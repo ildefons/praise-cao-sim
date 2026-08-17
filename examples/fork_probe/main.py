@@ -116,6 +116,15 @@ class MinimunPath(Selection):
         # print(("\tRequest service: %s " %message.dst))
         # print(("\tProcess serving that service: %s " %DES_dst))
 
+        #ILDE PRAISE DEBUGGING
+        print(
+            "PATH_PROBE",
+            "time=", sim.env.now,
+            "message=", message.name,
+            "id=", message.id,
+            "composition_path=", message.composition_path
+        )
+
         bestPath = []
         bestDES = []
 
@@ -205,6 +214,7 @@ class ForkPlacement(Placement):
             "ServiceA": 0,
             "ServiceB": 2,
             "ServiceC": 3,
+            "ServiceD": 4,
         }
 
         for module, node_id in deployment.items():
@@ -260,6 +270,10 @@ def create_application():
             "RAM": 10,
             "Type": Application.TYPE_MODULE
         }},
+        {"ServiceD": {
+            "RAM": 10,
+            "Type": Application.TYPE_MODULE
+        }},
     ])
 
     # Camera -> ServiceA
@@ -270,6 +284,9 @@ def create_application():
         instructions=20 * 10**6,
         bytes=1000
     )
+
+    # PRAISE composition-context propagation probe
+    m_a.composition_path = (("TEST_FORK", 0),)
 
     # ServiceA -> ServiceB
     m_b = Message(
@@ -287,6 +304,14 @@ def create_application():
         "ServiceC",
         instructions=40 * 10**6,
         bytes=500_000
+    )
+
+    m_d = Message(
+        "M.D",
+        "ServiceB",
+        "ServiceD",
+        instructions=10 * 10**6,
+        bytes=1000
     )
 
     a.add_source_messages(m_a)
@@ -313,8 +338,16 @@ def create_application():
     )
 
     # Branch endpoints
-    a.add_service_module("ServiceB", m_b)
+    #a.add_service_module("ServiceB", m_b)
+    a.add_service_module(
+        "ServiceB",
+        m_b,
+        m_d,
+        fractional_selectivity,
+        threshold=1.0
+    )
     a.add_service_module("ServiceC", m_c)
+    a.add_service_module("ServiceD", m_d)
 
     return a
 
@@ -409,6 +442,15 @@ def create_json_topology():
         "WATT": 40.0
     }
 
+    service_d_dev = {
+        "id": 4,
+        "model": "service-d-device",
+        "IPT": 100 * 10**7,
+        "RAM": 4000,
+        "COST": 3,
+        "WATT": 40.0
+    }
+
     # Camera -> ServiceA
     link_source_a = {
         "s": 1,
@@ -434,17 +476,39 @@ def create_json_topology():
         "PR": 15
     }
 
+    link_b_d = {
+        "s": 2,
+        "d": 4,
+        "BW": 10,
+        "PR": 2
+    }
+
+    # topology_json["entity"].extend([
+    #     service_a_dev,
+    #     sensor_dev,
+    #     service_b_dev,
+    #     service_c_dev
+    # ])
+
+    # topology_json["link"].extend([
+    #     link_source_a,
+    #     link_a_b,
+    #     link_a_c
+    # ])
+
     topology_json["entity"].extend([
         service_a_dev,
         sensor_dev,
         service_b_dev,
-        service_c_dev
+        service_c_dev,
+        service_d_dev
     ])
 
     topology_json["link"].extend([
         link_source_a,
         link_a_b,
-        link_a_c
+        link_a_c,
+        link_b_d
     ])
 
     return topology_json
