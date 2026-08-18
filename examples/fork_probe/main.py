@@ -286,7 +286,7 @@ def create_application():
     )
 
     # PRAISE composition-context propagation probe
-    m_a.composition_path = (("TEST_FORK", 0),)
+    m_a.composition_path = (("OUTER", 2),)
 
     # ServiceA -> ServiceB
     m_b = Message(
@@ -326,6 +326,7 @@ def create_application():
         m_a,
         m_b,
         fractional_selectivity,
+        composition_push=("F1", 0),
         threshold=1.0
     )
 
@@ -334,11 +335,11 @@ def create_application():
         m_a,
         m_c,
         fractional_selectivity,
+        composition_push=("F1", 1),
         threshold=1.0
     )
 
     # Branch endpoints
-    #a.add_service_module("ServiceB", m_b)
     a.add_service_module(
         "ServiceB",
         m_b,
