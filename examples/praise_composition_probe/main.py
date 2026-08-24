@@ -212,6 +212,7 @@ class ForkPlacement(Placement):
             "ServiceA": 0,
             "ServiceB": 2,
             "ServiceC": 3,
+            "ServiceD": 4,
         }
 
         for module, node_id in deployment.items():
@@ -242,6 +243,10 @@ def create_application():
             "Type": Application.TYPE_MODULE
         }},
         {"ServiceC": {
+            "RAM": 10,
+            "Type": Application.TYPE_MODULE
+        }},
+        {"ServiceD": {
             "RAM": 10,
             "Type": Application.TYPE_MODULE
         }},
@@ -299,13 +304,54 @@ def create_application():
         fractional_selectivity,
         composition_id="F1",
         branch_id=1,
-        depends_on=(),
+        depends_on=(0,),
         threshold=1.0
     )
+
+    m_d = Message(
+        "M.D",
+        a.compositions["F1"]["controller_name"],
+        "ServiceD",
+        instructions=0,
+        bytes=1000
+    )
+
+    a.set_composition_output_praise(
+        composition_id="F1",
+        message_out=m_d
+    )
+
+    composition = a.compositions["F1"]
+
+    print(
+        "COMPOSITION_OUTPUT_PROBE",
+        "composition=", "F1",
+        "message_out=", composition["message_out"].name,
+        "src=", composition["message_out"].src,
+        "dst=", composition["message_out"].dst
+    )
+
+    print(
+        "COMPOSITION_PROBE",
+        "composition=", "F1",
+        "origin_module=", composition["origin_module"],
+        "message_in=", composition["message_in"].name,
+        "controller_name=", composition["controller_name"],
+        "branches=", sorted(composition["branches"].keys())
+    )
+
+    for branch_id, registration in composition["branches"].items():
+        print(
+            "BRANCH_PROBE",
+            "branch=", branch_id,
+            "depends_on=", registration["depends_on"],
+            "message_out=", registration["message_out"].name
+        )
 
 
     a.add_service_module("ServiceB", m_b)
     a.add_service_module("ServiceC", m_c)
+    a.add_service_module("ServiceD", m_d)
 
     return a
 
@@ -353,6 +399,15 @@ def create_json_topology():
         "WATT": 40.0
     }
 
+    service_d_dev = {
+        "id": 4,
+        "model": "service-d-device",
+        "IPT": 100 * 10**7,
+        "RAM": 4000,
+        "COST": 3,
+        "WATT": 40.0
+    }
+
     # Camera -> ServiceA
     link_source_a = {
         "s": 1,
@@ -378,17 +433,27 @@ def create_json_topology():
         "PR": 15
     }
 
+    # PRAISE join controller / ServiceA node -> ServiceD
+    link_join_d = {
+        "s": 0,
+        "d": 4,
+        "BW": 10,
+        "PR": 5
+    }
+
     topology_json["entity"].extend([
         service_a_dev,
         sensor_dev,
         service_b_dev,
-        service_c_dev
+        service_c_dev,
+        service_d_dev
     ])
 
     topology_json["link"].extend([
         link_source_a,
         link_a_b,
-        link_a_c
+        link_a_c,
+        link_join_d
     ])
 
     return topology_json
