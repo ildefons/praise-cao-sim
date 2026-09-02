@@ -20,17 +20,26 @@ In the event-driven simulator, `T_violation,A` denotes the time of the first act
 
 A violation exactly at `H` counts as violated by `H`. The reporting horizon grid does not define sigma; it is used only for stored comparison/fitting tables. Exact white-box target-crossing times must be taken from first-violation events. See `SIGMA_SEMANTICS_AUDIT.md`.
 
-## Physical graph
+## Physical graph and provider instruction semantics
 
 `Fpre -> ParAll(A,B,C) -> Fpost`
 
-A/B/C intentionally use the same or deliberately similar native service-module implementation. Their stochasticity enters through a new native per-request realization of `Message.instructions`. The default white-box instruction family is gamma, with a fixed shared CV and provider-specific means determined by the center/dispersion parameterization:
+A/B/C intentionally use the same or deliberately similar native service-module implementation. Their stochasticity enters through a new native per-request realization of `Message.instructions`.
 
-- `A = center * (1-delta)`
-- `B = center`
-- `C = center * (1+delta)`
+For this benchmark, the interpretation of that field is frozen:
 
-AICon/YAFS causally generates service, queueing, latency, cost, and quality. `L`, `C`, and `Q` are never directly sampled by an auxiliary outcome model. Quality remains `Q=x`.
+- `D_i` / `Message.instructions` is the computational instruction requirement of provider `i` for one service invocation.
+- `Dbar` is the central mean provider service-instruction requirement per invocation.
+- `delta` controls provider-to-provider heterogeneity in that mean requirement:
+  - `A = Dbar * (1-delta)`
+  - `B = Dbar`
+  - `C = Dbar * (1+delta)`
+- `delta` is not request-to-request stochastic variability; the latter is controlled separately by the frozen gamma CV.
+- `D_i` is not the external/root workload. Workload `W` is fixed separately by the root invocation timing/pattern (period/rate and phase).
+
+Existing code/configuration names such as `center_instruction_mean` are retained for compatibility, but their scientific meaning is the provider service-instruction requirement above.
+
+AICon/YAFS causally generates service, queueing, latency, cost, and quality from those provider requirements together with the fixed execution/resource/environment configuration. `L`, `C`, and `Q` are never directly sampled by an auxiliary outcome model. Quality remains `Q=x`.
 
 ## Scientific pre-search contract
 
@@ -45,7 +54,8 @@ Already frozen in the scientific contract:
 - `q*=x`;
 - joint survival is not forced to 0.95;
 - coarse candidate evaluation remains `N=100` trajectories;
-- native stochasticity enters through `Message.instructions`;
+- native stochasticity enters through provider `Message.instructions` service-instruction requirements;
+- root workload `W` remains conceptually separate and fixed;
 - no direct stochastic sampling of `L`, `C`, or `Q`.
 
 For the later scientific search, the first empirical crossing below the target must be located at an **exact first-violation event time**, not rounded to the reporting horizon grid. The grid remains appropriate for common CSV output and M1 full-curve fitting.
@@ -54,7 +64,7 @@ For the later scientific search, the first empirical crossing below the target m
 
 A separate **development-only N=10 atlas** is implemented to answer a narrower question before Bayesian optimization:
 
-> Is the two-dimensional physical family `(Dbar, delta)` already capable of generating a useful range of white-box survival behaviours and L/C admissibility regions?
+> Is the two-dimensional provider family `(Dbar, delta)` already capable of generating a useful range of white-box survival behaviours and L/C admissibility regions?
 
 `config_phase1_atlas_smoke.json` defines an explicit 3 x 3 development grid of `(Dbar, delta)` settings. These numerical constants are diagnostic and are **not frozen scientific benchmark values**.
 
