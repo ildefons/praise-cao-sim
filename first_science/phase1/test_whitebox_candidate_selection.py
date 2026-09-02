@@ -5,6 +5,7 @@ import pandas as pd
 
 from whitebox_candidate_selection import (
     build_whitebox_candidate_table,
+    filter_informative_n10_candidates,
     rank_candidates_for_role,
     select_complementary_whitebox_proposal,
     summarize_reported_curve_shape,
@@ -143,6 +144,20 @@ def test_role_rankings_require_expected_first_violation_structure() -> None:
     assert rank_candidates_for_role(candidates, "mixed").iloc[0]["region_id"] == "A_mixed"
 
 
+def test_sparse_candidates_fail_information_gate() -> None:
+    """Verify two-event N=10 curves cannot be frozen as next-phase whiteboxes."""
+    reps, diagnostics, curves = build_synthetic_selection_fixture()
+    candidates = build_whitebox_candidate_table(
+        reps, diagnostics, curves, anchor_horizon=120.0, target_survival=0.95
+    )
+    sparse = candidates[candidates["region_id"] == "A_cost"].copy()
+    sparse.loc[:, "n_failed_by_stop"] = 2
+    sparse.loc[:, "n_unique_first_violation_times"] = 2
+    sparse.loc[:, "n_distinct_sigma_levels"] = 3
+    assert filter_informative_n10_candidates(sparse).empty
+    assert rank_candidates_for_role(sparse, "cost").empty
+
+
 def test_complementary_selection_uses_distinct_regions() -> None:
     """Verify the proposal contains one distinct region for each diagnostic role."""
     reps, diagnostics, curves = build_synthetic_selection_fixture()
@@ -158,6 +173,7 @@ def run_all_whitebox_selection_tests() -> None:
     """Execute all simulator-independent white-box selection tests."""
     test_curve_shape_summary()
     test_role_rankings_require_expected_first_violation_structure()
+    test_sparse_candidates_fail_information_gate()
     test_complementary_selection_uses_distinct_regions()
     print("PHASE1_WHITEBOX_SELECTION_TESTS_PASS")
 
