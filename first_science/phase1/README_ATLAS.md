@@ -8,9 +8,18 @@ The atlas is **not scientific evidence** and does not replace the later N=100 co
 
 ## Development physical grid
 
-`config_phase1_atlas_smoke.json` defines three central native gamma instruction means and three symmetric provider dispersions, giving 9 physical settings. Each setting uses the same 10 development seeds.
+`config_phase1_atlas_smoke.json` defines three central mean provider service-instruction requirements and three symmetric provider-heterogeneity magnitudes, giving 9 physical settings. Each setting uses the same 10 development seeds.
 
-A/B/C are structurally identical native AICon/YAFS service modules. Every invocation samples a fresh seeded gamma realization through `Message.instructions`; service time, queueing, L, C, and Q are simulator consequences. Fpre and Fpost are deterministic.
+The interpretation is deliberately explicit:
+
+- `Dbar` is the central mean number of computational instructions required by a provider service to execute one invocation.
+- `delta` is provider-to-provider heterogeneity in that mean requirement: A uses `Dbar*(1-delta)`, B uses `Dbar`, and C uses `Dbar*(1+delta)`.
+- `delta` is **not** request-to-request stochastic variability; that is controlled separately by the frozen gamma CV.
+- `Dbar` is **not** the external/root workload. The root workload `W` is fixed separately by the periodic invocation process (period/rate and phase).
+
+Existing implementation/configuration names such as `center_instruction_mean` are retained for compatibility, but comments and scientific interpretation use the provider service-instruction-requirement semantics above.
+
+A/B/C are structurally identical native AICon/YAFS service modules. Every invocation samples a fresh seeded gamma realization through `Message.instructions`; that realization is the computational work required by the provider service for that invocation. AICon/YAFS then causally generates service time, queueing, L, C, and Q. Fpre and Fpost are deterministic.
 
 ## Two-stage execution
 
