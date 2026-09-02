@@ -28,11 +28,38 @@ Outputs include:
 
 The last table gives compact example A regions for each achievable sigma at H=120, including latency-first and cost-first violation counts.
 
+## Sigma-curve plotting post-process
+
+`generate_sigma_plots.py` is a simulator-independent post-process. It reads the existing atlas CSVs and writes one PNG per physical setting into:
+
+`results/development_atlas/sigma_plots/`
+
+For each physical setting it selects the closest achievable anchor-sigma level at or below the target and the closest level at or above the target. With the N=10 development atlas and target `0.95`, these will normally be `0.9` and `1.0`. All representative ARs retained at those selected sigma levels are plotted, so latency-first, cost-first, and mixed representatives are not silently collapsed to one AR.
+
+Run after the atlas:
+
+```bash
+python generate_sigma_plots.py
+```
+
+Expected marker:
+
+```text
+PHASE1_SIGMA_PLOTS_PASS
+```
+
+Generated plot metadata are also recorded in:
+
+`results/development_atlas/sigma_plots/best_sigma_plot_selection.csv`
+
+The PNGs and selection CSV are generated results and remain ignored by Git.
+
 ## Simulator-independent tests
 
 ```bash
 python test_atlas_analysis.py
 python test_whitebox_atlas_configuration.py
+python test_generate_sigma_plots.py
 ```
 
 Expected:
@@ -40,6 +67,7 @@ Expected:
 ```text
 PHASE1_ATLAS_ANALYSIS_TESTS_PASS
 PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS
+PHASE1_SIGMA_PLOT_TESTS_PASS
 ```
 
 ## Minimal native integration check
@@ -54,6 +82,12 @@ If that passes, execute the full development atlas (`9 x 10` trajectories):
 
 ```bash
 python whitebox_atlas.py --clean
+```
+
+Then generate the PNGs without rerunning the simulator:
+
+```bash
+python generate_sigma_plots.py
 ```
 
 The full run remains a development atlas. Do not use it as the N=100 scientific calibration/search result.
