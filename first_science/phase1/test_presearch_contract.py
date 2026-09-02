@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from presearch_contract import (
+    assert_phase1_development_smoke_budget_is_separate_from_scientific_coarse_search,
     assert_phase1_presearch_configuration_is_frozen,
     calculate_symmetric_provider_instruction_means,
     create_contract_complete_test_configuration,
@@ -32,6 +33,20 @@ def test_symmetric_provider_instruction_parameterization() -> None:
     assert means.provider_a == 90.0
     assert means.provider_b == 100.0
     assert means.provider_c == 110.00000000000001
+
+
+def test_development_smoke_budget_is_n10_and_separate() -> None:
+    """Verify N=10 is development-only while scientific coarse search stays N=100.
+
+    Called by:
+        - ``run_all_phase1_presearch_contract_tests`` in this module.
+    """
+    cfg = load_phase1_configuration_for_contract_tests()
+    assert cfg["development_smoke"]["n_trajectories"] == 10
+    assert len(cfg["development_smoke"]["seed_bank"]) == 10
+    assert cfg["development_smoke"]["scientific_evidence"] is False
+    assert cfg["coarse_search"]["n_trajectories_per_candidate"] == 100
+    assert_phase1_development_smoke_budget_is_separate_from_scientific_coarse_search(cfg)
 
 
 def test_incomplete_configuration_fails_closed() -> None:
@@ -69,6 +84,7 @@ def run_all_phase1_presearch_contract_tests() -> None:
         - Python ``__main__`` entry point of ``test_presearch_contract.py``.
     """
     test_symmetric_provider_instruction_parameterization()
+    test_development_smoke_budget_is_n10_and_separate()
     test_incomplete_configuration_fails_closed()
     test_complete_configuration_passes_contract()
     print("PHASE1_PRESEARCH_CONTRACT_TESTS_PASS")
