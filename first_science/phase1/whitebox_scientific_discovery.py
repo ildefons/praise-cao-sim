@@ -15,10 +15,6 @@ from pathlib import Path
 import shutil
 
 from presearch_contract import assert_phase1_discovery_configuration_is_frozen
-from whitebox_atlas import (
-    execute_development_whitebox_atlas_simulations,
-    scan_all_physical_settings_and_write_atlas_outputs,
-)
 from whitebox_candidate_selection import (
     MAX_MIXED_CAUSE_IMBALANCE,
     MIN_DOMINANT_CAUSE_COUNT,
@@ -56,8 +52,15 @@ def load_and_validate_scientific_discovery_configuration(configuration_path: Pat
             f"targeted grid has {expected_budget} candidates but budget declares {declared_budget}"
         )
 
-    center_bounds = list(map(float, configuration["provider_parameterization"]["center_instruction_mean_bounds"]))
-    dispersion_bounds = list(map(float, configuration["provider_parameterization"]["dispersion_bounds"]))
+    center_bounds = list(
+        map(
+            float,
+            configuration["provider_parameterization"]["center_instruction_mean_bounds"],
+        )
+    )
+    dispersion_bounds = list(
+        map(float, configuration["provider_parameterization"]["dispersion_bounds"])
+    )
     if min(centers) < center_bounds[0] or max(centers) > center_bounds[1]:
         raise ValueError("candidate centers exceed frozen center_instruction_mean_bounds")
     if min(dispersions) < dispersion_bounds[0] or max(dispersions) > dispersion_bounds[1]:
@@ -128,11 +131,19 @@ def execute_scientific_discovery(
         maximum_trajectories_per_setting: Optional engineering-only truncation.
 
     Side effects:
-        Runs native AICon/YAFS simulations and writes Phase-1 discovery outputs.
+        Imports native AICon/YAFS execution machinery, runs simulations and
+        writes Phase-1 discovery outputs.
 
     Called by:
         - ``main`` in this module.
     """
+    # Defer native simulator imports so configuration tests remain genuinely
+    # simulator-independent and can run without importing YAFS.
+    from whitebox_atlas import (
+        execute_development_whitebox_atlas_simulations,
+        scan_all_physical_settings_and_write_atlas_outputs,
+    )
+
     scientific_configuration = load_and_validate_scientific_discovery_configuration(
         configuration_path
     )
@@ -158,7 +169,9 @@ def execute_scientific_discovery(
     )
 
     n_settings = int(ledgers["physical_setting_id"].nunique())
-    n_trajectories = int(ledgers[["physical_setting_id", "trajectory"]].drop_duplicates().shape[0])
+    n_trajectories = int(
+        ledgers[["physical_setting_id", "trajectory"]].drop_duplicates().shape[0]
+    )
     print(
         "PHASE1_SCIENTIFIC_DISCOVERY_RUN_PASS",
         f"n_physical_settings={n_settings}",
