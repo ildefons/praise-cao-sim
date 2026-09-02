@@ -15,7 +15,7 @@ A/B/C are structurally identical native AICon/YAFS service modules. Every invoca
 ## Two-stage execution
 
 1. `whitebox_atlas.py` executes the native composed graph `Fpre -> ParAll(A,B,C) -> Fpost` and writes one top-level ledger row per logical request.
-2. `atlas_analysis.py` reuses those ledgers and scans many `A={L<=l,C<=c,Q>=x}` regions offline. Threshold candidates are generated around each trajectory's critical L/C value at `H*=120`, so N=10 exposes the actually achievable 0.1-resolution survival transitions without an arbitrary dense grid.
+2. `atlas_analysis.py` reuses those ledgers and scans many `A={L<=l,C<=c,Q>=x}` regions offline. Threshold candidates are generated around each trajectory's critical L/C value at `H*=120`, so N=10 exposes the actually achievable 0.1-resolution survival transitions without an arbitrary dense threshold grid.
 
 Outputs include:
 
@@ -30,11 +30,27 @@ The last table gives compact example A regions for each achievable sigma at H=12
 
 ## Sigma-curve plotting post-process
 
-`generate_sigma_plots.py` is a simulator-independent post-process. It reads the existing atlas CSVs and writes one PNG per physical setting into:
+The frozen semantics are:
+
+`σ(t) = P(T_violation > t)`
+
+meaning the probability that the offering is still admissible at horizon `t`.
+
+`generate_sigma_plots.py` is simulator-independent. It does **not** plot by interpolating the stored 5-unit reporting grid. For every selected admissibility region it goes back to `all_top_level_request_ledgers.csv`, reconstructs one exact first-violation time per trajectory using the same frozen latency/cost/quality event semantics as `atlas_analysis.py`, and draws the exact empirical survival function over the complete configured domain `0 <= t <= 240`.
+
+The finite-sample estimator is:
+
+`σ_hat(t) = (1/N) * sum_j 1[T_violation,j > t]`.
+
+Therefore the empirical curve is a staircase whose horizontal coordinate is continuous over the full horizon and whose vertical drops occur at the actual observed first-violation times. The stored `survival_curves.csv` 5-unit horizon grid is a reporting table only and does not determine the PNG geometry.
+
+With N=10 the vertical probability resolution is 0.1; with N=100 it is 0.01. No artificial smoothing is applied.
+
+The PNGs are written into:
 
 `results/development_atlas/sigma_plots/`
 
-For each physical setting it selects the closest achievable anchor-sigma level at or below the target and the closest level at or above the target. With the N=10 development atlas and target `0.95`, these will normally be `0.9` and `1.0`. All representative ARs retained at those selected sigma levels are plotted, so latency-first, cost-first, and mixed representatives are not silently collapsed to one AR.
+For each physical setting the post-process selects the closest achievable anchor-sigma level at or below the target and the closest level at or above the target. With the N=10 development atlas and target `0.95`, these will normally be `0.9` and `1.0`. All representative ARs retained at those selected sigma levels are plotted, so latency-first, cost-first, and mixed representatives are not silently collapsed to one AR.
 
 Run after the atlas:
 
@@ -70,6 +86,8 @@ PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS
 PHASE1_SIGMA_PLOT_TESTS_PASS
 ```
 
+`test_generate_sigma_plots.py` includes a regression test that requires an empirical sigma drop at the exact synthetic violation time, rather than at a reporting-grid boundary.
+
 ## Minimal native integration check
 
 Run one physical setting and two trajectories first:
@@ -84,7 +102,7 @@ If that passes, execute the full development atlas (`9 x 10` trajectories):
 python whitebox_atlas.py --clean
 ```
 
-Then generate the PNGs without rerunning the simulator:
+Then generate the exact-event PNGs without rerunning the simulator:
 
 ```bash
 python generate_sigma_plots.py
