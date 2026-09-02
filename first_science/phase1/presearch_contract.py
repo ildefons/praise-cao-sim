@@ -13,10 +13,13 @@ from typing import Any
 
 @dataclass(frozen=True)
 class ProviderInstructionMeanTriplet:
-    """Hold the native gamma-instruction means for providers A, B, and C.
+    """Hold mean service-instruction requirements for providers A, B, and C.
 
-    The values parameterize the native per-request ``Message.instructions``
-    distributions. They do not parameterize latency, cost, or quality directly.
+    The values parameterize the native per-invocation ``Message.instructions``
+    distributions. Semantically, each value is the mean number of computational
+    instructions required by that provider to execute one invocation. It is a
+    provider/service property, not the external root workload or arrival rate.
+    The values do not parameterize latency, cost, or quality directly.
 
     Called by:
         - ``calculate_symmetric_provider_instruction_means`` in this module.
@@ -54,16 +57,27 @@ def calculate_symmetric_provider_instruction_means(
     center_instruction_mean: float,
     dispersion: float,
 ) -> ProviderInstructionMeanTriplet:
-    """Calculate A/B/C native instruction-demand means from center and dispersion.
+    """Calculate A/B/C mean service-instruction requirements from center/delta.
 
     Provider A receives ``center * (1-dispersion)``, B receives ``center``, and
-    C receives ``center * (1+dispersion)``. This only parameterizes the native
-    stochastic ``Message.instructions`` field; AICon/YAFS must causally generate
-    service time, queueing, latency, cost, and quality from the simulated graph.
+    C receives ``center * (1+dispersion)``. ``center_instruction_mean`` is kept
+    as the code/configuration name for compatibility, but scientifically it is
+    the central mean computational instruction requirement per provider
+    invocation. ``dispersion`` (delta) controls provider-to-provider
+    heterogeneity in that mean requirement; it is not request-to-request
+    stochastic variation. Invocation-to-invocation variation is governed
+    separately by the frozen native distribution CV.
+
+    These values parameterize the native stochastic ``Message.instructions``
+    field; AICon/YAFS must causally generate service time, queueing, latency,
+    cost, and quality from the simulated graph. The root workload W remains a
+    separate fixed specification of invocation timing/pattern.
 
     Args:
-        center_instruction_mean: Positive central nominal instruction mean.
-        dispersion: Multiplicative provider dispersion satisfying ``0 <= d < 1``.
+        center_instruction_mean: Positive central mean service-instruction
+            requirement per provider invocation.
+        dispersion: Multiplicative provider-heterogeneity magnitude satisfying
+            ``0 <= d < 1``.
 
     Returns:
         ProviderInstructionMeanTriplet with strictly positive A/B/C means.
