@@ -10,9 +10,21 @@
   "m0_m1_allowed_in_selection_loop": false,
   "development_smoke": {
     "n_trajectories": 10,
-    "scientific_evidence": false
+    "scientific_evidence": false,
+    "atlas_status": "IMPLEMENTED_AWAITING_NATIVE_INTEGRATION_VALIDATION",
+    "physical_grid_dimensions": ["center_instruction_mean", "dispersion"],
+    "physical_grid_size": 9,
+    "offline_ar_scan": true,
+    "anchor_horizon": 120.0,
+    "expected_sigma_resolution": 0.1,
+    "simulator_independent_tests": [
+      "PHASE1_PRESEARCH_CONTRACT_TESTS_PASS",
+      "PHASE1_ATLAS_ANALYSIS_TESTS_PASS",
+      "PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS"
+    ]
   },
   "scientific_coarse_search": {
-    "n_trajectories_per_candidate": 100
+    "n_trajectories_per_candidate": 100,
+    "status": "FAIL_CLOSED_UNTIL_SCIENTIFIC_PRESEARCH_CONFIG_IS_FROZEN"
   }
 }
