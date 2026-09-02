@@ -1,10 +1,10 @@
 # Phase 1 development white-box atlas
 
-This development checkpoint asks a deliberately empirical question before any Bayesian optimization:
+This development checkpoint asks a deliberately empirical question before the scientific discovery search:
 
 > Is the two-dimensional physical family `(Dbar, delta)` already rich enough to generate useful white-box survival behaviour and admissibility regions?
 
-The atlas is **not scientific evidence** and does not replace the later N=100 coarse candidate evaluation prescribed by the design document.
+The atlas is **not scientific evidence**. It validates the same native machinery that will later support scientific discovery, but it uses a development-only configuration. Scientific discovery now also uses N=10 per candidate; the distinction is governance, frozen configuration, candidate provenance and finalist selection.
 
 ## Development physical grid
 
@@ -67,7 +67,7 @@ The PNGs are written into:
 
 `results/development_atlas/sigma_plots/`
 
-For each physical setting the post-process selects the closest achievable anchor-sigma level at or below the target and the closest level at or above the target. With the N=10 development atlas and target `0.95`, these will normally be `0.9` and `1.0`. All representative ARs retained at those selected sigma levels are plotted, so latency-first, cost-first, and mixed representatives are not silently collapsed to one AR.
+For each physical setting the post-process selects the closest achievable anchor-sigma level at or below the target and the closest level at or above the target. With N=10 and target `0.95`, these will normally be `0.9` and `1.0`. This bracket is appropriate for discovery/diagnostics; it is not a claim that N=10 estimates 0.95 precisely. All representative ARs retained at those selected sigma levels are plotted, so latency-first, cost-first, and mixed representatives are not silently collapsed to one AR.
 
 Run after the atlas:
 
@@ -115,9 +115,18 @@ Output:
 
 `results/development_atlas/sigma_plots/sigma_curve_resolution_diagnostics.csv`
 
-These quantities diagnose whether the Monte Carlo staircase is sufficiently resolved for the intended comparison. They must not be used to smooth the white-box curve. If final high-N curves remain too coarse or split-half unstable, increase N while keeping the physical regime and A frozen.
+These quantities diagnose whether the Monte Carlo staircase is sufficiently resolved for discovery or later confirmation. They must not be used to smooth the white-box curve.
 
 The PNGs and diagnostic CSVs are generated results and remain ignored by Git.
+
+## Relation to scientific discovery and confirmation
+
+The development atlas remains non-scientific. The scientific workflow uses the same semantics but a separately frozen configuration:
+
+- **N=10 discovery:** search physical candidates and many offline A regions; retain promising white boxes.
+- **Freeze finalists:** write exact `(Dbar, delta, l_max, c_max, q_min)` cases to `selected_whiteboxes.json` with status `FROZEN_FOR_CONFIRMATION`.
+- **N=100 confirmation:** rerun only those exact cases with fresh seeds, disjoint from the discovery seed bank, and evaluate the same frozen A. Do **not** recalibrate A on the N=100 confirmation data.
+- **Later precision:** increase N only if required after confirmation; do not reopen the selected physical parameters or A.
 
 ## Simulator-independent tests
 
@@ -160,4 +169,4 @@ python generate_sigma_plots.py
 python sigma_curve_diagnostics.py
 ```
 
-The full run remains a development atlas. Do not use it as the N=100 scientific calibration/search result.
+The full run remains a development atlas. Do not treat it as the final selected-whitebox confirmation run.
