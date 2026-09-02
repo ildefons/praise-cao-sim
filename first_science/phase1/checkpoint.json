@@ -1,0 +1,11 @@
+{
+  "phase": 1,
+  "name": "reference_regime_and_ar_calibration",
+  "status": "IN_DEVELOPMENT",
+  "parent_phase": 0,
+  "parent_praise_cao_commit": "6473536d368ccdc84b3b2771678cc0ffd6833508",
+  "aicon_baseline": "6eabfa70531e7091e777a0946ffa967721c0f538",
+  "scientific_step": 0,
+  "technology_neutral": true,
+  "m0_m1_allowed_in_selection_loop": false
+}

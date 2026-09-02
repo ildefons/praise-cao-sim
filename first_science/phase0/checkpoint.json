@@ -1,0 +1,16 @@
+{
+  "phase": 0,
+  "name": "whitebox_provider_observation_kernel",
+  "status": "FROZEN",
+  "praise_cao_checkpoint_commit": "6473536d368ccdc84b3b2771678cc0ffd6833508",
+  "aicon_baseline": "6eabfa70531e7091e777a0946ffa967721c0f538",
+  "validation": [
+    "PHASE0_SURVIVAL_UNIT_TESTS_PASS",
+    "PHASE0_REPRODUCIBILITY_PASS",
+    "PHASE0_NETWORK_FIREWALL_PASS",
+    "PHASE0_QUEUE_CAPTURE_PASS",
+    "PHASE0_NATIVE_SMOKE_PASS",
+    "LOCAL_N100_ENGINEERING_VALIDATION_PASS",
+    "CODEX_CLOUD_NATIVE_SMOKE_REPRODUCTION_PASS"
+  ]
+}

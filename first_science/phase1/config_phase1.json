@@ -1,0 +1,54 @@
+{
+  "configuration_status": "INCOMPLETE_PRESEARCH_FREEZE",
+  "graph": {
+    "grammar": "Fpre -> ParAll(A,B,C) -> Fpost",
+    "pre_module_behavior": null,
+    "post_module_behavior": null
+  },
+  "workload": {
+    "period": null,
+    "phase": null
+  },
+  "topology": {
+    "placement": null,
+    "link_parameters": null
+  },
+  "provider_family": {
+    "module_implementation": "same_or_deliberately_similar_native_aicon_yafs_service_module",
+    "instruction_message_field": "Message.instructions",
+    "instruction_distribution_family": "gamma",
+    "instruction_cv": null,
+    "effective_ipt": null,
+    "cost_rate": null,
+    "x": null,
+    "quality_semantics": "Q=x",
+    "instruction_rng_streams": "independent_provider_specific_seeded_streams",
+    "direct_sampling_of_L_C_Q": false
+  },
+  "provider_parameterization": {
+    "center_instruction_mean_bounds": null,
+    "dispersion_bounds": null,
+    "offset_pattern": "symmetric_multiplicative",
+    "means": "A=center*(1-delta), B=center, C=center*(1+delta)"
+  },
+  "admissibility_calibration": {
+    "anchor_horizon": 120.0,
+    "target_survival": 0.95,
+    "quality_threshold_rule": "q_star=x",
+    "latency_and_cost_calibrated_separately": true,
+    "joint_survival_forced_to_target": false
+  },
+  "horizon": {
+    "minimum": 0.0,
+    "maximum": 240.0,
+    "grid": null,
+    "simulation_stop_time": null
+  },
+  "coarse_search": {
+    "n_trajectories_per_candidate": 100,
+    "calibration_seed_bank": null,
+    "search_method": null,
+    "initial_design_size": null,
+    "total_candidate_budget": null
+  }
+}
