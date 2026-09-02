@@ -44,6 +44,13 @@
     "grid": null,
     "simulation_stop_time": null
   },
+  "development_smoke": {
+    "n_trajectories": 10,
+    "seed_base": 1000,
+    "seed_bank": [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009],
+    "purpose": "development_only_trace_and_offline_AR_scan_validation",
+    "scientific_evidence": false
+  },
   "coarse_search": {
     "n_trajectories_per_candidate": 100,
     "calibration_seed_bank": null,
