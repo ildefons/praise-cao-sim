@@ -11,7 +11,14 @@
   "development_smoke": {
     "n_trajectories": 10,
     "scientific_evidence": false,
-    "atlas_status": "IMPLEMENTED_AWAITING_NATIVE_INTEGRATION_VALIDATION",
+    "atlas_status": "NATIVE_INTEGRATION_VALIDATED_READY_FOR_FULL_9X10_DEVELOPMENT_ATLAS",
+    "native_integration_validation": {
+      "physical_settings": 1,
+      "trajectories_per_setting": 2,
+      "result_marker": "PHASE1_DEVELOPMENT_ATLAS_SCAN_PASS",
+      "top_level_requests_per_trajectory": 1199,
+      "achievable_anchor_sigmas": [0.0, 0.5, 1.0]
+    },
     "physical_grid_dimensions": ["center_instruction_mean", "dispersion"],
     "physical_grid_size": 9,
     "offline_ar_scan": true,
