@@ -109,9 +109,12 @@ def build_whitebox_candidate_table(
     if candidates.empty:
         raise ValueError("no representative ARs have exact-event diagnostics")
 
+    # At N=10 the 0.9/1.0 values are intentionally treated as an empirical
+    # bracket around 0.95. Round the distance so binary floating representation
+    # cannot spuriously make one side of that symmetric bracket rank first.
     candidates["target_distance"] = (
         candidates["sigma_anchor"].astype(float) - float(target_survival)
-    ).abs()
+    ).abs().round(12)
     candidates["observed_first_violations"] = (
         candidates["latency_first_count"].astype(int)
         + candidates["cost_first_count"].astype(int)
@@ -133,10 +136,12 @@ def build_whitebox_candidate_table(
 def rank_candidates_for_role(candidates: pd.DataFrame, role: str) -> pd.DataFrame:
     """Rank candidates for one transparent diagnostic selection role.
 
-    Ranking first enforces the requested first-violation cause structure, then
-    prefers target-bracketing, temporally informative, non-plateaued curves.
-    Split-half disagreement is a final tie-breaker because N=10 halves are very
-    small and should not dominate discovery.
+    The role-defining first-violation structure is primary: latency candidates
+    maximize latency dominance, cost candidates maximize cost dominance, and
+    mixed candidates minimize latency/cost imbalance while retaining support for
+    both causes. Within that role, ranking prefers the N=10 target bracket,
+    temporally informative non-plateaued curves, more observed failures, and
+    finally smaller split-half disagreement.
 
     Args:
         candidates: Merged discovery candidate table.
@@ -182,20 +187,20 @@ def rank_candidates_for_role(candidates: pd.DataFrame, role: str) -> pd.DataFram
         "split_half_curve_supremum_difference"
     ].fillna(np.inf)
     sort_columns = [
+        *role_sort,
         "target_distance",
         "n_unique_first_violation_times",
         "longest_plateau_fraction_of_domain",
-        *role_sort,
         "n_failed_by_stop",
         "split_half_curve_supremum_difference",
         "physical_setting_id",
         "region_id",
     ]
     sort_ascending = [
+        *role_ascending,
         True,
         False,
         True,
-        *role_ascending,
         False,
         True,
         True,
