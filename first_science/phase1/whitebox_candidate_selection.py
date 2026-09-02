@@ -16,6 +16,12 @@ import pandas as pd
 
 
 SELECTION_ROLES = ("latency", "cost", "mixed")
+MIN_FAILED_BY_STOP = 4
+MIN_UNIQUE_FIRST_VIOLATION_TIMES = 4
+MIN_DOMINANT_CAUSE_COUNT = 3
+MIN_MIXED_CAUSE_COUNT = 2
+MAX_MIXED_CAUSE_IMBALANCE = 2
+MAX_N10_TARGET_DISTANCE = 0.051
 
 
 def summarize_reported_curve_shape(
@@ -133,15 +139,39 @@ def build_whitebox_candidate_table(
     return candidates
 
 
-def rank_candidates_for_role(candidates: pd.DataFrame, role: str) -> pd.DataFrame:
-    """Rank candidates for one transparent diagnostic selection role.
+def filter_informative_n10_candidates(candidates: pd.DataFrame) -> pd.DataFrame:
+    """Reject N=10 ARs that are too sparse to be useful next-phase benchmarks.
 
-    The role-defining first-violation structure is primary: latency candidates
-    maximize latency dominance, cost candidates maximize cost dominance, and
-    mixed candidates minimize latency/cost imbalance while retaining support for
-    both causes. Within that role, ranking prefers the N=10 target bracket,
-    temporally informative non-plateaued curves, more observed failures, and
-    finally smaller split-half disagreement.
+    Discovery does not require precision, but a finalist must expose enough
+    first-violation structure to provide an informative sigma curve. A case with
+    only one or two failures by H=240 is therefore retained in raw discovery
+    tables but is not eligible for the final white-box battery.
+
+    Called by:
+        - ``rank_candidates_for_role`` in this module.
+        - ``test_sparse_candidates_fail_information_gate`` in
+          ``test_whitebox_candidate_selection.py``.
+    """
+    return candidates[
+        (candidates["target_distance"] <= MAX_N10_TARGET_DISTANCE)
+        & (candidates["n_failed_by_stop"] >= MIN_FAILED_BY_STOP)
+        & (
+            candidates["n_unique_first_violation_times"]
+            >= MIN_UNIQUE_FIRST_VIOLATION_TIMES
+        )
+        & (candidates["n_distinct_sigma_levels"] >= MIN_FAILED_BY_STOP)
+    ].copy()
+
+
+def rank_candidates_for_role(candidates: pd.DataFrame, role: str) -> pd.DataFrame:
+    """Rank informative candidates for one transparent diagnostic role.
+
+    A hard information gate is applied before role assignment. Latency/cost
+    finalists require at least three first violations from the named cause and
+    at least a 2:1 dominance over the opposite cause. Mixed finalists require at
+    least two latency-first and two cost-first trajectories with an imbalance of
+    at most two. Within those role constraints, target-bracketing and temporal
+    curve informativeness are ranked before additional cause purity.
 
     Args:
         candidates: Merged discovery candidate table.
@@ -157,25 +187,32 @@ def rank_candidates_for_role(candidates: pd.DataFrame, role: str) -> pd.DataFram
     if role not in SELECTION_ROLES:
         raise ValueError(f"unknown selection role: {role}")
 
-    ranked = candidates.copy()
+    ranked = filter_informative_n10_candidates(candidates)
     if role == "latency":
         ranked = ranked[
-            (ranked["latency_first_count"] > ranked["cost_first_count"])
-            & (ranked["latency_first_count"] >= 1)
+            (ranked["latency_first_count"] >= MIN_DOMINANT_CAUSE_COUNT)
+            & (
+                ranked["latency_first_count"]
+                >= 2 * ranked["cost_first_count"].clip(lower=1)
+            )
         ].copy()
         role_sort = ["latency_minus_cost", "latency_first_count"]
         role_ascending = [False, False]
     elif role == "cost":
         ranked = ranked[
-            (ranked["cost_first_count"] > ranked["latency_first_count"])
-            & (ranked["cost_first_count"] >= 1)
+            (ranked["cost_first_count"] >= MIN_DOMINANT_CAUSE_COUNT)
+            & (
+                ranked["cost_first_count"]
+                >= 2 * ranked["latency_first_count"].clip(lower=1)
+            )
         ].copy()
         role_sort = ["cost_minus_latency", "cost_first_count"]
         role_ascending = [False, False]
     else:
         ranked = ranked[
-            (ranked["latency_first_count"] >= 1)
-            & (ranked["cost_first_count"] >= 1)
+            (ranked["latency_first_count"] >= MIN_MIXED_CAUSE_COUNT)
+            & (ranked["cost_first_count"] >= MIN_MIXED_CAUSE_COUNT)
+            & (ranked["cause_imbalance"] <= MAX_MIXED_CAUSE_IMBALANCE)
         ].copy()
         role_sort = ["cause_imbalance", "balanced_cause_support"]
         role_ascending = [True, False]
@@ -187,21 +224,21 @@ def rank_candidates_for_role(candidates: pd.DataFrame, role: str) -> pd.DataFram
         "split_half_curve_supremum_difference"
     ].fillna(np.inf)
     sort_columns = [
-        *role_sort,
         "target_distance",
         "n_unique_first_violation_times",
         "longest_plateau_fraction_of_domain",
         "n_failed_by_stop",
+        *role_sort,
         "split_half_curve_supremum_difference",
         "physical_setting_id",
         "region_id",
     ]
     sort_ascending = [
+        True,
+        False,
+        True,
+        False,
         *role_ascending,
-        True,
-        False,
-        True,
-        False,
         True,
         True,
         True,
@@ -210,7 +247,7 @@ def rank_candidates_for_role(candidates: pd.DataFrame, role: str) -> pd.DataFram
 
 
 def select_complementary_whitebox_proposal(candidates: pd.DataFrame) -> pd.DataFrame:
-    """Select one distinct best candidate for each frozen diagnostic role.
+    """Select one distinct informative candidate for each diagnostic role.
 
     Args:
         candidates: Merged discovery candidate table.
@@ -218,6 +255,11 @@ def select_complementary_whitebox_proposal(candidates: pd.DataFrame) -> pd.DataF
     Returns:
         Three-row proposal ordered latency, cost, mixed. A candidate region is
         not reused across roles.
+
+    Raises:
+        ValueError: If the current N=10 discovery results do not contain a
+            genuinely informative candidate for one of the roles. This is a
+            signal to expand/refine discovery, not to weaken the quality gate.
 
     Called by:
         - ``execute_whitebox_candidate_selection`` in this module.
@@ -229,7 +271,10 @@ def select_complementary_whitebox_proposal(candidates: pd.DataFrame) -> pd.DataF
         ranked = rank_candidates_for_role(candidates, role)
         ranked = ranked[~ranked["region_id"].astype(str).isin(used_region_ids)]
         if ranked.empty:
-            raise ValueError(f"no qualifying N=10 candidate for role '{role}'")
+            raise ValueError(
+                f"no informative N=10 candidate for role '{role}'; "
+                "expand/refine discovery rather than freezing a sparse curve"
+            )
         row = ranked.iloc[0].copy()
         row["selection_role"] = role
         selected_rows.append(row)
@@ -277,11 +322,20 @@ def proposal_dataframe_to_manifest(
     return {
         "status": "PROPOSED_FROM_N10_DISCOVERY_REQUIRES_REVIEW",
         "selection_semantics": (
-            "White-box-only N=10 discovery proposal. Review once, then copy exact "
-            "physical parameters and A into selected_whiteboxes.json with status "
-            "FROZEN_FOR_CONFIRMATION before any N=100 run. Confirmation must not "
-            "recalibrate A."
+            "White-box-only N=10 discovery proposal. Every finalist passed the "
+            "minimum information gate before role ranking. Review once, then copy "
+            "the exact physical parameters and A into selected_whiteboxes.json "
+            "with status FROZEN_FOR_CONFIRMATION before any N=100 run. "
+            "Confirmation must not recalibrate A."
         ),
+        "quality_gate": {
+            "min_failed_by_stop": MIN_FAILED_BY_STOP,
+            "min_unique_first_violation_times": MIN_UNIQUE_FIRST_VIOLATION_TIMES,
+            "min_dominant_cause_count": MIN_DOMINANT_CAUSE_COUNT,
+            "min_mixed_cause_count_each": MIN_MIXED_CAUSE_COUNT,
+            "max_mixed_cause_imbalance": MAX_MIXED_CAUSE_IMBALANCE,
+            "max_n10_target_distance": MAX_N10_TARGET_DISTANCE,
+        },
         "source_results_directory": str(source_results_directory),
         "anchor_horizon": float(anchor_horizon),
         "target_survival": float(target_survival),
@@ -320,13 +374,14 @@ def execute_whitebox_candidate_selection(
         anchor_horizon=anchor_horizon,
         target_survival=target_survival,
     )
-    selected = select_complementary_whitebox_proposal(candidates)
 
     output_directory = results_directory / "whitebox_selection"
     output_directory.mkdir(parents=True, exist_ok=True)
     candidates.sort_values(
         ["target_distance", "physical_setting_id", "sigma_anchor", "region_id"]
     ).to_csv(output_directory / "whitebox_candidate_ranking.csv", index=False)
+
+    selected = select_complementary_whitebox_proposal(candidates)
     manifest = proposal_dataframe_to_manifest(
         selected,
         source_results_directory=results_directory,
