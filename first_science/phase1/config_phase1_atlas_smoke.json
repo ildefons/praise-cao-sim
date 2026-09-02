@@ -1,0 +1,51 @@
+{
+  "configuration_status": "DEVELOPMENT_ATLAS_SMOKE_ONLY",
+  "scientific_evidence": false,
+  "development_trajectory_count": 10,
+  "development_seeds": [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009],
+  "graph": {
+    "grammar": "Fpre -> ParAll(A,B,C) -> Fpost",
+    "pre_instructions": 5000000.0,
+    "post_instructions": 5000000.0
+  },
+  "workload": {
+    "period": 0.2,
+    "phase": 0.0
+  },
+  "topology": {
+    "network_bw_mbps": 1000.0,
+    "network_pr": 0.001,
+    "request_bytes": 1000,
+    "branch_bytes": 1000,
+    "join_bytes": 1000
+  },
+  "provider_family": {
+    "instruction_distribution_family": "gamma",
+    "instruction_cv": 0.3,
+    "effective_ipt": 1000000000.0,
+    "cost_rate": 3.0,
+    "x": 0.5,
+    "quality_semantics": "Q=x",
+    "instruction_rng_streams": "independent_provider_specific_seeded_streams",
+    "direct_sampling_of_L_C_Q": false
+  },
+  "physical_atlas": {
+    "center_instruction_means": [160000000.0, 300000000.0, 420000000.0],
+    "dispersions": [0.0, 0.15, 0.3],
+    "offset_pattern": "symmetric_multiplicative",
+    "means": "A=center*(1-delta), B=center, C=center*(1+delta)"
+  },
+  "admissibility_scan": {
+    "anchor_horizon": 120.0,
+    "quality_threshold_rule": "q_star=x",
+    "threshold_relative_epsilon": 1e-9,
+    "include_unconstrained_threshold_multiplier": 1.05,
+    "representatives_per_anchor_survival": 3
+  },
+  "horizon": {
+    "minimum": 0.0,
+    "maximum": 240.0,
+    "grid_step": 5.0,
+    "simulation_stop_time": 240.0
+  }
+}
