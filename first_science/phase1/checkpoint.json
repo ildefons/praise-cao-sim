@@ -25,7 +25,12 @@
     "anchor_horizon": 120.0,
     "expected_sigma_resolution": 0.1,
     "sigma_plot_postprocess": {
-      "status": "IMPLEMENTED_AND_VALIDATED_ON_2_TRAJECTORY_NATIVE_SMOKE_OUTPUT",
+      "status": "EXACT_EVENT_STAIRCASE_IMPLEMENTED",
+      "sigma_semantics": "P(T_violation > t)",
+      "domain": [0.0, 240.0],
+      "uses_reporting_horizon_grid_for_png_geometry": false,
+      "reconstructs_first_violation_times_from_top_level_ledgers": true,
+      "artificial_smoothing": false,
       "target_anchor_sigma": 0.95,
       "output_directory": "results/development_atlas/sigma_plots",
       "selection_rule": "closest_achievable_sigma_at_or_below_and_at_or_above_target"
