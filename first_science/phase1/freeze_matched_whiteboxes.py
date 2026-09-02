@@ -2,9 +2,12 @@
 
 This utility prevents rounded terminal output from becoming the scientific
 specification. It reads the exact source rows selected in
-``matched_whitebox_sources.json`` from the augmented N=10 discovery table and
-writes ``selected_whiteboxes.json`` with status ``FROZEN_FOR_CONFIRMATION``.
-No simulator is run and no admissibility threshold is recalibrated.
+``matched_whitebox_sources.json`` from the full augmented N=10 admissibility-
+region table and writes ``selected_whiteboxes.json`` with status
+``FROZEN_FOR_CONFIRMATION``. The compact representative table is deliberately
+not used for freezing because a scientifically retained AR may cease to be one
+of the per-sigma representatives after offline AR augmentation. No simulator is
+run and no admissibility threshold is recalibrated.
 """
 from __future__ import annotations
 
@@ -37,22 +40,38 @@ def freeze_exact_matched_whiteboxes(
         - ``main`` in this module.
     """
     specification = json.loads(source_specification_path.read_text(encoding="utf-8"))
-    representatives = pd.read_csv(results_directory / "representative_regions_by_sigma.csv")
+    admissibility_regions_path = results_directory / "admissibility_regions.csv"
+    admissibility_regions = pd.read_csv(admissibility_regions_path)
     physical = specification["physical_regime"]
 
     frozen_cases: list[dict[str, object]] = []
     for case in specification["cases"]:
-        matches = representatives[
-            (representatives["physical_setting_id"].astype(str) == str(physical["physical_setting_id"]))
-            & (representatives["region_id"].astype(str) == str(case["source_region_id"]))
+        matches = admissibility_regions[
+            (
+                admissibility_regions["physical_setting_id"].astype(str)
+                == str(physical["physical_setting_id"])
+            )
+            & (
+                admissibility_regions["region_id"].astype(str)
+                == str(case["source_region_id"])
+            )
         ]
         if len(matches) != 1:
             raise ValueError(
-                f"expected exactly one source row for {case['source_region_id']}, got {len(matches)}"
+                f"expected exactly one source row for {case['source_region_id']} "
+                f"in {admissibility_regions_path}, got {len(matches)}"
             )
         row = matches.iloc[0]
-        if abs(float(row["center_instruction_mean"]) - float(physical["center_instruction_mean"])) > 1e-9:
-            raise ValueError("source row center_instruction_mean differs from matched physical regime")
+        if (
+            abs(
+                float(row["center_instruction_mean"])
+                - float(physical["center_instruction_mean"])
+            )
+            > 1e-9
+        ):
+            raise ValueError(
+                "source row center_instruction_mean differs from matched physical regime"
+            )
         if abs(float(row["dispersion"]) - float(physical["dispersion"])) > 1e-12:
             raise ValueError("source row dispersion differs from matched physical regime")
 
@@ -71,12 +90,16 @@ def freeze_exact_matched_whiteboxes(
                 "discovery_latency_first_count": int(row["latency_first_count"]),
                 "discovery_cost_first_count": int(row["cost_first_count"]),
                 "source_results_directory": str(results_directory),
+                "source_table": "admissibility_regions.csv",
             }
         )
 
     roles = {case["selection_role"] for case in frozen_cases}
     if roles != {"latency", "mixed", "cost"}:
-        raise ValueError(f"matched battery must contain latency, mixed, and cost roles; got {sorted(roles)}")
+        raise ValueError(
+            "matched battery must contain latency, mixed, and cost roles; "
+            f"got {sorted(roles)}"
+        )
     physical_keys = {
         (
             case["physical_setting_id"],
@@ -92,8 +115,10 @@ def freeze_exact_matched_whiteboxes(
         "status": "FROZEN_FOR_CONFIRMATION",
         "selection_semantics": (
             "Exact N=10 discovery source rows frozen before N=100 confirmation. "
-            "All three A regions share one physical regime. N=100 must use fresh "
-            "seeds and must not recalibrate A."
+            "All three A regions share one physical regime. Exact A values are "
+            "read from the full admissibility_regions.csv table, not from the "
+            "compact representative subset. N=100 must use fresh seeds and must "
+            "not recalibrate A."
         ),
         "paired_matched_physical_regime": True,
         "whiteboxes": frozen_cases,
