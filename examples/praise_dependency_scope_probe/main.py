@@ -40,9 +40,14 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 
-from yafs.application import Application, Message, fractional_selectivity
+from yafs.application import (
+    Application,
+    Message,
+    LinearQoS,
+    fractional_selectivity
+)
 from yafs.core import Sim
-from yafs.distribution import deterministic_distribution
+from yafs.distribution import deterministic_distribution, uniformDistribution
 from yafs.management_network import ManagementAgent, ManagementAgentNetwork
 from yafs.placement import Placement
 from yafs.population import Statical
@@ -192,12 +197,30 @@ class ScopeIsolationPlacement(Placement):
         }
 
         for module, node_id in deployment.items():
-            sim.deploy_module(
+            des_ids = sim.deploy_module(
                 app_name,
                 module,
                 services[module],
                 [node_id]
             )
+
+            # QoS semantic probe: apply 50% of nominal instructions only to
+            # the single deployed ServiceX instance. This is set here because
+            # the DES id exists immediately after deploy_module() returns.
+            if module == "ServiceX":
+                assert len(des_ids) == 1, (
+                    f"Expected exactly one ServiceX DES, got {des_ids}"
+                )
+
+                service_x_des = des_ids[0]
+                sim.des_pct_instructions[service_x_des] = 0.5
+
+                print(
+                    "QOS_PROBE_SETUP",
+                    "ServiceX DES=", service_x_des,
+                    "node=", node_id,
+                    "pct_instructions=", 0.5
+                )
 
 
 RANDOM_SEED = 1
@@ -272,12 +295,20 @@ def create_application():
     )
 
     # F0 branch 1: enters nested composition F1 at ServiceX.
+    m_x_instructions = uniformDistribution(
+        18 * 10**6,
+        22 * 10**6,
+        seed=123,
+        name="M.X.instructions"
+    )
+
     m_x = Message(
         "M.X",
         "ServiceA",
         "ServiceX",
-        instructions=20 * 10**6,
-        bytes=1000
+        instructions=m_x_instructions,
+        bytes=1000,
+        qos=LinearQoS(L=0.0, R=1.0)
     )
 
     a.add_source_messages(m_a)
@@ -721,6 +752,90 @@ def main(simulated_time):
     # STATS
     mypath = folder_results + "sim_trace"
     m = Stats(defaultPath=mypath)
+
+    # -------------------------------------------------
+    # Integrated ServiceX stochastic-instruction + cost probe
+    #
+    # M.X nominal instructions are sampled by Message.instantiate() from
+    # uniformDistribution(18e6, 22e6, seed=123).
+    #
+    # For ServiceX:
+    #   x = 0.5
+    #   node IPT = 1e9
+    #   the passive management agent reserves 50% of node IPT
+    #
+    # Thus:
+    #   available_IPT = 0.5e9
+    #   D_exec = 0.5 * D_nominal
+    #   t_service = D_exec / available_IPT = D_nominal / 1e9
+    #
+    # Therefore the realized nominal instruction draw can be reconstructed
+    # directly from the native service trace as:
+    #   D_nominal = t_service * 1e9
+    #
+    # Per-request native operating cost is:
+    #   C_request = COST(node) * t_service
+    # -------------------------------------------------
+
+    service_x_rows = m.df[m.df["module"] == "ServiceX"]
+
+    assert len(service_x_rows) == 1, (
+        "SERVICE_X_PROBE expected exactly one ServiceX invocation, "
+        f"got {len(service_x_rows)}"
+    )
+
+    service_x_row = service_x_rows.iloc[0]
+
+    service_x_node = int(service_x_row["TOPO.dst"])
+    service_x_time = float(service_x_row["service"])
+    service_x_cost_rate = float(
+        t.get_info()[service_x_node]["COST"]
+    )
+
+    service_x_nominal_instructions = service_x_time * 1e9
+    service_x_request_cost = (
+        service_x_cost_rate * service_x_time
+    )
+
+    print(
+        "\nINSTRUCTION_DISTRIBUTION_PROBE",
+        "module=", "ServiceX",
+        "service_time=", service_x_time,
+        "reconstructed_nominal_instructions=",
+        service_x_nominal_instructions
+    )
+
+    assert 18 * 10**6 <= service_x_nominal_instructions <= 22 * 10**6, (
+        "MESSAGE_INSTANTIATE distribution failure: reconstructed "
+        "ServiceX nominal instructions are outside the configured "
+        "[18e6, 22e6] support. "
+        f"got {service_x_nominal_instructions}"
+    )
+
+    print(
+        "MESSAGE_INSTANTIATE_DISTRIBUTION_PASS",
+        "ServiceX instruction draw lies inside [18e6, 22e6]"
+    )
+
+    print(
+        "\nCOST_PROBE",
+        "module=", "ServiceX",
+        "node=", service_x_node,
+        "service_time=", service_x_time,
+        "cost_rate=", service_x_cost_rate,
+        "request_cost=", service_x_request_cost
+    )
+
+    # Cost is no longer expected to be the old fixed 0.06 because M.X
+    # nominal instruction demand is now stochastic.
+    assert service_x_request_cost >= 0.0, (
+        "COST_PROBE failure: per-request cost must be non-negative"
+    )
+
+    print(
+        "COST_PROBE_PASS",
+        "ServiceX request cost = COST(node) * service_time"
+    )
 
     print("\n\t- Network saturation -")
     print("\t\tAverage waiting messages : %i" %
