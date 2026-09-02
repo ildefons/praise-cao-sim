@@ -4,40 +4,15 @@
   "phase": 1,
   "graph": {
     "grammar": "Fpre -> ParAll(A,B,C) -> Fpost",
-    "pre_module_behavior": {
-      "kind": "deterministic",
-      "instructions": 5000000.0,
-      "qos_neutral": true
-    },
-    "post_module_behavior": {
-      "kind": "deterministic",
-      "instructions": 5000000.0,
-      "qos_neutral": true
-    },
+    "pre_module_behavior": {"kind": "deterministic", "instructions": 5000000.0, "qos_neutral": true},
+    "post_module_behavior": {"kind": "deterministic", "instructions": 5000000.0, "qos_neutral": true},
     "pre_instructions": 5000000.0,
     "post_instructions": 5000000.0
   },
-  "workload": {
-    "period": 0.2,
-    "phase": 0.0,
-    "semantics": "fixed periodic root invocation workload"
-  },
+  "workload": {"period": 0.2, "phase": 0.0, "semantics": "fixed periodic root invocation workload"},
   "topology": {
-    "placement": {
-      "source": 0,
-      "Fpre": 1,
-      "ProviderA": 2,
-      "ProviderB": 3,
-      "ProviderC": 4,
-      "Fpost": 5
-    },
-    "link_parameters": {
-      "network_bw_mbps": 1000.0,
-      "network_pr": 0.001,
-      "request_bytes": 1000,
-      "branch_bytes": 1000,
-      "join_bytes": 1000
-    },
+    "placement": {"source": 0, "Fpre": 1, "ProviderA": 2, "ProviderB": 3, "ProviderC": 4, "Fpost": 5},
+    "link_parameters": {"network_bw_mbps": 1000.0, "network_pr": 0.001, "request_bytes": 1000, "branch_bytes": 1000, "join_bytes": 1000},
     "network_bw_mbps": 1000.0,
     "network_pr": 0.001,
     "request_bytes": 1000,
@@ -92,14 +67,10 @@
     "simulation_stop_time": 240.0,
     "reporting_grid_defines_sigma": false
   },
-  "development_smoke": {
-    "n_trajectories": 10,
-    "seed_bank": [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009],
-    "scientific_evidence": false
-  },
+  "development_smoke": {"n_trajectories": 10, "seed_bank": [1000,1001,1002,1003,1004,1005,1006,1007,1008,1009], "scientific_evidence": false},
   "discovery_search": {
     "n_trajectories_per_candidate": 10,
-    "calibration_seed_bank": [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009],
+    "calibration_seed_bank": [2000,2001,2002,2003,2004,2005,2006,2007,2008,2009],
     "search_method": "PREDECLARED_TARGETED_GRID_V1",
     "initial_design_size": 25,
     "total_candidate_budget": 25,
@@ -117,10 +88,11 @@
   },
   "confirmation": {
     "n_trajectories_per_selected_whitebox": 100,
-    "confirmation_seed_bank": null,
+    "confirmation_seed_bank": [3000,3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3017,3018,3019,3020,3021,3022,3023,3024,3025,3026,3027,3028,3029,3030,3031,3032,3033,3034,3035,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3049,3050,3051,3052,3053,3054,3055,3056,3057,3058,3059,3060,3061,3062,3063,3064,3065,3066,3067,3068,3069,3070,3071,3072,3073,3074,3075,3076,3077,3078,3079,3080,3081,3082,3083,3084,3085,3086,3087,3088,3089,3090,3091,3092,3093,3094,3095,3096,3097,3098,3099],
     "fresh_seeds_required": true,
     "selected_whiteboxes_must_be_frozen_before_run": true,
     "recalibrate_A_on_confirmation": false,
-    "purpose": "fresh_seed_confirmation_of_exact_frozen_discovery_whiteboxes"
+    "paired_matched_physical_regime": true,
+    "purpose": "fresh-seed paired N100 confirmation of exact frozen matched whiteboxes"
   }
 }
