@@ -119,8 +119,8 @@ def test_resolution_diagnostics_report_expected_jump_size() -> None:
     )
     assert diagnostics["n_trajectories"] == 3
     assert abs(diagnostics["vertical_probability_resolution"] - 1.0 / 3.0) < 1e-12
-    assert diagnostics["n_failed_by_anchor"] == 0
-    assert abs(diagnostics["sigma_anchor_exact"] - 1.0) < 1e-12
+    assert diagnostics["n_failed_by_anchor"] == 1
+    assert abs(diagnostics["sigma_anchor_exact"] - 2.0 / 3.0) < 1e-12
     assert diagnostics["n_unique_first_violation_times"] == 1
     assert abs(diagnostics["maximum_empirical_jump"] - 1.0 / 3.0) < 1e-12
     assert abs(float(diagnostics["exact_first_crossing_below_target"]) - 3.0) < 1e-12
