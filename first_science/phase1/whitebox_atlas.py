@@ -222,7 +222,10 @@ def create_whitebox_application_for_physical_setting(
         bytes=int(configuration["topology"]["join_bytes"]),
         qos=LinearQoS(L=0.0, R=1.0),
     )
-    application.set_composition_output_praise(COMPOSITION_ID, join_message)
+    application.set_composition_output_praise(
+        composition_id=COMPOSITION_ID,
+        message_out=join_message,
+    )
     application.add_service_module(POSTPROCESS_MODULE, join_message)
     return application
 
