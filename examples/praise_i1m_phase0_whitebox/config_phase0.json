@@ -1,0 +1,23 @@
+{
+  "n_trajectories": 8,
+  "seed_base": 1000,
+  "stop_time": 10.0,
+  "workload_period": 0.05,
+  "instruction_mean": 20000000.0,
+  "instruction_cv": 0.30,
+  "x": 0.5,
+  "provider_ipt": 1000000000.0,
+  "provider_cost_rate": 3.0,
+  "source_ipt": 100000000.0,
+  "sink_ipt": 1000000000.0,
+  "request_bytes": 1000,
+  "response_bytes": 500,
+  "network_bw_mbps": 1000.0,
+  "network_pr": 0.001,
+  "A_test": {
+    "l_max": 0.03,
+    "c_max": 0.05,
+    "q_min": 0.5
+  },
+  "horizons": [0.0, 1.0, 2.0, 5.0, 10.0]
+}
