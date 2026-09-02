@@ -1,6 +1,7 @@
 {
   "configuration_status": "SCIENTIFIC_DISCOVERY_V1_FROZEN",
   "scientific_evidence_scope": "WHITEBOX_DISCOVERY_ONLY_NOT_PRECISION_ESTIMATION",
+  "selection_revision": "NORMALIZED_RESTRICTED_SURVIVAL_AREA_V1",
   "phase": 1,
   "graph": {
     "grammar": "Fpre -> ParAll(A,B,C) -> Fpost",
@@ -45,12 +46,13 @@
     "means": "A=center*(1-delta), B=center, C=center*(1+delta)"
   },
   "admissibility_calibration": {
+    "selection_status": "SUPERSEDED_FOR_FINALIST_SELECTION_REPORTING_ONLY",
     "anchor_horizon": 120.0,
     "target_survival": 0.95,
     "quality_threshold_rule": "q_star=x",
     "latency_and_cost_calibrated_separately": true,
     "joint_survival_forced_to_target": false,
-    "discovery_n10_target_rule": "treat 0.9 and 1.0 as the empirical bracket around target 0.95; do not claim 0.95 precision from N=10"
+    "discovery_n10_target_rule": "legacy reporting only; sigma(120)=0.95 is not a finalist-selection target"
   },
   "admissibility_scan": {
     "anchor_horizon": 120.0,
@@ -80,19 +82,37 @@
     "development_atlas_used_only_to_choose_search_box": true
   },
   "selection_quality_gate": {
-    "min_failed_by_stop": 4,
-    "min_unique_first_violation_times": 4,
-    "min_dominant_cause_count": 3,
-    "min_mixed_cause_count_each": 2,
-    "max_mixed_cause_imbalance": 2
+    "metric": "normalized_restricted_survival_area",
+    "normalized_restricted_survival_area": {
+      "horizon_min": 0.0,
+      "horizon_max": 240.0,
+      "minimum": 0.5,
+      "maximum": 0.75,
+      "parameterized_band": true,
+      "optimize_to_midpoint": false,
+      "interpretation": "gate only: reject floor/ceiling regimes while preserving room for weak and strong tau separation"
+    },
+    "role_evidence": {
+      "min_dominant_cause_count": 3,
+      "dominance_ratio": 2.0,
+      "min_mixed_cause_count_each": 2,
+      "max_mixed_cause_imbalance": 2
+    },
+    "temporal_richness_is_hard_gate": false,
+    "sigma_120_is_selection_target": false
+  },
+  "confirmation_round_1_exploratory": {
+    "status": "USED_AND_INSPECTED_NOT_FINAL_UNDER_AUC_SELECTION_REVISION",
+    "seed_bank": [3000,3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3017,3018,3019,3020,3021,3022,3023,3024,3025,3026,3027,3028,3029,3030,3031,3032,3033,3034,3035,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3049,3050,3051,3052,3053,3054,3055,3056,3057,3058,3059,3060,3061,3062,3063,3064,3065,3066,3067,3068,3069,3070,3071,3072,3073,3074,3075,3076,3077,3078,3079,3080,3081,3082,3083,3084,3085,3086,3087,3088,3089,3090,3091,3092,3093,3094,3095,3096,3097,3098,3099],
+    "may_be_reused_for_final_confirmation": false
   },
   "confirmation": {
     "n_trajectories_per_selected_whitebox": 100,
-    "confirmation_seed_bank": [3000,3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3017,3018,3019,3020,3021,3022,3023,3024,3025,3026,3027,3028,3029,3030,3031,3032,3033,3034,3035,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3049,3050,3051,3052,3053,3054,3055,3056,3057,3058,3059,3060,3061,3062,3063,3064,3065,3066,3067,3068,3069,3070,3071,3072,3073,3074,3075,3076,3077,3078,3079,3080,3081,3082,3083,3084,3085,3086,3087,3088,3089,3090,3091,3092,3093,3094,3095,3096,3097,3098,3099],
+    "confirmation_seed_bank": null,
     "fresh_seeds_required": true,
     "selected_whiteboxes_must_be_frozen_before_run": true,
     "recalibrate_A_on_confirmation": false,
-    "paired_matched_physical_regime": true,
-    "purpose": "fresh-seed paired N100 confirmation of exact frozen matched whiteboxes"
+    "prefer_matched_physical_regime": true,
+    "purpose": "fresh-seed confirmation after AUC-based finalist freeze; seed bank remains OPEN until finalists are frozen"
   }
 }
