@@ -24,10 +24,17 @@
     "offline_ar_scan": true,
     "anchor_horizon": 120.0,
     "expected_sigma_resolution": 0.1,
+    "sigma_plot_postprocess": {
+      "status": "IMPLEMENTED_AND_VALIDATED_ON_2_TRAJECTORY_NATIVE_SMOKE_OUTPUT",
+      "target_anchor_sigma": 0.95,
+      "output_directory": "results/development_atlas/sigma_plots",
+      "selection_rule": "closest_achievable_sigma_at_or_below_and_at_or_above_target"
+    },
     "simulator_independent_tests": [
       "PHASE1_PRESEARCH_CONTRACT_TESTS_PASS",
       "PHASE1_ATLAS_ANALYSIS_TESTS_PASS",
-      "PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS"
+      "PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS",
+      "PHASE1_SIGMA_PLOT_TESTS_PASS"
     ]
   },
   "scientific_coarse_search": {
