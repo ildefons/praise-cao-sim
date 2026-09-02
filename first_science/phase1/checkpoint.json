@@ -1,7 +1,7 @@
 {
   "phase": 1,
   "name": "reference_regime_and_ar_calibration",
-  "status": "SCIENTIFIC_DISCOVERY_V1_READY_TO_RUN",
+  "status": "AUC_RERANK_READY_ON_EXISTING_N10_DISCOVERY",
   "parent_phase": 0,
   "parent_praise_cao_commit": "6473536d368ccdc84b3b2771678cc0ffd6833508",
   "aicon_baseline": "6eabfa70531e7091e777a0946ffa967721c0f538",
@@ -24,55 +24,57 @@
     "violation_at_horizon_counts_as_failed": true,
     "phase0_status": "FROZEN_SEMANTICS_CONFORMANT",
     "reporting_grid_defines_sigma_geometry": false,
-    "scientific_crossing_times_must_use_exact_events": true,
     "artificial_smoothing_allowed": false
   },
   "sampling_policy": {
     "status": "FROZEN_DISCOVERY_CONFIRMATION_SEPARATION",
     "discovery_n_per_candidate": 10,
     "discovery_vertical_resolution": 0.1,
-    "discovery_target_0_95_rule": "use empirical 0.9/1.0 bracket and curve/cause diagnostics; do not claim precision",
     "confirmation_n_per_selected_whitebox": 100,
     "confirmation_vertical_resolution": 0.01,
     "confirmation_uses_fresh_seeds": true,
     "confirmation_recalibrates_A": false,
     "later_precision_n": "OPEN_AND_DRIVEN_BY_CONVERGENCE_AFTER_N100_CONFIRMATION"
   },
-  "development_atlas": {
-    "status": "FULL_9X10_EXECUTED_AND_INTERPRETABLE",
-    "scientific_evidence": false,
-    "seeds": [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009],
-    "lesson": "420M delta0 produced an informative latency case; coarse-atlas cost/mixed proposals had only two failures and were rejected as too sparse"
-  },
   "scientific_discovery_v1": {
-    "status": "FROZEN_READY_TO_RUN",
+    "status": "PHYSICAL_GRID_COMPLETE_REUSE_FOR_OFFLINE_AUC_RERANK",
     "configuration": "config_phase1_discovery_v1.json",
-    "runner": "whitebox_scientific_discovery.py",
-    "search_method": "PREDECLARED_TARGETED_GRID_V1",
     "center_instruction_means": [300000000.0, 330000000.0, 360000000.0, 390000000.0, 420000000.0],
     "dispersions": [0.0, 0.05, 0.1, 0.15, 0.2],
     "n_physical_candidates": 25,
     "n_trajectories_per_candidate": 10,
     "common_discovery_seeds": [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009],
-    "development_seed_overlap": false,
     "derived_without_M0_M1": true,
-    "output_directory": "results/scientific_discovery_v1"
+    "simulator_rerun_required_for_auc_revision": false
   },
-  "finalist_quality_gate": {
-    "status": "IMPLEMENTED",
-    "min_failed_by_stop": 4,
-    "min_unique_first_violation_times": 4,
-    "min_distinct_sigma_levels": 4,
-    "latency_role": "at least 3 latency-first and >=2:1 latency dominance over cost",
-    "cost_role": "at least 3 cost-first and >=2:1 cost dominance over latency",
-    "mixed_role": "at least 2 latency-first and 2 cost-first with imbalance <=2",
-    "policy_if_role_missing": "refine_or_expand_discovery_do_not_weaken_gate"
+  "finalist_selection_revision": {
+    "status": "FROZEN_CRITERION_PARAMETERIZED_BAND",
+    "metric": "normalized_restricted_survival_area",
+    "exact_estimator": "mean capped first-violation time divided by horizon width",
+    "horizon": [0.0, 240.0],
+    "configured_area_band": [0.5, 0.75],
+    "band_is_parameterized_in_config": true,
+    "optimize_to_midpoint": false,
+    "sigma_120_is_selection_target": false,
+    "former_common_minimum_failure_gate": "SUPERSEDED",
+    "role_ranking": "latency-dominant, cost-dominant, mixed L/C; temporal richness secondary",
+    "deduplicate_exact_A_before_ranking": true,
+    "prefer_matched_physical_regime_when_available": true,
+    "metrics_tool": "exact_auc_candidate_metrics.py",
+    "selector": "whitebox_candidate_selection.py"
+  },
+  "exploratory_n100_round_1": {
+    "status": "RETAINED_AS_DESIGN_EVIDENCE_NOT_FINAL_CONFIRMATION",
+    "seed_bank": "3000..3099",
+    "observed_mechanism_replication": "latency 97/3 L/C; mixed 52/48 L/C; cost 0/58 L/C with 42 censored",
+    "may_be_reused_for_final_confirmation": false
   },
   "selected_whitebox_confirmation": {
     "n_trajectories_per_selected_whitebox": 100,
+    "new_seed_bank": null,
     "fresh_seed_bank_required": true,
+    "must_be_disjoint_from": ["1000..1009", "2000..2009", "3000..3099"],
     "recalibrate_A": false,
-    "manifest": "selected_whiteboxes.json",
-    "status": "WAITING_FOR_INFORMATIVE_FROZEN_DISCOVERY_FINALISTS"
+    "status": "WAITING_FOR_AUC_RERANK_AND_REVIEW"
   }
 }
