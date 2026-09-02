@@ -36,7 +36,8 @@
     "target_survival": 0.95,
     "quality_threshold_rule": "q_star=x",
     "latency_and_cost_calibrated_separately": true,
-    "joint_survival_forced_to_target": false
+    "joint_survival_forced_to_target": false,
+    "discovery_n10_target_rule": "treat 0.9 and 1.0 as the empirical bracket around target 0.95; do not claim 0.95 precision from N=10"
   },
   "horizon": {
     "minimum": 0.0,
@@ -51,11 +52,21 @@
     "purpose": "development_only_trace_and_offline_AR_scan_validation",
     "scientific_evidence": false
   },
-  "coarse_search": {
-    "n_trajectories_per_candidate": 100,
+  "discovery_search": {
+    "n_trajectories_per_candidate": 10,
     "calibration_seed_bank": null,
     "search_method": null,
     "initial_design_size": null,
-    "total_candidate_budget": null
+    "total_candidate_budget": null,
+    "purpose": "scientific_whitebox_candidate_and_AR_discovery_not_precision_estimation",
+    "common_seed_bank_across_candidates": true
+  },
+  "confirmation": {
+    "n_trajectories_per_selected_whitebox": 100,
+    "confirmation_seed_bank": null,
+    "fresh_seeds_required": true,
+    "selected_whiteboxes_must_be_frozen_before_run": true,
+    "recalibrate_A_on_confirmation": false,
+    "purpose": "fresh_seed_confirmation_of_exact_frozen_discovery_whiteboxes"
   }
 }
