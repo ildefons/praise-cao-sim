@@ -8,6 +8,21 @@
   "scientific_step": 0,
   "technology_neutral": true,
   "m0_m1_allowed_in_selection_loop": false,
+  "provider_instruction_semantics": {
+    "status": "FROZEN_INTERPRETATION",
+    "D_i": "computational instructions required by provider i to execute one service invocation",
+    "Dbar": "central mean provider service-instruction requirement per invocation",
+    "delta": "provider-to-provider heterogeneity in mean service-instruction requirement",
+    "delta_is_request_to_request_variability": false,
+    "request_to_request_variability_control": "frozen native gamma CV",
+    "D_i_is_external_root_workload": false,
+    "root_workload_W": "separate fixed invocation timing/pattern specified by period/rate and phase",
+    "implementation_names_retained": [
+      "center_instruction_mean",
+      "dispersion",
+      "Message.instructions"
+    ]
+  },
   "sigma_semantics_audit": {
     "primary_definition": "P(no violation of A occurs at any time t <= H)",
     "event_driven_equivalent": "P(T_violation,A > H), where T_violation,A is the first actual violation event time",
