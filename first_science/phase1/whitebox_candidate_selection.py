@@ -3,9 +3,9 @@
 The former sigma(120)≈0.95 / minimum-failure selection rule is superseded.
 Selection now applies a configuration-driven normalized restricted survival-area
 gate, then classifies latency-dominant, cost-dominant, and genuinely mixed L/C
-roles.  The area band is a gate only: candidates are never optimized toward its
-midpoint.  Temporal richness is secondary ranking information, not a hard common
-failure-count gate.  I1, M0 and M1 remain outside the selection loop.
+roles. The area band is a gate only: candidates are never optimized toward its
+midpoint. Temporal richness is secondary ranking information, not a hard common
+failure-count gate. I1, M0 and M1 remain outside the selection loop.
 """
 from __future__ import annotations
 
@@ -17,10 +17,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from selection_policy import (
-    SurvivalAreaSelectionPolicy,
-    load_survival_area_selection_policy,
-)
+from selection_policy import SurvivalAreaSelectionPolicy, load_survival_area_selection_policy
 
 SELECTION_ROLES = ("latency", "cost", "mixed")
 
@@ -31,30 +28,17 @@ def build_whitebox_candidate_table(
 ) -> pd.DataFrame:
     """Prepare exact-event N=10 metrics for transparent role ranking."""
     required = {
-        "physical_setting_id",
-        "region_id",
-        "center_instruction_mean",
-        "dispersion",
-        "l_max",
-        "c_max",
-        "q_min",
-        "normalized_restricted_survival_area",
-        "restricted_survival_area_seconds",
-        "sigma_120_reporting",
-        "latency_first_count_exact",
-        "cost_first_count_exact",
-        "quality_first_count_exact",
-        "tie_first_count_exact",
-        "censored_count_exact",
-        "n_unique_first_violation_times",
-        "maximum_empirical_jump",
+        "physical_setting_id", "region_id", "center_instruction_mean", "dispersion",
+        "l_max", "c_max", "q_min", "normalized_restricted_survival_area",
+        "restricted_survival_area_seconds", "sigma_120_reporting",
+        "latency_first_count_exact", "cost_first_count_exact",
+        "quality_first_count_exact", "tie_first_count_exact", "censored_count_exact",
+        "n_unique_first_violation_times", "maximum_empirical_jump",
         "longest_plateau_fraction_of_domain",
     }
     missing = required.difference(exact_auc_metrics.columns)
     if missing:
-        raise ValueError(
-            "exact AUC candidate metrics are incomplete: " + ", ".join(sorted(missing))
-        )
+        raise ValueError("exact AUC candidate metrics are incomplete: " + ", ".join(sorted(missing)))
 
     candidates = exact_auc_metrics.copy()
     candidates["latency_first_count"] = candidates["latency_first_count_exact"].astype(int)
@@ -62,20 +46,14 @@ def build_whitebox_candidate_table(
     candidates["quality_first_count"] = candidates["quality_first_count_exact"].astype(int)
     candidates["tie_first_count"] = candidates["tie_first_count_exact"].astype(int)
     candidates["censored_count"] = candidates["censored_count_exact"].astype(int)
-    candidates["latency_minus_cost"] = (
-        candidates["latency_first_count"] - candidates["cost_first_count"]
-    )
+    candidates["latency_minus_cost"] = candidates["latency_first_count"] - candidates["cost_first_count"]
     candidates["cost_minus_latency"] = -candidates["latency_minus_cost"]
     candidates["cause_imbalance"] = candidates["latency_minus_cost"].abs()
-    candidates["balanced_cause_support"] = candidates[
-        ["latency_first_count", "cost_first_count"]
-    ].min(axis=1)
+    candidates["balanced_cause_support"] = candidates[["latency_first_count", "cost_first_count"]].min(axis=1)
     candidates["inside_survival_area_band"] = (
-        candidates["normalized_restricted_survival_area"].astype(float)
-        >= policy.area_min - 1e-12
+        candidates["normalized_restricted_survival_area"].astype(float) >= policy.area_min - 1e-12
     ) & (
-        candidates["normalized_restricted_survival_area"].astype(float)
-        <= policy.area_max + 1e-12
+        candidates["normalized_restricted_survival_area"].astype(float) <= policy.area_max + 1e-12
     )
     return candidates
 
@@ -85,8 +63,6 @@ def filter_nondegenerate_n10_candidates(
     policy: SurvivalAreaSelectionPolicy,
 ) -> pd.DataFrame:
     """Apply only the configured normalized survival-area nondegeneracy gate."""
-    # Deliberately do not rank by distance to the midpoint.  Every point inside
-    # the configured interval is equally acceptable with respect to area.
     return candidates[candidates["inside_survival_area_band"]].copy()
 
 
@@ -95,12 +71,7 @@ def rank_candidates_for_role(
     role: str,
     policy: SurvivalAreaSelectionPolicy,
 ) -> pd.DataFrame:
-    """Rank area-eligible candidates for one failure-mechanism role.
-
-    Role evidence is primary. Exact-event temporal richness is secondary.
-    Normalized survival area is not used to rank candidates once they pass the
-    configured band.
-    """
+    """Rank area-eligible candidates for one failure-mechanism role."""
     if role not in SELECTION_ROLES:
         raise ValueError(f"unknown selection role: {role}")
 
@@ -109,10 +80,7 @@ def rank_candidates_for_role(
         opposite = ranked["cost_first_count"].clip(lower=1)
         ranked = ranked[
             (ranked["latency_first_count"] >= policy.min_dominant_cause_count)
-            & (
-                ranked["latency_first_count"]
-                >= policy.dominance_ratio * opposite
-            )
+            & (ranked["latency_first_count"] >= policy.dominance_ratio * opposite)
         ].copy()
         role_sort = ["latency_minus_cost", "latency_first_count"]
         role_ascending = [False, False]
@@ -120,10 +88,7 @@ def rank_candidates_for_role(
         opposite = ranked["latency_first_count"].clip(lower=1)
         ranked = ranked[
             (ranked["cost_first_count"] >= policy.min_dominant_cause_count)
-            & (
-                ranked["cost_first_count"]
-                >= policy.dominance_ratio * opposite
-            )
+            & (ranked["cost_first_count"] >= policy.dominance_ratio * opposite)
         ].copy()
         role_sort = ["cost_minus_latency", "cost_first_count"]
         role_ascending = [False, False]
@@ -147,14 +112,7 @@ def rank_candidates_for_role(
         "physical_setting_id",
         "region_id",
     ]
-    sort_ascending = [
-        *role_ascending,
-        False,
-        True,
-        True,
-        True,
-        True,
-    ]
+    sort_ascending = [*role_ascending, False, True, True, True, True]
     output = ranked.sort_values(sort_columns, ascending=sort_ascending).reset_index(drop=True)
     output["role_rank"] = np.arange(1, len(output) + 1, dtype=int)
     return output
@@ -168,8 +126,7 @@ def _select_distinct_rows_in_one_setting(
     role_rows: dict[str, pd.DataFrame] = {}
     for role in SELECTION_ROLES:
         rows = ranked_by_role[role][
-            ranked_by_role[role]["physical_setting_id"].astype(str)
-            == str(physical_setting_id)
+            ranked_by_role[role]["physical_setting_id"].astype(str) == str(physical_setting_id)
         ].head(20)
         if rows.empty:
             return None
@@ -196,15 +153,11 @@ def select_complementary_whitebox_proposal(
     prefer_matched_physical_regime: bool = True,
 ) -> pd.DataFrame:
     """Select one latency, cost and mixed finalist from the AUC-qualified pool."""
-    ranked_by_role = {
-        role: rank_candidates_for_role(candidates, role, policy)
-        for role in SELECTION_ROLES
-    }
+    ranked_by_role = {role: rank_candidates_for_role(candidates, role, policy) for role in SELECTION_ROLES}
     missing = [role for role, rows in ranked_by_role.items() if rows.empty]
     if missing:
         raise ValueError(
-            "no survival-area-qualified N=10 candidate for role(s) "
-            + ",".join(missing)
+            "no survival-area-qualified N=10 candidate for role(s) " + ",".join(missing)
             + "; keep the configured area band fixed and report/refine discovery"
         )
 
@@ -231,9 +184,7 @@ def select_complementary_whitebox_proposal(
         selected_rows = []
         used: set[str] = set()
         for role in SELECTION_ROLES:
-            available = ranked_by_role[role][
-                ~ranked_by_role[role]["region_id"].astype(str).isin(used)
-            ]
+            available = ranked_by_role[role][~ranked_by_role[role]["region_id"].astype(str).isin(used)]
             if available.empty:
                 raise ValueError(f"cannot select a distinct candidate for role {role}")
             row = available.iloc[0].copy()
@@ -250,6 +201,7 @@ def proposal_dataframe_to_manifest(
     selected: pd.DataFrame,
     source_results_directory: Path,
     policy: SurvivalAreaSelectionPolicy,
+    policy_configuration_path: Path,
 ) -> dict[str, object]:
     """Convert exact AUC-selected rows into a reviewable proposal manifest."""
     whiteboxes: list[dict[str, object]] = []
@@ -266,20 +218,14 @@ def proposal_dataframe_to_manifest(
                 "l_max": float(row["l_max"]),
                 "c_max": float(row["c_max"]),
                 "q_min": float(row["q_min"]),
-                "discovery_normalized_restricted_survival_area": float(
-                    row["normalized_restricted_survival_area"]
-                ),
-                "discovery_restricted_survival_area_seconds": float(
-                    row["restricted_survival_area_seconds"]
-                ),
+                "discovery_normalized_restricted_survival_area": float(row["normalized_restricted_survival_area"]),
+                "discovery_restricted_survival_area_seconds": float(row["restricted_survival_area_seconds"]),
                 "discovery_sigma_120_reporting": float(row["sigma_120_reporting"]),
                 "latency_first_count": int(row["latency_first_count"]),
                 "cost_first_count": int(row["cost_first_count"]),
                 "censored_count": int(row["censored_count"]),
                 "n_unique_first_violation_times": int(row["n_unique_first_violation_times"]),
-                "longest_plateau_fraction_of_domain": float(
-                    row["longest_plateau_fraction_of_domain"]
-                ),
+                "longest_plateau_fraction_of_domain": float(row["longest_plateau_fraction_of_domain"]),
                 "maximum_empirical_jump": float(row["maximum_empirical_jump"]),
             }
         )
@@ -287,12 +233,13 @@ def proposal_dataframe_to_manifest(
     return {
         "status": "PROPOSED_FROM_N10_AUC_DISCOVERY_REQUIRES_REVIEW",
         "selection_semantics": (
-            "Exact-event N=10 normalized restricted survival-area gate followed "
-            "by failure-mechanism and temporal-richness ranking. The configured "
-            "area interval is a gate only; no midpoint optimization and no "
-            "sigma(120) target are used. Review once, freeze exact A/physical "
-            "parameters, then confirm using a new disjoint N=100 seed bank."
+            "Exact-event N=10 normalized restricted survival-area gate followed by "
+            "failure-mechanism and temporal-richness ranking. The configured area "
+            "interval is a gate only; no midpoint optimization and no sigma(120) "
+            "target are used. Review once, freeze exact A/physical parameters, "
+            "then confirm using a new disjoint N=100 seed bank."
         ),
+        "policy_configuration": str(policy_configuration_path),
         "normalized_restricted_survival_area_gate": {
             "horizon_min": policy.horizon_min,
             "horizon_max": policy.horizon_max,
@@ -312,11 +259,12 @@ def proposal_dataframe_to_manifest(
     }
 
 
-def execute_whitebox_candidate_selection(results_directory: Path) -> pd.DataFrame:
-    """Apply the configured AUC gate and write a three-whitebox proposal."""
-    configuration = json.loads(
-        (results_directory / "effective_config.json").read_text(encoding="utf-8")
-    )
+def execute_whitebox_candidate_selection(
+    results_directory: Path,
+    policy_configuration_path: Path,
+) -> pd.DataFrame:
+    """Apply the versioned AUC gate and write a three-whitebox proposal."""
+    configuration = json.loads(policy_configuration_path.read_text(encoding="utf-8"))
     policy = load_survival_area_selection_policy(configuration)
     metrics_path = results_directory / "whitebox_selection" / "auc_candidate_metrics.csv"
     if not metrics_path.exists():
@@ -329,41 +277,26 @@ def execute_whitebox_candidate_selection(results_directory: Path) -> pd.DataFram
     output_directory = results_directory / "whitebox_selection"
     output_directory.mkdir(parents=True, exist_ok=True)
     candidates.sort_values(
-        [
-            "inside_survival_area_band",
-            "physical_setting_id",
-            "normalized_restricted_survival_area",
-            "region_id",
-        ],
+        ["inside_survival_area_band", "physical_setting_id", "normalized_restricted_survival_area", "region_id"],
         ascending=[False, True, True, True],
     ).to_csv(output_directory / "whitebox_candidate_ranking.csv", index=False)
 
     prefer_matched = bool(configuration.get("confirmation", {}).get("prefer_matched_physical_regime", True))
     selected = select_complementary_whitebox_proposal(
-        candidates,
-        policy,
-        prefer_matched_physical_regime=prefer_matched,
+        candidates, policy, prefer_matched_physical_regime=prefer_matched
     )
-    manifest = proposal_dataframe_to_manifest(selected, results_directory, policy)
+    manifest = proposal_dataframe_to_manifest(
+        selected, results_directory, policy, policy_configuration_path
+    )
     proposal_path = output_directory / "selected_whiteboxes_proposal.json"
     proposal_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     display_columns = [
-        "selection_role",
-        "physical_setting_id",
-        "region_id",
-        "center_instruction_mean",
-        "dispersion",
-        "l_max",
-        "c_max",
-        "q_min",
-        "normalized_restricted_survival_area",
-        "restricted_survival_area_seconds",
-        "sigma_120_reporting",
-        "latency_first_count",
-        "cost_first_count",
-        "censored_count",
-        "n_unique_first_violation_times",
+        "selection_role", "physical_setting_id", "region_id", "center_instruction_mean",
+        "dispersion", "l_max", "c_max", "q_min",
+        "normalized_restricted_survival_area", "restricted_survival_area_seconds",
+        "sigma_120_reporting", "latency_first_count", "cost_first_count",
+        "censored_count", "n_unique_first_violation_times",
         "longest_plateau_fraction_of_domain",
     ]
     print("PHASE1_WHITEBOX_AUC_SELECTION_PROPOSAL_PASS")
@@ -386,8 +319,13 @@ def main() -> None:
         type=Path,
         default=module_directory / "results" / "scientific_discovery_v1_full_domain_ar",
     )
+    parser.add_argument(
+        "--policy-config",
+        type=Path,
+        default=module_directory / "config_phase1_discovery_v1.json",
+    )
     args = parser.parse_args()
-    execute_whitebox_candidate_selection(args.results.resolve())
+    execute_whitebox_candidate_selection(args.results.resolve(), args.policy_config.resolve())
 
 
 if __name__ == "__main__":
