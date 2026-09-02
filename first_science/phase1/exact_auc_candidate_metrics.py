@@ -1,11 +1,16 @@
 """Compute exact-event survival-area metrics for every distinct Phase-1 N=10 AR.
 
-This is an offline white-box post-process.  It consumes the already generated
+This is an offline white-box post-process. It consumes the already generated
 top-level request ledgers and admissibility-region table, deduplicates numerically
 identical A=(l_max,c_max,q_min) regions, and evaluates every distinct A without
-rerunning AICon/YAFS.  The implementation precomputes latency/cost/quality event
+rerunning AICon/YAFS. The implementation precomputes latency/cost/quality event
 times for each trajectory and threshold so the complete AR table can be reranked
 without a lengthy per-region request scan.
+
+The result directory keeps its historical effective configuration untouched.
+The revised finalist-selection policy is read separately from the current
+versioned Phase-1 configuration, which is important because existing N=10 result
+folders predate the survival-area revision.
 """
 from __future__ import annotations
 
@@ -23,12 +28,7 @@ EVENT_TOLERANCE = 1e-12
 
 
 def deduplicate_exact_admissibility_regions(regions: pd.DataFrame) -> pd.DataFrame:
-    """Keep one provenance row for every exact physical-setting/A tuple.
-
-    Called by:
-        - ``compute_exact_auc_candidate_metrics`` in this module.
-        - unit tests in ``test_exact_auc_candidate_metrics.py``.
-    """
+    """Keep one provenance row for every exact physical-setting/A tuple."""
     required = {
         "physical_setting_id",
         "region_id",
@@ -101,12 +101,7 @@ def build_threshold_event_cache_for_trajectory(
     quality_thresholds: list[float],
     stop_time: float,
 ) -> dict[str, dict[float, float | None]]:
-    """Precompute earliest event times for every threshold in one trajectory.
-
-    Called by:
-        - ``compute_metrics_for_one_physical_setting`` in this module.
-        - unit tests in ``test_exact_auc_candidate_metrics.py``.
-    """
+    """Precompute earliest event times for every threshold in one trajectory."""
     ordered = trajectory_ledger.sort_values(["emission", "request_id"])
     emission = ordered["emission"].astype(float).to_numpy()
     completion = ordered["completion"].astype(float).to_numpy()
@@ -158,12 +153,9 @@ def calculate_exact_normalized_restricted_survival_area(
     """Return exact empirical restricted survival area and normalized area.
 
     For each trajectory the contribution to the integral over [Ha,Hb] is
-    max(0, min(T,Hb)-Ha); a right-censored trajectory contributes Hb-Ha.
-    This equals the exact area under the empirical P(T>H) staircase and does not
-    depend on the stored reporting grid.
-
-    Returns:
-        ``(area_seconds, normalized_area)``.
+    max(0,min(T,Hb)-Ha); a right-censored trajectory contributes Hb-Ha. This is
+    the exact area under the empirical P(T>H) staircase and does not depend on
+    the stored reporting grid.
     """
     if not first_violation_times:
         raise ValueError("at least one first-violation observation is required")
@@ -299,17 +291,25 @@ def compute_metrics_for_one_physical_setting(
 
 def compute_exact_auc_candidate_metrics(
     results_directory: Path,
+    policy_configuration_path: Path,
     output_path: Path | None = None,
 ) -> pd.DataFrame:
     """Compute all-distinct exact N=10 AUC metrics from an existing result set."""
-    configuration = json.loads(
+    result_configuration = json.loads(
         (results_directory / "effective_config.json").read_text(encoding="utf-8")
     )
-    policy = load_survival_area_selection_policy(configuration)
-    stop_time = float(configuration["horizon"]["simulation_stop_time"])
+    policy_configuration = json.loads(
+        policy_configuration_path.read_text(encoding="utf-8")
+    )
+    policy = load_survival_area_selection_policy(policy_configuration)
+    stop_time = float(result_configuration["horizon"]["simulation_stop_time"])
     if policy.horizon_max > stop_time + EVENT_TOLERANCE:
         raise ValueError("survival-area horizon cannot exceed simulator stop time")
-    anchor_horizon = float(configuration["admissibility_calibration"]["anchor_horizon"])
+    if abs(policy.horizon_min - float(result_configuration["horizon"]["minimum"])) > 1e-12:
+        raise ValueError("selection area horizon_min differs from discovery horizon minimum")
+    if abs(policy.horizon_max - float(result_configuration["horizon"]["maximum"])) > 1e-12:
+        raise ValueError("selection area horizon_max differs from discovery horizon maximum")
+    anchor_horizon = float(result_configuration["admissibility_calibration"]["anchor_horizon"])
 
     regions = deduplicate_exact_admissibility_regions(
         pd.read_csv(results_directory / "admissibility_regions.csv")
@@ -341,6 +341,7 @@ def compute_exact_auc_candidate_metrics(
         "PHASE1_EXACT_AUC_CANDIDATE_METRICS_PASS",
         f"n_distinct_A={len(table)}",
         f"area_band=[{policy.area_min:.6g},{policy.area_max:.6g}]",
+        f"policy_config={policy_configuration_path}",
         f"output={output_path}",
     )
     return table
@@ -355,10 +356,16 @@ def main() -> None:
         type=Path,
         default=module_directory / "results" / "scientific_discovery_v1_full_domain_ar",
     )
+    parser.add_argument(
+        "--policy-config",
+        type=Path,
+        default=module_directory / "config_phase1_discovery_v1.json",
+    )
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
     compute_exact_auc_candidate_metrics(
         args.results.resolve(),
+        args.policy_config.resolve(),
         None if args.output is None else args.output.resolve(),
     )
 
