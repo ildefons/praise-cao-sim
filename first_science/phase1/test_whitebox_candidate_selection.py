@@ -105,12 +105,13 @@ def build_synthetic_selection_fixture() -> tuple[pd.DataFrame, pd.DataFrame, pd.
         ]
     )
     curves = []
+    horizons = [0.0, 120.0, 160.0, 200.0, 240.0]
     for physical_setting_id, region_id, values in [
-        ("P1", "A_latency", [1.0, 0.9, 0.6, 0.3]),
-        ("P2", "A_cost", [1.0, 0.9, 0.7, 0.4]),
-        ("P3", "A_mixed", [1.0, 1.0, 0.7, 0.4]),
+        ("P1", "A_latency", [1.0, 0.9, 0.7, 0.5, 0.3]),
+        ("P2", "A_cost", [1.0, 0.9, 0.8, 0.6, 0.4]),
+        ("P3", "A_mixed", [1.0, 1.0, 0.8, 0.6, 0.4]),
     ]:
-        for horizon, sigma in zip([0.0, 120.0, 180.0, 240.0], values):
+        for horizon, sigma in zip(horizons, values):
             curves.append(
                 {
                     "physical_setting_id": physical_setting_id,
@@ -130,7 +131,7 @@ def test_curve_shape_summary() -> None:
     assert latency["sigma_anchor_from_curve"] == 0.9
     assert latency["sigma_stop"] == 0.3
     assert abs(latency["post_anchor_drop"] - 0.6) < 1e-12
-    assert latency["n_distinct_sigma_levels"] == 4
+    assert latency["n_distinct_sigma_levels"] == 5
 
 
 def test_role_rankings_require_expected_first_violation_structure() -> None:
