@@ -1,9 +1,12 @@
 """Native AICon/YAFS white-box atlas for PRAISE first-science Phase 1.
 
 The development atlas executes Fpre -> ParAll(A,B,C) -> Fpost for a small
-explicit grid of physical (center instruction mean, provider dispersion)
-settings. Admissibility regions are scanned only after native trajectories have
-been reduced to top-level request ledgers. No I1 card, M0, or M1 appears here.
+explicit grid of physical (central provider service-instruction requirement,
+provider heterogeneity) settings. ``Message.instructions`` on A/B/C denotes the
+computational instructions required by the provider service for one invocation;
+it is not the external root arrival workload. Admissibility regions are scanned
+only after native trajectories have been reduced to top-level request ledgers.
+No I1 card, M0, or M1 appears here.
 """
 from __future__ import annotations
 
@@ -126,7 +129,15 @@ def calculate_provider_instruction_means_for_physical_setting(
     center_instruction_mean: float,
     dispersion: float,
 ) -> tuple[float, float, float]:
-    """Calculate symmetric A/B/C gamma instruction-demand means.
+    """Calculate symmetric A/B/C mean service-instruction requirements.
+
+    ``center_instruction_mean`` is retained as the implementation/configuration
+    name, but its scientific meaning is the central mean number of instructions
+    required by a provider service to execute one invocation. ``dispersion``
+    (delta) controls provider-to-provider heterogeneity in that mean; it is not
+    the request-to-request stochastic variability, which is controlled
+    separately by the frozen gamma CV. The periodic root workload is a separate
+    fixed specification of invocation timing.
 
     Called by:
         - ``create_whitebox_application_for_physical_setting`` in this module.
@@ -151,7 +162,10 @@ def create_whitebox_application_for_physical_setting(
 
     A/B/C use identical service semantics. Their development-atlas difference is
     the mean of independent seeded gamma distributions attached natively to each
-    branch ``Message.instructions``. L, C, and Q are never directly sampled.
+    branch ``Message.instructions``. Each realization is the computational work
+    required by that provider service for one invocation, not an external root
+    workload realization. The root workload remains the fixed periodic source
+    configured separately below. L, C, and Q are never directly sampled.
 
     Called by:
         - ``execute_one_whitebox_trajectory`` in this module.
@@ -411,7 +425,12 @@ def execute_one_whitebox_trajectory(
 
 
 def enumerate_development_physical_settings(configuration: dict) -> list[dict]:
-    """Enumerate the explicit development-only ``(Dbar, delta)`` atlas grid.
+    """Enumerate the development-only ``(Dbar, delta)`` provider grid.
+
+    Here ``Dbar`` is the central mean service-instruction requirement per
+    provider invocation and ``delta`` is provider-to-provider heterogeneity in
+    that mean. Neither quantity is the periodic root workload, which remains
+    fixed across the atlas.
 
     Called by:
         - ``execute_development_whitebox_atlas_simulations`` in this module.
