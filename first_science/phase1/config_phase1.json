@@ -32,12 +32,32 @@
     "means": "A=center*(1-delta), B=center, C=center*(1+delta)"
   },
   "admissibility_calibration": {
+    "selection_status": "SUPERSEDED_FOR_FINALIST_SELECTION_REPORTING_ONLY",
     "anchor_horizon": 120.0,
     "target_survival": 0.95,
     "quality_threshold_rule": "q_star=x",
     "latency_and_cost_calibrated_separately": true,
     "joint_survival_forced_to_target": false,
-    "discovery_n10_target_rule": "treat 0.9 and 1.0 as the empirical bracket around target 0.95; do not claim 0.95 precision from N=10"
+    "discovery_n10_target_rule": "legacy reporting only; sigma(120)=0.95 is not a finalist-selection target"
+  },
+  "selection_quality_gate": {
+    "metric": "normalized_restricted_survival_area",
+    "normalized_restricted_survival_area": {
+      "horizon_min": 0.0,
+      "horizon_max": 240.0,
+      "minimum": 0.5,
+      "maximum": 0.75,
+      "parameterized_band": true,
+      "optimize_to_midpoint": false
+    },
+    "role_evidence": {
+      "min_dominant_cause_count": 3,
+      "dominance_ratio": 2.0,
+      "min_mixed_cause_count_each": 2,
+      "max_mixed_cause_imbalance": 2
+    },
+    "temporal_richness_is_hard_gate": false,
+    "sigma_120_is_selection_target": false
   },
   "horizon": {
     "minimum": 0.0,
@@ -67,6 +87,6 @@
     "fresh_seeds_required": true,
     "selected_whiteboxes_must_be_frozen_before_run": true,
     "recalibrate_A_on_confirmation": false,
-    "purpose": "fresh_seed_confirmation_of_exact_frozen_discovery_whiteboxes"
+    "purpose": "fresh_seed_confirmation_of_exact_frozen_auc_selected_whiteboxes"
   }
 }
