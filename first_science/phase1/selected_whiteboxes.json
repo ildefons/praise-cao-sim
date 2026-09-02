@@ -1,0 +1,5 @@
+{
+  "status": "EMPTY_UNTIL_DISCOVERY_SELECTION",
+  "selection_semantics": "After N=10 discovery, freeze the exact physical parameters and admissibility region A for each finalist before any N=100 confirmation run. Confirmation must not recalibrate A.",
+  "whiteboxes": []
+}
