@@ -8,6 +8,18 @@
   "scientific_step": 0,
   "technology_neutral": true,
   "m0_m1_allowed_in_selection_loop": false,
+  "sigma_semantics_audit": {
+    "primary_definition": "P(no violation of A occurs at any time t <= H)",
+    "event_driven_equivalent": "P(T_violation,A > H), where T_violation,A is the first actual violation event time",
+    "violation_at_horizon_counts_as_failed": true,
+    "phase0_numeric_change_required": false,
+    "phase0_status": "FROZEN_SEMANTICS_CONFORMANT",
+    "phase1_anchor_semantics_status": "CONFORMANT",
+    "reporting_grid_defines_sigma_geometry": false,
+    "scientific_crossing_times_must_use_exact_events": true,
+    "artificial_smoothing_allowed": false,
+    "audit_document": "SIGMA_SEMANTICS_AUDIT.md"
+  },
   "development_smoke": {
     "n_trajectories": 10,
     "scientific_evidence": false,
@@ -26,7 +38,8 @@
     "expected_sigma_resolution": 0.1,
     "sigma_plot_postprocess": {
       "status": "EXACT_EVENT_STAIRCASE_IMPLEMENTED",
-      "sigma_semantics": "P(T_violation > t)",
+      "sigma_semantics": "P(no violation of A occurs at any time t <= H)",
+      "event_driven_computation": "P(T_violation > H)",
       "domain": [0.0, 240.0],
       "uses_reporting_horizon_grid_for_png_geometry": false,
       "reconstructs_first_violation_times_from_top_level_ledgers": true,
@@ -35,15 +48,33 @@
       "output_directory": "results/development_atlas/sigma_plots",
       "selection_rule": "closest_achievable_sigma_at_or_below_and_at_or_above_target"
     },
+    "sigma_curve_resolution_diagnostics": {
+      "status": "IMPLEMENTED",
+      "script": "sigma_curve_diagnostics.py",
+      "output": "results/development_atlas/sigma_plots/sigma_curve_resolution_diagnostics.csv",
+      "metrics": [
+        "vertical_probability_resolution",
+        "sigma_anchor_exact",
+        "n_failed_by_anchor",
+        "n_unique_first_violation_times",
+        "maximum_empirical_jump",
+        "longest_plateau_fraction_of_domain",
+        "exact_first_crossing_below_target",
+        "split_half_anchor_absolute_difference",
+        "split_half_curve_supremum_difference"
+      ]
+    },
     "simulator_independent_tests": [
       "PHASE1_PRESEARCH_CONTRACT_TESTS_PASS",
       "PHASE1_ATLAS_ANALYSIS_TESTS_PASS",
       "PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS",
-      "PHASE1_SIGMA_PLOT_TESTS_PASS"
+      "PHASE1_SIGMA_PLOT_TESTS_PASS",
+      "PHASE1_SIGMA_CURVE_DIAGNOSTIC_TESTS_PASS"
     ]
   },
   "scientific_coarse_search": {
     "n_trajectories_per_candidate": 100,
+    "crossing_time_rule": "exact_first_violation_event_time_not_reporting_grid",
     "status": "FAIL_CLOSED_UNTIL_SCIENTIFIC_PRESEARCH_CONFIG_IS_FROZEN"
   }
 }
