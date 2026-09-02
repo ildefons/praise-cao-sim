@@ -1,0 +1,26 @@
+{
+  "status": "SOURCE_REGIONS_SELECTED_FOR_EXACT_FREEZE",
+  "physical_regime": {
+    "physical_setting_id": "D390000000_d0.150",
+    "center_instruction_mean": 390000000.0,
+    "dispersion": 0.15
+  },
+  "selection_semantics": "Freeze exact A values by reading these source rows from the augmented N=10 discovery outputs. Do not copy rounded terminal values.",
+  "cases": [
+    {
+      "case_id": "WB_L",
+      "selection_role": "latency",
+      "source_region_id": "D390000000_d0.150_A00861"
+    },
+    {
+      "case_id": "WB_LC",
+      "selection_role": "mixed",
+      "source_region_id": "D390000000_d0.150_A01018"
+    },
+    {
+      "case_id": "WB_C",
+      "selection_role": "cost",
+      "source_region_id": "D390000000_d0.150_FDL_00026"
+    }
+  ]
+}
