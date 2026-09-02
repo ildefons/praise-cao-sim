@@ -28,21 +28,29 @@ Outputs include:
 
 The last table gives compact example A regions for each achievable sigma at H=120, including latency-first and cost-first violation counts.
 
+## Primary sigma semantics
+
+The authoritative scientific event is cumulative admissibility:
+
+`σ_G(A,H) = P(no violation of A occurs at any time t <= H)`.
+
+Under the declared event-driven latency/cost/quality semantics, let `T_violation,A` be the time of the first **actual violation event**, with `+inf` if none occurs. Then the computational form is exactly:
+
+`σ_G(A,H) = P(T_violation,A > H)`.
+
+A violation exactly at `H` counts as violated by `H`. The first-event representation is a lossless compression for this cumulative no-violation event; it is not a different scientific definition.
+
+See `SIGMA_SEMANTICS_AUDIT.md` for the Phase-0/Phase-1 audit.
+
 ## Sigma-curve plotting post-process
 
-The frozen semantics are:
-
-`σ(t) = P(T_violation > t)`
-
-meaning the probability that the offering is still admissible at horizon `t`.
-
-`generate_sigma_plots.py` is simulator-independent. It does **not** plot by interpolating the stored 5-unit reporting grid. For every selected admissibility region it goes back to `all_top_level_request_ledgers.csv`, reconstructs one exact first-violation time per trajectory using the same frozen latency/cost/quality event semantics as `atlas_analysis.py`, and draws the exact empirical survival function over the complete configured domain `0 <= t <= 240`.
+`generate_sigma_plots.py` is simulator-independent. It does **not** plot by interpolating the stored 5-unit reporting grid. For every selected admissibility region it goes back to `all_top_level_request_ledgers.csv`, reconstructs one exact first-violation time per trajectory using the same frozen latency/cost/quality event semantics as `atlas_analysis.py`, and draws the exact empirical survival function over the complete configured domain `0 <= H <= 240`.
 
 The finite-sample estimator is:
 
-`σ_hat(t) = (1/N) * sum_j 1[T_violation,j > t]`.
+`σ_hat(H) = (1/N) * sum_j 1[T_violation,j > H]`.
 
-Therefore the empirical curve is a staircase whose horizontal coordinate is continuous over the full horizon and whose vertical drops occur at the actual observed first-violation times. The stored `survival_curves.csv` 5-unit horizon grid is a reporting table only and does not determine the PNG geometry.
+Therefore the empirical curve is a staircase whose horizontal coordinate is continuous over the full horizon and whose vertical drops occur at the actual observed first-violation times. The stored `survival_curves.csv` 5-unit horizon grid is a reporting table only and does not determine the PNG geometry or an exact target-crossing time.
 
 With N=10 the vertical probability resolution is 0.1; with N=100 it is 0.01. No artificial smoothing is applied.
 
@@ -68,7 +76,39 @@ Generated plot metadata are also recorded in:
 
 `results/development_atlas/sigma_plots/best_sigma_plot_selection.csv`
 
-The PNGs and selection CSV are generated results and remain ignored by Git.
+## Curve-resolution / convergence diagnostics
+
+`sigma_curve_diagnostics.py` evaluates the same best/bracketing ARs without smoothing the empirical curve. It records finite-N resolution and a deterministic split-half stability check:
+
+- vertical probability resolution `1/N`;
+- exact sigma at `H*`;
+- failures by `H*` and by simulator stop;
+- number of unique first-violation event times;
+- maximum empirical jump;
+- longest plateau and fraction of the domain;
+- exact first crossing below the target, using event times rather than the reporting grid;
+- split-half absolute difference at `H*`;
+- split-half full-curve supremum difference.
+
+Run:
+
+```bash
+python sigma_curve_diagnostics.py
+```
+
+Expected marker:
+
+```text
+PHASE1_SIGMA_CURVE_DIAGNOSTICS_PASS
+```
+
+Output:
+
+`results/development_atlas/sigma_plots/sigma_curve_resolution_diagnostics.csv`
+
+These quantities diagnose whether the Monte Carlo staircase is sufficiently resolved for the intended comparison. They must not be used to smooth the white-box curve. If final high-N curves remain too coarse or split-half unstable, increase N while keeping the physical regime and A frozen.
+
+The PNGs and diagnostic CSVs are generated results and remain ignored by Git.
 
 ## Simulator-independent tests
 
@@ -76,6 +116,7 @@ The PNGs and selection CSV are generated results and remain ignored by Git.
 python test_atlas_analysis.py
 python test_whitebox_atlas_configuration.py
 python test_generate_sigma_plots.py
+python test_sigma_curve_diagnostics.py
 ```
 
 Expected:
@@ -84,9 +125,10 @@ Expected:
 PHASE1_ATLAS_ANALYSIS_TESTS_PASS
 PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS
 PHASE1_SIGMA_PLOT_TESTS_PASS
+PHASE1_SIGMA_CURVE_DIAGNOSTIC_TESTS_PASS
 ```
 
-`test_generate_sigma_plots.py` includes a regression test that requires an empirical sigma drop at the exact synthetic violation time, rather than at a reporting-grid boundary.
+`test_generate_sigma_plots.py` requires an empirical sigma drop at the exact synthetic violation time, rather than at a reporting-grid boundary. `test_sigma_curve_diagnostics.py` additionally checks the primary cumulative no-violation semantics, exact target crossing and finite-N jump resolution.
 
 ## Minimal native integration check
 
@@ -102,10 +144,11 @@ If that passes, execute the full development atlas (`9 x 10` trajectories):
 python whitebox_atlas.py --clean
 ```
 
-Then generate the exact-event PNGs without rerunning the simulator:
+Then generate the exact-event PNGs and resolution diagnostics without rerunning the simulator:
 
 ```bash
 python generate_sigma_plots.py
+python sigma_curve_diagnostics.py
 ```
 
 The full run remains a development atlas. Do not use it as the N=100 scientific calibration/search result.
