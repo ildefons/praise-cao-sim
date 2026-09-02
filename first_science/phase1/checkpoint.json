@@ -93,12 +93,27 @@
         "split_half_curve_supremum_difference"
       ]
     },
+    "whitebox_candidate_selection": {
+      "status": "IMPLEMENTED_PROPOSAL_NOT_YET_FROZEN",
+      "script": "whitebox_candidate_selection.py",
+      "roles": [
+        "latency",
+        "cost",
+        "mixed"
+      ],
+      "ranking_uses_only_whitebox_information": true,
+      "proposal_output": "results/development_atlas/whitebox_selection/selected_whiteboxes_proposal.json",
+      "ranking_output": "results/development_atlas/whitebox_selection/whitebox_candidate_ranking.csv",
+      "canonical_manifest_is_modified_automatically": false,
+      "review_required_before_confirmation_freeze": true
+    },
     "simulator_independent_tests": [
       "PHASE1_PRESEARCH_CONTRACT_TESTS_PASS",
       "PHASE1_ATLAS_ANALYSIS_TESTS_PASS",
       "PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS",
       "PHASE1_SIGMA_PLOT_TESTS_PASS",
-      "PHASE1_SIGMA_CURVE_DIAGNOSTIC_TESTS_PASS"
+      "PHASE1_SIGMA_CURVE_DIAGNOSTIC_TESTS_PASS",
+      "PHASE1_WHITEBOX_SELECTION_TESTS_PASS"
     ]
   },
   "scientific_discovery_search": {
@@ -106,7 +121,7 @@
     "common_seed_bank_across_candidates": true,
     "crossing_time_rule": "exact_first_violation_event_time_not_reporting_grid",
     "selection_outputs": "freeze a small battery of exact (Dbar,delta,A) finalists",
-    "status": "FAIL_CLOSED_UNTIL_SCIENTIFIC_DISCOVERY_CONFIG_IS_FROZEN"
+    "status": "EXISTING_9X10_ATLAS_CAN_PROPOSE_FINALISTS; CANONICAL_FREEZE_REQUIRES_REVIEW"
   },
   "selected_whitebox_confirmation": {
     "n_trajectories_per_selected_whitebox": 100,
