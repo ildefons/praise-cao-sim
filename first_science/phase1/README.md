@@ -1,6 +1,6 @@
 # PRAISE first science — Phase 1
 
-**Status: IN DEVELOPMENT.**
+**Status: IN DEVELOPMENT — scientific discovery v1 frozen and ready to run.**
 
 ## Purpose
 
@@ -24,9 +24,9 @@ A violation exactly at `H` counts as violated by `H`. The reporting horizon grid
 
 `Fpre -> ParAll(A,B,C) -> Fpost`
 
-A/B/C intentionally use the same or deliberately similar native service-module implementation. Their stochasticity enters through a new native per-request realization of `Message.instructions`.
+A/B/C intentionally use the same native service-module implementation. Their stochasticity enters through a new native per-invocation realization of `Message.instructions`.
 
-For this benchmark, the interpretation of that field is frozen:
+For this benchmark, the interpretation is frozen:
 
 - `D_i` / `Message.instructions` is the computational instruction requirement of provider `i` for one service invocation.
 - `Dbar` is the central mean provider service-instruction requirement per invocation.
@@ -34,84 +34,75 @@ For this benchmark, the interpretation of that field is frozen:
   - `A = Dbar * (1-delta)`
   - `B = Dbar`
   - `C = Dbar * (1+delta)`
-- `delta` is not request-to-request stochastic variability; the latter is controlled separately by the frozen gamma CV.
-- `D_i` is not the external/root workload. Workload `W` is fixed separately by the root invocation timing/pattern (period/rate and phase).
+- `delta` is not invocation-to-invocation stochastic variability; that is controlled separately by the frozen gamma CV.
+- `D_i` is not the external/root workload. Workload `W` is fixed separately by root invocation timing/pattern.
 
-Existing code/configuration names such as `center_instruction_mean` are retained for compatibility, but their scientific meaning is the provider service-instruction requirement above.
+Existing implementation/configuration names such as `center_instruction_mean` are retained for compatibility.
 
-AICon/YAFS causally generates service, queueing, latency, cost, and quality from those provider requirements together with the fixed execution/resource/environment configuration. `L`, `C`, and `Q` are never directly sampled by an auxiliary outcome model. Quality remains `Q=x`.
+AICon/YAFS causally generates service, queueing, latency, cost, and quality from provider requirements together with the fixed execution/resource/environment configuration. `L`, `C`, and `Q` are never directly sampled. Quality remains `Q=x`.
 
-## Scientific discovery contract
+## N=10 discovery -> freeze finalists -> N=100 confirmation
 
-The numerical scientific configuration remains intentionally incomplete. `config_phase1.json` contains `null` for every scientific design constant that has not yet been explicitly frozen. No scientific discovery candidate may be evaluated until `assert_phase1_discovery_configuration_is_frozen(...)` passes.
+Phase 1 separates cheap discovery from confirmation:
 
-Already frozen in the scientific contract:
+1. **Discovery (`N=10` per candidate).** Search provider settings under one common N=10 seed bank. For each physical candidate, reuse its native ledgers to scan many `A={L<=l,C<=c,Q>=x}` offline. M0/M1 are forbidden.
+2. **Freeze finalists.** Retain a small informative battery and freeze each exact `(Dbar,delta,A)` in `selected_whiteboxes.json` with status `FROZEN_FOR_CONFIRMATION`.
+3. **Confirmation (`N=100` per finalist).** Rerun only those exact finalists with 100 fresh independent trajectories. **Do not recalibrate A on N=100 data.**
+4. **Later precision, only if needed.** Increase N further only for convergence/precision after confirmation; do not reopen physical parameters or A.
 
-- scientific Step 0 remains technology-neutral;
-- `H* = 120`;
-- horizon domain `[0, 240]`;
-- calibration target `0.95` separately for latency and cost;
-- `q*=x`;
-- joint survival is not forced to 0.95;
-- scientific candidate/AR discovery uses `N=10` trajectories per candidate;
-- the same N=10 discovery seed bank is used across physical candidates;
-- at N=10, `0.9` and `1.0` are the empirical bracket around target `0.95`; N=10 is not a precision estimate of 0.95;
-- native stochasticity enters through provider `Message.instructions` service-instruction requirements;
-- root workload `W` remains conceptually separate and fixed;
-- no direct stochastic sampling of `L`, `C`, or `Q`.
+At N=10, `0.9` and `1.0` form the empirical bracket around target `0.95`. N=10 is used to discover informative regimes, not to claim 0.95 precision.
 
-The first empirical crossing below a target must be located at an **exact first-violation event time**, not rounded to the reporting horizon grid. The grid remains appropriate for common CSV output and later M1 full-curve fitting.
+## Development atlas result and lesson
 
-## Discovery -> freeze finalists -> N=100 confirmation
+The original 3x3, N=10 development atlas validated native execution, provider parameterization, offline AR scanning, exact-event sigma reconstruction and diagnostics. It remains explicitly non-scientific.
 
-Phase 1 deliberately separates cheap discovery from confirmation:
+A first finalist selector applied to that coarse atlas proposed:
 
-1. **Discovery (`N=10` per candidate).** Search many `(Dbar, delta)` provider settings under one common N=10 seed bank. For each physical candidate, reuse its native ledgers to scan many `A={L<=l,C<=c,Q>=x}` offline. Discovery ranks white-box candidates only by white-box properties: anchor relevance, nondegenerate sigma-curve shape, first-violation timing/cause structure, and stability diagnostics. M0/M1 are forbidden.
-2. **Freeze finalists.** Retain a small diagnostic battery, for example latency-sensitive, cost-sensitive, and mixed cases. Freeze each finalist's exact physical parameters and exact `A=(l_max,c_max,q_min)` in `selected_whiteboxes.json` with status `FROZEN_FOR_CONFIRMATION`.
-3. **Confirmation (`N=100` per selected white box).** Rerun only those exact finalists using 100 fresh independent trajectories. The confirmation seed bank must be disjoint from discovery. **Do not recalibrate A on the N=100 data.** Confirmation tests whether the white-box regime/AR discovered at N=10 replicates with 0.01 vertical sigma resolution.
-4. **Later final precision, only if needed.** Once the benchmark cases are confirmed and frozen, increase N further only if the final reference curves need more precision for the M0/M1 comparison. Increasing N must not reopen physical parameters or A.
+- a promising latency-dominant case at `Dbar=420M, delta=0` with 10 distinct first-violation times by H=240;
+- cost and mixed cases with only two first violations by H=240.
 
-`assert_phase1_confirmation_configuration_is_ready(...)` enforces the fresh-seed N=100 confirmation policy and rejects an empty/unfrozen finalist manifest.
+Those sparse cost/mixed curves are **not** frozen. This result motivated an explicit information gate and a targeted scientific discovery grid rather than weakening the finalist standard.
 
-## N=10 development atlas
+## Frozen scientific discovery v1
 
-A separate **development-only N=10 atlas** has already validated native execution, the `(Dbar, delta)` parameterization, offline AR scanning, exact-event sigma reconstruction and curve diagnostics.
+`config_phase1.json` remains the general fail-closed template. The first complete versioned instantiation is:
 
-`config_phase1_atlas_smoke.json` defines an explicit 3 x 3 development grid. These numerical constants are diagnostic and the development atlas remains marked **non-scientific** even though scientific discovery now also uses N=10. The difference is governance: scientific discovery requires the frozen scientific configuration and produces candidate-selection provenance.
+`config_phase1_discovery_v1.json`
 
-For each physical setting, `whitebox_atlas.py` executes the native composed graph with the same 10 development seeds and caches top-level request ledgers. `atlas_analysis.py` then scans `A={L<=l,C<=c,Q>=x}` offline without rerunning the simulator. Candidate thresholds are generated immediately below/at/above each trajectory's critical L/C threshold at `H*=120`, allowing N=10 to expose its achievable 0.1-resolution sigma levels.
+It freezes the already validated environment/workload/provider constants and a targeted 5x5 provider grid selected using white-box development evidence only:
 
-The atlas writes `achievable_sigmas.csv` and `representative_regions_by_sigma.csv`, including latency-first and cost-first violation counts. `generate_sigma_plots.py` reconstructs exact-event empirical sigma staircases. `sigma_curve_diagnostics.py` measures finite-N resolution and split-half curve stability without smoothing. See `README_ATLAS.md` for commands and output details.
+- `Dbar ∈ {300, 330, 360, 390, 420} M instructions/invocation`
+- `delta ∈ {0, 0.05, 0.10, 0.15, 0.20}`
+- 25 physical candidates total
+- common scientific discovery seeds `2000..2009`, fresh from development seeds `1000..1009`
+- `N=10` per candidate
+- `H*=120`, horizon domain `[0,240]`, reporting step 5
+- gamma CV `0.3`, IPT `1e9`, COST rate `3`, `x=q*=0.5`
+- fixed root workload period `0.2`
+- no M0/M1 in discovery
 
-## Selected-whitebox manifest
+The targeted search box follows the coarse development atlas: 160M was largely floor/ceiling-uninformative, while the 300–420M region contained the useful transition structure. The v1 grid refines that interval without using any M0/M1 result.
 
-`selected_whiteboxes.json` is intentionally empty until discovery selects finalists. Confirmation requires it to be edited to:
+## Finalist information gate
 
-```json
-{
-  "status": "FROZEN_FOR_CONFIRMATION",
-  "whiteboxes": [
-    {
-      "case_id": "...",
-      "selection_role": "latency|cost|mixed|other",
-      "physical_setting_id": "...",
-      "center_instruction_mean": 0.0,
-      "dispersion": 0.0,
-      "l_max": 0.0,
-      "c_max": 0.0,
-      "q_min": 0.0
-    }
-  ]
-}
-```
+`whitebox_candidate_selection.py` does not freeze a case merely because it carries a latency/cost/mixed label. Before role ranking, an N=10 finalist must satisfy:
 
-The values above are placeholders only. The actual manifest must be generated from retained N=10 discovery results, not invented manually.
+- anchor survival within the N=10 0.9/1.0 bracket around 0.95;
+- at least 4 first violations by H=240;
+- at least 4 distinct first-violation times;
+- at least 4 distinct stored sigma levels.
 
-## Development requirement
+Role-specific requirements are then applied:
 
-Non-trivial functions use explicit self-explanatory snake-case names. Each non-trivial function carries a docstring describing purpose, inputs/outputs/side effects as relevant, and a maintained **Called by** provenance identifying caller functions and Python modules.
+- latency: at least 3 latency-first trajectories and at least 2:1 latency dominance over cost;
+- cost: at least 3 cost-first trajectories and at least 2:1 cost dominance over latency;
+- mixed: at least 2 latency-first and 2 cost-first trajectories, with cause-count imbalance <=2.
 
-## Simulator-independent tests
+If discovery does not contain a qualifying case for a role, selection fails explicitly. The correct response is to refine/expand discovery, not to freeze a sparse curve.
+
+## Commands
+
+First validate the simulator-independent contracts:
 
 ```bash
 python test_presearch_contract.py
@@ -119,20 +110,48 @@ python test_atlas_analysis.py
 python test_whitebox_atlas_configuration.py
 python test_generate_sigma_plots.py
 python test_sigma_curve_diagnostics.py
+python test_whitebox_candidate_selection.py
+python test_scientific_discovery_configuration.py
 ```
 
-Expected:
+Before the full scientific run, use an engineering-only smoke:
+
+```bash
+python whitebox_scientific_discovery.py --clean --max-physical-settings 1 --max-trajectories-per-setting 2
+```
+
+Then run the complete frozen 25x10 discovery:
+
+```bash
+python whitebox_scientific_discovery.py --clean
+```
+
+Post-process without rerunning the simulator:
+
+```bash
+python generate_sigma_plots.py --results-dir results/scientific_discovery_v1
+python sigma_curve_diagnostics.py --results-dir results/scientific_discovery_v1
+python whitebox_candidate_selection.py --results results/scientific_discovery_v1
+```
+
+Expected final selector marker, if all three roles have informative candidates:
 
 ```text
-PHASE1_PRESEARCH_CONTRACT_TESTS_PASS
-PHASE1_ATLAS_ANALYSIS_TESTS_PASS
-PHASE1_WHITEBOX_ATLAS_CONFIGURATION_TESTS_PASS
-PHASE1_SIGMA_PLOT_TESTS_PASS
-PHASE1_SIGMA_CURVE_DIAGNOSTIC_TESTS_PASS
+PHASE1_WHITEBOX_SELECTION_PROPOSAL_PASS
 ```
 
-## Current freeze gate
+The proposal is written to:
 
-The native N=10 development atlas is already validated. The next gate is to freeze the remaining numerical scientific discovery constants in `config_phase1.json` (including search bounds, common N=10 discovery seeds and candidate budget), then implement/run the scientific discovery driver. N=100 is **not** used across the search space; it is reserved for fresh-seed confirmation of the exact frozen finalists.
+`results/scientific_discovery_v1/whitebox_selection/selected_whiteboxes_proposal.json`
 
-At final precision, inspect exact-event sigma curves together with the resolution diagnostics. If the empirical staircase is still too coarse for the effect sizes being compared or split-half curves remain materially unstable, increase N without altering the frozen physical regime, admissibility region, graph or method definitions. Artificial smoothing is not a substitute for Monte Carlo convergence.
+Review that proposal once. Only then copy the exact finalists into `selected_whiteboxes.json` and change its status to `FROZEN_FOR_CONFIRMATION`.
+
+## Selected-whitebox manifest
+
+`selected_whiteboxes.json` remains empty until discovery produces acceptable finalists. N=100 confirmation is blocked until the manifest contains the exact selected physical parameters and exact `A=(l_max,c_max,q_min)` values with status `FROZEN_FOR_CONFIRMATION`.
+
+`assert_phase1_confirmation_configuration_is_ready(...)` additionally requires a 100-seed confirmation bank disjoint from the N=10 discovery bank.
+
+## Development requirement
+
+Non-trivial functions use explicit self-explanatory snake-case names. Each non-trivial function carries a docstring describing purpose, inputs/outputs/side effects as relevant, and maintained **Called by** provenance.
