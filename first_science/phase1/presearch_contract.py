@@ -1,6 +1,6 @@
 """Phase-1 pre-search contract for the first PRAISE scientific experiment.
 
-This module is deliberately simulator-independent.  It prevents the Phase-1
+This module is deliberately simulator-independent. It prevents the Phase-1
 reference-regime search from starting before every required pre-search constant
 has been explicitly frozen in ``config_phase1.json``.
 """
@@ -57,7 +57,7 @@ def calculate_symmetric_provider_instruction_means(
     """Calculate A/B/C native instruction-demand means from center and dispersion.
 
     Provider A receives ``center * (1-dispersion)``, B receives ``center``, and
-    C receives ``center * (1+dispersion)``.  This only parameterizes the native
+    C receives ``center * (1+dispersion)``. This only parameterizes the native
     stochastic ``Message.instructions`` field; AICon/YAFS must causally generate
     service time, queueing, latency, cost, and quality from the simulated graph.
 
@@ -84,6 +84,44 @@ def calculate_symmetric_provider_instruction_means(
         provider_b=center,
         provider_c=center * (1.0 + delta),
     )
+
+
+def assert_phase1_development_smoke_budget_is_separate_from_scientific_coarse_search(
+    configuration: dict[str, Any],
+) -> None:
+    """Validate the N=10 development smoke budget without altering scientific N=100.
+
+    The Phase-1 development smoke is intentionally small and exists only to
+    validate native trace generation and the offline admissibility-region scan.
+    It must contain exactly 10 deterministic seeds and must be explicitly marked
+    as non-scientific. The scientific coarse-search budget remains N=100.
+
+    Args:
+        configuration: Parsed ``config_phase1.json`` dictionary.
+
+    Raises:
+        ValueError: If the smoke budget is not exactly N=10, the seed bank does
+            not contain 10 unique seeds, the smoke is marked as scientific, or
+            the coarse scientific budget differs from N=100.
+
+    Called by:
+        - ``assert_phase1_presearch_configuration_is_frozen`` in this module.
+        - ``test_development_smoke_budget_is_n10_and_separate`` in
+          ``test_presearch_contract.py``.
+        - Future Phase-1 native development-smoke entry point.
+    """
+    development_smoke = configuration.get("development_smoke", {})
+    coarse_search = configuration.get("coarse_search", {})
+
+    if int(development_smoke.get("n_trajectories", -1)) != 10:
+        raise ValueError("Phase-1 development smoke must use exactly N=10 trajectories")
+    seed_bank = development_smoke.get("seed_bank")
+    if not isinstance(seed_bank, list) or len(seed_bank) != 10 or len(set(seed_bank)) != 10:
+        raise ValueError("Phase-1 development smoke must define 10 unique deterministic seeds")
+    if development_smoke.get("scientific_evidence") is not False:
+        raise ValueError("Phase-1 N=10 development smoke must not be treated as scientific evidence")
+    if int(coarse_search.get("n_trajectories_per_candidate", -1)) != 100:
+        raise ValueError("scientific coarse search must remain N=100 trajectories per candidate")
 
 
 def list_unfrozen_phase1_presearch_configuration_fields(configuration: dict[str, Any]) -> list[str]:
@@ -121,9 +159,10 @@ def list_unfrozen_phase1_presearch_configuration_fields(configuration: dict[str,
 def assert_phase1_presearch_configuration_is_frozen(configuration: dict[str, Any]) -> None:
     """Reject a Phase-1 scientific run until the pre-search freeze is complete.
 
-    This gate also checks a small set of already-frozen scientific invariants:
-    Step 0 remains technology-neutral; L/C/Q are not directly sampled; the
-    anchor is H*=120 with target 0.95; and the coarse candidate budget is N=100.
+    This gate also checks already-frozen scientific invariants: Step 0 remains
+    technology-neutral; L/C/Q are not directly sampled; the anchor is H*=120
+    with target 0.95; the coarse candidate budget is N=100; and the distinct
+    development-smoke budget remains N=10 and explicitly non-scientific.
 
     Args:
         configuration: Parsed ``config_phase1.json`` dictionary.
@@ -138,6 +177,7 @@ def assert_phase1_presearch_configuration_is_frozen(configuration: dict[str, Any
           ``test_complete_configuration_passes_contract`` in
           ``test_presearch_contract.py``.
     """
+    assert_phase1_development_smoke_budget_is_separate_from_scientific_coarse_search(configuration)
     missing = list_unfrozen_phase1_presearch_configuration_fields(configuration)
     if missing:
         raise ValueError("Phase-1 pre-search configuration is not frozen: " + ", ".join(missing))
@@ -165,7 +205,7 @@ def create_contract_complete_test_configuration(configuration: dict[str, Any]) -
     """Create an artificial complete config used only by contract unit tests.
 
     The inserted values are intentionally marked as test fixtures and must never
-    be copied into the scientific configuration.  Their only purpose is to
+    be copied into the scientific configuration. Their only purpose is to
     exercise the validation logic without inventing Phase-1 scientific defaults.
 
     Args:
