@@ -64,6 +64,7 @@ def run_all_tests() -> None:
         discovery, protocol, selected
     )
     assert final_manifest["status"] == "FROZEN_FOR_CONFIRMATION"
+    assert final_manifest["paired_matched_physical_regime"] is True
     assert final_manifest["physical_setting_id"] == "D300000000_d0.200"
     assert len(final_manifest["whiteboxes"]) == 3
     assert final_config["confirmation"]["confirmation_seed_bank"] == list(
