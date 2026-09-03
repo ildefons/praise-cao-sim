@@ -1,0 +1,66 @@
+{
+  "status": "PHASE2_M0_V1_DEVELOPMENT_CONTRACT",
+  "method_id": "M0_TOPOLOGY_AWARE_SLA_CERTIFICATION_V1",
+  "scientific_role": "analytic topology-aware SLA certification from the same I1 cards later consumed by M1",
+  "phase1_dependency": {
+    "benchmark": "../phase1",
+    "public_configuration": "../phase1/config_phase1_discovery_v1.json",
+    "final_selected_manifest": "../phase1/selected_whiteboxes_final_confirmation_v1.json",
+    "read_only": true,
+    "global_rho": 0.95,
+    "global_regions": [
+      "latency-dominant",
+      "cost-dominant",
+      "mixed L/C"
+    ]
+  },
+  "graph": "Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+  "boundary_algebra": {
+    "latency": "L_G = L_common + max_i(L_branch_network_i + L_i)",
+    "cost": "C_G = C_fixed + sum_i C_i",
+    "quality": "Q_G = min(Q_fixed, Q_A, Q_B, Q_C)",
+    "latency_local_rule": "each provider receives the full residual latency because ParAll composes latency by max",
+    "cost_local_rule": "equal split of the residual additive cost budget for the first low-information symmetric pilot",
+    "quality_local_rule": "q_i=q_G when deterministic fixed stages are quality-neutral"
+  },
+  "sla_error_budget": {
+    "global_epsilon": 0.05,
+    "allocation": "equal_across_three_required_stochastic_providers",
+    "epsilon_i": 0.016666666666666666,
+    "rho_i": 0.9833333333333333,
+    "rule": "sum_i epsilon_i <= epsilon_G"
+  },
+  "probability_composition": {
+    "anchor_dependence": "independent_provider_local_SLA_events",
+    "rule": "sigma_m0(H)=product_i sigma_i(A_i,H;rho_i)",
+    "interpretation": "probability of the sufficient local-SLA conjunction; lower-bound certificate only when request-level sufficiency, aligned accounting, and independence assumptions hold"
+  },
+  "information_firewall": {
+    "allowed": [
+      "public graph/topology contract",
+      "deterministic Fpre/Fpost/network parameters",
+      "frozen global A_G and rho_G",
+      "I1 provider cards"
+    ],
+    "forbidden": [
+      "provider Dbar/delta means",
+      "provider Gamma family/CV",
+      "provider raw traces",
+      "provider acquisition seeds",
+      "top-level white-box sigma curve during composition"
+    ]
+  },
+  "first_pilot_local_boundaries": {
+    "generic_l_c_q_grid": false,
+    "rule": "derive exactly one provider-local A_i per provider and frozen global diagnostic cell from the M0 boundary algebra",
+    "same_exact_I1_cards_for_M0_and_M1": true
+  },
+  "mandatory_pre_evaluation_audits": {
+    "request_level_boundary_sufficiency": true,
+    "aligned_root_request_correspondence": true,
+    "decision_time_horizon_alignment": true,
+    "deterministic_poststage_queueing_or_other_unmodelled_latency": true,
+    "independent_local_SLA_event_assumption": true,
+    "note": "Do not label the real M0 curve a formal lower-bound certificate until these anchor-specific preconditions are checked."
+  }
+}
