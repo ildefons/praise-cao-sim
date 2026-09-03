@@ -1,0 +1,27 @@
+{
+  "status": "FROZEN_SLA_NATIVE_AR_GENERATOR_V1",
+  "scientific_role": "current Phase-1 offline admissibility-region generator under rho*=0.95 cumulative SLA semantics",
+  "source": "sealed_N10_top_level_request_ledgers",
+  "quantile_levels": [
+    0.9,
+    0.925,
+    0.95,
+    0.975,
+    0.99
+  ],
+  "quantile_interpolation": "higher",
+  "pooling": "pooled_requests_within_physical_setting_across_N10",
+  "quality_threshold_rule": "q_star=x",
+  "loose_latency_rule": "simulation_stop_time_plus_epsilon",
+  "loose_cost_rule": "max_finite_cost_times_multiplier_plus_epsilon",
+  "loose_cost_multiplier": 1.05,
+  "epsilon": 1e-09,
+  "candidate_families": [
+    "latency_quantile_x_cost_loose",
+    "latency_loose_x_cost_quantile",
+    "latency_quantile_x_cost_quantile"
+  ],
+  "m0_m1_allowed_in_generator": false,
+  "midpoint_or_area_target_used_in_generator": false,
+  "historical_first_passage_ar_generator_status": "SUPERSEDED_FOR_CURRENT_FINALIST_SELECTION_RETAINED_FOR_PROVENANCE"
+}
