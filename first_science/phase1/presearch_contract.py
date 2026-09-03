@@ -1,10 +1,9 @@
-"""Phase-1 discovery and confirmation contracts for the first PRAISE experiment.
+"""Phase-1 discovery and confirmation contracts for the PRAISE SLA benchmark.
 
-This module is deliberately simulator-independent. It prevents the Phase-1
-white-box discovery search from starting before every required search constant
-has been explicitly frozen in ``config_phase1.json``. It also prevents N=100
-confirmation from starting until exact discovery finalists and their admissibility
-regions have been frozen and a fresh confirmation seed bank has been declared.
+This simulator-independent module turns source-of-truth design decisions into
+machine-checkable invariants. It prevents scientific discovery/confirmation from
+running after configuration drift. The current primary sigma is SLA compliance:
+P(c_G(A,H) >= rho*) with rho*=0.95 and cumulative [0,H] accounting from t=0.
 """
 from __future__ import annotations
 
@@ -12,20 +11,16 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
+from selection_policy import load_sla_compliance_area_selection_policy
+
 
 @dataclass(frozen=True)
 class ProviderInstructionMeanTriplet:
-    """Hold mean service-instruction requirements for providers A, B, and C.
-
-    The values parameterize the native per-invocation ``Message.instructions``
-    distributions. Semantically, each value is the mean number of computational
-    instructions required by that provider to execute one invocation. It is a
-    provider/service property, not the external root workload or arrival rate.
-    The values do not parameterize latency, cost, or quality directly.
+    """Hold A/B/C mean service-instruction requirements per invocation.
 
     Called by:
         - ``calculate_symmetric_provider_instruction_means`` in this module.
-        - Phase-1 native reference-search code once that runner is implemented.
+        - Phase-1 parameterization tests.
     """
 
     provider_a: float
@@ -52,6 +47,11 @@ _REQUIRED_DISCOVERY_NON_NULL_PATHS = (
     "discovery_search.search_method",
     "discovery_search.initial_design_size",
     "discovery_search.total_candidate_budget",
+    "sla_compliance.search_rho",
+    "sla_compliance.accounting_origin",
+    "sla_compliance.zero_decided_requests_compliance",
+    "sla_compliance.accounting_window",
+    "selection_quality_gate.normalized_sla_compliance_area",
 )
 
 _REQUIRED_SELECTED_WHITEBOX_FIELDS = (
@@ -63,6 +63,9 @@ _REQUIRED_SELECTED_WHITEBOX_FIELDS = (
     "l_max",
     "c_max",
     "q_min",
+    "rho",
+    "accounting_origin",
+    "accounting_window",
 )
 
 
@@ -70,35 +73,22 @@ def calculate_symmetric_provider_instruction_means(
     center_instruction_mean: float,
     dispersion: float,
 ) -> ProviderInstructionMeanTriplet:
-    """Calculate A/B/C mean service-instruction requirements from center/delta.
-
-    Provider A receives ``center * (1-dispersion)``, B receives ``center``, and
-    C receives ``center * (1+dispersion)``. ``center_instruction_mean`` is kept
-    as the code/configuration name for compatibility, but scientifically it is
-    the central mean computational instruction requirement per provider
-    invocation. ``dispersion`` (delta) controls provider-to-provider
-    heterogeneity in that mean requirement; it is not request-to-request
-    stochastic variation. Invocation-to-invocation variation is governed
-    separately by the frozen native distribution CV.
-
-    These values parameterize the native stochastic ``Message.instructions``
-    field; AICon/YAFS must causally generate service time, queueing, latency,
-    cost, and quality from the simulated graph. The root workload W remains a
-    separate fixed specification of invocation timing/pattern.
+    """Calculate symmetric A/B/C service-instruction means.
 
     Args:
-        center_instruction_mean: Positive central mean service-instruction
-            requirement per provider invocation.
-        dispersion: Multiplicative provider-heterogeneity magnitude satisfying
-            ``0 <= d < 1``.
+        center_instruction_mean: Positive central mean instructions/invocation.
+        dispersion: Provider-to-provider multiplicative heterogeneity.
 
     Returns:
-        ProviderInstructionMeanTriplet with strictly positive A/B/C means.
+        ProviderInstructionMeanTriplet with A=center(1-d), B=center,
+        C=center(1+d).
+
+    Side effects:
+        None.
 
     Called by:
         - ``test_symmetric_provider_instruction_parameterization`` in
           ``test_presearch_contract.py``.
-        - Future Phase-1 native candidate construction code.
     """
     center = float(center_instruction_mean)
     delta = float(dispersion)
@@ -113,71 +103,54 @@ def calculate_symmetric_provider_instruction_means(
     )
 
 
-def assert_phase1_sampling_policy_is_consistent(configuration: dict[str, Any]) -> None:
-    """Validate the frozen N=10 discovery / N=100 confirmation policy.
-
-    The existing N=10 development atlas remains explicitly non-scientific. The
-    scientific discovery search also uses N=10 trajectories per candidate, but
-    under a separately frozen scientific search configuration. N=100 is reserved
-    for fresh-seed confirmation of exact finalists selected by discovery.
-
-    Args:
-        configuration: Parsed ``config_phase1.json`` dictionary.
-
-    Raises:
-        ValueError: If development, discovery, or confirmation budgets/policies
-            drift from the frozen discovery/confirmation separation.
+def assert_phase1_sampling_policy_is_consistent(
+    configuration: dict[str, Any],
+) -> None:
+    """Validate N=10 discovery / fresh N=100 confirmation separation.
 
     Called by:
-        - ``assert_phase1_discovery_configuration_is_frozen`` in this module.
-        - ``assert_phase1_confirmation_configuration_is_ready`` in this module.
-        - ``test_discovery_is_n10_and_confirmation_is_n100`` in
-          ``test_presearch_contract.py``.
+        - discovery and confirmation contract assertions in this module.
+        - ``test_presearch_contract.py``.
     """
-    development_smoke = configuration.get("development_smoke", {})
-    discovery_search = configuration.get("discovery_search", {})
+    development = configuration.get("development_smoke", {})
+    discovery = configuration.get("discovery_search", {})
     confirmation = configuration.get("confirmation", {})
 
-    if int(development_smoke.get("n_trajectories", -1)) != 10:
-        raise ValueError("Phase-1 development smoke must use exactly N=10 trajectories")
-    development_seeds = development_smoke.get("seed_bank")
+    if int(development.get("n_trajectories", -1)) != 10:
+        raise ValueError("Phase-1 development smoke must use N=10")
+    development_seeds = development.get("seed_bank")
     if (
         not isinstance(development_seeds, list)
         or len(development_seeds) != 10
         or len(set(development_seeds)) != 10
     ):
-        raise ValueError("Phase-1 development smoke must define 10 unique deterministic seeds")
-    if development_smoke.get("scientific_evidence") is not False:
-        raise ValueError("Phase-1 development smoke must remain explicitly non-scientific")
+        raise ValueError("development smoke must define 10 unique seeds")
+    if development.get("scientific_evidence") is not False:
+        raise ValueError("development smoke must remain non-scientific")
 
-    if int(discovery_search.get("n_trajectories_per_candidate", -1)) != 10:
-        raise ValueError("scientific white-box discovery must use N=10 trajectories per candidate")
-    if discovery_search.get("common_seed_bank_across_candidates") is not True:
-        raise ValueError("discovery must use one common seed bank across candidate physical settings")
+    if int(discovery.get("n_trajectories_per_candidate", -1)) != 10:
+        raise ValueError("scientific white-box discovery must use N=10")
+    if discovery.get("common_seed_bank_across_candidates") is not True:
+        raise ValueError("discovery must use a common seed bank across settings")
 
     if int(confirmation.get("n_trajectories_per_selected_whitebox", -1)) != 100:
-        raise ValueError("selected-whitebox confirmation must use N=100 trajectories per finalist")
+        raise ValueError("selected-whitebox confirmation must use N=100")
     if confirmation.get("fresh_seeds_required") is not True:
-        raise ValueError("confirmation must require seeds fresh from the N=10 discovery seed bank")
+        raise ValueError("confirmation must require fresh seeds")
     if confirmation.get("selected_whiteboxes_must_be_frozen_before_run") is not True:
-        raise ValueError("confirmation requires finalists to be frozen before the N=100 run")
+        raise ValueError("confirmation requires frozen selected white boxes")
     if confirmation.get("recalibrate_A_on_confirmation") is not False:
-        raise ValueError("confirmation must evaluate the exact frozen A; it must not recalibrate A")
+        raise ValueError("confirmation must not recalibrate A")
 
 
 def list_unfrozen_phase1_discovery_configuration_fields(
     configuration: dict[str, Any],
 ) -> list[str]:
-    """Return scientific discovery-search fields that are still absent or null.
-
-    The function implements the fail-closed discovery gate: no candidate may be
-    evaluated scientifically until all listed physical, horizon, seed-bank and
-    search-budget constants have been frozen in a versioned configuration.
+    """Return required scientific discovery fields that are absent or null.
 
     Called by:
         - ``assert_phase1_discovery_configuration_is_frozen`` in this module.
-        - ``test_incomplete_discovery_configuration_fails_closed`` in
-          ``test_presearch_contract.py``.
+        - ``test_presearch_contract.py``.
     """
     missing: list[str] = []
     for dotted_path in _REQUIRED_DISCOVERY_NON_NULL_PATHS:
@@ -192,120 +165,172 @@ def list_unfrozen_phase1_discovery_configuration_fields(
     return sorted(missing)
 
 
-def assert_phase1_discovery_configuration_is_frozen(configuration: dict[str, Any]) -> None:
-    """Reject scientific N=10 discovery until the pre-search freeze is complete.
-
-    This gate checks the technology-neutral scientific invariants, the N=10
-    discovery budget, and the physical/search constants required before any
-    candidate white-box regime is evaluated.
+def assert_phase1_sla_semantics_are_frozen(
+    configuration: dict[str, Any],
+) -> None:
+    """Reject drift from rho*=0.95 cumulative [0,H]-from-t=0 semantics.
 
     Called by:
-        - Future Phase-1 scientific discovery-search entry point.
-        - ``test_incomplete_discovery_configuration_fails_closed`` and
-          ``test_complete_discovery_configuration_passes_contract`` in
-          ``test_presearch_contract.py``.
+        - discovery and confirmation contract assertions in this module.
+        - SLA contract tests.
+    """
+    sla = configuration.get("sla_compliance", {})
+    if abs(float(sla.get("search_rho", -1.0)) - 0.95) > 1e-12:
+        raise ValueError("Phase-1 search rho must remain frozen at 0.95")
+    if abs(float(sla.get("accounting_origin", -1.0))) > 1e-12:
+        raise ValueError("Phase-1 SLA accounting origin must remain t=0")
+    if sla.get("accounting_window") != "cumulative_[0,H]_from_t0":
+        raise ValueError("SLA accounting must remain cumulative [0,H] from t=0")
+    if sla.get("rolling_windows_allowed") is not False:
+        raise ValueError("rolling/restarted SLA windows are forbidden")
+    if abs(float(sla.get("zero_decided_requests_compliance", -1.0)) - 1.0) > 1e-12:
+        raise ValueError("zero-decided-request compliance convention must remain 1")
+    if sla.get("alternative_rho_values_may_drive_search") is not False:
+        raise ValueError("alternative rho values may not drive Phase-1 search")
+
+
+def assert_phase1_discovery_configuration_is_frozen(
+    configuration: dict[str, Any],
+) -> None:
+    """Reject scientific N=10 discovery/reranking after design drift.
+
+    Called by:
+        - ``whitebox_scientific_discovery.py``.
+        - ``test_presearch_contract.py``.
     """
     assert_phase1_sampling_policy_is_consistent(configuration)
     missing = list_unfrozen_phase1_discovery_configuration_fields(configuration)
     if missing:
         raise ValueError(
-            "Phase-1 discovery configuration is not frozen: " + ", ".join(missing)
+            "Phase-1 discovery configuration is not frozen: "
+            + ", ".join(missing)
         )
+    assert_phase1_sla_semantics_are_frozen(configuration)
+    policy = load_sla_compliance_area_selection_policy(configuration)
 
-    provider_family = configuration["provider_family"]
-    calibration = configuration["admissibility_calibration"]
-    discovery_search = configuration["discovery_search"]
+    provider = configuration["provider_family"]
+    discovery = configuration["discovery_search"]
     horizon = configuration["horizon"]
 
-    if provider_family.get("instruction_message_field") != "Message.instructions":
-        raise ValueError("native stochasticity must enter through Message.instructions")
-    if provider_family.get("direct_sampling_of_L_C_Q") is not False:
-        raise ValueError("L, C, and Q must be simulator-derived, never directly sampled")
-    if float(calibration.get("anchor_horizon")) != 120.0:
-        raise ValueError("anchor_horizon must remain frozen at 120")
-    if float(calibration.get("target_survival")) != 0.95:
-        raise ValueError("target_survival must remain frozen at 0.95")
-    if int(discovery_search.get("n_trajectories_per_candidate")) != 10:
-        raise ValueError("scientific discovery must use N=10 trajectories per candidate")
-    discovery_seeds = discovery_search.get("calibration_seed_bank")
+    if provider.get("instruction_message_field") != "Message.instructions":
+        raise ValueError(
+            "native stochasticity must enter through Message.instructions"
+        )
+    if provider.get("direct_sampling_of_L_C_Q") is not False:
+        raise ValueError("L, C and Q must be simulator-derived")
+    if int(discovery.get("n_trajectories_per_candidate")) != 10:
+        raise ValueError("scientific discovery must use N=10")
+    discovery_seeds = discovery.get("calibration_seed_bank")
     if (
         not isinstance(discovery_seeds, list)
         or len(discovery_seeds) != 10
         or len(set(discovery_seeds)) != 10
     ):
-        raise ValueError("scientific discovery must define exactly 10 unique common seeds")
-    if float(horizon.get("minimum")) != 0.0 or float(horizon.get("maximum")) != 240.0:
-        raise ValueError("Phase-1 horizon domain must remain [0, 240]")
+        raise ValueError("scientific discovery requires 10 unique common seeds")
+    if (
+        float(horizon.get("minimum")) != 0.0
+        or float(horizon.get("maximum")) != 240.0
+        or float(horizon.get("simulation_stop_time")) != 240.0
+    ):
+        raise ValueError("Phase-1 physical horizon must remain [0,240]")
+    if abs(policy.horizon_min - 0.0) > 1e-12 or abs(policy.horizon_max - 240.0) > 1e-12:
+        raise ValueError("current SLA-compliance area must use [0,240]")
 
 
 def assert_phase1_confirmation_configuration_is_ready(
     configuration: dict[str, Any],
     selected_whiteboxes_manifest: dict[str, Any],
 ) -> None:
-    """Reject N=100 confirmation until exact discovery finalists are frozen.
+    """Reject N=100 confirmation until revised SLA finalists are frozen.
 
-    Confirmation is not another search/calibration loop. Each selected white box
-    must preserve its discovery physical parameters and exact admissibility region
-    ``A=(l_max,c_max,q_min)``. The N=100 seed bank must be unique and disjoint
-    from the N=10 discovery seed bank.
+    The seed bank must contain 100 unique seeds disjoint from development,
+    discovery and every explicitly recorded inspected/exploratory N=100 bank.
+    Each frozen case must carry the exact A plus rho/accounting semantics.
 
     Called by:
-        - Future Phase-1 selected-whitebox confirmation runner.
-        - confirmation-gate tests in ``test_presearch_contract.py``.
+        - ``run_n100_matched_confirmation.py``.
+        - confirmation contract tests.
     """
     assert_phase1_discovery_configuration_is_frozen(configuration)
     assert_phase1_sampling_policy_is_consistent(configuration)
+    assert_phase1_sla_semantics_are_frozen(configuration)
 
-    confirmation = configuration["confirmation"]
-    confirmation_seeds = confirmation.get("confirmation_seed_bank")
+    confirmation_seeds = configuration["confirmation"].get(
+        "confirmation_seed_bank"
+    )
     if (
         not isinstance(confirmation_seeds, list)
         or len(confirmation_seeds) != 100
         or len(set(confirmation_seeds)) != 100
     ):
-        raise ValueError("confirmation must define exactly 100 unique fresh seeds")
+        raise ValueError(
+            "confirmation must define exactly 100 unique fresh seeds"
+        )
 
-    discovery_seeds = set(configuration["discovery_search"]["calibration_seed_bank"])
-    if discovery_seeds.intersection(confirmation_seeds):
-        raise ValueError("confirmation seed bank must be disjoint from the N=10 discovery seed bank")
+    previously_used = set(
+        configuration["development_smoke"]["seed_bank"]
+    ) | set(
+        configuration["discovery_search"]["calibration_seed_bank"]
+    )
+    exploratory = configuration.get(
+        "confirmation_round_1_exploratory", {}
+    ).get("seed_bank", [])
+    if isinstance(exploratory, list):
+        previously_used |= set(exploratory)
+    if previously_used.intersection(confirmation_seeds):
+        raise ValueError(
+            "confirmation seed bank must be disjoint from all prior inspected banks"
+        )
 
     if selected_whiteboxes_manifest.get("status") != "FROZEN_FOR_CONFIRMATION":
-        raise ValueError("selected whiteboxes must have status FROZEN_FOR_CONFIRMATION")
+        raise ValueError(
+            "selected whiteboxes must have status FROZEN_FOR_CONFIRMATION"
+        )
     whiteboxes = selected_whiteboxes_manifest.get("whiteboxes")
     if not isinstance(whiteboxes, list) or not whiteboxes:
-        raise ValueError("at least one discovery whitebox must be frozen for confirmation")
+        raise ValueError("at least one white box must be frozen")
 
+    expected_rho = float(configuration["sla_compliance"]["search_rho"])
     seen_case_ids: set[str] = set()
     for whitebox in whiteboxes:
         if not isinstance(whitebox, dict):
-            raise ValueError("each selected whitebox must be a dictionary")
-        missing = [field for field in _REQUIRED_SELECTED_WHITEBOX_FIELDS if field not in whitebox]
+            raise ValueError("each selected white box must be a dictionary")
+        missing = [
+            field
+            for field in _REQUIRED_SELECTED_WHITEBOX_FIELDS
+            if field not in whitebox
+        ]
         if missing:
             raise ValueError(
-                "selected whitebox missing required fields: " + ", ".join(sorted(missing))
+                "selected whitebox missing required fields: "
+                + ", ".join(sorted(missing))
             )
         case_id = str(whitebox["case_id"])
         if case_id in seen_case_ids:
             raise ValueError(f"duplicate selected whitebox case_id: {case_id}")
         seen_case_ids.add(case_id)
         if float(whitebox["center_instruction_mean"]) <= 0.0:
-            raise ValueError("selected center_instruction_mean must be positive")
+            raise ValueError("selected instruction mean must be positive")
         dispersion = float(whitebox["dispersion"])
         if not 0.0 <= dispersion < 1.0:
-            raise ValueError("selected dispersion must satisfy 0 <= dispersion < 1")
+            raise ValueError("selected dispersion must satisfy 0 <= d < 1")
         if float(whitebox["l_max"]) < 0.0 or float(whitebox["c_max"]) < 0.0:
-            raise ValueError("selected l_max and c_max must be non-negative")
+            raise ValueError("selected l_max/c_max must be non-negative")
+        if abs(float(whitebox["rho"]) - expected_rho) > 1e-12:
+            raise ValueError("selected whitebox rho differs from frozen rho*=0.95")
+        if abs(float(whitebox["accounting_origin"])) > 1e-12:
+            raise ValueError("selected whitebox accounting origin must be t=0")
+        if whitebox["accounting_window"] != "cumulative_[0,H]_from_t0":
+            raise ValueError("selected whitebox accounting window is inconsistent")
 
 
-def create_contract_complete_test_configuration(configuration: dict[str, Any]) -> dict[str, Any]:
-    """Create an artificial discovery-complete config used only by unit tests.
-
-    The inserted values are test fixtures and must never be copied into the
-    scientific configuration. They only exercise validation logic.
+def create_contract_complete_test_configuration(
+    configuration: dict[str, Any],
+) -> dict[str, Any]:
+    """Create a complete artificial config used only by unit tests.
 
     Called by:
-        - ``test_complete_discovery_configuration_passes_contract`` in
-          ``test_presearch_contract.py``.
+        - ``test_presearch_contract.py``.
         - ``create_confirmation_ready_test_configuration`` in this module.
     """
     cfg = deepcopy(configuration)
@@ -330,22 +355,24 @@ def create_contract_complete_test_configuration(configuration: dict[str, Any]) -
     return cfg
 
 
-def create_confirmation_ready_test_configuration(configuration: dict[str, Any]) -> dict[str, Any]:
+def create_confirmation_ready_test_configuration(
+    configuration: dict[str, Any],
+) -> dict[str, Any]:
     """Create a test-only config with fresh N=100 confirmation seeds.
 
     Called by:
-        - confirmation-gate tests in ``test_presearch_contract.py``.
+        - ``test_presearch_contract.py``.
     """
     cfg = create_contract_complete_test_configuration(configuration)
-    cfg["confirmation"]["confirmation_seed_bank"] = list(range(2000, 2100))
+    cfg["confirmation"]["confirmation_seed_bank"] = list(range(4000, 4100))
     return cfg
 
 
 def create_frozen_selected_whitebox_test_manifest() -> dict[str, Any]:
-    """Create one test-only frozen discovery finalist for confirmation tests.
+    """Create one test-only frozen SLA finalist manifest.
 
     Called by:
-        - confirmation-gate tests in ``test_presearch_contract.py``.
+        - ``test_presearch_contract.py``.
     """
     return {
         "status": "FROZEN_FOR_CONFIRMATION",
@@ -359,26 +386,9 @@ def create_frozen_selected_whitebox_test_manifest() -> dict[str, Any]:
                 "l_max": 2.0,
                 "c_max": 3.0,
                 "q_min": 0.5,
+                "rho": 0.95,
+                "accounting_origin": 0.0,
+                "accounting_window": "cumulative_[0,H]_from_t0",
             }
         ],
     }
-
-
-# Compatibility aliases retained while the scientific runner is still being built.
-def assert_phase1_presearch_configuration_is_frozen(configuration: dict[str, Any]) -> None:
-    """Compatibility alias for the N=10 scientific discovery gate."""
-    assert_phase1_discovery_configuration_is_frozen(configuration)
-
-
-def list_unfrozen_phase1_presearch_configuration_fields(
-    configuration: dict[str, Any],
-) -> list[str]:
-    """Compatibility alias for discovery-specific missing-field reporting."""
-    return list_unfrozen_phase1_discovery_configuration_fields(configuration)
-
-
-def assert_phase1_development_smoke_budget_is_separate_from_scientific_coarse_search(
-    configuration: dict[str, Any],
-) -> None:
-    """Compatibility alias for the current discovery/confirmation sampling policy."""
-    assert_phase1_sampling_policy_is_consistent(configuration)
