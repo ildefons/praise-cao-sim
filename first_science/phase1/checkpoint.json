@@ -1,7 +1,7 @@
 {
   "phase": 1,
   "name": "reference_regime_and_ar_calibration",
-  "status": "AUC_RERANK_READY_ON_EXISTING_N10_DISCOVERY",
+  "status": "SLA_NATIVE_N10_FINALISTS_AGREED_N100_CONFIRMATION_READY_AFTER_LOCAL_EXACT_FREEZE",
   "parent_phase": 0,
   "parent_praise_cao_commit": "6473536d368ccdc84b3b2771678cc0ffd6833508",
   "aicon_baseline": "6eabfa70531e7091e777a0946ffa967721c0f538",
@@ -13,68 +13,80 @@
     "D_i": "computational instructions required by provider i to execute one service invocation",
     "Dbar": "central mean provider service-instruction requirement per invocation",
     "delta": "provider-to-provider heterogeneity in mean service-instruction requirement",
-    "delta_is_request_to_request_variability": false,
     "request_to_request_variability_control": "frozen native gamma CV",
-    "D_i_is_external_root_workload": false,
-    "root_workload_W": "separate fixed invocation timing/pattern specified by period/rate and phase"
+    "D_i_is_external_root_workload": false
   },
-  "sigma_semantics_audit": {
-    "primary_definition": "P(no violation of A occurs at any time t <= H)",
-    "event_driven_equivalent": "P(T_violation,A > H), where T_violation,A is the first actual violation event time",
-    "violation_at_horizon_counts_as_failed": true,
-    "phase0_status": "FROZEN_SEMANTICS_CONFORMANT",
-    "reporting_grid_defines_sigma_geometry": false,
-    "artificial_smoothing_allowed": false
+  "sigma_semantics": {
+    "status": "FROZEN_SLA_COMPLIANCE_REVISION",
+    "primary_definition": "sigma_G(A,H,rho)=P(c_G(A,H)>=rho)",
+    "search_rho": 0.95,
+    "accounting_origin": 0.0,
+    "accounting_window": "cumulative_[0,H]_from_t0",
+    "zero_decided_requests_compliance": 1.0,
+    "rolling_windows_allowed": false,
+    "curve_may_be_nonmonotone": true,
+    "first_passage_survival_is_primary": false,
+    "first_passage_survival_status": "STRICT_RHO_1_SPECIAL_CASE_AND_HISTORICAL_DIAGNOSTIC_ONLY"
   },
   "sampling_policy": {
     "status": "FROZEN_DISCOVERY_CONFIRMATION_SEPARATION",
     "discovery_n_per_candidate": 10,
-    "discovery_vertical_resolution": 0.1,
     "confirmation_n_per_selected_whitebox": 100,
-    "confirmation_vertical_resolution": 0.01,
     "confirmation_uses_fresh_seeds": true,
     "confirmation_recalibrates_A": false,
-    "later_precision_n": "OPEN_AND_DRIVEN_BY_CONVERGENCE_AFTER_N100_CONFIRMATION"
+    "confirmation_recalibrates_rho": false,
+    "later_precision_n": "OPEN_AFTER_N100_CONVERGENCE_CHECK"
   },
   "scientific_discovery_v1": {
-    "status": "PHYSICAL_GRID_COMPLETE_REUSE_FOR_OFFLINE_AUC_RERANK",
+    "status": "PHYSICAL_GRID_COMPLETE_REUSED_FOR_SLA_NATIVE_AR_SEARCH",
     "configuration": "config_phase1_discovery_v1.json",
-    "center_instruction_means": [300000000.0, 330000000.0, 360000000.0, 390000000.0, 420000000.0],
-    "dispersions": [0.0, 0.05, 0.1, 0.15, 0.2],
+    "center_instruction_means": [300000000.0,330000000.0,360000000.0,390000000.0,420000000.0],
+    "dispersions": [0.0,0.05,0.1,0.15,0.2],
     "n_physical_candidates": 25,
     "n_trajectories_per_candidate": 10,
-    "common_discovery_seeds": [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009],
+    "common_discovery_seeds": [2000,2001,2002,2003,2004,2005,2006,2007,2008,2009],
     "derived_without_M0_M1": true,
-    "simulator_rerun_required_for_auc_revision": false
+    "simulator_rerun_required_for_sla_revision": false,
+    "current_reranker": "sla_native_candidate_metrics.py"
+  },
+  "sla_native_ar_generator": {
+    "status": "FROZEN_AFTER_DIAGNOSTIC_REPLACEMENT_OF_FIRST_PASSAGE_AR_GRID",
+    "configuration": "config_phase1_sla_ar_generator_v1.json",
+    "quantile_levels": [0.9,0.925,0.95,0.975,0.99],
+    "quantile_method": "higher",
+    "families": ["latency_axis","cost_axis","crossed_lc"],
+    "quality_threshold": 0.5,
+    "physical_rerun_required": false
   },
   "finalist_selection_revision": {
-    "status": "FROZEN_CRITERION_PARAMETERIZED_BAND",
-    "metric": "normalized_restricted_survival_area",
-    "exact_estimator": "mean capped first-violation time divided by horizon width",
-    "horizon": [0.0, 240.0],
-    "configured_area_band": [0.5, 0.75],
-    "band_is_parameterized_in_config": true,
+    "status": "N10_SLA_NATIVE_FINALISTS_AGREED",
+    "metric": "normalized_sla_compliance_area",
+    "rho": 0.95,
+    "horizon": [0.0,240.0],
+    "configured_area_band": [0.5,0.75],
     "optimize_to_midpoint": false,
-    "sigma_120_is_selection_target": false,
-    "former_common_minimum_failure_gate": "SUPERSEDED",
-    "role_ranking": "latency-dominant, cost-dominant, mixed L/C; temporal richness secondary",
-    "deduplicate_exact_A_before_ranking": true,
-    "prefer_matched_physical_regime_when_available": true,
-    "metrics_tool": "exact_auc_candidate_metrics.py",
-    "selector": "whitebox_candidate_selection.py"
+    "matched_physical_regime": "D330000000_d0.150",
+    "center_instruction_mean": 330000000.0,
+    "dispersion": 0.15,
+    "rounded_console_summary": {
+      "latency": {"region_id":"D330000000_d0.150_SLA_A0002","l_max":0.67448,"c_max":2.854752,"q_min":0.5,"area":0.626565,"sigma120":0.6,"sigma240":0.7,"latency_failures":598,"cost_failures":0},
+      "cost": {"region_id":"D330000000_d0.150_SLA_A0007","l_max":240.0,"c_max":1.966112,"q_min":0.5,"area":0.551382,"sigma120":0.5,"sigma240":0.6,"latency_failures":0,"cost_failures":598},
+      "mixed": {"region_id":"D330000000_d0.150_SLA_A0028","l_max":0.798021,"c_max":2.071415,"q_min":0.5,"area":0.683546,"sigma120":0.6,"sigma240":0.7,"latency_failures":299,"cost_failures":290}
+    },
+    "exact_threshold_source": "selected_whiteboxes_proposal.json; freeze script copies exact machine-precision values without retyping rounded console output"
   },
   "exploratory_n100_round_1": {
-    "status": "RETAINED_AS_DESIGN_EVIDENCE_NOT_FINAL_CONFIRMATION",
+    "status": "RETAINED_AS_HISTORICAL_FIRST_PASSAGE_DESIGN_EVIDENCE_ONLY",
     "seed_bank": "3000..3099",
-    "observed_mechanism_replication": "latency 97/3 L/C; mixed 52/48 L/C; cost 0/58 L/C with 42 censored",
     "may_be_reused_for_final_confirmation": false
   },
   "selected_whitebox_confirmation": {
     "n_trajectories_per_selected_whitebox": 100,
-    "new_seed_bank": null,
+    "new_seed_bank": "4000..4099",
     "fresh_seed_bank_required": true,
-    "must_be_disjoint_from": ["1000..1009", "2000..2009", "3000..3099"],
+    "must_be_disjoint_from": ["1000..1009","2000..2009","3000..3099"],
     "recalibrate_A": false,
-    "status": "WAITING_FOR_AUC_RERANK_AND_REVIEW"
+    "recalibrate_rho": false,
+    "status": "READY_AFTER_RUNNING_FREEZE_SELECTED_WHITEBOXES_FROM_PROPOSAL"
   }
 }
