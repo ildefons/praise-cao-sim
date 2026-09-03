@@ -105,6 +105,7 @@ def build_final_confirmation_inputs(
 
     final_manifest = deepcopy(selected)
     final_manifest["status"] = "FROZEN_FOR_CONFIRMATION"
+    final_manifest["paired_matched_physical_regime"] = True
     final_manifest["freeze_semantics"] = (
         "Selected solely by the predeclared N10 ordering plus the N100 shortlist "
         "stability gate. A, rho and the SLA-area gate are frozen. The final "
