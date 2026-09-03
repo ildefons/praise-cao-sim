@@ -1,134 +1,115 @@
-"""Simulator-independent tests for revised Phase-1 AUC finalist selection."""
+"""Simulator-independent tests for SLA-based Phase-1 white-box selection."""
 from __future__ import annotations
 
 import pandas as pd
 
-from selection_policy import SurvivalAreaSelectionPolicy
+from selection_policy import load_sla_compliance_area_selection_policy
 from whitebox_candidate_selection import (
     build_whitebox_candidate_table,
-    filter_nondegenerate_n10_candidates,
     rank_candidates_for_role,
     select_complementary_whitebox_proposal,
 )
 
 
-def policy() -> SurvivalAreaSelectionPolicy:
-    """Return the current test-only parameterized area policy."""
-    return SurvivalAreaSelectionPolicy(
-        horizon_min=0.0,
-        horizon_max=240.0,
-        area_min=0.50,
-        area_max=0.75,
-        optimize_to_midpoint=False,
-        min_dominant_cause_count=3,
-        dominance_ratio=2.0,
-        min_mixed_cause_count_each=2,
-        max_mixed_cause_imbalance=2,
+def build_policy():
+    return load_sla_compliance_area_selection_policy(
+        {
+            "sla_compliance": {
+                "search_rho": 0.95,
+                "accounting_origin": 0.0,
+                "zero_decided_requests_compliance": 1.0,
+                "accounting_window": "cumulative_[0,H]_from_t0",
+                "rolling_windows_allowed": False,
+            },
+            "selection_quality_gate": {
+                "metric": "normalized_sla_compliance_area",
+                "normalized_sla_compliance_area": {
+                    "horizon_min": 0.0,
+                    "horizon_max": 240.0,
+                    "minimum": 0.5,
+                    "maximum": 0.75,
+                    "optimize_to_midpoint": False,
+                },
+                "role_evidence": {"dominance_ratio": 2.0},
+            },
+        }
     )
 
 
-def metrics_fixture() -> pd.DataFrame:
-    """Create compact exact-event candidate metrics for deterministic tests."""
-    common = {
+def row(region, latency, cost, area=0.6, setting="P"):
+    lc = latency + cost
+    return {
+        "physical_setting_id": setting,
+        "region_id": region,
+        "center_instruction_mean": 390e6,
+        "dispersion": 0.1,
+        "l_max": 10.0,
+        "c_max": 3.0,
         "q_min": 0.5,
-        "restricted_survival_area_seconds": 144.0,
-        "sigma_120_reporting": 0.7,
-        "quality_first_count_exact": 0,
-        "tie_first_count_exact": 0,
-        "censored_count_exact": 2,
-        "n_unique_first_violation_times": 8,
-        "maximum_empirical_jump": 0.1,
-        "longest_plateau_fraction_of_domain": 0.2,
+        "rho": 0.95,
+        "normalized_sla_compliance_area": area,
+        "sla_compliance_area_seconds": area * 240.0,
+        "sigma_120_reporting": 0.6,
+        "sigma_240_reporting": 0.7,
+        "decided_request_count": 1000,
+        "unresolved_request_count": 5,
+        "compliant_request_count": 930,
+        "failed_request_count": 70,
+        "latency_failure_count": latency,
+        "cost_failure_count": cost,
+        "quality_failure_count": 0,
+        "latency_failure_fraction_of_lc": latency / lc if lc else float("nan"),
+        "cost_failure_fraction_of_lc": cost / lc if lc else float("nan"),
+        "n_sigma_transition_times": 12,
+        "maximum_empirical_sigma_jump": 0.1,
+        "longest_sigma_plateau_fraction_of_domain": 0.2,
     }
-    rows = [
-        {
-            **common,
-            "physical_setting_id": "P_MATCH",
-            "region_id": "A_latency",
-            "center_instruction_mean": 390.0,
-            "dispersion": 0.15,
-            "l_max": 10.0,
-            "c_max": 4.0,
-            "normalized_restricted_survival_area": 0.60,
-            "latency_first_count_exact": 8,
-            "cost_first_count_exact": 0,
-        },
-        {
-            **common,
-            "physical_setting_id": "P_MATCH",
-            "region_id": "A_cost",
-            "center_instruction_mean": 390.0,
-            "dispersion": 0.15,
-            "l_max": 30.0,
-            "c_max": 3.0,
-            "normalized_restricted_survival_area": 0.68,
-            "latency_first_count_exact": 0,
-            "cost_first_count_exact": 6,
-        },
-        {
-            **common,
-            "physical_setting_id": "P_MATCH",
-            "region_id": "A_mixed",
-            "center_instruction_mean": 390.0,
-            "dispersion": 0.15,
-            "l_max": 18.0,
-            "c_max": 3.0,
-            "normalized_restricted_survival_area": 0.55,
-            "latency_first_count_exact": 4,
-            "cost_first_count_exact": 4,
-        },
-        {
-            **common,
-            "physical_setting_id": "P_OUT",
-            "region_id": "A_outside",
-            "center_instruction_mean": 300.0,
-            "dispersion": 0.0,
-            "l_max": 1.0,
-            "c_max": 1.0,
-            "normalized_restricted_survival_area": 0.90,
-            "latency_first_count_exact": 9,
-            "cost_first_count_exact": 0,
-        },
-    ]
-    return pd.DataFrame(rows)
 
 
-def test_area_band_is_gate_not_midpoint_optimization() -> None:
-    """Verify both 0.55 and 0.68 pass while 0.90 fails the configured gate."""
-    candidates = build_whitebox_candidate_table(metrics_fixture(), policy())
-    eligible = filter_nondegenerate_n10_candidates(candidates, policy())
-    assert set(eligible["region_id"]) == {"A_latency", "A_cost", "A_mixed"}
-    assert candidates.loc[candidates["region_id"] == "A_cost", "inside_survival_area_band"].iloc[0]
+def build_candidates():
+    return pd.DataFrame(
+        [
+            row("L", 90, 10),
+            row("C", 10, 90),
+            row("M", 45, 55),
+            row("OUT", 90, 10, area=0.9),
+        ]
+    )
 
 
-def test_role_rankings_use_failure_mechanism_after_area_gate() -> None:
-    """Verify role assignment happens only after the common AUC gate."""
-    candidates = build_whitebox_candidate_table(metrics_fixture(), policy())
-    assert rank_candidates_for_role(candidates, "latency", policy()).iloc[0]["region_id"] == "A_latency"
-    assert rank_candidates_for_role(candidates, "cost", policy()).iloc[0]["region_id"] == "A_cost"
-    assert rank_candidates_for_role(candidates, "mixed", policy()).iloc[0]["region_id"] == "A_mixed"
+def test_role_classification_uses_all_request_failures() -> None:
+    policy = build_policy()
+    candidates = build_whitebox_candidate_table(build_candidates(), policy)
+    assert rank_candidates_for_role(candidates, "latency", policy).iloc[0]["region_id"] == "L"
+    assert rank_candidates_for_role(candidates, "cost", policy).iloc[0]["region_id"] == "C"
+    assert rank_candidates_for_role(candidates, "mixed", policy).iloc[0]["region_id"] == "M"
 
 
-def test_matched_physical_regime_is_preferred_when_all_roles_exist() -> None:
-    """Verify the proposal uses one physical setting when a complete matched battery exists."""
-    candidates = build_whitebox_candidate_table(metrics_fixture(), policy())
+def test_area_gate_excludes_ceiling_candidate() -> None:
+    policy = build_policy()
+    candidates = build_whitebox_candidate_table(build_candidates(), policy)
+    latency = rank_candidates_for_role(candidates, "latency", policy)
+    assert "OUT" not in set(latency["region_id"])
+
+
+def test_selection_prefers_matched_physical_regime() -> None:
+    policy = build_policy()
+    candidates = build_whitebox_candidate_table(build_candidates(), policy)
     selected = select_complementary_whitebox_proposal(
-        candidates,
-        policy(),
-        prefer_matched_physical_regime=True,
+        candidates, policy, prefer_matched_physical_regime=True
     )
     assert list(selected["selection_role"]) == ["latency", "cost", "mixed"]
+    assert selected["region_id"].nunique() == 3
     assert selected["physical_setting_id"].nunique() == 1
-    assert selected["matched_physical_regime"].all()
+    assert bool(selected["matched_physical_regime"].all())
 
 
-def run_all_whitebox_selection_tests() -> None:
-    """Execute revised simulator-independent white-box selection tests."""
-    test_area_band_is_gate_not_midpoint_optimization()
-    test_role_rankings_use_failure_mechanism_after_area_gate()
-    test_matched_physical_regime_is_preferred_when_all_roles_exist()
-    print("PHASE1_WHITEBOX_AUC_SELECTION_TESTS_PASS")
+def run_all_tests() -> None:
+    test_role_classification_uses_all_request_failures()
+    test_area_gate_excludes_ceiling_candidate()
+    test_selection_prefers_matched_physical_regime()
+    print("PHASE1_WHITEBOX_SLA_SELECTION_TESTS_PASS")
 
 
 if __name__ == "__main__":
-    run_all_whitebox_selection_tests()
+    run_all_tests()
