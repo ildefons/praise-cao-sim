@@ -1,96 +1,122 @@
-# Phase 1 N=10 white-box candidate selection
+# Phase 1 N=10 white-box candidate selection — SLA semantics
 
-This post-process converts the completed N=10 white-box discovery atlas into a small reviewable finalist proposal for fresh N=100 confirmation. It is simulator-independent and uses only white-box outputs. I1, M0 and M1 are forbidden from this selection.
-
-## Revised nondegeneracy criterion
-
-The former `sigma(H=120) ~= 0.95` finalist target is superseded. `H=120` remains a reporting checkpoint only.
-
-For each exact admissibility region `A=(l_max,c_max,q_min)`, compute the normalized restricted survival area
+The current Phase-1 selector uses the frozen SLA quantity
 
 ```text
-R(A) = integral_0^Hmax sigma_A(H) dH / Hmax
+sigma_G(A,H,rho*) = P(c_G(A,H) >= rho*)
+rho* = 0.95
+accounting window = cumulative [0,H] from prescribed t=0
 ```
 
-exactly from first-violation times. With censoring at `Hmax`, the empirical estimator is the mean capped first-violation time divided by the horizon width. The stored 5 s reporting grid does not define the area.
+The old first-passage AR generator and first-violation AUC scripts are retained only for provenance/reproducibility. They are **not** the current finalist-selection substrate.
 
-The numerical nondegeneracy interval is **configuration data**, not a hard-coded selection target. The current versioned default is:
+## Why the AR generator changed
+
+The original AR candidates were generated around first-passage critical values. After sigma was reopened and redefined as cumulative SLA-compliance probability, diagnostics showed that cost-dominant and mixed mechanisms existed in the sealed N=10 traces but were almost always far above the SLA-area gate. The old threshold geometry was therefore unsuitable for the new 5% violation-budget semantics.
+
+The physical `25 x N=10` traces remain valid. No AICon/YAFS rerun is required.
+
+## Current SLA-native AR generator
+
+`config_phase1_sla_ar_generator_v1.json` freezes empirical request-level quantiles
 
 ```text
-0.50 <= R_hat_10(A) <= 0.75
+{0.90, 0.925, 0.95, 0.975, 0.99}
 ```
 
-The interval is a **gate only**. The selector does not optimize toward `0.625` or any other midpoint. A future justified change to the band is a versioned configuration edit; no algorithm rewrite should be needed.
+using `higher` empirical quantiles pooled across the ten sealed trajectories of each physical setting. `q_min=x=0.5` remains frozen.
 
-## Selection roles
+For every physical setting, the generator creates three families:
 
-After the common area gate, candidates are classified/ranked as:
+```text
+L quantile x loose C          latency-pressure axis
+loose L x C quantile          cost-pressure axis
+L quantile x C quantile       crossed L/C pressure
+```
 
-- `latency`: latency-first violations clearly dominate cost-first violations;
-- `cost`: cost-first violations clearly dominate latency-first violations;
-- `mixed`: both latency-first and cost-first violations have material support and limited imbalance.
+Loose latency is `simulation_stop_time + epsilon`, so no latency deadline can bind within the benchmark horizon. Loose cost is above every finite observed request cost. M0 and M1 are forbidden from AR generation.
 
-Role evidence is primary. Exact-event temporal richness (unique first-violation times, plateau fraction and maximum empirical jump) is secondary ranking information. There is no longer a role-independent hard gate requiring four failures, four unique times or four stored sigma levels.
+The generator does not use the SLA-area midpoint or M0/M1 performance to tune A.
 
-When all three roles are available in one physical setting, the selector prefers a matched physical regime. Otherwise it returns the best distinct role candidates and leaves the final scientific review explicit.
-
-## Run on the existing discovery results
-
-The existing `25 x N=10` physical trajectories remain valid. No AICon/YAFS rerun is required solely because the selection criterion changed.
+## Current N=10 workflow
 
 From `first_science/phase1`:
 
 ```bash
-python test_exact_auc_candidate_metrics.py
-python test_whitebox_candidate_selection.py
-python test_scientific_discovery_configuration.py
+python test_sla_native_admissibility_regions.py
+python test_sla_revision_smoke.py
+python test_presearch_contract.py
 ```
 
-Then compute exact metrics for **all distinct A regions** in the already augmented discovery result set:
+Generate the new AR candidate substrate from the sealed physical ledgers:
 
 ```bash
-python exact_auc_candidate_metrics.py \
+python generate_sla_native_admissibility_regions.py \
   --results results/scientific_discovery_v1_full_domain_ar
 ```
 
-The implementation deduplicates numerically identical `A` regions and precomputes threshold-event times per trajectory, avoiding a slow request-by-request rescan for every region.
+Expected marker:
 
-Then select the proposal:
+```text
+PHASE1_SLA_NATIVE_AR_GENERATOR_PASS
+```
+
+Then calculate the SLA-compliance metrics on those new A candidates:
+
+```bash
+python sla_native_candidate_metrics.py \
+  --results results/scientific_discovery_v1_full_domain_ar
+```
+
+Expected marker:
+
+```text
+PHASE1_SLA_NATIVE_CANDIDATE_METRICS_PASS
+```
+
+Then select and plot the proposed latency/cost/mixed finalists:
 
 ```bash
 python whitebox_candidate_selection.py \
   --results results/scientific_discovery_v1_full_domain_ar
 ```
 
-Expected markers:
+Expected marker if all three roles are available:
 
 ```text
-PHASE1_EXACT_AUC_CANDIDATE_METRICS_PASS
-PHASE1_WHITEBOX_AUC_SELECTION_PROPOSAL_PASS
+PHASE1_WHITEBOX_SLA_SELECTION_PROPOSAL_PASS
 ```
 
-Outputs:
+Key outputs are under:
 
 ```text
-results/scientific_discovery_v1_full_domain_ar/whitebox_selection/auc_candidate_metrics.csv
-results/scientific_discovery_v1_full_domain_ar/whitebox_selection/whitebox_candidate_ranking.csv
-results/scientific_discovery_v1_full_domain_ar/whitebox_selection/selected_whiteboxes_proposal.json
+results/scientific_discovery_v1_full_domain_ar/whitebox_selection/
 ```
 
-If a role is absent, diagnose it without changing the band:
+including:
 
-```bash
-python diagnose_whitebox_selection.py
+```text
+sla_native_admissibility_regions.csv
+sla_candidate_metrics.csv
+whitebox_candidate_ranking.csv
+selected_whiteboxes_proposal.json
+selected_candidate_request_decisions.csv
+selected_candidate_trajectory_compliance_curves.csv
+selected_candidate_sigma_curves.csv
+selected_candidate_exact_sigma_steps.csv
+n10_selected_sla_sigma_curves.png
 ```
 
-## Freeze and confirmation gate
+The normalized SLA-compliance-area gate remains
 
-The proposal is not automatically copied into `selected_whiteboxes.json`. Review the exact physical parameters, `A`, N=10 area and failure-mechanism evidence once.
+```text
+0.50 <= R_0.95(A) <= 0.75
+```
 
-Only accepted cases are frozen for confirmation. Final N=100 confirmation must:
+and remains a gate only; there is no optimization toward its midpoint.
 
-- use a **new** seed bank disjoint from development seeds `1000..1009`, discovery seeds `2000..2009`, and the already inspected exploratory N=100 seeds `3000..3099`;
-- rerun the exact frozen physical case(s);
-- evaluate the exact frozen `A=(l_max,c_max,q_min)`;
-- recompute exact `R_hat_100(A)`, sigma curves and first-violation causes;
-- never recalibrate `A` on the N=100 traces.
+## Freeze and N=100 confirmation
+
+Do not automatically copy the proposal into `selected_whiteboxes.json`. First inspect the three exact N=10 sigma curves and request-level L/C failure evidence. Once the exact physical setting(s), A values, rho=0.95, and cumulative [0,H] semantics are accepted, freeze them once.
+
+Only then assign a new N=100 seed bank disjoint from development `1000..1009`, discovery `2000..2009`, and inspected exploratory `3000..3099`. N=100 confirms the frozen cases and must not recalibrate A or rho.
