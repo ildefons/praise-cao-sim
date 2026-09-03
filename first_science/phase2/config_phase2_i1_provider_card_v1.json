@@ -1,9 +1,9 @@
 {
-  "status": "FROZEN_MINIMAL_I1_PROVIDER_CARD_V1",
+  "status": "FROZEN_MINIMAL_I1_PROVIDER_CARD_INTERFACE_V1",
   "phase": "phase2_step1",
   "schema": "PRAISE_I1_PROVIDER_SLA_CARD_V1",
   "information_technology": "I1_LOCAL_SLA_SIGMA_CARD",
-  "scientific_role": "provider-exposed local SLA-compliance probability surface consumed unchanged by M0 and M1",
+  "scientific_role": "provider-exposed local SLA-compliance probability card consumed unchanged by M0 and M1",
   "phase1_dependency": "read-only frozen Step-0 SLA accounting and benchmark target",
   "provider_scope": [
     "ProviderA",
@@ -35,7 +35,7 @@
     "minimum": 0.0,
     "maximum": 240.0,
     "step": 5.0,
-    "reporting_only": true
+    "role": "common reporting/comparison support points; not an l/c/q acquisition grid"
   },
   "supported_rho_values": [
     0.95,
@@ -53,7 +53,7 @@
     "n_stochastic_provider_branches": 3,
     "epsilon_i": 0.016666666666666666,
     "rho_i": 0.9833333333333333,
-    "status": "reference allocation for first M0 pilot; not an I1 assumption"
+    "status": "reference allocation for first M0 pilot; the allocation remains an M0 rule, not an I1 inference"
   },
   "confidence": {
     "interval": "Wilson_95_percent",
@@ -65,9 +65,11 @@
     "extrapolation": false,
     "reason": "avoid embedding an untested interpolation model inside the information representation"
   },
-  "local_region_grid": {
-    "status": "TO_BE_FROZEN_BEFORE_REAL_I1_ACQUISITION",
-    "constraint": "must be constructed only from provider-local information and must not use top-level white-box sigma or M0/M1 outcomes"
+  "local_region_support": {
+    "generic_l_c_q_grid": false,
+    "first_pilot_rule": "for each frozen Phase-1 global diagnostic A_G, M0 v1 derives one exact sufficient A_i for each provider; those exact provider-card points are then frozen and supplied unchanged to both M0 and M1",
+    "no_top_level_outcome_tuning": true,
+    "note": "the meaningful global AR battery was selected in Phase 1 precisely to define the downstream tau test problems; Phase 2 does not search new local ARs before the first M0 pilot"
   },
   "forbidden_public_information": [
     "raw provider traces",
