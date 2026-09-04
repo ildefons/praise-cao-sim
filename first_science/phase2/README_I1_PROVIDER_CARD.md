@@ -1,103 +1,110 @@
-# Phase-2 minimal I1 provider SLA card
+# Phase 2 — I1 provider SLA-compliance surface
 
-Phase 2 starts Step 1. The Phase-1 Step-0 white-box benchmark remains frozen and technology-neutral; this work only consumes its frozen SLA-accounting semantics and later compares against its fixed top-level reference curves.
+Phase 2 freezes the first provider information technology. Phase 1 remains the immutable Step-0 white-box benchmark.
 
-## Scientific role
+## Public I1 object
 
-`I1` is the first provider information representation. Every provider exposes the same kind of local SLA-compliance card, and the identical I1 cards must be consumed by both `M0` and `M1`.
+For one exact provider-local admissibility region
 
-The minimal public object is
+`A_i = {L_i <= l_i, C_i <= c_i, Q_i >= q_i}`
 
-`σ_i(A_i,H;ρ_i) = P(c_i(A_i,H) >= ρ_i)`
+and declared workload/context `W_i`, a public card instance is
 
-for provider-local admissibility boundaries
+`I1_i = (A_i, W_i, R, {sigma_i(A_i,H;rho): H in H, rho in R})`
 
-`A_i = {L_i <= l_i, C_i <= c_i, Q_i >= q_i}`.
+with
 
-The public card contains the empirical probability curve, a 95% Wilson interval, successful-trajectory count and acquisition-trajectory count. Raw observations remain private to provider-side acquisition and are not part of I1.
+`sigma_i(A_i,H;rho) = P(c_i(A_i,H) >= rho)`.
 
-## The Phase-1 global ARs define the first I1 test points
+The frozen first-experiment axes are:
 
-The first pilot does **not** construct an arbitrary provider-local `(l_i,c_i,q_i)` grid. Phase 1 already selected three meaningful, nondegenerate top-level diagnostic problems: latency-dominant, cost-dominant and mixed L/C.
+- `H = 0..240` in steps of 5;
+- `R = {0.95, 0.975, 0.9833333333333333, 0.99, 1.0}`.
 
-For each frozen top-level
+The card also exposes a 95% Wilson interval, successful-trajectory count and acquisition-trajectory count at every surface point.
 
-`A_G = {L_G <= l_G, C_G <= c_G, Q_G >= q_G}`,
+The new SLA definition does not require a different simulator run for each rho. One provider trajectory determines `c_i(A_i,H)`; the whole rho surface is obtained by thresholding the same cumulative-compliance values.
 
-M0's declared topology/budget decomposition produces exactly one local boundary `A_i` for each ProviderA/B/C. These nine exact provider/cell points are the minimal I1 support required for the first comparison. The resulting cards are frozen and supplied unchanged to M0 and M1.
+## A_i is not selected by I1
 
-A broader local L/C/Q surface is deferred until a later method actually requires allocation search or interpolation. We do not manufacture extra information before it is scientifically needed.
+I1 does **not** optimize or choose `(l_i,c_i,q_i)`, and Phase 2 does not build an arbitrary L/C/Q grid.
 
-## Why rho_i is a card dimension
+`A_i` is an exact query argument supplied by a consuming composition method. The method must declare the requested local regions before inspecting I1 sigma values or the Phase-1 top-level sigma outcomes. I1 then deterministically materializes those exact card instances from the already-frozen private provider corpus.
 
-The top-level Step-0 benchmark freezes `rho_G=0.95`, but M0 must not simply multiply three local probabilities evaluated at the same rho. The first structural certification method allocates the global request-violation allowance `epsilon_G=1-rho_G=0.05` equally across the three stochastic providers:
+This is important for the factorization `tau=(I,M)`: a local budget allocation belongs to `M`, not to `I`.
 
-`epsilon_i = 0.05 / 3`
+For a fair `(I1,M0)` versus `(I1,M1)` comparison, the exact same materialized card instances are supplied unchanged to both methods.
 
-and
+## Provider-local semantics
 
-`rho_i = 1 - epsilon_i = 0.9833333333333333`.
-
-Therefore rho is a query dimension of I1. The particular allocation remains an M0 design rule rather than hidden provider information.
-
-## Local SLA semantics
-
-The provider-local accounting mirrors the frozen Phase-1 semantics:
+The local accounting mirrors the frozen Phase-1 SLA semantics:
 
 - cumulative `[0,H]` from common `t=0`;
-- an in-time request is decided at local provider completion;
-- a timeout is decided as a latency failure at the local latency deadline;
-- cost and quality are not evaluated after timeout;
-- unresolved requests at H are excluded;
+- `L_i` is provider arrival to provider completion, including provider queue wait and service;
+- an in-time request is decided at provider completion;
+- a local latency miss is decided at its local latency deadline;
+- cost and quality are not evaluated after a timeout;
+- unresolved requests at `H` are excluded;
 - zero decided requests implies compliance fraction 1;
-- `sigma_i(H)` may recover when `rho_i < 1`; monotonicity is not imposed.
+- `sigma_i(H;rho)` may be non-monotone in H when `rho<1`;
+- at fixed `A_i,H`, `sigma_i(H;rho)` is non-increasing in rho.
 
-The local metrics are:
+`C_i` is native provider execution cost for the request and `Q_i` is native provider-observed quality.
 
-- `L_i`: provider-local request arrival to provider completion;
-- `C_i`: native provider execution cost for that local request;
-- `Q_i`: provider-local observed quality.
+## Phase 2 acquisition
+
+The provider evidence is acquired once using the frozen matched physical regime and a fresh independent seed bank `6000..6099` (`N=100`). The full native graph is used only to preserve the actual provider arrival context. Native full-graph traces and top-level ledgers are temporary; only provider-local ledgers persist.
+
+For each root request that completed Fpre, provider arrival is reconstructed as
+
+`Fpre completion + native branch-link delay`
+
+and cross-checked against native `time_reception` whenever a provider metric row exists. This retains requests that reached a provider but were still queued at the simulation stop.
+
+The frozen private corpus contains only the local ledger columns needed by the SLA accounting:
+
+`trajectory, request_id, emission, completion, L, C, Q`
+
+where `emission` means **provider arrival**, not root-source emission.
+
+All later A_i/H/rho card queries are deterministic post-processing of this same corpus. There is no rerun per A_i or rho.
 
 ## Information firewall
 
-A public I1 card must not expose raw provider traces, acquisition seeds, hidden generator parameters, provider instruction means, hidden `(Dbar,delta)` labels, simulator state, or top-level Phase-1 white-box curves/outcomes.
+A public I1 card must not expose raw provider traces, private request ledgers, acquisition seeds, hidden generator parameters, provider instruction means, hidden physical `(Dbar,delta)` labels, simulator state, or top-level Phase-1 white-box curves/outcomes.
 
-The workload/context under which the card was acquired is public because local SLA behavior is load dependent.
+The workload/context is public because provider SLA behavior is load dependent.
 
-## Current v1 query policy
+## Files
 
-V1 supports exact queried points only. Interpolation and extrapolation are forbidden so that an interpolation model is not silently bundled into the information representation.
+- `config_phase2_i1_provider_card_v1.json`: frozen public I1 contract and H x R surface.
+- `config_phase2_i1_acquisition_v1.json`: frozen private acquisition protocol.
+- `i1_provider_card.py`: card builder, exact query API, confidence intervals and firewall.
+- `i1_provider_acquisition.py`: fresh provider-local acquisition runner.
+- `materialize_i1_cards.py`: deterministic public-card materializer for predeclared exact A_i queries.
+- `test_i1_provider_card.py`: simulator-independent card/surface tests.
+- `test_i1_provider_acquisition.py`: provider arrival/ledger extraction tests.
 
-The first pilot uses the common `H=0..240` reporting support in steps of 5. The primary local SLA requirement for M0 is `rho_i=0.9833333333333333`; nearby rho values remain available for later sensitivity but do not alter the frozen Phase-1 benchmark.
-
-## M0-facing implication
-
-If M0 chooses local L/C/Q boundaries such that simultaneous local request compliance implies global request admissibility, and the local violation fractions satisfy
-
-`sum_i epsilon_i <= 0.05`,
-
-then on an aligned common set of logical requests the all-provider local conjunction has compliance fraction at least `rho_G=0.95`.
-
-For the deliberately independent first anchor, M0 then composes the trajectory-level I1 probabilities as
-
-`σ_M0(H) = product_i σ_i(A_i,H;rho_i)`.
-
-This product is an M0 rule, not part of I1. Its interpretation as a formal lower-bound certificate additionally requires the real anchor's request-set/horizon accounting and fixed-stage latency assumptions to be audited; see `README_M0.md`.
-
-## Validation
+## Validation sequence
 
 Starting from `~/praise/praise-cao-sim/first_science/phase2`:
 
 ```bash
 python test_i1_provider_card.py
-python test_m0_contract_composition.py
+python test_i1_provider_acquisition.py
 ```
 
 Expected:
 
 ```text
 PHASE2_I1_PROVIDER_CARD_TESTS_PASS
-PHASE2_M0_CONTRACT_COMPOSITION_TESTS_PASS
+PHASE2_I1_PROVIDER_ACQUISITION_TESTS_PASS
 ```
 
-After these contract tests pass, the next step is to derive the nine exact local boundaries from the full-precision frozen Phase-1 manifest and audit the real anchor conditions needed by M0 before generating the provider cards.
+The real acquisition then requires the AICon/YAFS import path and runs `N=100` fresh trajectories. Its success marker is:
+
+```text
+PHASE2_I1_ACQUISITION_RUN_PASS
+```
+
+Once that corpus is frozen, Phase 2 is scientifically complete: later methods may request exact A_i card instances, but they cannot change the I1 evidence, H/R support, SLA semantics or public/private boundary.
