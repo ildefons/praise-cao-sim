@@ -1,17 +1,12 @@
-"""Minimal method-neutral I1 provider SLA card for PRAISE Phase 2.
+"""Frozen Phase-2 I1 provider SLA-compliance surface card.
 
-Phase 1 is the frozen Step-0 white-box benchmark. Phase 2 begins Step 1 and may
-consume frozen Phase-1 SLA-accounting semantics, but it must not modify the
-Phase-1 benchmark or expose its hidden white-box information through I1.
+A public card instance exposes only provider-local
 
-I1 exposes only provider-local horizon-dependent SLA-compliance probabilities
-for explicitly supported local admissibility regions. The public card contains
-no raw traces, generator parameters, provider instruction distributions, seeds,
-or top-level white-box information.
+    sigma_i(A_i,H;rho) = P(c_i(A_i,H) >= rho)
 
-The rho dimension is part of I1. This is required because composition methods
-such as M0 may allocate a global violation allowance across providers and query
-local rho values different from the top-level rho=0.95.
+on predeclared H and rho supports for exact requested local admissibility regions
+A_i. Provider traces, acquisition seeds, hidden generator parameters and
+Phase-1 top-level white-box outcomes are never part of the public card.
 """
 from __future__ import annotations
 
@@ -24,7 +19,6 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
-# Phase 2 consumes the frozen Phase-1 SLA accounting implementation read-only.
 PHASE1_DIRECTORY = Path(__file__).resolve().parents[1] / "phase1"
 if str(PHASE1_DIRECTORY) not in sys.path:
     sys.path.insert(0, str(PHASE1_DIRECTORY))
@@ -36,7 +30,7 @@ from sla_compliance_analysis import (  # noqa: E402
 )
 
 I1_CARD_SCHEMA = "PRAISE_I1_PROVIDER_SLA_CARD_V1"
-I1_INFORMATION_TECHNOLOGY = "I1_LOCAL_SLA_SIGMA_CARD"
+I1_INFORMATION_TECHNOLOGY = "I1_LOCAL_SLA_SIGMA_SURFACE_CARD"
 DEFAULT_WILSON_Z_95 = 1.959963984540054
 
 _REQUIRED_LEDGER_COLUMNS = {
@@ -46,10 +40,24 @@ _REQUIRED_REGION_FIELDS = {"region_id", "l_max", "c_max", "q_min"}
 _REQUIRED_WORKLOAD_FIELDS = {"period", "accounting_origin", "horizon_max"}
 
 _FORBIDDEN_PUBLIC_FIELD_NAMES = {
-    "seed", "seeds", "trajectory_seed", "instruction_mean",
-    "center_instruction_mean", "dispersion", "instruction_cv",
-    "gamma_shape", "gamma_scale", "raw_trace", "raw_traces",
-    "top_level_sigma", "top_level_whitebox",
+    "seed",
+    "seeds",
+    "seed_bank",
+    "trajectory_seed",
+    "instruction_mean",
+    "provider_instruction_mean",
+    "center_instruction_mean",
+    "physical_setting_id",
+    "dispersion",
+    "delta",
+    "instruction_cv",
+    "gamma_shape",
+    "gamma_scale",
+    "raw_trace",
+    "raw_traces",
+    "private_provider_ledgers",
+    "top_level_sigma",
+    "top_level_whitebox",
 }
 
 
@@ -58,7 +66,7 @@ def wilson_binomial_interval(
     trials: int,
     z: float = DEFAULT_WILSON_Z_95,
 ) -> tuple[float, float]:
-    """Return a Wilson score interval for a binomial probability."""
+    """Return the Wilson score interval for a binomial probability."""
     k, n, z_value = int(successes), int(trials), float(z)
     if n <= 0:
         raise ValueError("Wilson interval requires at least one trial")
@@ -72,7 +80,7 @@ def wilson_binomial_interval(
     center = (p + z2 / (2.0 * n)) / denominator
     half_width = (
         z_value
-        * sqrt((p * (1.0 - p) / n) + (z2 / (4.0 * n * n)))
+        * sqrt((p * (1.0 - p) / n) + z2 / (4.0 * n * n))
         / denominator
     )
     return max(0.0, center - half_width), min(1.0, center + half_width)
@@ -88,17 +96,21 @@ def _validate_inputs(
 ) -> None:
     missing = _REQUIRED_LEDGER_COLUMNS.difference(ledgers.columns)
     if missing:
-        raise ValueError("private provider ledgers missing columns: " + ", ".join(sorted(missing)))
+        raise ValueError(
+            "private provider ledgers missing columns: " + ", ".join(sorted(missing))
+        )
     if ledgers.empty or int(ledgers["trajectory"].nunique()) <= 0:
         raise ValueError("at least one private provider trajectory is required")
 
     if not regions:
-        raise ValueError("I1 requires at least one local admissibility region")
+        raise ValueError("I1 requires at least one exact local admissibility region")
     seen: set[str] = set()
     for region in regions:
         missing_region = _REQUIRED_REGION_FIELDS.difference(region)
         if missing_region:
-            raise ValueError("local region missing fields: " + ", ".join(sorted(missing_region)))
+            raise ValueError(
+                "local region missing fields: " + ", ".join(sorted(missing_region))
+            )
         region_id = str(region["region_id"])
         if not region_id or region_id in seen:
             raise ValueError("local region_id values must be non-empty and unique")
@@ -108,12 +120,16 @@ def _validate_inputs(
 
     if not rhos or len(set(rhos)) != len(rhos):
         raise ValueError("I1 rho values must be non-empty and unique")
-    if any(not 0.0 < float(rho) <= 1.0 for rho in rhos):
+    if rhos != sorted(rhos):
+        raise ValueError("I1 rho values must be sorted")
+    if any(not 0.0 < rho <= 1.0 for rho in rhos):
         raise ValueError("I1 rho values must satisfy 0 < rho <= 1")
 
     missing_workload = _REQUIRED_WORKLOAD_FIELDS.difference(workload_contract)
     if missing_workload:
-        raise ValueError("workload contract missing fields: " + ", ".join(sorted(missing_workload)))
+        raise ValueError(
+            "workload contract missing fields: " + ", ".join(sorted(missing_workload))
+        )
     if float(workload_contract["period"]) <= 0.0:
         raise ValueError("workload period must be positive")
     if abs(float(workload_contract["accounting_origin"])) > 1e-12:
@@ -122,8 +138,10 @@ def _validate_inputs(
     if horizon_max <= 0.0:
         raise ValueError("workload horizon_max must be positive")
 
-    if not horizons or len(set(horizons)) != len(horizons) or horizons != sorted(horizons):
-        raise ValueError("I1 horizons must be non-empty, unique and sorted")
+    if not horizons or len(set(horizons)) != len(horizons):
+        raise ValueError("I1 horizons must be non-empty and unique")
+    if horizons != sorted(horizons):
+        raise ValueError("I1 horizons must be sorted")
     if horizons[0] < -1e-12 or horizons[-1] > horizon_max + 1e-12:
         raise ValueError("I1 horizons must lie inside [0,horizon_max]")
     if float(stop_time) + 1e-12 < horizon_max:
@@ -149,7 +167,25 @@ def assert_public_i1_card_has_no_forbidden_information(
     public_keys = set(walk_keys(metadata)) | set(map(str, surface.columns))
     leaked = sorted(_FORBIDDEN_PUBLIC_FIELD_NAMES.intersection(public_keys))
     if leaked:
-        raise ValueError("public I1 card leaks forbidden fields: " + ", ".join(leaked))
+        raise ValueError(
+            "public I1 card leaks forbidden fields: " + ", ".join(leaked)
+        )
+
+
+def assert_i1_surface_monotone_in_rho(
+    surface: pd.DataFrame,
+    tolerance: float = 1e-12,
+) -> None:
+    """Check the mathematical invariant P(c>=rho) is non-increasing in rho."""
+    required = {"region_id", "horizon", "rho", "sigma_hat"}
+    missing = required.difference(surface.columns)
+    if missing:
+        raise ValueError("I1 surface missing monotonicity columns")
+    for (_, _), group in surface.groupby(["region_id", "horizon"], sort=False):
+        ordered = group.sort_values("rho")
+        values = ordered["sigma_hat"].astype(float).to_numpy()
+        if np.any(values[:-1] + float(tolerance) < values[1:]):
+            raise RuntimeError("I1 sigma surface violates monotonicity in rho")
 
 
 def build_i1_provider_card(
@@ -162,7 +198,7 @@ def build_i1_provider_card(
     workload_contract: dict[str, object],
     confidence_z: float = DEFAULT_WILSON_Z_95,
 ) -> tuple[dict[str, object], pd.DataFrame]:
-    """Build a public provider-local SLA-sigma card from private observations."""
+    """Build one public H x rho SLA surface for exact requested A_i regions."""
     provider = str(provider_id).strip()
     if not provider:
         raise ValueError("provider_id must be non-empty")
@@ -200,8 +236,10 @@ def build_i1_provider_card(
                 accounting_origin=float(workload_contract["accounting_origin"]),
                 zero_decision_compliance=1.0,
             )
-            sigma_curve, trajectory_curves = calculate_empirical_sla_sigma_from_decision_tables(
-                decision_tables, hs, definition
+            sigma_curve, trajectory_curves = (
+                calculate_empirical_sla_sigma_from_decision_tables(
+                    decision_tables, hs, definition
+                )
             )
             counts = (
                 trajectory_curves.groupby("horizon", as_index=False)
@@ -214,45 +252,55 @@ def build_i1_provider_card(
             merged = sigma_curve.merge(counts, on="horizon", validate="one_to_one")
             for row in merged.itertuples(index=False):
                 successes, trials = int(row.n_success), int(row.n_trajectories)
-                lower, upper = wilson_binomial_interval(successes, trials, z=confidence_z)
-                rows.append({
-                    "provider_id": provider,
-                    "region_id": str(region["region_id"]),
-                    "l_max": l_max,
-                    "c_max": c_max,
-                    "q_min": q_min,
-                    "rho": rho,
-                    "horizon": float(row.horizon),
-                    "sigma_hat": float(row.sigma),
-                    "sigma_ci95_lower": float(lower),
-                    "sigma_ci95_upper": float(upper),
-                    "n_success": successes,
-                    "n_trajectories": trials,
-                })
+                lower, upper = wilson_binomial_interval(
+                    successes, trials, z=confidence_z
+                )
+                rows.append(
+                    {
+                        "provider_id": provider,
+                        "region_id": str(region["region_id"]),
+                        "l_max": l_max,
+                        "c_max": c_max,
+                        "q_min": q_min,
+                        "rho": rho,
+                        "horizon": float(row.horizon),
+                        "sigma_hat": float(row.sigma),
+                        "sigma_ci95_lower": float(lower),
+                        "sigma_ci95_upper": float(upper),
+                        "n_success": successes,
+                        "n_trajectories": trials,
+                    }
+                )
 
     surface = pd.DataFrame(rows).sort_values(
         ["region_id", "rho", "horizon"]
     ).reset_index(drop=True)
-    if surface.empty or set(surface["n_trajectories"].astype(int)) != {n_trajectories}:
-        raise RuntimeError("I1 provider-card surface is empty or internally inconsistent")
+    if surface.empty:
+        raise RuntimeError("I1 provider-card surface is empty")
+    if set(surface["n_trajectories"].astype(int)) != {n_trajectories}:
+        raise RuntimeError("I1 provider-card trajectory counts are inconsistent")
+    assert_i1_surface_monotone_in_rho(surface)
 
     metadata: dict[str, object] = {
         "schema": I1_CARD_SCHEMA,
         "information_technology": I1_INFORMATION_TECHNOLOGY,
         "provider_id": provider,
-        "status": "PUBLIC_PROVIDER_CARD",
-        "phase": "phase2_step1",
+        "status": "PUBLIC_PROVIDER_SIGMA_SURFACE_CARD",
+        "phase": "phase2_i1",
+        "card_instance": "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho)})",
         "semantics": {
             "local_admissibility": "A_i={L_i<=l_max,C_i<=c_max,Q_i>=q_min}",
             "sigma": "P(c_i(A_i,H)>=rho)",
             "accounting_window": "cumulative_[0,H]_from_t0",
             "zero_decided_requests_compliance": 1.0,
-            "latency_timeout": "decision_at_local_latency_deadline",
+            "latency_timeout": "decision_at_provider_local_latency_deadline",
             "cost_quality_after_timeout": "not_evaluated_after_latency_failure",
+            "unresolved_at_H": "excluded_from_c_i_denominator",
             "nonmonotone_in_horizon_allowed": True,
+            "monotone_in_rho_at_fixed_H": True,
         },
         "local_metric_scope": {
-            "L_i": "provider-local request arrival to provider completion",
+            "L_i": "provider-local request arrival to provider completion including queue wait and service",
             "C_i": "native provider execution cost for the local request",
             "Q_i": "provider-local observed quality",
         },
@@ -262,7 +310,7 @@ def build_i1_provider_card(
         "n_trajectories": n_trajectories,
         "n_local_regions": len(regions),
         "confidence_interval": "Wilson_95_percent",
-        "query_semantics": "exact_supported_points_only_v1",
+        "query_semantics": "exact_materialized_A_i_H_rho_points_only_v1",
         "forbidden_public_information": sorted(_FORBIDDEN_PUBLIC_FIELD_NAMES),
     }
     assert_public_i1_card_has_no_forbidden_information(metadata, surface)
@@ -279,7 +327,7 @@ def query_i1_provider_card_exact(
     horizon: float,
     tolerance: float = 1e-10,
 ) -> pd.Series:
-    """Return one exact supported I1 point; interpolation is forbidden in v1."""
+    """Return one exact materialized I1 surface point; no interpolation."""
     required = {
         "l_max", "c_max", "q_min", "rho", "horizon",
         "sigma_hat", "sigma_ci95_lower", "sigma_ci95_upper",
@@ -296,7 +344,9 @@ def query_i1_provider_card_exact(
     )
     matches = surface.loc[mask]
     if len(matches) != 1:
-        raise KeyError(f"I1 exact query requires exactly one supported point; found {len(matches)}")
+        raise KeyError(
+            f"I1 exact query requires exactly one materialized point; found {len(matches)}"
+        )
     return matches.iloc[0]
 
 
@@ -306,6 +356,7 @@ def write_i1_provider_card(
     output_directory: Path,
 ) -> tuple[Path, Path]:
     """Write public metadata JSON and sigma-surface CSV for one provider."""
+    assert_i1_surface_monotone_in_rho(surface)
     assert_public_i1_card_has_no_forbidden_information(metadata, surface)
     output_directory.mkdir(parents=True, exist_ok=True)
     metadata_path = output_directory / "card.json"
@@ -326,5 +377,6 @@ def load_i1_provider_card(
         raise ValueError("unexpected I1 provider-card schema")
     surface_name = str(metadata.get("surface_file", "sigma_surface.csv"))
     surface = pd.read_csv(card_directory / surface_name)
+    assert_i1_surface_monotone_in_rho(surface)
     assert_public_i1_card_has_no_forbidden_information(metadata, surface)
     return metadata, surface
