@@ -1,0 +1,41 @@
+{
+  "status": "FROZEN_PHASE2_I1_V1",
+  "freeze_date": "2026-09-04",
+  "scientific_role": "freeze I1 contract, acquisition protocol, and provider-local evidence corpus before any M0/M1 evaluation",
+  "phase1_dependency": "read-only frozen Step-0 white-box benchmark",
+  "validation": {
+    "provider_card_test": "PHASE2_I1_PROVIDER_CARD_TESTS_PASS",
+    "provider_acquisition_test": "PHASE2_I1_PROVIDER_ACQUISITION_TESTS_PASS",
+    "private_acquisition_manifest_status": "FROZEN_PHASE2_I1_PRIVATE_ACQUISITION_CORPUS_V1"
+  },
+  "n_trajectories": 100,
+  "providers": [
+    "ProviderA",
+    "ProviderB",
+    "ProviderC"
+  ],
+  "provider_rows": {
+    "ProviderA": 119900,
+    "ProviderB": 119900,
+    "ProviderC": 119900
+  },
+  "provider_trajectories": {
+    "ProviderA": 100,
+    "ProviderB": 100,
+    "ProviderC": 100
+  },
+  "provider_corpus_sha256": {
+    "ProviderA": "2a2e31876ac54734ea4c58e8c4f5aaa022da133a341a0c5df9daf99deb3de8c1",
+    "ProviderB": "f235fe8a3bba1ea4df2e9953d2045dfffa091d45069fc74381c40697f8c68528",
+    "ProviderC": "d0260b6fbf7e1b14e81c423aba4bf8896f2746ae4a095e82597f01953360c4dc"
+  },
+  "workload_contract": {
+    "period": 0.2,
+    "accounting_origin": 0.0,
+    "horizon_max": 240.0
+  },
+  "I1_definition": "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})",
+  "A_i_policy": "I1 does not select A_i; a consuming method declares exact A_i before inspecting I1 sigma values, then cards are deterministically materialized from this frozen corpus",
+  "same_materialized_I1_for_M0_and_M1": true,
+  "frozen": true
+}
