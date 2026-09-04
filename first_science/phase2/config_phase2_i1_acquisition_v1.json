@@ -1,0 +1,44 @@
+{
+  "status": "FROZEN_PHASE2_I1_ACQUISITION_PROTOCOL_V1",
+  "phase": "phase2_i1",
+  "scientific_role": "private provider-side evidence acquisition for I1; not public card content",
+  "phase1_base_configuration": "../phase1/config_phase1_discovery_v1.json",
+  "frozen_physical_reference": {
+    "physical_setting_id": "D300000000_d0.200",
+    "center_instruction_mean": 300000000.0,
+    "dispersion": 0.2,
+    "provenance": "final Phase-1 matched diagnostic regime confirmed on untouched N=100 bank"
+  },
+  "acquisition": {
+    "n_trajectories": 100,
+    "seed_start": 6000,
+    "seed_end_inclusive": 6099,
+    "fresh_relative_to_phase1": true,
+    "forbidden_seed_max_inclusive": 5099,
+    "common_seed_bank_across_providers": true,
+    "reason_common_bank": "one composed native run per seed yields the three provider-local ledgers under the same workload realization while preserving independent provider RNG streams"
+  },
+  "workload": {
+    "period": 0.2,
+    "accounting_origin": 0.0,
+    "horizon_max": 240.0,
+    "simulation_stop_time": 240.0
+  },
+  "provider_ledger": {
+    "providers": ["ProviderA", "ProviderB", "ProviderC"],
+    "columns": ["trajectory", "request_id", "emission", "completion", "L", "C", "Q"],
+    "emission_semantics": "arrival time at the provider, not root-source emission",
+    "completion_semantics": "provider completion if completed by simulation stop; otherwise null",
+    "latency_semantics": "provider completion minus provider arrival, including provider queue waiting and native service time",
+    "cost_semantics": "native COST(node)*service for the provider module only",
+    "quality_semantics": "native provider module qos",
+    "arrival_reconstruction": "Fpre completion plus frozen branch-link transmission/propagation delay; cross-checked against native provider time_reception when a provider metric row exists"
+  },
+  "privacy_firewall": {
+    "persistent_outputs": "provider-local ledgers and acquisition manifests only",
+    "native_full-graph_traces": "temporary and deleted after provider extraction",
+    "top_level_request_ledgers": "temporary and deleted with native trace directory",
+    "public_card_must_not_contain_hidden_acquisition_fields": true
+  },
+  "freeze_rule": "after successful acquisition and validation, the provider-local ledger corpus is immutable and all later I1 card instances are deterministic post-processing of this corpus; no reruns for different A_i, H, or rho"
+}
