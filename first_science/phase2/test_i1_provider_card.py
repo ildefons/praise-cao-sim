@@ -1,4 +1,4 @@
-"""Simulator-independent tests for the minimal Phase-2 I1 provider card."""
+"""Simulator-independent tests for the frozen Phase-2 I1 sigma-surface card."""
 from __future__ import annotations
 
 import tempfile
@@ -17,7 +17,7 @@ from i1_provider_card import (
 
 
 def synthetic_private_provider_ledgers() -> pd.DataFrame:
-    """Two private trajectories; one has exactly one local latency failure."""
+    """Two trajectories; trajectory 1 has exactly one local latency failure."""
     rows = []
     for trajectory in (0, 1):
         for request_id in range(25):
@@ -28,7 +28,7 @@ def synthetic_private_provider_ledgers() -> pd.DataFrame:
             rows.append(
                 {
                     "trajectory": trajectory,
-                    "seed": 9000 + trajectory,
+                    "seed": 9000 + trajectory,  # private; must never reach I1
                     "request_id": request_id,
                     "emission": emission,
                     "completion": emission + latency,
@@ -41,7 +41,8 @@ def synthetic_private_provider_ledgers() -> pd.DataFrame:
 
 
 def run_all_tests() -> None:
-    local_rho_equal_budget = 1.0 - 0.05 / 3.0
+    equal_budget_rho = 1.0 - 0.05 / 3.0
+    rho_surface = [0.95, 0.975, equal_budget_rho, 0.99, 1.0]
     metadata, surface = build_i1_provider_card(
         provider_id="ProviderA",
         private_provider_ledgers=synthetic_private_provider_ledgers(),
@@ -53,7 +54,7 @@ def run_all_tests() -> None:
                 "q_min": 0.5,
             }
         ],
-        rho_values=[0.95, local_rho_equal_budget],
+        rho_values=rho_surface,
         horizons=[0.0, 30.0],
         stop_time=30.0,
         workload_contract={
@@ -65,9 +66,9 @@ def run_all_tests() -> None:
     )
 
     assert metadata["schema"] == I1_CARD_SCHEMA
-    assert metadata["phase"] == "phase2_step1"
     assert metadata["provider_id"] == "ProviderA"
     assert metadata["n_trajectories"] == 2
+    assert metadata["supported_rho_values"] == rho_surface
     assert "seed" not in surface.columns
     assert "center_instruction_mean" not in surface.columns
     assert "dispersion" not in surface.columns
@@ -85,24 +86,33 @@ def run_all_tests() -> None:
         l_max=0.5,
         c_max=1.0,
         q_min=0.5,
-        rho=local_rho_equal_budget,
+        rho=equal_budget_rho,
         horizon=30.0,
     )
-    # Trajectory 1 has compliance 24/25=0.96: it passes rho=.95 but not
-    # rho=1-.05/3. This verifies that rho_i must be part of I1.
+    # Trajectory 1 has cumulative compliance 24/25=0.96. It passes rho=.95
+    # but fails every stricter contour in the frozen test surface.
     assert abs(float(rho095["sigma_hat"]) - 1.0) < 1e-12
     assert abs(float(rho_equal["sigma_hat"]) - 0.5) < 1e-12
     assert int(rho_equal["n_success"]) == 1
     assert int(rho_equal["n_trajectories"]) == 2
+
+    # At fixed A_i and H, P(c_i>=rho) must be non-increasing in rho.
+    fixed_h = surface[surface["horizon"] == 30.0].sort_values("rho")
+    sigma_values = fixed_h["sigma_hat"].astype(float).tolist()
+    assert all(
+        sigma_values[index] + 1e-12 >= sigma_values[index + 1]
+        for index in range(len(sigma_values) - 1)
+    )
+
     assert (
         float(rho_equal["sigma_ci95_lower"])
         <= float(rho_equal["sigma_hat"])
         <= float(rho_equal["sigma_ci95_upper"])
     )
-
     lower, upper = wilson_binomial_interval(1, 2)
     assert 0.0 <= lower < 0.5 < upper <= 1.0
 
+    # V1 materialized cards support exact A_i/H/rho points only.
     try:
         query_i1_provider_card_exact(
             surface,
@@ -115,7 +125,7 @@ def run_all_tests() -> None:
     except KeyError:
         pass
     else:
-        raise AssertionError("I1 v1 must reject unsupported/interpolated queries")
+        raise AssertionError("I1 v1 must reject unsupported/interpolated A_i queries")
 
     with tempfile.TemporaryDirectory() as temporary_directory:
         card_directory = Path(temporary_directory) / "ProviderA"
