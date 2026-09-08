@@ -1,4 +1,4 @@
-# PRAISE first science — Phase 2 / I1 — FROZEN
+# PRAISE first science - Phase 2 / I1 - FROZEN
 
 Phase 2 freezes the first information technology `I1`. Phase 1 remains the immutable Step-0 white-box benchmark.
 
@@ -12,7 +12,7 @@ The development sequence is:
 
 I1 does not choose the provider-local admissibility region `A_i`. A consuming method declares exact `A_i` query points before seeing I1 sigma values; the public card is then deterministically materialized from the frozen private provider-acquisition corpus. This avoids an arbitrary provider-local L/C/Q grid and keeps metric-budget allocation inside `M` rather than `I`.
 
-## 2A — I1 contract — FROZEN
+## 2A - I1 contract - FROZEN
 
 `config_phase2_i1_provider_card_v1.json` freezes:
 
@@ -24,7 +24,7 @@ I1 does not choose the provider-local admissibility region `A_i`. A consuming me
 - public/private information firewall;
 - same materialized cards for M0 and M1.
 
-## 2B — I1 acquisition protocol — FROZEN
+## 2B - I1 acquisition protocol - FROZEN
 
 `config_phase2_i1_acquisition_v1.json` freezes:
 
@@ -36,7 +36,7 @@ I1 does not choose the provider-local admissibility region `A_i`. A consuming me
 - transient full-graph traces and persistent provider-local ledgers only;
 - one immutable corpus reused for later exact `A_i/H/rho` card queries.
 
-## 2C — acquired provider corpus — FROZEN
+## 2C - acquired provider corpus - FROZEN
 
 The real acquisition completed successfully with:
 
@@ -62,6 +62,20 @@ The validated public provenance checkpoint is recorded in `phase2_i1_freeze_mani
 - `test_i1_provider_acquisition.py`
 - `README_I1_PROVIDER_CARD.md`
 - `phase2_i1_freeze_manifest_v1.json`
+
+## Human-auditable implementation convention
+
+Phase-2 scientific semantics and evidence are frozen, but comments, docstrings and semantically equivalent internal names may be improved when this makes the code easier to review by a researcher.
+
+For Phase 2 and later phases:
+
+- module docstrings state the phase, scientific role, main call path and relevant information boundary;
+- scientifically important functions/classes state the scientific object they implement, important input/output meaning, callers and invariants;
+- descriptive names are preferred over opaque short names in long scientific transformations;
+- comments explain why a block exists or what scientific/simulator boundary it enforces rather than merely restating Python;
+- visible comments should make boundaries such as `full white-box simulation -> private provider evidence -> public I1 -> composition` easy to follow.
+
+A readability refactor must not modify configurations, mathematical definitions, persistent data formats, public numerical outputs or the frozen provider evidence. The Phase-2 tests must still pass and the provider-corpus SHA-256 fingerprints in `phase2_i1_freeze_manifest_v1.json` must remain identical.
 
 ## Freeze rule
 
