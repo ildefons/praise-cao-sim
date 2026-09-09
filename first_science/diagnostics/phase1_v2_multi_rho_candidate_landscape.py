@@ -27,6 +27,15 @@ requires a fresh independent confirmation seed bank.
 
 No AICon/YAFS execution occurs here. The script reuses the frozen Phase-1
 request-decision and cumulative-admissibility semantics read-only.
+
+Implementation note
+-------------------
+For each candidate/trajectory, the request-decision table is constructed once.
+Its ordered cumulative admissibility fractions are then reused for every rho
+and reporting horizon. This is mathematically equivalent to thresholding the
+same c_j(A,H) process separately for every rho, but avoids repeated Pandas
+groupby work. The script prints candidate progress because the full landscape
+is intentionally a nontrivial offline diagnostic.
 """
 from __future__ import annotations
 
@@ -47,12 +56,7 @@ if str(PHASE1_DIRECTORY) not in sys.path:
     sys.path.insert(0, str(PHASE1_DIRECTORY))
 
 from selection_policy import classify_lc_failure_role  # noqa: E402
-from sla_compliance_analysis import (  # noqa: E402
-    SlaComplianceDefinition,
-    build_request_sla_decision_table,
-    calculate_empirical_sla_sigma_from_decision_tables,
-    calculate_exact_empirical_sla_compliance_area,
-)
+from sla_compliance_analysis import build_request_sla_decision_table  # noqa: E402
 
 EVENT_TOLERANCE = 1e-12
 DEFAULT_RHOS = (0.95, 0.975, 0.99)
@@ -96,20 +100,121 @@ def deduplicate_exact_admissibility_regions(
     return pd.DataFrame(rows).reset_index(drop=True)
 
 
-def _extract_sigma_at_horizon(sigma_curve: pd.DataFrame, horizon: float) -> float:
-    """Return the unique sigma value at one requested report horizon."""
-    mask = np.isclose(
-        sigma_curve["horizon"].astype(float),
-        float(horizon),
-        atol=EVENT_TOLERANCE,
-        rtol=0.0,
-    )
-    selected = sigma_curve.loc[mask, "sigma"]
-    if len(selected) != 1:
-        raise RuntimeError(
-            f"expected one sigma point at H={float(horizon)}, found {len(selected)}"
+def _trajectory_multi_rho_metrics(
+    request_decisions: pd.DataFrame,
+    rho_values: tuple[float, ...],
+    report_horizons: tuple[float, ...],
+    stop_time: float,
+) -> tuple[dict[float, float], dict[tuple[float, float], bool]]:
+    """Evaluate one trajectory's exact area and report-horizon states for all rho.
+
+    The frozen Phase-1 convention is preserved: requests are included only once
+    their decision time is at or before H; before the first decision the
+    cumulative admissibility fraction is one. Between decision events the
+    cumulative fraction is constant. Therefore exact area can be obtained by
+    integrating those constant intervals and thresholding the same interval
+    fractions for every rho.
+    """
+    stop = float(stop_time)
+    if stop <= 0.0:
+        raise ValueError("stop_time must be positive")
+
+    decided = request_decisions[request_decisions["decision_time"].notna()].copy()
+    if decided.empty:
+        return (
+            {float(rho): 1.0 for rho in rho_values},
+            {
+                (float(rho), float(horizon)): True
+                for rho in rho_values
+                for horizon in report_horizons
+            },
         )
-    return float(selected.iloc[0])
+
+    times = decided["decision_time"].astype(float).to_numpy()
+    compliant = (
+        decided["compliant"].fillna(False).astype(bool).to_numpy(dtype=np.int64)
+    )
+    observable = times <= stop + EVENT_TOLERANCE
+    times = times[observable]
+    compliant = compliant[observable]
+    if len(times) == 0:
+        return (
+            {float(rho): 1.0 for rho in rho_values},
+            {
+                (float(rho), float(horizon)): True
+                for rho in rho_values
+                for horizon in report_horizons
+            },
+        )
+
+    order = np.argsort(times, kind="stable")
+    times = times[order]
+    compliant = compliant[order]
+    unique_times, first_indices, counts = np.unique(
+        times,
+        return_index=True,
+        return_counts=True,
+    )
+    compliant_at_time = np.add.reduceat(compliant, first_indices)
+    cumulative_decisions = np.cumsum(counts, dtype=np.int64)
+    cumulative_compliant = np.cumsum(compliant_at_time, dtype=np.int64)
+    cumulative_fraction = cumulative_compliant / cumulative_decisions
+
+    prior_count = int(
+        np.searchsorted(unique_times, EVENT_TOLERANCE, side="right")
+    )
+    initial_fraction = (
+        1.0 if prior_count == 0 else float(cumulative_fraction[prior_count - 1])
+    )
+    observable_end = int(
+        np.searchsorted(unique_times, stop + EVENT_TOLERANCE, side="right")
+    )
+    future_times = np.minimum(unique_times[prior_count:observable_end], stop)
+    interval_fractions = np.concatenate(
+        (
+            np.asarray([initial_fraction], dtype=float),
+            cumulative_fraction[prior_count:observable_end].astype(float),
+        )
+    )
+    boundaries = np.concatenate(
+        (
+            np.asarray([0.0], dtype=float),
+            future_times.astype(float),
+            np.asarray([stop], dtype=float),
+        )
+    )
+    widths = np.diff(boundaries)
+    if len(widths) != len(interval_fractions):
+        raise RuntimeError("internal exact-area interval construction mismatch")
+    if np.any(widths < -EVENT_TOLERANCE):
+        raise RuntimeError("decision times produced negative exact-area intervals")
+    widths = np.maximum(widths, 0.0)
+
+    normalized_area: dict[float, float] = {}
+    for rho in rho_values:
+        passing = interval_fractions + EVENT_TOLERANCE >= float(rho)
+        area = float(np.sum(widths * passing.astype(float)))
+        normalized_area[float(rho)] = float(area / stop)
+
+    passes_at_horizon: dict[tuple[float, float], bool] = {}
+    horizon_fraction: dict[float, float] = {}
+    for horizon in report_horizons:
+        index = int(
+            np.searchsorted(
+                unique_times,
+                float(horizon) + EVENT_TOLERANCE,
+                side="right",
+            )
+        )
+        horizon_fraction[float(horizon)] = (
+            1.0 if index == 0 else float(cumulative_fraction[index - 1])
+        )
+    for rho in rho_values:
+        for horizon in report_horizons:
+            passes_at_horizon[(float(rho), float(horizon))] = bool(
+                horizon_fraction[float(horizon)] + EVENT_TOLERANCE >= float(rho)
+            )
+    return normalized_area, passes_at_horizon
 
 
 def _assert_candidate_rho_monotonicity(
@@ -148,6 +253,7 @@ def evaluate_candidate_landscape(
     stop_time: float,
     dominance_ratio: float,
     expected_trajectories: int | None = 100,
+    progress: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Evaluate every distinct A_G under several rho values on one frozen bank."""
     rhos = tuple(sorted(set(float(value) for value in rho_values)))
@@ -175,38 +281,64 @@ def evaluate_candidate_landscape(
 
     long_rows: list[dict[str, object]] = []
     wide_rows: list[dict[str, object]] = []
+    n_candidates = int(len(regions))
+    n_trajectories = int(len(trajectory_groups))
 
     for candidate_index, (_, candidate) in enumerate(regions.iterrows()):
         latency_threshold = float(candidate["l_max"])
         cost_threshold = float(candidate["c_max"])
         quality_threshold = float(candidate["q_min"])
+        if progress:
+            print(
+                "PHASE1_V2_LANDSCAPE_PROGRESS "
+                f"candidate={candidate_index + 1}/{n_candidates} "
+                f"region_id={candidate['region_id']}",
+                flush=True,
+            )
 
-        decision_tables = [
-            build_request_sla_decision_table(
+        latency_failures = 0
+        cost_failures = 0
+        quality_failures = 0
+        area_sums = {float(rho): 0.0 for rho in rhos}
+        success_counts = {
+            (float(rho), float(horizon)): 0
+            for rho in rhos
+            for horizon in horizons
+        }
+
+        for _, trajectory_ledger in trajectory_groups:
+            decision_table = build_request_sla_decision_table(
                 trajectory_ledger,
                 latency_threshold=latency_threshold,
                 cost_threshold=cost_threshold,
                 quality_threshold=quality_threshold,
                 stop_time=float(stop_time),
             )
-            for _, trajectory_ledger in trajectory_groups
-        ]
+            latency_failures += int(
+                decision_table["latency_failed"].astype(bool).sum()
+            )
+            cost_failures += int(decision_table["cost_failed"].astype(bool).sum())
+            quality_failures += int(
+                decision_table["quality_failed"].astype(bool).sum()
+            )
+            trajectory_areas, trajectory_passes = _trajectory_multi_rho_metrics(
+                decision_table,
+                rhos,
+                horizons,
+                float(stop_time),
+            )
+            for rho in rhos:
+                area_sums[float(rho)] += float(trajectory_areas[float(rho)])
+                for horizon in horizons:
+                    success_counts[(float(rho), float(horizon))] += int(
+                        trajectory_passes[(float(rho), float(horizon))]
+                    )
 
-        latency_failures = int(
-            sum(int(table["latency_failed"].astype(bool).sum()) for table in decision_tables)
-        )
-        cost_failures = int(
-            sum(int(table["cost_failed"].astype(bool).sum()) for table in decision_tables)
-        )
-        quality_failures = int(
-            sum(int(table["quality_failed"].astype(bool).sum()) for table in decision_tables)
-        )
         role = classify_lc_failure_role(
             latency_failures,
             cost_failures,
             float(dominance_ratio),
         )
-
         base: dict[str, object] = {
             "candidate_index": int(candidate_index),
             "region_id": str(candidate["region_id"]),
@@ -221,38 +353,24 @@ def evaluate_candidate_landscape(
             "c_max": cost_threshold,
             "q_min": quality_threshold,
             "descriptive_role": role,
-            "latency_failure_count": latency_failures,
-            "cost_failure_count": cost_failures,
-            "quality_failure_count": quality_failures,
-            "n_trajectories": int(len(trajectory_groups)),
+            "latency_failure_count": int(latency_failures),
+            "cost_failure_count": int(cost_failures),
+            "quality_failure_count": int(quality_failures),
+            "n_trajectories": n_trajectories,
         }
         wide_row = dict(base)
 
         for rho in rhos:
-            definition = SlaComplianceDefinition(
-                rho=float(rho),
-                accounting_origin=0.0,
-                zero_decision_compliance=1.0,
-            )
-            _, normalized_area = calculate_exact_empirical_sla_compliance_area(
-                decision_tables,
-                definition,
-                horizon_min=0.0,
-                horizon_max=float(stop_time),
-            )
-            sigma_curve, _ = calculate_empirical_sla_sigma_from_decision_tables(
-                decision_tables,
-                horizons,
-                definition,
-            )
-
+            normalized_area = float(area_sums[float(rho)] / n_trajectories)
             row = dict(base)
             row["rho"] = float(rho)
-            row["normalized_area"] = float(normalized_area)
+            row["normalized_area"] = normalized_area
             tag = _rho_tag(rho)
-            wide_row[f"area_rho_{tag}"] = float(normalized_area)
+            wide_row[f"area_rho_{tag}"] = normalized_area
             for horizon in horizons:
-                sigma_value = _extract_sigma_at_horizon(sigma_curve, horizon)
+                sigma_value = float(
+                    success_counts[(float(rho), float(horizon))] / n_trajectories
+                )
                 horizon_tag = int(round(float(horizon)))
                 row[f"sigma_{horizon_tag}"] = sigma_value
                 wide_row[f"sigma_{horizon_tag}_rho_{tag}"] = sigma_value
@@ -341,12 +459,7 @@ def _find_physical_setting_id(n100_ledgers: pd.DataFrame) -> str:
 
 
 def _load_frozen_dominance_ratio() -> float:
-    """Load the role-classification ratio from the frozen discovery policy.
-
-    The N=100 effective execution configuration is not required to retain the
-    full finalist-selection policy metadata. Role semantics are therefore read
-    from the authoritative frozen Phase-1 discovery configuration instead.
-    """
+    """Load the role-classification ratio from the frozen discovery policy."""
     configuration_path = PHASE1_DIRECTORY / "config_phase1_discovery_v1.json"
     configuration = json.loads(configuration_path.read_text(encoding="utf-8"))
     try:
@@ -420,6 +533,13 @@ def main() -> None:
         sorted(set(float(value) for value in args.report_horizons))
     )
 
+    print(
+        "PHASE1_V2_MULTI_RHO_CANDIDATE_LANDSCAPE_START "
+        f"n_distinct_candidates={len(distinct_regions)} "
+        f"n_trajectories={n100_ledgers['trajectory'].nunique()} "
+        f"rhos={rho_values}",
+        flush=True,
+    )
     long_metrics, wide_summary = evaluate_candidate_landscape(
         distinct_regions,
         n100_ledgers,
@@ -428,6 +548,7 @@ def main() -> None:
         stop_time=stop_time,
         dominance_ratio=dominance_ratio,
         expected_trajectories=100,
+        progress=True,
     )
     role_ranges = build_role_ranges(long_metrics)
 
