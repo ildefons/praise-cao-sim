@@ -1,0 +1,82 @@
+{
+  "status": "FROZEN_PHASE1_V2_CONFIRMED_V1",
+  "freeze_date": "2026-09-09",
+  "phase": "phase1_v2_fresh_confirmation",
+  "scientific_role": "Record the untouched paired N=100 confirmation outcome for the already frozen Phase-1 v2 admissibility-region battery. No selection, recalibration, or threshold tuning is permitted from this result.",
+  "depends_on": {
+    "ar_freeze_manifest": "phase1_v2_ar_freeze_manifest_v1.json",
+    "confirmation_protocol": "config_phase1_v2_confirmation_v1.json"
+  },
+  "physical_setting_id": "D300000000_d0.200",
+  "n_trajectories": 100,
+  "seed_bank_start": 7000,
+  "seed_bank_end_inclusive": 7099,
+  "common_seed_bank_across_three_regions": true,
+  "selection_reopened": false,
+  "recalibration_performed": false,
+  "scientific_confirmation_pass": true,
+  "confirmation_rule": {
+    "nominal_health": "R_0.95 >= 0.95",
+    "stress_informativeness": "0.50 <= R_0.99 <= 0.95",
+    "role_must_replicate": true,
+    "all_three_cases_must_pass": true
+  },
+  "cases": [
+    {
+      "selection_role": "latency",
+      "region_id": "D300000000_d0.200_FDC_00026",
+      "descriptive_role": "latency",
+      "area_rho_0p95": 0.990991,
+      "area_rho_0p975": 0.975010,
+      "area_rho_0p99": 0.934165,
+      "sigma_120_rho_0p95": 0.99,
+      "sigma_240_rho_0p95": 1.0,
+      "sigma_120_rho_0p99": 0.91,
+      "sigma_240_rho_0p99": 0.91,
+      "latency_failure_count": 314,
+      "cost_failure_count": 1,
+      "role_replication_pass": true,
+      "nominal_health_pass": true,
+      "stress_informativeness_pass": true,
+      "fresh_confirmation_pass": true
+    },
+    {
+      "selection_role": "cost",
+      "region_id": "D300000000_d0.200_A00933",
+      "descriptive_role": "cost",
+      "area_rho_0p95": 0.994440,
+      "area_rho_0p975": 0.983723,
+      "area_rho_0p99": 0.934537,
+      "sigma_120_rho_0p95": 0.99,
+      "sigma_240_rho_0p95": 1.0,
+      "sigma_120_rho_0p99": 0.93,
+      "sigma_240_rho_0p99": 0.95,
+      "latency_failure_count": 138,
+      "cost_failure_count": 328,
+      "role_replication_pass": true,
+      "nominal_health_pass": true,
+      "stress_informativeness_pass": true,
+      "fresh_confirmation_pass": true
+    },
+    {
+      "selection_role": "mixed",
+      "region_id": "D300000000_d0.200_A00936",
+      "descriptive_role": "mixed",
+      "area_rho_0p95": 0.994932,
+      "area_rho_0p975": 0.984926,
+      "area_rho_0p99": 0.945689,
+      "sigma_120_rho_0p95": 0.99,
+      "sigma_240_rho_0p95": 1.0,
+      "sigma_120_rho_0p99": 0.94,
+      "sigma_240_rho_0p99": 0.95,
+      "latency_failure_count": 138,
+      "cost_failure_count": 228,
+      "role_replication_pass": true,
+      "nominal_health_pass": true,
+      "stress_informativeness_pass": true,
+      "fresh_confirmation_pass": true
+    }
+  ],
+  "result_directory": "first_science/phase1/results/phase1_v2_fresh_confirmation_v1",
+  "next_dependency": "Phase-3 may consume this Phase-1 v2 battery as the frozen exogenous top-level admissibility-query benchmark."
+}
