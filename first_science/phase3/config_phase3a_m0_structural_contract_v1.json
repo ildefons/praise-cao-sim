@@ -1,0 +1,41 @@
+{
+  "status": "DRAFT_PHASE3A_M0_STRUCTURAL_CONTRACT_V1",
+  "phase": "phase3a_m0_structural_query_decomposition",
+  "phase1_v2_ar_manifest": "../phase1/phase1_v2_ar_freeze_manifest_v1.json",
+  "phase1_public_config": "../phase1/config_phase1_discovery_v1.json",
+  "phase2_i1_freeze_manifest": "../phase2/phase2_i1_freeze_manifest_v1.json",
+  "method_id": "M0_STRUCTURAL_DECOMPOSITION_EQUAL_BUDGET_V1",
+  "global_query_direction": "exogenous_A_G_H_rho_G_to_local_A_i_H_rho_i",
+  "required_providers": ["ProviderA", "ProviderB", "ProviderC"],
+  "required_roles": ["latency", "cost", "mixed"],
+  "rho_global": 0.95,
+  "tolerance_allocation": {
+    "policy": "equal_violation_budget",
+    "epsilon_global": 0.05,
+    "epsilon_local": 0.016666666666666666,
+    "rho_local": 0.9833333333333333,
+    "sum_local_epsilon_must_not_exceed_global": true
+  },
+  "boundary_decomposition": {
+    "latency": "each provider receives the complete residual after deterministic common and branch-ingress latency because provider branches compose by max",
+    "cost": "residual execution-cost budget after deterministic fixed stages is split equally across the three required providers because provider costs compose additively",
+    "quality": "each provider inherits global q_min because composed quality is the minimum across required providers and deterministic fixed stages are quality-neutral"
+  },
+  "information_firewall": {
+    "may_read_phase1_v2_A_G_thresholds": true,
+    "may_read_public_graph_topology_runtime_constants": true,
+    "may_read_phase2_I1_rho_grid_for_predeclared_query_compatibility": true,
+    "may_read_phase2_private_provider_ledgers": false,
+    "may_read_I1_sigma_values_during_structural_definition": false,
+    "may_read_phase1_whitebox_sigma_outcomes_during_structural_definition": false,
+    "may_read_hidden_provider_generator_parameters": false,
+    "may_read_M1_results": false
+  },
+  "proof_status": {
+    "request_level_boundary_implication": "TO_VALIDATE_IN_PHASE3A_TESTS",
+    "aligned_request_counting_implication": "TO_VALIDATE_IN_PHASE3A_TESTS",
+    "real_decision_time_horizon_alignment": "UNRESOLVED_REQUIRES_SEPARATE_AUDIT",
+    "independent_probability_product": "NOT_YET_FROZEN_PHASE3B"
+  },
+  "freeze_rule": "Do not mark Phase3A frozen until structural tests pass, exact v2-derived local queries are human-reviewed, and the real decision-time horizon-alignment audit is resolved or explicitly scoped as an approximation condition."
+}
