@@ -69,12 +69,7 @@ def deduplicate_exact_admissibility_regions(
     full_regions: pd.DataFrame,
     physical_setting_id: str,
 ) -> pd.DataFrame:
-    """Keep one provenance row per exact (l_max,c_max,q_min) in one regime.
-
-    Different generator branches may emit distinct region_ids for the same
-    numerical admissibility region. Landscape analysis must count that region
-    once, while preserving its provenance IDs.
-    """
+    """Keep one provenance row per exact (l_max,c_max,q_min) in one regime."""
     required = {"physical_setting_id", "region_id", "l_max", "c_max", "q_min"}
     missing = required.difference(full_regions.columns)
     if missing:
@@ -154,14 +149,7 @@ def evaluate_candidate_landscape(
     dominance_ratio: float,
     expected_trajectories: int | None = 100,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Evaluate every distinct A_G under several rho values on one frozen bank.
-
-    Returns
-    -------
-    ``(long_metrics, wide_summary)``. The long table contains one row per
-    candidate/rho. The wide summary contains one row per candidate and is meant
-    for landscape plotting and inspection.
-    """
+    """Evaluate every distinct A_G under several rho values on one frozen bank."""
     rhos = tuple(sorted(set(float(value) for value in rho_values)))
     horizons = tuple(sorted(set(float(value) for value in report_horizons)))
     if not rhos or any(not 0.0 < rho <= 1.0 for rho in rhos):
@@ -352,6 +340,29 @@ def _find_physical_setting_id(n100_ledgers: pd.DataFrame) -> str:
     return str(physical_ids[0])
 
 
+def _load_frozen_dominance_ratio() -> float:
+    """Load the role-classification ratio from the frozen discovery policy.
+
+    The N=100 effective execution configuration is not required to retain the
+    full finalist-selection policy metadata. Role semantics are therefore read
+    from the authoritative frozen Phase-1 discovery configuration instead.
+    """
+    configuration_path = PHASE1_DIRECTORY / "config_phase1_discovery_v1.json"
+    configuration = json.loads(configuration_path.read_text(encoding="utf-8"))
+    try:
+        value = configuration["selection_quality_gate"]["role_evidence"][
+            "dominance_ratio"
+        ]
+    except KeyError as error:
+        raise KeyError(
+            "frozen Phase-1 discovery configuration lacks role_evidence.dominance_ratio"
+        ) from error
+    ratio = float(value)
+    if ratio <= 1.0:
+        raise ValueError("frozen dominance_ratio must exceed one")
+    return ratio
+
+
 def main() -> None:
     """Run the read-only multi-rho candidate-landscape diagnostic."""
     parser = argparse.ArgumentParser()
@@ -403,10 +414,7 @@ def main() -> None:
     )
 
     stop_time = float(effective_configuration["horizon"]["simulation_stop_time"])
-    role_configuration = effective_configuration["selection_quality_gate"][
-        "role_evidence"
-    ]
-    dominance_ratio = float(role_configuration["dominance_ratio"])
+    dominance_ratio = _load_frozen_dominance_ratio()
     rho_values = tuple(sorted(set(float(value) for value in args.rhos)))
     report_horizons = tuple(
         sorted(set(float(value) for value in args.report_horizons))
@@ -440,6 +448,7 @@ def main() -> None:
     print(f"physical_setting_id={physical_setting_id}")
     print(f"n_distinct_candidates={len(wide_summary)}")
     print(f"rho_values={rho_values}")
+    print(f"dominance_ratio={dominance_ratio:g}")
     print("selection_performed=false")
     print("fresh_confirmation_required_for_any_selected_v2_candidate=true")
     print(role_ranges.to_string(index=False))
