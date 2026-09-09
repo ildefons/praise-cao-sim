@@ -1,0 +1,171 @@
+{
+  "status": "FROZEN_PHASE1_V2_AR_SELECTION_V1",
+  "freeze_date": "2026-09-09",
+  "phase": "phase1_v2_admissibility_region_selection",
+  "scientific_scope": "Freeze the revised Phase-1 top-level admissibility-region battery after multi-rho calibration. The physical simulator, matched regime, workload, horizon, and cumulative request-accounting semantics remain unchanged from the frozen Phase-1 benchmark.",
+  "supersedes": "Historical Phase-1 v1 admissibility-region finalist selection only; it does not supersede simulator, physical-regime, workload, or sigma-accounting semantics.",
+  "physical_setting": {
+    "physical_setting_id": "D300000000_d0.200",
+    "center_instruction_mean": 300000000.0,
+    "dispersion": 0.2
+  },
+  "sigma_query": {
+    "definition": "sigma_G(A,H;rho)=P(c_G(A,H)>=rho)",
+    "accounting_origin": 0.0,
+    "accounting_window": "cumulative_[0,H]_from_t0",
+    "zero_decided_requests_compliance": 1.0,
+    "horizon_min": 0.0,
+    "horizon_max": 240.0,
+    "primary_rho": 0.95,
+    "stress_rho": 0.99,
+    "intermediate_diagnostic_rho": 0.975
+  },
+  "selection_policy": {
+    "revision": "HEALTHY_NOMINAL_PLUS_STRESS_MULTI_RHO_V2",
+    "normalized_area_symbol": "R_rho",
+    "nominal_health_gate": {
+      "rho": 0.95,
+      "minimum": 0.95
+    },
+    "stress_informativeness_gate": {
+      "rho": 0.99,
+      "minimum": 0.5,
+      "maximum": 0.95
+    },
+    "intermediate_rho_is_selection_gate": false,
+    "midpoint_optimization": false,
+    "role_dominance_ratio": 2.0,
+    "required_roles": [
+      "latency",
+      "cost",
+      "mixed"
+    ],
+    "canonicalization": "Collapse the deliberate v-epsilon, v, v+epsilon threshold triplets generated around Phase-1 critical values to the middle value v before finalist ranking.",
+    "threshold_relative_epsilon": 1e-09,
+    "source_preference": {
+      "latency": [
+        "FULL_DOMAIN_LOOSE_COST",
+        "ORIGINAL_ANCHOR_INFORMED"
+      ],
+      "cost": [
+        "FULL_DOMAIN_LOOSE_LATENCY",
+        "ORIGINAL_ANCHOR_INFORMED"
+      ],
+      "mixed": [
+        "ORIGINAL_ANCHOR_INFORMED"
+      ]
+    },
+    "ranking_within_chosen_source": "Largest R_0.95 first, then smaller R_0.99, then deterministic numerical/provenance tie-breakers.",
+    "selection_uses_whitebox_outcomes": true,
+    "selection_may_not_be_reopened_after_fresh_confirmation": true
+  },
+  "calibration_provenance": {
+    "candidate_landscape_source": "first_science/phase1/results/v2_multi_rho_candidate_landscape_D300000000_d0.200/candidate_multi_rho_summary.csv",
+    "request_ledger_source": "first_science/phase1/results/final_n100_confirmation_v1/all_top_level_request_ledgers.csv",
+    "request_ledger_bank_has_been_inspected": true,
+    "request_ledger_bank_may_be_reused_for_v2_final_confirmation": false,
+    "n_distinct_candidates": 1056,
+    "rho_values_evaluated": [
+      0.95,
+      0.975,
+      0.99
+    ],
+    "human_review_completed": true
+  },
+  "paired_matched_physical_regime": true,
+  "whiteboxes": [
+    {
+      "case_id": "V2_LATENCY",
+      "selection_role": "latency",
+      "physical_setting_id": "D300000000_d0.200",
+      "center_instruction_mean": 300000000.0,
+      "dispersion": 0.2,
+      "region_id": "D300000000_d0.200_FDC_00026",
+      "source_family": "FULL_DOMAIN_LOOSE_COST",
+      "l_max": 0.68855284199994315,
+      "c_max": 2.60390295517990822,
+      "q_min": 0.5,
+      "rho": 0.95,
+      "accounting_origin": 0.0,
+      "accounting_window": "cumulative_[0,H]_from_t0",
+      "calibration_R_0p95": 0.99719064434204163,
+      "calibration_R_0p975": 0.98199488734025020,
+      "calibration_R_0p99": 0.94583636022504158,
+      "calibration_sigma_120_rho_0p95": 0.99,
+      "calibration_sigma_240_rho_0p95": 1.0,
+      "calibration_sigma_120_rho_0p99": 0.91,
+      "calibration_sigma_240_rho_0p99": 0.93,
+      "calibration_latency_failure_count": 246,
+      "calibration_cost_failure_count": 2
+    },
+    {
+      "case_id": "V2_COST",
+      "selection_role": "cost",
+      "physical_setting_id": "D300000000_d0.200",
+      "center_instruction_mean": 300000000.0,
+      "dispersion": 0.2,
+      "region_id": "D300000000_d0.200_A00933",
+      "source_family": "ORIGINAL_ANCHOR_INFORMED",
+      "l_max": 0.74739413900001495,
+      "c_max": 2.13979268099999986,
+      "q_min": 0.5,
+      "rho": 0.95,
+      "accounting_origin": 0.0,
+      "accounting_window": "cumulative_[0,H]_from_t0",
+      "calibration_R_0p95": 0.99754176324037480,
+      "calibration_R_0p975": 0.98625207164233397,
+      "calibration_R_0p99": 0.94263353632599955,
+      "calibration_sigma_120_rho_0p95": 1.0,
+      "calibration_sigma_240_rho_0p95": 1.0,
+      "calibration_sigma_120_rho_0p99": 0.91,
+      "calibration_sigma_240_rho_0p99": 0.94,
+      "calibration_latency_failure_count": 147,
+      "calibration_cost_failure_count": 332
+    },
+    {
+      "case_id": "V2_MIXED",
+      "selection_role": "mixed",
+      "physical_setting_id": "D300000000_d0.200",
+      "center_instruction_mean": 300000000.0,
+      "dispersion": 0.2,
+      "region_id": "D300000000_d0.200_A00936",
+      "source_family": "ORIGINAL_ANCHOR_INFORMED",
+      "l_max": 0.74739413900001495,
+      "c_max": 2.17409932499999980,
+      "q_min": 0.5,
+      "rho": 0.95,
+      "accounting_origin": 0.0,
+      "accounting_window": "cumulative_[0,H]_from_t0",
+      "calibration_R_0p95": 0.99767839763687483,
+      "calibration_R_0p975": 0.98754949418991722,
+      "calibration_R_0p99": 0.94753044180629142,
+      "calibration_sigma_120_rho_0p95": 1.0,
+      "calibration_sigma_240_rho_0p95": 1.0,
+      "calibration_sigma_120_rho_0p99": 0.92,
+      "calibration_sigma_240_rho_0p99": 0.95,
+      "calibration_latency_failure_count": 147,
+      "calibration_cost_failure_count": 257
+    }
+  ],
+  "fresh_confirmation": {
+    "required": true,
+    "n_trajectories": 100,
+    "seed_bank": [
+      7000,7001,7002,7003,7004,7005,7006,7007,7008,7009,
+      7010,7011,7012,7013,7014,7015,7016,7017,7018,7019,
+      7020,7021,7022,7023,7024,7025,7026,7027,7028,7029,
+      7030,7031,7032,7033,7034,7035,7036,7037,7038,7039,
+      7040,7041,7042,7043,7044,7045,7046,7047,7048,7049,
+      7050,7051,7052,7053,7054,7055,7056,7057,7058,7059,
+      7060,7061,7062,7063,7064,7065,7066,7067,7068,7069,
+      7070,7071,7072,7073,7074,7075,7076,7077,7078,7079,
+      7080,7081,7082,7083,7084,7085,7086,7087,7088,7089,
+      7090,7091,7092,7093,7094,7095,7096,7097,7098,7099
+    ],
+    "common_seed_bank_across_three_regions": true,
+    "recalibrate_A": false,
+    "recalibrate_rho": false,
+    "reopen_selection_gate": false,
+    "purpose": "Untouched paired N=100 confirmation of the already frozen Phase-1 v2 latency/cost/mixed battery."
+  }
+}
