@@ -1,0 +1,77 @@
+{
+  "status": "FROZEN_PHASE2_I1_CARD_CONTRACT_V2_DIRECT_LOCAL_REGION",
+  "phase": "phase2_i1",
+  "schema": "PRAISE_I1_PROVIDER_SLA_CARD_V1",
+  "information_technology": "I1_LOCAL_SLA_SIGMA_SURFACE_CARD",
+  "scientific_role": "provider-exposed local SLA-compliance surface consumed unchanged by composition methods",
+  "supersedes": "config_phase2_i1_provider_card_v1.json only for A_i ownership; numerical H/rho/accounting/confidence semantics are unchanged",
+  "provider_scope": ["ProviderA", "ProviderB", "ProviderC"],
+  "card_instance": "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})",
+  "local_admissibility": "A_i={L_i<=l_max,C_i<=c_max,Q_i>=q_min}",
+  "local_metric_semantics": {
+    "L_i": "provider-local request arrival to provider completion, including provider queue waiting and service time",
+    "C_i": "native provider execution cost for the local request",
+    "Q_i": "provider-local observed quality"
+  },
+  "sla_accounting": {
+    "sigma": "P(c_i(A_i,H)>=rho)",
+    "accounting_origin": 0.0,
+    "accounting_window": "cumulative_[0,H]_from_t0",
+    "zero_decided_requests_compliance": 1.0,
+    "latency_timeout": "decision_at_provider_local_latency_deadline",
+    "cost_quality_after_timeout": "not_evaluated_after_latency_failure",
+    "unresolved_at_H": "excluded_from_c_i_denominator",
+    "nonmonotone_in_horizon_allowed": true,
+    "monotone_in_rho_at_fixed_H": true
+  },
+  "workload_contract": {
+    "period": 0.2,
+    "accounting_origin": 0.0,
+    "horizon_max": 240.0,
+    "semantics": "same periodic root-request context as the frozen Phase-1 matched physical benchmark"
+  },
+  "H": {
+    "minimum": 0.0,
+    "maximum": 240.0,
+    "step": 5.0,
+    "values": [0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0,95.0,100.0,105.0,110.0,115.0,120.0,125.0,130.0,135.0,140.0,145.0,150.0,155.0,160.0,165.0,170.0,175.0,180.0,185.0,190.0,195.0,200.0,205.0,210.0,215.0,220.0,225.0,230.0,235.0,240.0]
+  },
+  "R": {
+    "status": "FROZEN_BEFORE_M0_AND_M1",
+    "values": [0.95, 0.975, 0.9833333333333333, 0.99, 1.0],
+    "adapt_after_M1_fit": false
+  },
+  "confidence": {
+    "interval": "Wilson_95_percent",
+    "use_in_composition": "M-specific; I1 exposes point estimate and interval but does not choose how either is consumed"
+  },
+  "A_i_selection": {
+    "owner": "Phase2 information construction",
+    "rule_config": "config_phase2_i1_local_region_rule_v1.json",
+    "source": "provider_i_local_acquisition_evidence_only",
+    "one_region_per_provider": true,
+    "same_rule_form_for_all_providers": true,
+    "A_G_is_input": false,
+    "M0_or_M1_may_choose_or_alter_A_i": false,
+    "generic_l_c_q_grid": false,
+    "interpolation_or_extrapolation": false,
+    "fair_tau_rule": "the exact same final materialized I1 cards are supplied unchanged to M0 and M1"
+  },
+  "acquisition_principle": {
+    "one_frozen_private_provider_ledger_corpus": true,
+    "all_H_and_rho_slices_computed_by_postprocessing_same_corpus": true,
+    "rerun_per_rho": false,
+    "rerun_per_A_i": false
+  },
+  "forbidden_public_information": [
+    "raw provider traces",
+    "private provider request ledgers",
+    "acquisition seeds",
+    "Gamma distribution parameters",
+    "provider instruction means",
+    "physical Dbar/delta labels",
+    "hidden simulator state",
+    "top-level Phase-1 white-box curves or outcomes"
+  ],
+  "same_I1_for_M0_and_M1": true
+}
