@@ -36,6 +36,45 @@
     }
   },
   "global_query_relation": "Compose the already-fixed local A_i boundaries forward through G. M0 is applicable to an exogenous A_G only when the induced boundary is contained in A_G: l_M0<=l_G, c_M0<=c_G, q_M0>=q_G.",
+  "phase1_benchmark_adapter": {
+    "status": "FROZEN_PHASE1_G0_NUMERIC_ADAPTER_V1",
+    "implementation": "m0_phase1_benchmark_adapter.py",
+    "physical_configuration": "../phase1/config_phase1_discovery_v1.json",
+    "graph": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "network_model": {
+      "law": "latency_hop=message_bytes/(BW_mbps*1e6)+PR",
+      "request_bytes": 1000,
+      "branch_bytes": 1000,
+      "join_bytes": 1000,
+      "BW_mbps": 1000.0,
+      "PR": 0.001,
+      "latency_per_hop": 0.001001,
+      "cost_per_hop": 0.0,
+      "qos_neutral": true
+    },
+    "fixed_service_model": {
+      "Fpre_instructions": 5000000.0,
+      "Fpost_instructions": 5000000.0,
+      "effective_IPT": 1000000000.0,
+      "COST_rate": 3.0,
+      "Fpre_latency": 0.005,
+      "Fpost_latency": 0.005,
+      "Fpre_cost": 0.015,
+      "Fpost_cost": 0.015,
+      "qos_neutral": true
+    },
+    "fixed_terms_outside_provider_boundaries": {
+      "latency": 0.013003,
+      "cost": 0.03
+    },
+    "full_boundary_formula": {
+      "latency": "l_M0=0.013003+max_i(l_i)",
+      "cost": "c_M0=0.03+sum_i(c_i)",
+      "quality": "q_M0=min_i(q_i)"
+    },
+    "network_path_accounting": "root hop + Fpre service + one branch hop on the parallel critical path + join hop + Fpost service",
+    "whitebox_sigma_used": false
+  },
   "rho_policy": {
     "status": "FROZEN",
     "rule": "same_as_global_for_every_required_provider",
@@ -56,16 +95,16 @@
     "scientific_role": "This is a deliberate borderline limitation of M0 and motivates richer integration methods such as M1."
   },
   "hard_preconditions_for_numeric_prediction": [
-    "forward-composed fixed A_i boundary is contained in the requested A_G",
+    "forward-composed fixed A_i boundary including deterministic fixed-stage and network terms is contained in the requested A_G",
     "the requested H point exists in every required I1 card",
     "the requested rho_G slice exists in every required I1 card"
   ],
-  "failure_semantics": "If a required boundary or card point is unavailable, M0 reports NOT_APPLICABLE rather than changing Phase 2, interpolating an unexposed rho, or redistributing rho_G.",
+  "failure_semantics": "If a required boundary or card point is unavailable, M0 reports NOT_APPLICABLE rather than changing Phase 2, interpolating an unexposed rho, or redistributing rho_G. A raw provider-probability product may be retained for diagnostics but is not an M0 prediction when the boundary precondition fails.",
   "phase2_independence": {
     "A_i_created_by_M0": false,
     "A_G_to_A_i_mapping": false,
     "rho_i_used_to_construct_A_i": false,
     "M0_may_modify_I1": false
   },
-  "evaluation_lock": "The same-rho M0 rule is frozen before M0 is compared with any Phase-1 white-box sigma outcome."
+  "evaluation_lock": "The same-rho M0 rule and Phase-1 deterministic boundary adapter are frozen independently of Phase-1 white-box sigma outcomes."
 }
