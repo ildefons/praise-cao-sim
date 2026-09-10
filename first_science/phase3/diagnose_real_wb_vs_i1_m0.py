@@ -4,19 +4,16 @@ Scientific inputs
 -----------------
 * White-box truth: frozen Phase-1 v2 fresh-confirmation top-level ledgers.
 * Provider information: frozen Phase-2 provider-local acquisition ledgers T_i.
-* I1 A_i calibration: frozen coordinate-wise 0.95-at-120 rule.
+* I1 A_i calibration: frozen coordinate-wise 0.95-at-120 first-crossing rule.
 * M0 probability rule: rho_i = rho_G and product_i sigma_i(A_i,H;rho_G).
+* M0 applicability: full frozen G0 boundary, including deterministic network,
+  Fpre and Fpost terms, must be contained in the exogenous A_G.
 
 There is no external A_i input. Phase 2 derives each rectangular A_i from its
-own T_i.  Under the current cumulative-admissibility semantics the recovered
-anchor calibration uses rho_anchor=0.95, H*=120 s and sigma_target=0.95.  Each
-coordinate is calibrated separately by the first sigma crossing rule and the
-three thresholds are then combined.  The resulting joint local sigma is a
-measured outcome, not another calibration target.
-
-The plotted probability curve is the real M0 probability-composition component.
-This diagnostic does not claim the separate full-graph boundary-applicability
-check, which also requires deterministic pre/post/network boundary terms.
+own T_i. The resulting I1 cards are the same cards used at every evaluated rho.
+The raw M0 probability product is retained for diagnostics, but it is reported
+as an M0 prediction only when the full induced boundary A_G^M0 is contained in
+the requested white-box A_G. Otherwise the case is explicitly NOT_APPLICABLE.
 """
 from __future__ import annotations
 
@@ -42,9 +39,12 @@ from i1_local_region import derive_local_regions_from_traces  # noqa: E402
 from i1_provider_card import build_i1_provider_card  # noqa: E402
 from m0_analytic_composition import (  # noqa: E402
     AdmissibilityBoundary,
-    compose_parallel_all,
+    boundary_is_sufficient_for_query,
     independent_product_probability,
     same_rho_as_global,
+)
+from m0_phase1_benchmark_adapter import (  # noqa: E402
+    build_phase1_g0_full_m0_boundary,
 )
 from sla_compliance_analysis import (  # noqa: E402
     SlaComplianceDefinition,
@@ -200,11 +200,25 @@ def build_real_whitebox_curve(
 def compare_curves(
     whitebox_curve: pd.DataFrame,
     m0_curve: pd.DataFrame,
+    *,
+    m0_applicable: bool = True,
 ) -> tuple[pd.DataFrame, dict[str, float]]:
-    """Align WB/M0 points and compute pointwise diagnostic errors."""
+    """Align WB/M0 points and suppress M0 prediction when not applicable."""
     comparison = whitebox_curve.merge(m0_curve, on="horizon", how="inner", validate="one_to_one")
     if comparison.empty or len(comparison) != len(m0_curve):
         raise RuntimeError("white-box and I1-M0 horizon supports do not align")
+
+    comparison["sigma_i1_m0_raw_probability_component"] = comparison["sigma_i1_m0"].astype(float)
+    if not m0_applicable:
+        comparison["sigma_i1_m0"] = np.nan
+        comparison["error_m0_minus_wb"] = np.nan
+        return comparison, {
+            "mae": float("nan"),
+            "rmse": float("nan"),
+            "bias": float("nan"),
+            "max_abs_error": float("nan"),
+        }
+
     comparison["error_m0_minus_wb"] = (
         comparison["sigma_i1_m0"].astype(float)
         - comparison["sigma_whitebox"].astype(float)
@@ -219,14 +233,32 @@ def compare_curves(
     return comparison, metrics
 
 
+def _containment_failure_summary(
+    induced: AdmissibilityBoundary,
+    requested: AdmissibilityBoundary,
+) -> str:
+    """Return a compact explanation of failed M0 boundary containment."""
+    failures: list[str] = []
+    if induced.l_max > requested.l_max + EVENT_TOLERANCE:
+        failures.append(f"L {induced.l_max:.4f}>{requested.l_max:.4f}")
+    if induced.c_max > requested.c_max + EVENT_TOLERANCE:
+        failures.append(f"C {induced.c_max:.4f}>{requested.c_max:.4f}")
+    if induced.q_min + EVENT_TOLERANCE < requested.q_min:
+        failures.append(f"Q {induced.q_min:.4f}<{requested.q_min:.4f}")
+    return ", ".join(failures) if failures else "none"
+
+
 def plot_one_comparison(
     comparison: pd.DataFrame,
     role: str,
     rho_global: float,
     metrics: dict[str, float],
     output_path: Path,
+    *,
+    m0_applicable: bool,
+    containment_failure: str,
 ) -> None:
-    """Write one minimalist real-trace diagnostic plot."""
+    """Write one minimalist real-trace diagnostic plot with applicability."""
     figure, axis = plt.subplots(figsize=(8.2, 5.1))
     axis.plot(
         comparison["horizon"],
@@ -234,47 +266,61 @@ def plot_one_comparison(
         linewidth=2.0,
         label=r"White-box $\sigma_G$",
     )
-    axis.plot(
-        comparison["horizon"],
-        comparison["sigma_i1_m0"],
-        linewidth=2.0,
-        linestyle="--",
-        label=r"I1-M0 $\hat{\sigma}_G$",
-    )
+    if m0_applicable:
+        axis.plot(
+            comparison["horizon"],
+            comparison["sigma_i1_m0"],
+            linewidth=2.0,
+            linestyle="--",
+            label=r"I1-M0 $\hat{\sigma}_G$",
+        )
     axis.set_xlim(float(comparison["horizon"].min()), float(comparison["horizon"].max()))
     axis.set_ylim(0.0, 1.02)
     axis.set_xlabel("Horizon H (s)")
     axis.set_ylabel("Admissibility probability")
+    status_line = "M0 applicable" if m0_applicable else "M0 NOT APPLICABLE"
     axis.set_title(
         f"{ROLE_TITLES.get(role, role)}: white-box vs I1-M0\n"
-        f"Real frozen trace banks, $\\rho_G={rho_global:g}$"
+        f"$\\rho_G={rho_global:g}$, {status_line}"
     )
     axis.grid(True, alpha=0.22)
     axis.legend(frameon=False)
-    axis.text(
-        0.02,
-        0.04,
-        f"MAE={metrics['mae']:.3f}   bias={metrics['bias']:+.3f}",
-        transform=axis.transAxes,
-        fontsize=9,
-        alpha=0.75,
-    )
+    if m0_applicable:
+        axis.text(
+            0.02,
+            0.04,
+            f"MAE={metrics['mae']:.3f}   bias={metrics['bias']:+.3f}",
+            transform=axis.transAxes,
+            fontsize=9,
+            alpha=0.75,
+        )
+    else:
+        axis.text(
+            0.02,
+            0.04,
+            f"I1-M0 not defined for this query\ncontainment failure: {containment_failure}",
+            transform=axis.transAxes,
+            fontsize=9,
+            alpha=0.8,
+        )
     figure.tight_layout()
     figure.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(figure)
 
 
 def _snapshot_rows(comparison_table: pd.DataFrame) -> pd.DataFrame:
-    """Return WB/I1-M0 sigma values at five diagnostic horizons."""
+    """Return WB/I1-M0 values at five diagnostic horizons."""
     mask = np.zeros(len(comparison_table), dtype=bool)
     horizons = comparison_table["horizon"].astype(float).to_numpy()
     for target in SNAPSHOT_HORIZONS:
         mask |= np.isclose(horizons, target, atol=EVENT_TOLERANCE)
     columns = [
         "selection_role",
+        "m0_status",
         "horizon",
         "sigma_whitebox",
         "sigma_i1_m0",
+        "sigma_i1_m0_raw_probability_component",
         "sigma_ProviderA",
         "sigma_ProviderB",
         "sigma_ProviderC",
@@ -311,6 +357,7 @@ def run_real_trace_diagnostic(
     *,
     whitebox_ledger_path: Path,
     whitebox_manifest_path: Path,
+    phase1_physical_config_path: Path,
     provider_root: Path,
     i1_contract_path: Path,
     rho_global: float,
@@ -334,6 +381,9 @@ def run_real_trace_diagnostic(
     whitebox_manifest = _read_json(whitebox_manifest_path)
     if whitebox_manifest.get("status") != "FROZEN_PHASE1_V2_AR_SELECTION_V1":
         raise ValueError("unexpected Phase-1 v2 white-box manifest status")
+    phase1_physical_config = _read_json(phase1_physical_config_path)
+    if phase1_physical_config.get("configuration_status") != "SCIENTIFIC_DISCOVERY_V1_FROZEN":
+        raise ValueError("unexpected Phase-1 frozen physical configuration")
 
     provider_ledgers = load_provider_evidence(provider_root)
     local_regions, region_table = derive_local_regions_from_traces(
@@ -358,9 +408,9 @@ def run_real_trace_diagnostic(
         rho_anchor,
         anchor_horizon,
     )
-    m0_curve = build_same_rho_m0_curve(provider_surfaces, rho_global, horizons)
+    raw_m0_curve = build_same_rho_m0_curve(provider_surfaces, rho_global, horizons)
 
-    provider_only_boundaries = {
+    provider_boundaries = {
         provider: AdmissibilityBoundary(
             l_max=float(local_regions[provider]["l_max"]),
             c_max=float(local_regions[provider]["c_max"]),
@@ -368,8 +418,9 @@ def run_real_trace_diagnostic(
         )
         for provider in PROVIDERS
     }
-    provider_only_boundary = compose_parallel_all(
-        [provider_only_boundaries[provider] for provider in PROVIDERS]
+    induced_global_boundary, boundary_breakdown = build_phase1_g0_full_m0_boundary(
+        phase1_physical_config,
+        provider_boundaries,
     )
 
     output_directory.mkdir(parents=True, exist_ok=True)
@@ -377,10 +428,11 @@ def run_real_trace_diagnostic(
     pd.concat(
         [provider_surfaces[provider] for provider in PROVIDERS], ignore_index=True
     ).to_csv(output_directory / "real_i1_provider_surfaces.csv", index=False)
-    m0_curve.to_csv(output_directory / "real_i1_m0_probability_curve.csv", index=False)
+    raw_m0_curve.to_csv(output_directory / "real_i1_m0_raw_probability_curve.csv", index=False)
 
     all_comparisons: list[pd.DataFrame] = []
     summary_rows: list[dict[str, object]] = []
+    applicability_manifest: dict[str, object] = {}
     by_role = {
         str(whitebox["selection_role"]): whitebox
         for whitebox in whitebox_manifest["whiteboxes"]
@@ -390,6 +442,21 @@ def run_real_trace_diagnostic(
         if role not in by_role:
             raise RuntimeError(f"frozen white-box manifest lacks role {role}")
         whitebox = by_role[role]
+        requested_boundary = AdmissibilityBoundary(
+            l_max=float(whitebox["l_max"]),
+            c_max=float(whitebox["c_max"]),
+            q_min=float(whitebox["q_min"]),
+        )
+        applicable = boundary_is_sufficient_for_query(
+            induced_global_boundary,
+            requested_boundary,
+        )
+        status = "PREDICTED" if applicable else "NOT_APPLICABLE"
+        containment_failure = _containment_failure_summary(
+            induced_global_boundary,
+            requested_boundary,
+        )
+
         whitebox_curve = build_real_whitebox_curve(
             all_top_level_ledgers,
             whitebox,
@@ -397,7 +464,12 @@ def run_real_trace_diagnostic(
             horizons,
             stop_time,
         )
-        comparison, metrics = compare_curves(whitebox_curve, m0_curve)
+        comparison, metrics = compare_curves(
+            whitebox_curve,
+            raw_m0_curve,
+            m0_applicable=applicable,
+        )
+        comparison.insert(0, "m0_status", status)
         comparison.insert(0, "selection_role", role)
         comparison.insert(0, "case_id", str(whitebox["case_id"]))
         all_comparisons.append(comparison)
@@ -409,16 +481,36 @@ def run_real_trace_diagnostic(
             rho_global,
             metrics,
             output_directory / plot_name,
+            m0_applicable=applicable,
+            containment_failure=containment_failure,
         )
         summary_rows.append(
             {
                 "case_id": str(whitebox["case_id"]),
                 "selection_role": role,
                 "rho_global": float(rho_global),
+                "m0_status": status,
+                "containment_failure": containment_failure,
+                "induced_l_max": induced_global_boundary.l_max,
+                "induced_c_max": induced_global_boundary.c_max,
+                "induced_q_min": induced_global_boundary.q_min,
+                "requested_l_max": requested_boundary.l_max,
+                "requested_c_max": requested_boundary.c_max,
+                "requested_q_min": requested_boundary.q_min,
                 **metrics,
                 "plot": plot_name,
             }
         )
+        applicability_manifest[str(whitebox["case_id"])] = {
+            "selection_role": role,
+            "status": status,
+            "containment_failure": containment_failure,
+            "requested_A_G": {
+                "l_max": requested_boundary.l_max,
+                "c_max": requested_boundary.c_max,
+                "q_min": requested_boundary.q_min,
+            },
+        }
 
     comparison_table = pd.concat(all_comparisons, ignore_index=True)
     summary_table = pd.DataFrame(summary_rows)
@@ -445,6 +537,7 @@ def run_real_trace_diagnostic(
         "m0_probability_rule": "product_i sigma_i(A_i,H;rho_G)",
         "whitebox_source": str(whitebox_ledger_path),
         "provider_source_root": str(provider_root),
+        "phase1_physical_config": str(phase1_physical_config_path),
         "derived_local_regions": {
             provider: {
                 "l_max": float(local_regions[provider]["l_max"]),
@@ -453,12 +546,26 @@ def run_real_trace_diagnostic(
             }
             for provider in PROVIDERS
         },
-        "provider_only_parallel_boundary": {
-            "l_max": provider_only_boundary.l_max,
-            "c_max": provider_only_boundary.c_max,
-            "q_min": provider_only_boundary.q_min,
+        "full_M0_induced_boundary": {
+            "l_max": induced_global_boundary.l_max,
+            "c_max": induced_global_boundary.c_max,
+            "q_min": induced_global_boundary.q_min,
         },
-        "full_M0_boundary_applicability_asserted": False,
+        "deterministic_boundary_breakdown": {
+            "root_network_latency": boundary_breakdown.root_network_latency,
+            "pre_service_latency": boundary_breakdown.pre_service_latency,
+            "branch_network_latency": boundary_breakdown.branch_network_latency,
+            "join_network_latency": boundary_breakdown.join_network_latency,
+            "post_service_latency": boundary_breakdown.post_service_latency,
+            "fixed_latency_outside_provider": boundary_breakdown.fixed_latency_outside_provider,
+            "pre_service_cost": boundary_breakdown.pre_service_cost,
+            "post_service_cost": boundary_breakdown.post_service_cost,
+            "fixed_cost_outside_provider": boundary_breakdown.fixed_cost_outside_provider,
+        },
+        "full_M0_boundary_applicability_asserted": True,
+        "case_applicability": applicability_manifest,
+        "raw_probability_component_retained_when_not_applicable": True,
+        "raw_probability_component_is_not_a_prediction_when_not_applicable": True,
     }
     (output_directory / "real_wb_vs_i1_m0_diagnostic_manifest.json").write_text(
         json.dumps(diagnostic_manifest, indent=2), encoding="utf-8"
@@ -475,8 +582,33 @@ def run_real_trace_diagnostic(
     print(f"A_i_calibration_H_star={anchor_horizon:g}")
     print(f"A_i_calibration_sigma_target={sigma_target:g}")
     print("rho_policy=M0_rho_i_equals_evaluated_rho_G")
+    print("full_M0_boundary_applicability_asserted=true")
     print("\nDERIVED_LOCAL_A_I")
     print(region_table.to_string(index=False))
+    print("\nFULL_M0_BOUNDARY")
+    print(
+        f"A_G_M0=(L<={induced_global_boundary.l_max:.15g}, "
+        f"C<={induced_global_boundary.c_max:.15g}, "
+        f"Q>={induced_global_boundary.q_min:.15g})"
+    )
+    print(
+        f"fixed_latency_outside_provider={boundary_breakdown.fixed_latency_outside_provider:.15g} "
+        f"fixed_cost_outside_provider={boundary_breakdown.fixed_cost_outside_provider:.15g}"
+    )
+    print("\nAPPLICABILITY")
+    print(
+        summary_table[
+            [
+                "case_id",
+                "selection_role",
+                "m0_status",
+                "containment_failure",
+                "requested_l_max",
+                "requested_c_max",
+                "requested_q_min",
+            ]
+        ].to_string(index=False)
+    )
     print("\nSIGMA_SNAPSHOT")
     print(snapshot.to_string(index=False))
     print("\nERROR_SUMMARY")
@@ -488,8 +620,8 @@ def run_real_trace_diagnostic(
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Compute real Phase-1 white-box sigma and real I1-M0 sigma using "
-            "the frozen Phase-2 coordinate-wise H*=120 A_i calibration."
+            "Compute real Phase-1 white-box sigma and applicable I1-M0 sigma using "
+            "the frozen Phase-2 A_i calibration and full Phase-1 G0 boundary."
         )
     )
     parser.add_argument("--rho", type=float, default=0.95)
@@ -505,6 +637,11 @@ def main() -> None:
         "--whitebox-manifest",
         type=Path,
         default=PHASE1_DIRECTORY / "phase1_v2_ar_freeze_manifest_v1.json",
+    )
+    parser.add_argument(
+        "--phase1-physical-config",
+        type=Path,
+        default=PHASE1_DIRECTORY / "config_phase1_discovery_v1.json",
     )
     parser.add_argument(
         "--provider-root",
@@ -535,6 +672,7 @@ def main() -> None:
     run_real_trace_diagnostic(
         whitebox_ledger_path=args.whitebox_ledgers.resolve(),
         whitebox_manifest_path=args.whitebox_manifest.resolve(),
+        phase1_physical_config_path=args.phase1_physical_config.resolve(),
         provider_root=args.provider_root.resolve(),
         i1_contract_path=args.i1_contract.resolve(),
         rho_global=float(args.rho),
