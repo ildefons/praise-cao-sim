@@ -58,8 +58,8 @@ def main() -> None:
     expected = [1.0, 1.0, 0.5, 0.5, 0.5]
     assert np.allclose(curve["sigma"].to_numpy(dtype=float), expected, atol=1e-12)
 
-    # The frozen selector is based on first crossing time, not a request-level
-    # percentile.  Candidate 2 crosses below 0.95 exactly at H*=120.
+    # The frozen selector is based on first crossing time. Candidate 2 crosses
+    # below 0.95 exactly at H*=120 and must therefore be selected.
     fake_horizons = [0.0, 60.0, 120.0, 180.0, 240.0]
     crossing_by_threshold = {1.0: 60.0, 2.0: 120.0, 3.0: 180.0, 4.0: None}
 
@@ -82,8 +82,7 @@ def main() -> None:
         "first_crossing_below_sigma_target_closest_to_H_star"
     )
 
-    # Current anchor quality is constant.  The calibrator must preserve its
-    # unique observed value rather than fabricate a crossing threshold.
+    # Current anchor quality is constant. Preserve its unique observed value.
     q_threshold, q_diagnostics = calibrate_coordinate_threshold(
         ledger=ledger,
         coordinate="Q",
@@ -96,13 +95,14 @@ def main() -> None:
     assert isclose(q_threshold, 0.5, abs_tol=1e-12)
     assert q_diagnostics["selection_mode"] == "constant_observed_quality_use_unique_value"
 
-    # The production diagnostic must have no external A_i input.  Its evaluated
-    # rho_G is distinct from the fixed Phase-2 anchor rho used to calibrate A_i.
+    # No external A_i input. The full Phase-1 physical config is now required
+    # because applicability is evaluated on the complete G0 boundary.
     signature = inspect.signature(run_real_trace_diagnostic)
     assert "local_regions_path" not in signature.parameters
     assert "local_regions" not in signature.parameters
     assert "rho_global" in signature.parameters
     assert "provider_root" in signature.parameters
+    assert "phase1_physical_config_path" in signature.parameters
 
     surfaces = {
         "ProviderA": _synthetic_surface([1.0, 0.8]),
@@ -121,7 +121,7 @@ def main() -> None:
             "sigma_whitebox": [0.50, 0.20],
         }
     )
-    comparison, metrics = compare_curves(whitebox, m0)
+    comparison, metrics = compare_curves(whitebox, m0, m0_applicable=True)
     errors = comparison["error_m0_minus_wb"].astype(float).tolist()
     assert len(errors) == 2
     assert isclose(errors[0], -0.05, abs_tol=1e-12)
@@ -130,6 +130,27 @@ def main() -> None:
     assert isclose(metrics["bias"], -0.075, abs_tol=1e-12)
     assert isclose(metrics["rmse"], sqrt((0.05**2 + 0.1**2) / 2), abs_tol=1e-12)
     assert isclose(metrics["max_abs_error"], 0.1, abs_tol=1e-12)
+    assert np.allclose(
+        comparison["sigma_i1_m0_raw_probability_component"].to_numpy(dtype=float),
+        [0.45, 0.1],
+        atol=1e-12,
+    )
+
+    # A failed boundary containment means M0 has no prediction. Keep the raw
+    # product only as a diagnostic component and suppress errors/metrics.
+    not_applicable, na_metrics = compare_curves(
+        whitebox,
+        m0,
+        m0_applicable=False,
+    )
+    assert not_applicable["sigma_i1_m0"].isna().all()
+    assert not_applicable["error_m0_minus_wb"].isna().all()
+    assert np.allclose(
+        not_applicable["sigma_i1_m0_raw_probability_component"].to_numpy(dtype=float),
+        [0.45, 0.1],
+        atol=1e-12,
+    )
+    assert all(np.isnan(value) for value in na_metrics.values())
 
     assert _rho_tag(0.95) == "0p95"
     assert _rho_tag(0.9833333333333333) == "0p983333"
@@ -139,7 +160,10 @@ def main() -> None:
     print("CUMULATIVE_COORDINATE_ACCOUNTING_PASS")
     print("CONSTANT_QUALITY_NO_ARTIFICIAL_THRESHOLD_PASS")
     print("NO_EXTERNAL_A_I_INPUT_PASS")
+    print("FULL_M0_APPLICABILITY_INPUT_PASS")
     print("M0_REAL_CURVE_COMPOSITION_KERNEL_PASS")
+    print("M0_NOT_APPLICABLE_SUPPRESSION_PASS")
+    print("RAW_PRODUCT_RETAINED_AS_DIAGNOSTIC_ONLY_PASS")
     print("WB_M0_ERROR_METRICS_PASS")
 
 
