@@ -3,20 +3,26 @@
 Scientific purpose
 ------------------
 The direct-I1 design requires each provider-local admissibility region A_i to
-come from that provider's own acquisition evidence. This diagnostic therefore
-reuses the already established Phase-1 *style* of AR calibration locally:
-empirical L/C candidate thresholds are generated from the provider trace, then
-candidate sigma surfaces are inspected for a healthy rho=0.95 contour and an
-informative rho=0.99 contour.
+come from that provider's own acquisition evidence. This diagnostic reuses the
+already established Phase-1 style of AR calibration locally: empirical L/C
+candidate thresholds are generated from the provider trace, then candidate
+sigma behavior is inspected for a healthy rho=0.95 contour and an informative
+rho=0.99 contour.
 
 There is deliberately no A_G input, no global budget decomposition, and no
 M0/M1. This file is diagnostic only: it does not select or freeze A_i.
+
+Performance note
+----------------
+The first implementation repeatedly built thousands of Pandas decision tables
+and was unnecessarily slow. This version preserves the same frozen request
+accounting semantics but evaluates each trajectory with NumPy arrays directly.
+No simulator rerun occurs.
 """
 from __future__ import annotations
 
 import hashlib
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -24,16 +30,6 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 PHASE1 = HERE.parent / "phase1"
-if str(PHASE1) not in sys.path:
-    sys.path.insert(0, str(PHASE1))
-
-from sla_compliance_analysis import (  # noqa: E402
-    SlaComplianceDefinition,
-    build_request_sla_decision_table,
-    calculate_empirical_sla_sigma_from_decision_tables,
-    calculate_exact_empirical_sla_compliance_area,
-)
-
 ACQUISITION = HERE / "results" / "i1_acquisition_v1"
 EVIDENCE_MANIFEST = HERE / "phase2_i1_freeze_manifest_v1.json"
 PHASE1_AR_GENERATOR = PHASE1 / "config_phase1_sla_ar_generator_v1.json"
@@ -102,44 +98,181 @@ def build_local_mixed_candidates(
     return candidates
 
 
-def evaluate_candidate(
-    ledger: pd.DataFrame,
+def _trajectory_metrics_numpy(
+    emission: np.ndarray,
+    completion: np.ndarray,
+    cost: np.ndarray,
+    quality: np.ndarray,
+    *,
+    latency_threshold: float,
+    cost_threshold: float,
+    quality_threshold: float,
+    rho_values: tuple[float, ...],
+    stop_time: float,
+) -> tuple[dict[float, float], dict[tuple[float, float], bool]]:
+    """Evaluate one trajectory using the exact frozen request-accounting semantics.
+
+    A request completing by its local latency deadline is decided at completion.
+    Otherwise it is decided as a latency failure at the deadline. Requests whose
+    decision occurs after the simulation stop are unresolved. Exact normalized
+    area is then integrated over the resulting cumulative compliance step
+    process. This is numerically equivalent to the Phase-1 Pandas implementation
+    but avoids constructing intermediate DataFrames.
+    """
+    deadline = emission + float(latency_threshold)
+    completion_finite = np.isfinite(completion)
+    completed_in_time = completion_finite & (
+        completion <= deadline + EVENT_TOLERANCE
+    )
+    decision_time = np.where(completed_in_time, completion, deadline)
+    decided = decision_time <= float(stop_time) + EVENT_TOLERANCE
+
+    compliant = (
+        decided
+        & completed_in_time
+        & np.isfinite(cost)
+        & np.isfinite(quality)
+        & (cost <= float(cost_threshold) + EVENT_TOLERANCE)
+        & (quality + EVENT_TOLERANCE >= float(quality_threshold))
+    )
+
+    times = decision_time[decided].astype(float)
+    passes = compliant[decided].astype(np.int64)
+    if len(times) == 0:
+        areas = {float(rho): 1.0 for rho in rho_values}
+        horizon_states = {
+            (float(rho), float(horizon)): True
+            for rho in rho_values
+            for horizon in REPORT_HORIZONS
+        }
+        return areas, horizon_states
+
+    order = np.argsort(times, kind="stable")
+    times = times[order]
+    passes = passes[order]
+    unique_times, first_indices, counts = np.unique(
+        times, return_index=True, return_counts=True
+    )
+    pass_at_time = np.add.reduceat(passes, first_indices)
+    cumulative_count = np.cumsum(counts, dtype=np.int64)
+    cumulative_pass = np.cumsum(pass_at_time, dtype=np.int64)
+    cumulative_fraction = cumulative_pass / cumulative_count
+
+    observable = unique_times <= float(stop_time) + EVENT_TOLERANCE
+    unique_times = unique_times[observable]
+    cumulative_fraction = cumulative_fraction[observable]
+
+    # Before the first decision c_i=1. After every decision event the new
+    # cumulative fraction holds until the next event.
+    boundaries = np.concatenate(
+        (
+            np.asarray([0.0], dtype=float),
+            np.minimum(unique_times, float(stop_time)),
+            np.asarray([float(stop_time)], dtype=float),
+        )
+    )
+    widths = np.diff(boundaries)
+    widths = np.maximum(widths, 0.0)
+    interval_fraction = np.concatenate(
+        (np.asarray([1.0], dtype=float), cumulative_fraction.astype(float))
+    )
+    if len(widths) != len(interval_fraction):
+        raise RuntimeError("internal local exact-area construction mismatch")
+
+    areas: dict[float, float] = {}
+    for rho in rho_values:
+        passing = interval_fraction + EVENT_TOLERANCE >= float(rho)
+        areas[float(rho)] = float(
+            np.sum(widths * passing.astype(float)) / float(stop_time)
+        )
+
+    fraction_at_horizon: dict[float, float] = {}
+    for horizon in REPORT_HORIZONS:
+        index = int(
+            np.searchsorted(
+                unique_times, float(horizon) + EVENT_TOLERANCE, side="right"
+            )
+        )
+        fraction_at_horizon[float(horizon)] = (
+            1.0 if index == 0 else float(cumulative_fraction[index - 1])
+        )
+
+    horizon_states = {
+        (float(rho), float(horizon)): bool(
+            fraction_at_horizon[float(horizon)] + EVENT_TOLERANCE >= float(rho)
+        )
+        for rho in rho_values
+        for horizon in REPORT_HORIZONS
+    }
+    return areas, horizon_states
+
+
+def _trajectory_arrays(ledger: pd.DataFrame) -> list[tuple[np.ndarray, ...]]:
+    """Convert each provider trajectory once to compact numerical arrays."""
+    required = {"trajectory", "emission", "completion", "C", "Q"}
+    missing = required.difference(ledger.columns)
+    if missing:
+        raise ValueError(f"provider ledger missing columns: {sorted(missing)}")
+
+    arrays: list[tuple[np.ndarray, ...]] = []
+    for _, trajectory in ledger.groupby("trajectory", sort=True):
+        arrays.append(
+            (
+                pd.to_numeric(trajectory["emission"], errors="coerce").to_numpy(dtype=float),
+                pd.to_numeric(trajectory["completion"], errors="coerce").to_numpy(dtype=float),
+                pd.to_numeric(trajectory["C"], errors="coerce").to_numpy(dtype=float),
+                pd.to_numeric(trajectory["Q"], errors="coerce").to_numpy(dtype=float),
+            )
+        )
+    if not arrays:
+        raise ValueError("provider ledger contains no trajectories")
+    return arrays
+
+
+def evaluate_candidate_fast(
+    trajectory_arrays: list[tuple[np.ndarray, ...]],
     candidate: dict[str, object],
     rho_values: tuple[float, ...],
     stop_time: float,
 ) -> dict[str, object]:
-    """Evaluate one local A_i on the frozen provider trajectories."""
-    decision_tables = []
-    for _, trajectory_ledger in ledger.groupby("trajectory", sort=True):
-        decision_tables.append(
-            build_request_sla_decision_table(
-                trajectory_ledger,
-                latency_threshold=float(candidate["l_max"]),
-                cost_threshold=float(candidate["c_max"]),
-                quality_threshold=float(candidate["q_min"]),
-                stop_time=float(stop_time),
-            )
-        )
+    """Evaluate one local A_i without repeated Pandas decision-table construction."""
+    area_sum = {float(rho): 0.0 for rho in rho_values}
+    success_count = {
+        (float(rho), float(horizon)): 0
+        for rho in rho_values
+        for horizon in REPORT_HORIZONS
+    }
 
+    for emission, completion, cost, quality in trajectory_arrays:
+        areas, states = _trajectory_metrics_numpy(
+            emission,
+            completion,
+            cost,
+            quality,
+            latency_threshold=float(candidate["l_max"]),
+            cost_threshold=float(candidate["c_max"]),
+            quality_threshold=float(candidate["q_min"]),
+            rho_values=rho_values,
+            stop_time=float(stop_time),
+        )
+        for rho in rho_values:
+            area_sum[float(rho)] += areas[float(rho)]
+            for horizon in REPORT_HORIZONS:
+                success_count[(float(rho), float(horizon))] += int(
+                    states[(float(rho), float(horizon))]
+                )
+
+    n_trajectories = len(trajectory_arrays)
     result = dict(candidate)
     for rho in rho_values:
-        definition = SlaComplianceDefinition(
-            rho=float(rho), accounting_origin=0.0, zero_decision_compliance=1.0
-        )
-        _, normalized_area = calculate_exact_empirical_sla_compliance_area(
-            decision_tables,
-            definition,
-            horizon_min=0.0,
-            horizon_max=float(stop_time),
-        )
-        sigma, _ = calculate_empirical_sla_sigma_from_decision_tables(
-            decision_tables, REPORT_HORIZONS, definition
-        )
         tag = str(rho).replace(".", "p")
-        result[f"R_{tag}"] = float(normalized_area)
-        by_h = sigma.set_index("horizon")["sigma"]
-        result[f"sigma120_{tag}"] = float(by_h.loc[120.0])
-        result[f"sigma240_{tag}"] = float(by_h.loc[240.0])
+        result[f"R_{tag}"] = float(area_sum[float(rho)] / n_trajectories)
+        result[f"sigma120_{tag}"] = float(
+            success_count[(float(rho), 120.0)] / n_trajectories
+        )
+        result[f"sigma240_{tag}"] = float(
+            success_count[(float(rho), 240.0)] / n_trajectories
+        )
     return result
 
 
@@ -164,6 +297,7 @@ def main() -> None:
     print("A_G_used=false")
     print("global_budget_split=false")
     print("M0_M1_used=false")
+    print("implementation=numpy_fast_v2")
     print(f"candidate_quantiles={levels}")
     print(
         "local_diagnostic_gate="
@@ -173,6 +307,7 @@ def main() -> None:
     )
 
     for provider in PROVIDERS:
+        print(f"\n{provider}: loading frozen local evidence...", flush=True)
         ledger_path = (
             ACQUISITION / "private" / provider / "provider_request_ledgers.csv"
         )
@@ -180,11 +315,22 @@ def main() -> None:
         if _sha256(ledger_path) != expected_hash:
             raise RuntimeError(f"{provider} frozen provider-corpus SHA-256 mismatch")
         ledger = pd.read_csv(ledger_path)
+        trajectories = _trajectory_arrays(ledger)
+        candidates = build_local_mixed_candidates(ledger, provider, levels)
 
-        rows = [
-            evaluate_candidate(ledger, candidate, rho_values, stop_time)
-            for candidate in build_local_mixed_candidates(ledger, provider, levels)
-        ]
+        rows: list[dict[str, object]] = []
+        for index, candidate in enumerate(candidates, start=1):
+            rows.append(
+                evaluate_candidate_fast(
+                    trajectories, candidate, rho_values, stop_time
+                )
+            )
+            if index in (5, 10, 15, 20, 25):
+                print(
+                    f"{provider}: evaluated {index}/{len(candidates)} candidates",
+                    flush=True,
+                )
+
         frame = pd.DataFrame(rows)
         nominal_column = f"R_{str(nominal_rho).replace('.', 'p')}"
         stress_column = f"R_{str(stress_rho).replace('.', 'p')}"
