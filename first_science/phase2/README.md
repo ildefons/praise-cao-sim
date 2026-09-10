@@ -1,64 +1,60 @@
 # PRAISE first science - Phase 2 / I1
 
-Phase 2 owns construction of the provider information object `I1`. The public schema, provider-local `T_i -> A_i` rule, H/rho support, and materialization pipeline are frozen.
+Phase 2 owns construction of the provider information object `I1` from the frozen private provider evidence. The private acquisition corpus, workload, H grid, cumulative accounting semantics, and Phase-1 white-box benchmark remain unchanged.
 
-The active path is:
+## Current correction under validation: rho-conditioned local regions
 
-`frozen provider evidence T_i -> frozen A_i calibration -> full sigma_i(A_i,H;rho) surface -> hash-frozen public I1_i -> M0/M1`
+The historical materialization `results/i1_cards_v1/` used one fixed local region per provider, selected by the earlier `H*=120`, `rho_anchor=.95`, `sigma_target=.95` first-crossing calibration. That branch is retained for provenance, but it is no longer the intended scientific construction if the rho-conditioned candidate below validates.
 
-There is no `A_G -> A_i` step and Phase 2 does not select a provider-specific `rho_i`.
+The candidate path is
 
-## Provider evidence - FROZEN
+`T_i -> joint log(L,C) GMM -> A_i(rho_region) -> sigma_i(A_i(rho_region),H;rho_query) -> public I1_i`.
+
+The central map is
+
+`Gamma(T_i,rho_region)=A_i(rho_region)`.
+
+For the current benchmark, `Q=0.5` is degenerate. Each provider therefore fits a full-covariance Gaussian mixture in `(log L, log C)`. The number of components is selected by minimum BIC over `K=1..4`. From one deterministic `N=100000` sample of the fitted joint model, the code extracts the minimum-area origin-anchored rectangle `[0,l] x [0,c]` containing at least the requested model probability content. Regions are constrained to be nested as `rho_region` increases. Non-degenerate Q is deliberately rejected in this version rather than generalized without a frozen rule.
+
+The finite region-content support is
+
+`R_region={0.95,0.975,0.9833333333333333,0.99,0.995}`.
+
+`rho_region=1` is not used because a Gaussian mixture has unbounded support and therefore no finite exact 100% probability-content rectangle.
+
+The trajectory-compliance query threshold remains a separate coordinate in the public card:
+
+`sigma_i(A_i(rho_region),H;rho_query)=P(c_i(A_i(rho_region),H)>=rho_query)`.
+
+For now the same support is exposed for `rho_query`. The complete Cartesian `A_i(rho_region) x rho_query x H` surface is materialized so later methods never need private traces. The official M0 comparison first uses only the diagonal
+
+`rho_region=rho_query=rho_i=rho_G`.
+
+## Provider evidence - unchanged and hash frozen
 
 `config_phase2_i1_acquisition_v1.json` defines the completed acquisition protocol. The private corpus contains 100 trajectories, seeds `6000..6099`, and 119900 provider-request rows per provider. `phase2_i1_freeze_manifest_v1.json` stores the frozen SHA-256 fingerprints.
 
-## Public I1 object - FROZEN
+The new materializer verifies these same hashes before doing any GMM fitting. No new provider simulation is required, and Phase-1 white-box outputs are forbidden from the I1 construction.
 
-For each provider:
+## Versioned implementations
 
-`I1_i = (A_i, W_i, R, {sigma_i(A_i,H;rho): H in H, rho in R})`
+Historical fixed-region branch, retained for provenance:
 
-with
+- `config_phase2_i1_provider_card_v2.json`
+- `i1_local_region.py`
+- `materialize_frozen_i1_cards.py`
+- generated `results/i1_cards_v1/`
 
-`sigma_i(A_i,H;rho) = P(c_i(A_i,H) >= rho)`.
+Rho-conditioned candidate branch:
 
-Frozen support:
+- `config_phase2_i1_provider_card_v3_rho_conditioned.json`
+- `i1_rho_conditioned_region.py`
+- `materialize_rho_conditioned_i1_cards.py`
+- generated `results/i1_cards_v2_rho_conditioned/`
 
-- `H={0,5,...,240}`;
-- `R={0.95,0.975,0.9833333333333333,0.99,1.0}`.
+The generic `i1_provider_card.py` is reused. It already supports multiple exact local regions and computes the H x rho query surface from the frozen provider ledgers using the established cumulative request-decision semantics.
 
-The public card contains `A_i`, workload/context `W_i`, exact H/rho support, the sigma surface, and confidence metadata. Provider traces remain private.
-
-## T_i -> A_i calibration - FROZEN
-
-`i1_local_region.py` implements the frozen coordinate-wise anchor rule:
-
-- `rho_anchor=0.95`;
-- `H*=120 s`;
-- `sigma_target=0.95`.
-
-For latency, cost, and quality separately, select the observed threshold whose first `sigma_i(A_i^X,H;rho_anchor)` crossing below 0.95 occurs closest to 120 s. Combine the three thresholds into
-
-`A_i={L_i<=l_i*, C_i<=c_i*, Q_i>=q_i*}`.
-
-The resulting joint sigma is measured, not forced to 0.95. If quality is constant, its unique observed value is used directly.
-
-`rho_anchor` is a Phase-2 calibration anchor, not a provider-specific `rho_i`. After `A_i` is fixed, the full frozen rho support is materialized.
-
-## Public card materialization - FROZEN PIPELINE
-
-`materialize_frozen_i1_cards.py` is the only materialization path. It:
-
-1. verifies all three private provider-ledger SHA-256 hashes against `phase2_i1_freeze_manifest_v1.json`;
-2. derives the three fixed `A_i` values using the rule above;
-3. computes every H x rho I1 point from the same frozen corpus;
-4. writes `card.json` and `sigma_surface.csv` for ProviderA/B/C;
-5. reloads and validates each public card;
-6. writes `i1_card_instances_manifest_v1.json` containing the public card hashes.
-
-Generated cards live under `results/i1_cards_v1/public/` and are intentionally generated artifacts. The instance manifest, rather than a source-code boolean, records whether a concrete materialization exists.
-
-M0 and M1 must consume exactly these same hash-frozen public cards. Phase 3 is forbidden from reading the private provider ledgers.
+Fitted GMM parameters, BIC diagnostics and the synthetic model sample stay private. The public handoff contains only the rho-conditioned regions, their support, workload/context, exact sigma surfaces and confidence metadata. The resulting public cards are hash recorded in `i1_rho_conditioned_manifest_v1.json` and are intended to be supplied unchanged to M0 and M1.
 
 ## Validation and materialization
 
@@ -67,19 +63,33 @@ Starting from the repository root:
 ```bash
 cd ~/praise/praise-cao-sim
 
-python first_science/phase2/test_phase2_direct_i1_contract.py
-python first_science/phase2/test_materialize_frozen_i1_cards.py
-python first_science/phase2/materialize_frozen_i1_cards.py
+git pull origin first-science-phase1
+
+python -c "import sklearn; print(sklearn.__version__)"
+python first_science/phase2/test_i1_rho_conditioned_region.py
+python first_science/phase2/test_materialize_rho_conditioned_i1_cards.py
+python first_science/phase2/materialize_rho_conditioned_i1_cards.py
 ```
 
-Expected materialization markers:
+Expected markers include:
 
 ```text
-PHASE2_I1_CARD_MATERIALIZATION_PASS
+PHASE2_RHO_CONDITIONED_REGION_TESTS_PASS
+JOINT_LOG_LC_GMM_BIC_PASS
+MINIMUM_AREA_JOINT_MASS_BOX_PASS
+NESTED_A_I_OF_RHO_PASS
+FINITE_GMM_RHO_ONE_BLOCKED_PASS
+NONDEGENERATE_Q_NOT_SILENTLY_GENERALIZED_PASS
+
+PHASE2_RHO_CONDITIONED_I1_CONTRACT_TESTS_PASS
+OLD_H120_SINGLE_A_I_CALIBRATION_BLOCKED_PASS
+MULTI_A_I_PUBLIC_CARD_MATERIALIZATION_PASS
+
+PHASE2_RHO_CONDITIONED_I1_MATERIALIZATION_PASS
 PRIVATE_EVIDENCE_HASH_VERIFICATION_PASS
-THREE_PUBLIC_I1_CARDS_WRITTEN_PASS
-PUBLIC_I1_CARD_HASH_FREEZE_PASS
-SAME_I1_FOR_M0_M1_PASS
+JOINT_LOG_GMM_REGION_EXTRACTION_PASS
+PUBLIC_I1_RHO_REGION_CARTESIAN_SURFACE_PASS
+SAME_CORRECTED_I1_FOR_M0_M1_PASS
 ```
 
-After this step, Phase 3 consumes only `results/i1_cards_v1/public/` and its instance manifest.
+After validation, Phase 3 must consume only `results/i1_cards_v2_rho_conditioned/public/`; it must never refit the GMM or read the private provider ledgers.
