@@ -1,8 +1,9 @@
 """Simulator-independent checks for the direct-trace Phase-2 design harness.
 
-The public I1 schema and the trace-plus-rho_G A_i construction rule are frozen.
-The tests prevent regression to the rejected independent marginal percentile
-construction, A_G localization, rho_i-driven A_i construction, or method feedback.
+The public I1 schema and the recovered provider-local coordinate calibration are
+frozen.  The tests prevent regression to the rejected request-level percentile
+construction, A_G localization, rho_i-driven A_i construction, or method
+feedback.
 """
 from __future__ import annotations
 
@@ -40,39 +41,44 @@ def run_all_tests() -> None:
         "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})"
     )
     assert card["R"]["phase2_selects_rho_i"] is False
-    assert card["A_i"]["status"] == "FROZEN_TRACE_PLUS_RHO_G_JOINT_COMMON_RANK_V1"
+    assert card["A_i"]["status"] == "FROZEN_TRACE_COORDINATE_SIGMA_CALIBRATION_V1"
     assert card["A_i"]["owner"] == "Phase2 information construction"
     assert card["A_i"]["A_G_is_input"] is False
-    assert card["A_i"]["rho_G_is_input"] is True
     assert card["A_i"]["rho_i_is_input"] is False
     assert card["A_i"]["M0_or_M1_may_choose_or_alter_A_i"] is False
-    assert card["A_i"]["construction_rule"]["marginal_rho_thresholds_selected_independently"] is False
-    assert card["A_i"]["construction_rule"]["sigma_target_used"] is False
+    assert card["A_i"]["request_level_percentile_target_used"] is False
+    assert card["A_i"]["posthoc_method_result_tuning_authorized"] is False
+
+    card_calibration = card["A_i"]["calibration"]
+    assert card_calibration["rho_anchor"] == 0.95
+    assert card_calibration["H_star"] == 120.0
+    assert card_calibration["sigma_target"] == 0.95
+    assert "first sigma_i" in card_calibration["coordinate_rule"]
+    assert "not forced" in card_calibration["combine_rule"]
 
     ai = contract["A_i_instantiation"]
-    assert ai["status"] == "FROZEN_TRACE_PLUS_RHO_G_JOINT_COMMON_RANK_V1"
+    assert ai["status"] == "FROZEN_TRACE_COORDINATE_SIGMA_CALIBRATION_V1"
     assert ai["source"] == "provider_i_local_acquisition_evidence_only"
     assert ai["A_G_is_input"] is False
-    assert ai["rho_G_is_input"] is True
     assert ai["rho_i_is_input"] is False
     assert ai["global_budget_split_allowed"] is False
     assert ai["M0_or_M1_may_choose_A_i"] is False
-    assert ai["selection_rule"] == "minimal k with joint empirical coverage at least rho_G"
-    assert ai["independent_marginal_rho_thresholds_forbidden"] is True
-    assert ai["arbitrary_fixed_percentile_level_forbidden"] is True
-    assert ai["local_sigma_shape_tuning_authorized"] is False
+    assert ai["rho_anchor"] == 0.95
+    assert ai["H_star"] == 120.0
+    assert ai["sigma_target"] == 0.95
+    assert "first sigma_i" in ai["selection_rule"]
+    assert ai["request_level_percentile_target_forbidden"] is True
+    assert ai["posthoc_method_result_tuning_forbidden"] is True
     assert ai["implementation_module"] == "i1_local_region.py"
 
     harness = contract["hard_design_harness"]
     assert harness["I1_schema_may_not_be_reopened_to_solve_A_i_instantiation"] is True
     assert harness["A_G_to_A_i_forbidden"] is True
     assert harness["rho_i_to_A_i_forbidden"] is True
-    assert harness["rho_G_to_A_i_required"] is True
     assert harness["global_budget_split_forbidden"] is True
-    assert harness["independent_marginal_rho_thresholds_forbidden"] is True
-    assert harness["arbitrary_fixed_percentile_A_i_forbidden"] is True
-    assert harness["joint_common_rank_rho_G_rule_required"] is True
-    assert harness["local_sigma_shape_tuning_forbidden"] is True
+    assert harness["request_level_percentile_A_i_forbidden"] is True
+    assert harness["coordinate_sigma_crossing_H120_rule_required"] is True
+    assert harness["posthoc_local_sigma_shape_tuning_forbidden"] is True
     assert harness["Phase1_global_sigma_used_to_construct_A_i"] is False
     assert harness["M0_result_used_to_construct_A_i"] is False
     assert harness["M1_result_used_to_construct_A_i"] is False
@@ -87,7 +93,6 @@ def run_all_tests() -> None:
     ]:
         assert not (HERE / filename).exists(), filename
 
-    # The canonical A_i implementation now exists in Phase 2.
     assert (HERE / "i1_local_region.py").exists()
 
     # The already acquired evidence is preserved exactly.
@@ -112,15 +117,16 @@ def run_all_tests() -> None:
     assert m0["numerical_I1_to_M0_status"] == "READY_FOR_DIAGNOSTIC_AFTER_TRACE_DERIVED_A_i"
     assert m0["M0_may_not_choose_or_modify_A_i"] is True
 
-    assert contract["finalization"]["concrete_A_i_depend_on_rho_G"] is True
+    assert contract["finalization"]["concrete_A_i_calibrated_from_anchor_rho_G_0p95"] is True
     assert contract["finalization"]["phase2_rho_i_selected"] is False
     assert contract["finalization"]["final_I1_materialized"] is False
     assert contract["finalization"]["numerical_phase3_diagnostic_allowed"] is True
 
     print("PHASE2_DIRECT_I1_DESIGN_HARNESS_TESTS_PASS")
     print("I1_SCHEMA_REMAINS_FROZEN_PASS")
-    print("A_I_TRACE_PLUS_RHO_G_RULE_FROZEN_PASS")
-    print("MARGINAL_PERCENTILE_COMPOUNDING_BLOCKED_PASS")
+    print("A_I_H120_COORDINATE_CALIBRATION_FROZEN_PASS")
+    print("REQUEST_LEVEL_PERCENTILE_A_I_BLOCKED_PASS")
+    print("JOINT_SIGMA_NOT_FORCED_TO_CALIBRATION_TARGET_PASS")
     print("M0_SAME_RHO_POLICY_FROZEN_PASS")
 
 
