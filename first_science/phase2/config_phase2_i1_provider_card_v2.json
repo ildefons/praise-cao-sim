@@ -44,24 +44,25 @@
     "adapt_after_method_results": false
   },
   "A_i": {
-    "status": "FROZEN_TRACE_PLUS_RHO_G_JOINT_COMMON_RANK_V1",
+    "status": "FROZEN_TRACE_COORDINATE_SIGMA_CALIBRATION_V1",
     "owner": "Phase2 information construction",
     "source": "provider_i_local_acquisition_evidence_only",
-    "one_region_per_provider_per_global_query": true,
+    "one_region_per_provider": true,
     "A_G_is_input": false,
-    "rho_G_is_input": true,
     "rho_i_is_input": false,
     "M0_or_M1_may_choose_or_alter_A_i": false,
-    "construction_rule": {
-      "joint_finite_population": "rows of T_i with finite L_i,C_i,Q_i",
-      "common_rank_family": "A_i(k)={L_i<=L_(k),C_i<=C_(k),Q_i>=Q_[k]}, with L/C kth ascending and Q kth descending order statistics on the same joint-finite sample",
-      "selection": "choose the smallest common rank k whose joint empirical coverage P_hat_Ti[(L_i,C_i,Q_i) in A_i(k)] is at least rho_G",
-      "marginal_rho_thresholds_selected_independently": false,
-      "additional_percentile_level": false,
-      "sigma_target_used": false,
-      "posthoc_sigma_shape_tuning": false
+    "request_level_percentile_target_used": false,
+    "posthoc_method_result_tuning_authorized": false,
+    "calibration": {
+      "rho_anchor": 0.95,
+      "rho_anchor_semantics": "frozen global cumulative-admissibility query used to calibrate A_i; not a provider-specific M0 rho_i",
+      "H_star": 120.0,
+      "sigma_target": 0.95,
+      "coordinate_rule": "For L, C and Q separately, select the observed candidate threshold whose first sigma_i(A_i^X,H;rho_anchor) crossing below sigma_target occurs closest to H_star.",
+      "combine_rule": "A_i={L_i<=l_i_star,C_i<=c_i_star,Q_i>=q_i_star}; the joint sigma at H_star is not forced to sigma_target.",
+      "quality_constant_rule": "If Q is constant in T_i, use the unique observed Q value and do not invent an artificial quality crossing."
     },
-    "note": "rho_G parameterizes the deterministic trace-to-A_i construction. This is distinct from rho_i, which is not selected by Phase 2. After A_i is fixed for the global query, I1 still exposes the complete frozen R surface."
+    "note": "The recovered 0.95-at-120 coordinate calibration is the frozen T_i-to-A_i rule under current cumulative-admissibility semantics."
   },
   "acquisition_principle": {
     "one_frozen_private_provider_ledger_corpus": true,
