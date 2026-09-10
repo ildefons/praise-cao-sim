@@ -1,4 +1,9 @@
-"""Simulator-independent contract checks for the corrected direct Phase-2 I1 path."""
+"""Simulator-independent checks for the direct-trace Phase-2 design harness.
+
+This test is intentionally a scientific-boundary test, not a materialization
+test. If the public I1 representation is not explicitly frozen in the design,
+Phase 2 must stop rather than infer an A_i envelope from older code.
+"""
 from __future__ import annotations
 
 import json
@@ -15,37 +20,46 @@ def run_all_tests() -> None:
     contract = _load(HERE / "config_phase2_i1_direct_trace_v2.json")
     evidence = _load(HERE / "phase2_i1_freeze_manifest_v1.json")
 
-    assert contract["status"] == "PHASE2_DIRECT_I1_CONSTRUCTION_V2_AI_SELECTION_OPEN"
-    assert contract["provider_acquisition"]["seed_bank"] == "6000..6099"
-    assert contract["provider_acquisition"]["n_trajectories"] == 100
+    assert contract["status"] == (
+        "PHASE2_DIRECT_I1_CONSTRUCTION_V2_REPRESENTATION_RECONCILIATION_OPEN"
+    )
+    retained = contract["retained_valid_evidence"]
+    assert retained["seed_bank"] == "6000..6099"
+    assert retained["n_trajectories"] == 100
 
-    ownership = contract["A_i_ownership"]
-    assert ownership["owner"] == "Phase2 information construction"
-    assert ownership["source"] == "provider_i_local_acquisition_evidence_only"
-    assert ownership["A_G_is_input"] is False
-    assert ownership["global_budget_split_allowed"] is False
-    assert ownership["M0_or_M1_may_choose_A_i"] is False
-    assert ownership["same_rule_form_for_all_providers"] is True
-    assert ownership["selection_rule_status"] == "OPEN_BEFORE_FINAL_CARD_FREEZE"
+    reconciliation = contract["representation_reconciliation"]
+    assert reconciliation["status"] == "OPEN_HARD_STOP_BEFORE_MORE_I1_MATERIALIZATION_CODE"
+    assert reconciliation["public_I1_schema"] == "NOT_YET_FROZEN"
+    assert reconciliation["raw_trace_publication_assumed"] is False
 
-    firewall = contract["information_firewall"]
-    assert all(value is False for value in firewall.values())
+    harness = contract["hard_design_harness"]
+    assert harness["A_G_to_A_i_forbidden"] is True
+    assert harness["global_budget_split_forbidden"] is True
+    assert harness["quantile_or_percentile_based_A_i_forbidden"] is True
+    assert harness["support_extrema_based_A_i_forbidden_without_explicit_design_change"] is True
+    assert harness["local_sigma_shape_tuning_forbidden"] is True
+    assert harness["Phase1_global_sigma_used_to_construct_I1"] is False
+    assert harness["M0_result_used_to_construct_I1"] is False
+    assert harness["M1_result_used_to_construct_I1"] is False
+    assert harness["infer_unspecified_scientific_choice_from_old_code"] is False
+    assert harness["required_behavior_when_design_is_unspecified"] == (
+        "STOP_AND_RECONCILE_THE_DESIGN_DOCUMENT"
+    )
 
-    assert contract["surface_support"]["H"] == {
-        "minimum": 0.0,
-        "maximum": 240.0,
-        "step": 5.0,
-    }
-    assert contract["surface_support"]["R"] == [
-        0.95,
-        0.975,
-        0.9833333333333333,
-        0.99,
-        1.0,
+    # The p99/quantile branch was a design-harness violation and must not remain
+    # as active Phase-2 materialization code.
+    forbidden_active_files = [
+        "config_phase2_i1_local_region_rule_v1.json",
+        "config_phase2_i1_provider_card_v2.json",
+        "materialize_direct_i1_cards.py",
+        "test_materialize_direct_i1_cards.py",
+        "diagnose_direct_i1_local_ar.py",
+        "test_diagnose_direct_i1_local_ar.py",
     ]
+    for filename in forbidden_active_files:
+        assert not (HERE / filename).exists(), filename
 
-    # The corrected architecture reuses the already frozen provider evidence;
-    # it does not replace or reinterpret the actual acquisition corpus.
+    # The already acquired evidence is preserved exactly.
     assert evidence["n_trajectories"] == 100
     assert evidence["provider_rows"] == {
         "ProviderA": 119900,
@@ -58,11 +72,28 @@ def run_all_tests() -> None:
         "ProviderC",
     }
 
-    assert contract["finalization"]["A_i_rule_frozen"] is False
-    assert contract["finalization"]["final_cards_materialized"] is False
-    assert contract["finalization"]["phase3_allowed"] is False
+    m0 = contract["m0_boundary"]
+    assert m0["generic_topology_aware_LCQ_algebra_remains_frozen"] is True
+    assert m0["numerical_I1_to_M0_adapter_status"] == "BLOCKED_PENDING_FINAL_I1_SCHEMA"
+    assert m0["M0_may_not_force_a_particular_I1_representation"] is True
 
-    print("PHASE2_DIRECT_I1_CONTRACT_TESTS_PASS")
+    finalization = contract["finalization"]
+    assert finalization["public_I1_schema_frozen"] is False
+    assert finalization["final_I1_materialized"] is False
+    assert finalization["numerical_phase3_allowed"] is False
+
+    # The active contract itself must not encode the rejected percentile rule.
+    active_text = (HERE / "config_phase2_i1_direct_trace_v2.json").read_text(
+        encoding="utf-8"
+    ).lower()
+    assert "p99" not in active_text
+    assert '"quantile":' not in active_text
+    assert '"percentile":' not in active_text
+
+    print("PHASE2_DIRECT_I1_DESIGN_HARNESS_TESTS_PASS")
+    print("UNSPECIFIED_I1_REPRESENTATION_HARD_STOP_PASS")
+    print("PERCENTILE_A_I_BRANCH_REMOVED_PASS")
+    print("M0_STRUCTURAL_KERNEL_PRESERVED_NUMERIC_ADAPTER_BLOCKED_PASS")
 
 
 if __name__ == "__main__":
