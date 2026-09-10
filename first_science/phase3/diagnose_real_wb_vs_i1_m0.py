@@ -3,25 +3,28 @@
 Scientific inputs
 -----------------
 * White-box truth: frozen Phase-1 v2 fresh-confirmation top-level ledgers.
-* Provider information: frozen Phase-2 provider-local acquisition ledgers.
+* Provider information: frozen Phase-2 provider-local acquisition ledgers T_i.
+* Query tolerance: rho_G.
 * M0 probability rule: rho_i = rho_G and product_i sigma_i(A_i,H;rho_G).
 
-This diagnostic never derives or tunes A_i. The caller must supply the three
-explicit provider-local rectangular regions. Therefore plotting cannot silently
-solve the separate Phase-2 T_i -> A_i design problem.
+For this diagnostic there is no external A_i input. Each provider-local
+rectangular A_i is derived deterministically from its own frozen trace bank T_i
+and rho_G. For upper-bounded coordinates L and C, use the smallest observed
+threshold covering at least rho_G of finite observations. For lower-bounded Q,
+use the largest observed threshold retaining at least rho_G of finite
+observations. These are empirical order statistics, not tuned sigma targets.
 
-All plotted sigma values are recomputed from the real frozen trace banks. The
-I1-M0 curve is the real probability-composition component of M0. This script
-intentionally does not claim the separate full-graph boundary-applicability
-check because the final numerical adapter for deterministic graph/network terms
-must be frozen independently.
+All plotted sigma values are then recomputed from the real frozen trace banks.
+The I1-M0 curve is the real same-rho probability-composition component of M0.
+This script does not claim the separate full-graph boundary-applicability check,
+which also requires the deterministic pre/post/network boundary adapter.
 """
 from __future__ import annotations
 
 import argparse
 import json
-import math
 import sys
+from math import ceil
 from pathlib import Path
 from typing import Any
 
@@ -57,6 +60,7 @@ ROLE_TITLES = {
     "mixed": "Mixed L/C",
 }
 EVENT_TOLERANCE = 1e-12
+SNAPSHOT_HORIZONS = (0.0, 60.0, 120.0, 180.0, 240.0)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -65,58 +69,88 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _rho_tag(rho: float) -> str:
-    """Return a filesystem-safe rho label without altering filename suffixes."""
+    """Return a filesystem-safe rho label."""
     return f"{float(rho):.6f}".rstrip("0").rstrip(".").replace(".", "p")
 
 
-def load_explicit_local_regions(path: Path) -> dict[str, AdmissibilityBoundary]:
-    """Load caller-supplied A_i values without deriving or tuning thresholds.
+def _finite_values(series: pd.Series) -> np.ndarray:
+    """Return sorted finite observations as float64."""
+    values = pd.to_numeric(series, errors="coerce").to_numpy(dtype=float)
+    values = values[np.isfinite(values)]
+    if len(values) == 0:
+        raise ValueError("cannot derive an empirical threshold from no finite observations")
+    return np.sort(values)
 
-    Expected minimal format::
 
-        {
-          "regions": {
-            "ProviderA": {"l_max": ..., "c_max": ..., "q_min": ...},
-            "ProviderB": {"l_max": ..., "c_max": ..., "q_min": ...},
-            "ProviderC": {"l_max": ..., "c_max": ..., "q_min": ...}
-          }
-        }
+def empirical_upper_threshold(series: pd.Series, rho: float) -> float:
+    """Smallest observed x with empirical P(X<=x) >= rho."""
+    probability = float(rho)
+    if not 0.0 < probability <= 1.0:
+        raise ValueError("rho must lie in (0,1]")
+    values = _finite_values(series)
+    required = int(ceil(probability * len(values)))
+    return float(values[required - 1])
 
-    ``rho`` and ``rho_i`` are rejected. A_i construction is independent of the
-    later M0 same-rho slice selection.
+
+def empirical_lower_threshold(series: pd.Series, rho: float) -> float:
+    """Largest observed x with empirical P(X>=x) >= rho."""
+    probability = float(rho)
+    if not 0.0 < probability <= 1.0:
+        raise ValueError("rho must lie in (0,1]")
+    values = _finite_values(series)
+    required = int(ceil(probability * len(values)))
+    return float(values[len(values) - required])
+
+
+def derive_local_regions_from_traces(
+    provider_ledgers: dict[str, pd.DataFrame],
+    rho_global: float,
+) -> tuple[dict[str, AdmissibilityBoundary], pd.DataFrame]:
+    """Derive A_A,A_B,A_C deterministically from T_i and rho_G only.
+
+    For each provider i:
+
+      l_i = min observed l with empirical P(L_i <= l) >= rho_G
+      c_i = min observed c with empirical P(C_i <= c) >= rho_G
+      q_i = max observed q with empirical P(Q_i >= q) >= rho_G
+
+    No sigma curve, A_G boundary, M0/M1 result, or additional percentile level
+    enters this construction.
     """
-    document = _read_json(path)
-    if "rho" in document or "rho_i" in document:
-        raise ValueError("local-region input must not select rho or rho_i")
-    regions = document.get("regions")
-    if not isinstance(regions, dict):
-        raise ValueError("local-region JSON must contain an object named 'regions'")
-    if set(regions) != set(PROVIDERS):
-        raise ValueError(
-            "local-region JSON must contain exactly ProviderA, ProviderB and ProviderC"
-        )
+    rho_g = float(rho_global)
+    if not 0.0 < rho_g <= 1.0:
+        raise ValueError("rho_global must lie in (0,1]")
+    if set(provider_ledgers) != set(PROVIDERS):
+        raise ValueError("provider ledgers must contain exactly ProviderA/B/C")
 
-    parsed: dict[str, AdmissibilityBoundary] = {}
+    regions: dict[str, AdmissibilityBoundary] = {}
+    rows: list[dict[str, object]] = []
     for provider in PROVIDERS:
-        region = regions[provider]
-        if not isinstance(region, dict):
-            raise ValueError(f"{provider} region must be a JSON object")
-        if "rho" in region or "rho_i" in region:
-            raise ValueError(f"{provider} A_i must not contain rho or rho_i")
-        missing = {"l_max", "c_max", "q_min"}.difference(region)
-        if missing:
-            raise ValueError(
-                f"{provider} region missing fields: {', '.join(sorted(missing))}"
-            )
-        values = (
-            float(region["l_max"]),
-            float(region["c_max"]),
-            float(region["q_min"]),
+        ledger = provider_ledgers[provider]
+        boundary = AdmissibilityBoundary(
+            l_max=empirical_upper_threshold(ledger["L"], rho_g),
+            c_max=empirical_upper_threshold(ledger["C"], rho_g),
+            q_min=empirical_lower_threshold(ledger["Q"], rho_g),
         )
-        if not all(math.isfinite(value) for value in values):
-            raise ValueError(f"{provider} region values must be finite")
-        parsed[provider] = AdmissibilityBoundary(*values)
-    return parsed
+        regions[provider] = boundary
+
+        finite_l = int(np.isfinite(pd.to_numeric(ledger["L"], errors="coerce")).sum())
+        finite_c = int(np.isfinite(pd.to_numeric(ledger["C"], errors="coerce")).sum())
+        finite_q = int(np.isfinite(pd.to_numeric(ledger["Q"], errors="coerce")).sum())
+        rows.append(
+            {
+                "provider": provider,
+                "rho_global": rho_g,
+                "l_max": boundary.l_max,
+                "c_max": boundary.c_max,
+                "q_min": boundary.q_min,
+                "finite_L": finite_l,
+                "finite_C": finite_c,
+                "finite_Q": finite_q,
+                "rule": "empirical_order_statistics_from_T_i_and_rho_G",
+            }
+        )
+    return regions, pd.DataFrame(rows)
 
 
 def load_i1_contract_support(
@@ -129,9 +163,7 @@ def load_i1_contract_support(
         raise ValueError("unexpected Phase-2 I1 card contract status")
     horizons = [float(value) for value in contract["H"]["values"]]
     rho_support = [float(value) for value in contract["R"]["values"]]
-    if not any(
-        abs(float(rho_global) - rho) <= EVENT_TOLERANCE for rho in rho_support
-    ):
+    if not any(abs(float(rho_global) - rho) <= EVENT_TOLERANCE for rho in rho_support):
         raise ValueError(
             f"rho_G={rho_global:g} is not present in frozen I1 support {rho_support}"
         )
@@ -161,6 +193,11 @@ def build_real_i1_surfaces(
 ) -> dict[str, pd.DataFrame]:
     """Build in-memory I1 surfaces from the frozen real provider traces."""
     stop_time = float(workload_contract["horizon_max"])
+    workload = {
+        "period": float(workload_contract["period"]),
+        "accounting_origin": float(workload_contract["accounting_origin"]),
+        "horizon_max": stop_time,
+    }
     surfaces: dict[str, pd.DataFrame] = {}
     for provider in PROVIDERS:
         boundary = local_regions[provider]
@@ -169,7 +206,7 @@ def build_real_i1_surfaces(
             private_provider_ledgers=provider_ledgers[provider],
             local_regions=[
                 {
-                    "region_id": f"{provider}_explicit_diagnostic_A_i",
+                    "region_id": f"{provider}_TRACE_RHOG_A_i",
                     "l_max": boundary.l_max,
                     "c_max": boundary.c_max,
                     "q_min": boundary.q_min,
@@ -178,7 +215,7 @@ def build_real_i1_surfaces(
             rho_values=rho_support,
             horizons=horizons,
             stop_time=stop_time,
-            workload_contract=workload_contract,
+            workload_contract=workload,
         )
         surfaces[provider] = surface
     return surfaces
@@ -191,10 +228,7 @@ def build_same_rho_m0_curve(
 ) -> pd.DataFrame:
     """Compose real I1 points with the frozen M0 same-rho product rule."""
     rho_map = same_rho_as_global(rho_global, PROVIDERS)
-    if any(
-        abs(rho - float(rho_global)) > EVENT_TOLERANCE
-        for rho in rho_map.values()
-    ):
+    if any(abs(rho - float(rho_global)) > EVENT_TOLERANCE for rho in rho_map.values()):
         raise RuntimeError("M0 same-rho contract was violated")
 
     rows: list[dict[str, float]] = []
@@ -203,21 +237,12 @@ def build_same_rho_m0_curve(
         for provider in PROVIDERS:
             surface = provider_surfaces[provider]
             selected = surface[
-                np.isclose(
-                    surface["rho"].astype(float),
-                    float(rho_global),
-                    atol=EVENT_TOLERANCE,
-                )
-                & np.isclose(
-                    surface["horizon"].astype(float),
-                    float(horizon),
-                    atol=EVENT_TOLERANCE,
-                )
+                np.isclose(surface["rho"].astype(float), float(rho_global), atol=EVENT_TOLERANCE)
+                & np.isclose(surface["horizon"].astype(float), float(horizon), atol=EVENT_TOLERANCE)
             ]
             if len(selected) != 1:
                 raise RuntimeError(
-                    f"expected one I1 point for {provider}, "
-                    f"H={horizon:g}, rho={rho_global:g}"
+                    f"expected one I1 point for {provider}, H={horizon:g}, rho={rho_global:g}"
                 )
             provider_sigma[provider] = float(selected.iloc[0]["sigma_hat"])
 
@@ -256,22 +281,15 @@ def build_real_whitebox_curve(
         stop_time=float(stop_time),
         sla_definition=definition,
     )
-    return sigma[["horizon", "sigma"]].rename(
-        columns={"sigma": "sigma_whitebox"}
-    )
+    return sigma[["horizon", "sigma"]].rename(columns={"sigma": "sigma_whitebox"})
 
 
 def compare_curves(
     whitebox_curve: pd.DataFrame,
     m0_curve: pd.DataFrame,
 ) -> tuple[pd.DataFrame, dict[str, float]]:
-    """Align WB/M0 points and compute simple pointwise diagnostic errors."""
-    comparison = whitebox_curve.merge(
-        m0_curve,
-        on="horizon",
-        how="inner",
-        validate="one_to_one",
-    )
+    """Align WB/M0 points and compute pointwise diagnostic errors."""
+    comparison = whitebox_curve.merge(m0_curve, on="horizon", how="inner", validate="one_to_one")
     if comparison.empty or len(comparison) != len(m0_curve):
         raise RuntimeError("white-box and I1-M0 horizon supports do not align")
     comparison["error_m0_minus_wb"] = (
@@ -310,17 +328,13 @@ def plot_one_comparison(
         linestyle="--",
         label=r"I1-M0 $\hat{\sigma}_G$",
     )
-    axis.set_xlim(
-        float(comparison["horizon"].min()),
-        float(comparison["horizon"].max()),
-    )
+    axis.set_xlim(float(comparison["horizon"].min()), float(comparison["horizon"].max()))
     axis.set_ylim(0.0, 1.02)
     axis.set_xlabel("Horizon H (s)")
     axis.set_ylabel("Admissibility probability")
-    role_title = ROLE_TITLES.get(role, role)
     axis.set_title(
-        f"{role_title}: white-box vs I1-M0\n"
-        f"Frozen real trace banks, $\\rho_G={rho_global:g}$"
+        f"{ROLE_TITLES.get(role, role)}: white-box vs I1-M0\n"
+        f"Real frozen trace banks, $\\rho_G={rho_global:g}$"
     )
     axis.grid(True, alpha=0.22)
     axis.legend(frameon=False)
@@ -337,20 +351,38 @@ def plot_one_comparison(
     plt.close(figure)
 
 
+def _snapshot_rows(comparison_table: pd.DataFrame) -> pd.DataFrame:
+    """Return concise WB/I1-M0 sigma values at five diagnostic horizons."""
+    mask = np.zeros(len(comparison_table), dtype=bool)
+    h = comparison_table["horizon"].astype(float).to_numpy()
+    for target in SNAPSHOT_HORIZONS:
+        mask |= np.isclose(h, target, atol=EVENT_TOLERANCE)
+    columns = [
+        "selection_role",
+        "horizon",
+        "sigma_whitebox",
+        "sigma_i1_m0",
+        "sigma_ProviderA",
+        "sigma_ProviderB",
+        "sigma_ProviderC",
+        "error_m0_minus_wb",
+    ]
+    return comparison_table.loc[mask, columns].sort_values(
+        ["selection_role", "horizon"]
+    )
+
+
 def run_real_trace_diagnostic(
     *,
     whitebox_ledger_path: Path,
     whitebox_manifest_path: Path,
     provider_root: Path,
     i1_contract_path: Path,
-    local_regions_path: Path,
     rho_global: float,
     output_directory: Path,
 ) -> pd.DataFrame:
-    """Run the complete real-data probability-composition diagnostic."""
-    horizons, rho_support, workload = load_i1_contract_support(
-        i1_contract_path, rho_global
-    )
+    """Run the complete real-data WB versus I1-M0 diagnostic."""
+    horizons, rho_support, workload = load_i1_contract_support(i1_contract_path, rho_global)
     stop_time = float(workload["horizon_max"])
 
     if not whitebox_ledger_path.exists():
@@ -363,8 +395,10 @@ def run_real_trace_diagnostic(
     if whitebox_manifest.get("status") != "FROZEN_PHASE1_V2_AR_SELECTION_V1":
         raise ValueError("unexpected Phase-1 v2 white-box manifest status")
 
-    local_regions = load_explicit_local_regions(local_regions_path)
     provider_ledgers = load_provider_evidence(provider_root)
+    local_regions, region_table = derive_local_regions_from_traces(
+        provider_ledgers, rho_global
+    )
     provider_surfaces = build_real_i1_surfaces(
         provider_ledgers,
         local_regions,
@@ -372,27 +406,18 @@ def run_real_trace_diagnostic(
         horizons,
         workload,
     )
-    m0_curve = build_same_rho_m0_curve(
-        provider_surfaces, rho_global, horizons
-    )
+    m0_curve = build_same_rho_m0_curve(provider_surfaces, rho_global, horizons)
 
-    # Provider-only boundary is useful bookkeeping but is not the full graph
-    # A_G^M0. This diagnostic never invents deterministic stage/network terms.
     provider_only_boundary = compose_parallel_all(
         [local_regions[provider] for provider in PROVIDERS]
     )
 
     output_directory.mkdir(parents=True, exist_ok=True)
-    provider_surface_table = pd.concat(
-        [provider_surfaces[provider] for provider in PROVIDERS],
-        ignore_index=True,
-    )
-    provider_surface_table.to_csv(
-        output_directory / "real_i1_provider_surfaces.csv", index=False
-    )
-    m0_curve.to_csv(
-        output_directory / "real_i1_m0_probability_curve.csv", index=False
-    )
+    region_table.to_csv(output_directory / "derived_local_A_i.csv", index=False)
+    pd.concat(
+        [provider_surfaces[provider] for provider in PROVIDERS], ignore_index=True
+    ).to_csv(output_directory / "real_i1_provider_surfaces.csv", index=False)
+    m0_curve.to_csv(output_directory / "real_i1_m0_probability_curve.csv", index=False)
 
     all_comparisons: list[pd.DataFrame] = []
     summary_rows: list[dict[str, object]] = []
@@ -417,9 +442,7 @@ def run_real_trace_diagnostic(
         comparison.insert(0, "case_id", str(whitebox["case_id"]))
         all_comparisons.append(comparison)
 
-        plot_name = (
-            f"real_wb_vs_i1_m0_{role}_rho_{_rho_tag(rho_global)}.png"
-        )
+        plot_name = f"real_wb_vs_i1_m0_{role}_rho_{_rho_tag(rho_global)}.png"
         plot_one_comparison(
             comparison,
             role,
@@ -432,9 +455,6 @@ def run_real_trace_diagnostic(
                 "case_id": str(whitebox["case_id"]),
                 "selection_role": role,
                 "rho_global": float(rho_global),
-                "whitebox_l_max": float(whitebox["l_max"]),
-                "whitebox_c_max": float(whitebox["c_max"]),
-                "whitebox_q_min": float(whitebox["q_min"]),
                 **metrics,
                 "plot": plot_name,
             }
@@ -442,22 +462,27 @@ def run_real_trace_diagnostic(
 
     comparison_table = pd.concat(all_comparisons, ignore_index=True)
     summary_table = pd.DataFrame(summary_rows)
-    comparison_table.to_csv(
-        output_directory / "real_wb_vs_i1_m0_curves.csv", index=False
-    )
-    summary_table.to_csv(
-        output_directory / "real_wb_vs_i1_m0_summary.csv", index=False
-    )
+    comparison_table.to_csv(output_directory / "real_wb_vs_i1_m0_curves.csv", index=False)
+    summary_table.to_csv(output_directory / "real_wb_vs_i1_m0_summary.csv", index=False)
+    snapshot = _snapshot_rows(comparison_table)
+    snapshot.to_csv(output_directory / "real_wb_vs_i1_m0_sigma_snapshot.csv", index=False)
 
     diagnostic_manifest = {
         "status": "REAL_TRACE_DIAGNOSTIC_NOT_A_FREEZE_ARTIFACT",
         "rho_global": float(rho_global),
-        "rho_policy": "rho_i=rho_G for all providers",
+        "A_i_rule": {
+            "inputs": ["provider-local trace bank T_i", "rho_G"],
+            "L": "smallest observed threshold with empirical P(L<=l)>=rho_G",
+            "C": "smallest observed threshold with empirical P(C<=c)>=rho_G",
+            "Q": "largest observed threshold with empirical P(Q>=q)>=rho_G",
+            "external_A_i_input": False,
+            "sigma_target_used_to_choose_A_i": False,
+        },
+        "rho_policy": "M0 reads rho_i=rho_G for all providers",
         "m0_probability_rule": "product_i sigma_i(A_i,H;rho_G)",
         "whitebox_source": str(whitebox_ledger_path),
         "provider_source_root": str(provider_root),
-        "local_regions_source": str(local_regions_path),
-        "local_regions": {
+        "derived_local_regions": {
             provider: {
                 "l_max": local_regions[provider].l_max,
                 "c_max": local_regions[provider].c_max,
@@ -471,13 +496,6 @@ def run_real_trace_diagnostic(
             "q_min": provider_only_boundary.q_min,
         },
         "full_M0_boundary_applicability_asserted": False,
-        "note": (
-            "All sigma values are computed from real frozen trace banks. "
-            "A_i values are caller-supplied and are not selected by this script. "
-            "The plotted I1-M0 curve is the real probability-composition component; "
-            "full numerical M0 additionally requires the separately frozen "
-            "deterministic stage/network boundary adapter."
-        ),
     }
     (output_directory / "real_wb_vs_i1_m0_diagnostic_manifest.json").write_text(
         json.dumps(diagnostic_manifest, indent=2), encoding="utf-8"
@@ -485,26 +503,25 @@ def run_real_trace_diagnostic(
 
     print("PHASE3_REAL_WB_VS_I1_M0_DIAGNOSTIC_PASS")
     print("all_sigma_values_from_real_frozen_trace_banks=true")
-    print("A_i_selected_by_diagnostic=false")
-    print("rho_policy=rho_i_equals_rho_G")
-    print("full_M0_boundary_applicability_asserted=false")
+    print("A_i_external_input=false")
+    print("A_i_rule=T_i_plus_rho_G_empirical_order_statistics")
+    print("rho_policy=M0_rho_i_equals_rho_G")
+    print("\nDERIVED_LOCAL_A_I")
+    print(region_table.to_string(index=False))
+    print("\nSIGMA_SNAPSHOT")
+    print(snapshot.to_string(index=False))
+    print("\nERROR_SUMMARY")
     print(summary_table.to_string(index=False))
-    print(f"output={output_directory.resolve()}")
+    print(f"\noutput={output_directory.resolve()}")
     return summary_table
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Plot real Phase-1 white-box sigma against real I1-M0 "
-            "same-rho probability composition."
+            "Compute real Phase-1 white-box sigma and real I1-M0 sigma; "
+            "derive A_i directly from T_i and rho_G."
         )
-    )
-    parser.add_argument(
-        "--local-regions-json",
-        type=Path,
-        required=True,
-        help="Explicit ProviderA/B/C A_i values. This script never derives A_i.",
     )
     parser.add_argument("--rho", type=float, default=0.95)
     parser.add_argument(
@@ -551,7 +568,6 @@ def main() -> None:
         whitebox_manifest_path=args.whitebox_manifest.resolve(),
         provider_root=args.provider_root.resolve(),
         i1_contract_path=args.i1_contract.resolve(),
-        local_regions_path=args.local_regions_json.resolve(),
         rho_global=float(args.rho),
         output_directory=output.resolve(),
     )
