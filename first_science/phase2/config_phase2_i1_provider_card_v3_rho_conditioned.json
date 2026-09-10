@@ -4,13 +4,32 @@
   "revision_date": "2026-09-10",
   "schema": "PRAISE_I1_PROVIDER_RHO_CONDITIONED_CARD_V1",
   "information_technology": "I1_LOCAL_RHO_CONDITIONED_SIGMA_SURFACE_CARD",
-  "scientific_role": "Provider-local information representation derived only from frozen private provider evidence. For each predeclared region-content quantile rho_region, a joint log(L,C) Gaussian-mixture model induces a nested minimum-area local admissibility region A_i(rho_region). The public card then materializes sigma_i(A_i(rho_region),H;rho_query) on the complete declared H x rho_region x rho_query support.",
-  "supersedes_after_validation": "The historical single-A_i H*=120/rho=.95/sigma=.95 first-crossing calibration only. The frozen provider evidence corpus, workload, accounting semantics and Phase-1 white-box benchmark remain unchanged.",
+  "scientific_role": "Provider-local information representation. A_i(rho_region) is constructed from frozen private T_i^Gamma evidence, while sigma_i(A_i(rho_region),H;rho_query) is estimated from a separate frozen private T_i^sigma corpus. M0 and M1 receive only the same public card.",
+  "supersedes_after_validation": "The historical single-A_i H*=120/rho=.95/sigma=.95 first-crossing calibration and the self-evaluated rho-conditioned candidate. The workload, accounting semantics and Phase-1 white-box benchmark remain unchanged.",
   "provider_scope": [
     "ProviderA",
     "ProviderB",
     "ProviderC"
   ],
+  "evidence_partition": {
+    "region_construction": {
+      "symbol": "T_i^Gamma",
+      "acquisition_contract": "config_phase2_i1_acquisition_v1.json",
+      "n_trajectories": 100,
+      "role": "fit the joint model and construct A_i(rho_region) only",
+      "may_estimate_public_sigma": false
+    },
+    "sigma_estimation": {
+      "symbol": "T_i^sigma",
+      "acquisition_contract": "config_phase2_i1_sigma_acquisition_v1.json",
+      "n_trajectories": 100,
+      "role": "estimate sigma_i(A_i(rho_region),H;rho_query) for already frozen regions only",
+      "may_fit_or_modify_regions": false
+    },
+    "trajectory_seed_banks_must_be_disjoint": true,
+    "runtime_hash_verification_required": true,
+    "same_public_I1_for_M0_and_M1": true
+  },
   "local_admissibility": "A_i(rho_region)={L_i<=l_i(rho_region),C_i<=c_i(rho_region),Q_i>=q_i}",
   "region_rho": {
     "semantics": "joint fitted-distribution probability-content level used to construct A_i(rho_region)",
@@ -54,10 +73,13 @@
     "model_samples": 100000,
     "region_extraction": "On one deterministic synthetic sample from the fitted joint model, choose the minimum-area origin-anchored [0,l]x[0,c] rectangle containing at least ceil(rho_region*N)/N mass, subject to containing the preceding lower-rho rectangle.",
     "quality_rule": "Current benchmark Q is degenerate at one value; preserve that exact q_min. Non-degenerate Q is rejected in this version rather than assigned an unvalidated multivariate rule.",
-    "fit_uses_phase1_whitebox": false
+    "fit_uses_phase1_whitebox": false,
+    "fit_uses_sigma_estimation_corpus": false
   },
   "sigma_semantics": {
     "definition": "sigma_i(A_i(rho_region),H;rho_query)=P(c_i(A_i(rho_region),H)>=rho_query)",
+    "estimation_corpus": "independent T_i^sigma only",
+    "region_construction_corpus_forbidden_for_sigma_estimation": true,
     "accounting_origin": 0.0,
     "accounting_window": "cumulative_[0,H]_from_t0",
     "zero_decided_requests_compliance": 1.0,
@@ -130,9 +152,9 @@
   },
   "public_private_boundary": {
     "private": [
-      "raw provider traces",
-      "provider request ledgers",
-      "acquisition seeds",
+      "T_i^Gamma raw provider traces and request ledgers",
+      "T_i^sigma raw provider traces and request ledgers",
+      "all acquisition seeds",
       "fitted GMM parameters",
       "GMM BIC table",
       "synthetic model sample"
@@ -142,9 +164,10 @@
       "workload contract",
       "region-rho support",
       "query-rho support",
-      "sigma surfaces",
+      "sigma surfaces estimated on independent evidence",
       "confidence metadata",
-      "construction family metadata"
+      "construction family metadata",
+      "boolean provenance that region and sigma evidence are trajectory-disjoint"
     ],
     "Phase1_whitebox_sigma_public_to_I1": false
   },
