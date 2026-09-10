@@ -1,0 +1,58 @@
+{
+  "status": "FROZEN_PHASE2_I1_RHO_CONDITIONED_V1",
+  "freeze_date": "2026-09-10",
+  "phase": "phase2_i1",
+  "scientific_role": "Finalized public I1 representation for the first controlled I1-M0/I1-M1 comparison.",
+  "accepted_after": [
+    "rho-conditioned region construction validated",
+    "independent trajectory-level sigma-estimation corpus acquired and validated",
+    "Phase-3 M0 two-axis diagnostic inspected",
+    "Phase-3 same-region sigma diagnostic inspected"
+  ],
+  "public_i1_manifest": {
+    "path": "first_science/phase2/results/i1_cards_v2_rho_conditioned/public/i1_rho_conditioned_manifest_v1.json",
+    "sha256": "8345a3430f0a6b6af9934d839d2d578485a9e47ea3daa01a6093f222bb3a5dc4"
+  },
+  "evidence_partition": {
+    "region_construction": {
+      "symbol": "T_i^Gamma",
+      "seed_start": 6000,
+      "seed_end_inclusive": 6099,
+      "n_trajectories": 100,
+      "freeze_manifest": "phase2_i1_region_evidence_manifest_v1.json",
+      "allowed_use": "fit the joint log(L,C) model and construct A_i(rho_region) only"
+    },
+    "sigma_estimation": {
+      "symbol": "T_i^sigma",
+      "seed_start": 6100,
+      "seed_end_inclusive": 6199,
+      "n_trajectories": 100,
+      "acquisition_contract": "config_phase2_i1_sigma_acquisition_v1.json",
+      "allowed_use": "estimate sigma_i(A_i(rho_region),H;rho_query) only"
+    },
+    "trajectory_seed_banks_disjoint": true
+  },
+  "construction": {
+    "joint_model": "full-covariance GaussianMixture on (log L, log C)",
+    "component_selection": "minimum BIC over K=1..4",
+    "model_samples": 100000,
+    "region_geometry": "minimum-area origin-anchored [0,l]x[0,c] rectangle with nested regions",
+    "quality": "Q is degenerate and preserved exactly at q_min=0.5",
+    "rho_region_values": [0.95, 0.975, 0.9833333333333333, 0.99, 0.995],
+    "rho_query_values": [0.95, 0.975, 0.9833333333333333, 0.99, 0.995],
+    "rho_one_allowed_for_finite_GMM_region": false,
+    "H_min": 0.0,
+    "H_max": 240.0,
+    "H_step": 5.0,
+    "sigma_definition": "sigma_i(A_i(rho_region),H;rho_query)=P(c_i(A_i(rho_region),H)>=rho_query)",
+    "accounting_window": "cumulative_[0,H]_from_t0",
+    "official_first_comparison_diagonal": "rho_region=rho_query=rho_i=rho_G"
+  },
+  "information_firewall": {
+    "phase1_whitebox_used_to_construct_I1": false,
+    "M0_or_M1_may_read_private_provider_evidence": false,
+    "same_public_I1_for_M0_and_M1": true
+  },
+  "freeze_rule": "Do not alter the I1 construction, evidence partition, rho support, public-card schema, or materialized public cards merely to improve M0 or M1 results. Reopen only for a concrete scientific or implementation defect.",
+  "frozen": true
+}
