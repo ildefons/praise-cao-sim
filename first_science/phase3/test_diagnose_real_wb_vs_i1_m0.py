@@ -1,10 +1,8 @@
 """Simulator-independent tests for the real WB versus I1-M0 diagnostic."""
 from __future__ import annotations
 
-import json
+import inspect
 from math import isclose, sqrt
-from pathlib import Path
-from tempfile import TemporaryDirectory
 
 import pandas as pd
 
@@ -12,14 +10,11 @@ from diagnose_real_wb_vs_i1_m0 import (
     _rho_tag,
     build_same_rho_m0_curve,
     compare_curves,
-    load_explicit_local_regions,
+    derive_local_regions_from_traces,
+    empirical_lower_threshold,
+    empirical_upper_threshold,
+    run_real_trace_diagnostic,
 )
-
-
-def _write_json(directory: Path, name: str, document: dict) -> Path:
-    path = directory / name
-    path.write_text(json.dumps(document, indent=2), encoding="utf-8")
-    return path
 
 
 def _synthetic_surface(values: list[float]) -> pd.DataFrame:
@@ -32,66 +27,47 @@ def _synthetic_surface(values: list[float]) -> pd.DataFrame:
     )
 
 
+def _synthetic_provider_ledger(offset: float) -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "trajectory": [0] * 10,
+            "request_id": list(range(10)),
+            "emission": [float(i) for i in range(10)],
+            "completion": [float(i) + 0.1 for i in range(10)],
+            "L": [offset + float(i) for i in range(1, 11)],
+            "C": [10.0 * offset + float(i) for i in range(1, 11)],
+            "Q": [offset + float(i) for i in range(1, 11)],
+        }
+    )
+
+
 def main() -> None:
-    with TemporaryDirectory(prefix="praise_real_m0_diag_test_") as temporary:
-        root = Path(temporary)
-        valid_path = _write_json(
-            root,
-            "valid_regions.json",
-            {
-                "regions": {
-                    "ProviderA": {"l_max": 0.2, "c_max": 0.6, "q_min": 0.5},
-                    "ProviderB": {"l_max": 0.3, "c_max": 0.8, "q_min": 0.5},
-                    "ProviderC": {"l_max": 0.4, "c_max": 1.0, "q_min": 0.5},
-                }
-            },
-        )
-        regions = load_explicit_local_regions(valid_path)
-        assert set(regions) == {"ProviderA", "ProviderB", "ProviderC"}
-        assert isclose(regions["ProviderA"].l_max, 0.2)
-        assert isclose(regions["ProviderC"].c_max, 1.0)
+    values = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
+    assert isclose(empirical_upper_threshold(values, 0.8), 8.0)
+    assert isclose(empirical_lower_threshold(values, 0.8), 3.0)
+    assert isclose(empirical_upper_threshold(values, 0.95), 10.0)
+    assert isclose(empirical_lower_threshold(values, 0.95), 1.0)
 
-        top_level_rho_path = _write_json(
-            root,
-            "invalid_top_level_rho.json",
-            {
-                "rho_i": 0.95,
-                "regions": {
-                    "ProviderA": {"l_max": 0.2, "c_max": 0.6, "q_min": 0.5},
-                    "ProviderB": {"l_max": 0.3, "c_max": 0.8, "q_min": 0.5},
-                    "ProviderC": {"l_max": 0.4, "c_max": 1.0, "q_min": 0.5},
-                },
-            },
-        )
-        try:
-            load_explicit_local_regions(top_level_rho_path)
-        except ValueError as error:
-            assert "must not select rho" in str(error)
-        else:
-            raise AssertionError("diagnostic accepted a top-level rho_i selection")
+    provider_ledgers = {
+        "ProviderA": _synthetic_provider_ledger(0.0),
+        "ProviderB": _synthetic_provider_ledger(100.0),
+        "ProviderC": _synthetic_provider_ledger(200.0),
+    }
+    regions, table = derive_local_regions_from_traces(provider_ledgers, 0.8)
+    assert isclose(regions["ProviderA"].l_max, 8.0)
+    assert isclose(regions["ProviderA"].c_max, 8.0)
+    assert isclose(regions["ProviderA"].q_min, 3.0)
+    assert isclose(regions["ProviderB"].l_max, 108.0)
+    assert isclose(regions["ProviderC"].q_min, 203.0)
+    assert set(table["provider"]) == {"ProviderA", "ProviderB", "ProviderC"}
+    assert set(table["rho_global"]) == {0.8}
 
-        provider_rho_path = _write_json(
-            root,
-            "invalid_provider_rho.json",
-            {
-                "regions": {
-                    "ProviderA": {
-                        "l_max": 0.2,
-                        "c_max": 0.6,
-                        "q_min": 0.5,
-                        "rho": 0.95,
-                    },
-                    "ProviderB": {"l_max": 0.3, "c_max": 0.8, "q_min": 0.5},
-                    "ProviderC": {"l_max": 0.4, "c_max": 1.0, "q_min": 0.5},
-                }
-            },
-        )
-        try:
-            load_explicit_local_regions(provider_rho_path)
-        except ValueError as error:
-            assert "must not contain rho" in str(error)
-        else:
-            raise AssertionError("diagnostic accepted rho inside ProviderA A_i")
+    # The production diagnostic must not expose an external A_i input anymore.
+    signature = inspect.signature(run_real_trace_diagnostic)
+    assert "local_regions_path" not in signature.parameters
+    assert "local_regions" not in signature.parameters
+    assert "rho_global" in signature.parameters
+    assert "provider_root" in signature.parameters
 
     surfaces = {
         "ProviderA": _synthetic_surface([1.0, 0.8]),
@@ -111,23 +87,18 @@ def main() -> None:
         }
     )
     comparison, metrics = compare_curves(whitebox, m0)
-    errors = comparison["error_m0_minus_wb"].astype(float).tolist()
-    assert isclose(errors[0], -0.05, abs_tol=1e-12)
-    assert isclose(errors[1], -0.1, abs_tol=1e-12)
+    assert list(comparison["error_m0_minus_wb"]) == [-0.05, -0.1]
     assert isclose(metrics["mae"], 0.075, abs_tol=1e-12)
     assert isclose(metrics["bias"], -0.075, abs_tol=1e-12)
-    assert isclose(
-        metrics["rmse"],
-        sqrt((0.05**2 + 0.1**2) / 2),
-        abs_tol=1e-12,
-    )
+    assert isclose(metrics["rmse"], sqrt((0.05**2 + 0.1**2) / 2), abs_tol=1e-12)
     assert isclose(metrics["max_abs_error"], 0.1, abs_tol=1e-12)
 
     assert _rho_tag(0.95) == "0p95"
     assert _rho_tag(0.9833333333333333) == "0p983333"
 
     print("PHASE3_REAL_WB_VS_I1_M0_DIAGNOSTIC_TESTS_PASS")
-    print("DIAGNOSTIC_DOES_NOT_SELECT_A_I_OR_RHO_I_PASS")
+    print("A_I_DERIVED_FROM_T_I_AND_RHO_G_PASS")
+    print("NO_EXTERNAL_A_I_INPUT_PASS")
     print("M0_REAL_CURVE_COMPOSITION_KERNEL_PASS")
     print("WB_M0_ERROR_METRICS_PASS")
     print("DIAGNOSTIC_FILENAME_RHO_TAG_PASS")
