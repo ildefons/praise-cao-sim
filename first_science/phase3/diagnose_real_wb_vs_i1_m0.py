@@ -4,14 +4,15 @@ Scientific inputs
 -----------------
 * White-box truth: frozen Phase-1 v2 fresh-confirmation top-level ledgers.
 * Provider information: frozen Phase-2 provider-local acquisition ledgers T_i.
-* Query tolerance: rho_G.
+* I1 A_i calibration: frozen coordinate-wise 0.95-at-120 rule.
 * M0 probability rule: rho_i = rho_G and product_i sigma_i(A_i,H;rho_G).
 
 There is no external A_i input. Phase 2 derives each rectangular A_i from its
-own T_i and rho_G using the frozen minimal-common-rank joint-coverage rule in
-``i1_local_region.py``. The diagnostic then materializes the real local sigma
-surfaces and compares the same-rho M0 product against the independent white-box
-sigma curve.
+own T_i.  Under the current cumulative-admissibility semantics the recovered
+anchor calibration uses rho_anchor=0.95, H*=120 s and sigma_target=0.95.  Each
+coordinate is calibrated separately by the first sigma crossing rule and the
+three thresholds are then combined.  The resulting joint local sigma is a
+measured outcome, not another calibration target.
 
 The plotted probability curve is the real M0 probability-composition component.
 This diagnostic does not claim the separate full-graph boundary-applicability
@@ -72,8 +73,8 @@ def _rho_tag(rho: float) -> str:
 def load_i1_contract_support(
     contract_path: Path,
     rho_global: float,
-) -> tuple[list[float], list[float], dict[str, object]]:
-    """Return frozen I1 H/R support and workload context."""
+) -> tuple[list[float], list[float], dict[str, object], dict[str, object]]:
+    """Return frozen I1 H/R support, workload, and A_i calibration contract."""
     contract = _read_json(contract_path)
     if contract.get("status") != "FROZEN_PHASE2_I1_CARD_CONTRACT_V2_DIRECT_TRACE":
         raise ValueError("unexpected Phase-2 I1 card contract status")
@@ -83,7 +84,11 @@ def load_i1_contract_support(
         raise ValueError(
             f"rho_G={rho_global:g} is not present in frozen I1 support {rho_support}"
         )
-    return horizons, rho_support, dict(contract["workload_contract"])
+    ai_contract = contract["A_i"]
+    if ai_contract.get("status") != "FROZEN_TRACE_COORDINATE_SIGMA_CALIBRATION_V1":
+        raise ValueError("unexpected frozen A_i calibration rule")
+    calibration = dict(ai_contract["calibration"])
+    return horizons, rho_support, dict(contract["workload_contract"]), calibration
 
 
 def load_provider_evidence(provider_root: Path) -> dict[str, pd.DataFrame]:
@@ -280,6 +285,28 @@ def _snapshot_rows(comparison_table: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def _add_joint_anchor_sigma_diagnostic(
+    region_table: pd.DataFrame,
+    provider_surfaces: dict[str, pd.DataFrame],
+    rho_anchor: float,
+    anchor_horizon: float,
+) -> pd.DataFrame:
+    """Attach the resulting joint-card sigma at the calibration anchor."""
+    table = region_table.copy()
+    values: dict[str, float] = {}
+    for provider in PROVIDERS:
+        surface = provider_surfaces[provider]
+        selected = surface[
+            np.isclose(surface["rho"].astype(float), float(rho_anchor), atol=EVENT_TOLERANCE)
+            & np.isclose(surface["horizon"].astype(float), float(anchor_horizon), atol=EVENT_TOLERANCE)
+        ]
+        if len(selected) != 1:
+            raise RuntimeError(f"missing joint anchor sigma for {provider}")
+        values[provider] = float(selected.iloc[0]["sigma_hat"])
+    table["joint_sigma_at_H_star"] = table["provider"].map(values)
+    return table
+
+
 def run_real_trace_diagnostic(
     *,
     whitebox_ledger_path: Path,
@@ -290,8 +317,13 @@ def run_real_trace_diagnostic(
     output_directory: Path,
 ) -> pd.DataFrame:
     """Run the complete real-data WB versus I1-M0 diagnostic."""
-    horizons, rho_support, workload = load_i1_contract_support(i1_contract_path, rho_global)
+    horizons, rho_support, workload, ai_calibration = load_i1_contract_support(
+        i1_contract_path, rho_global
+    )
     stop_time = float(workload["horizon_max"])
+    rho_anchor = float(ai_calibration["rho_anchor"])
+    anchor_horizon = float(ai_calibration["H_star"])
+    sigma_target = float(ai_calibration["sigma_target"])
 
     if not whitebox_ledger_path.exists():
         raise FileNotFoundError(f"missing white-box ledger: {whitebox_ledger_path}")
@@ -305,11 +337,13 @@ def run_real_trace_diagnostic(
 
     provider_ledgers = load_provider_evidence(provider_root)
     local_regions, region_table = derive_local_regions_from_traces(
-        provider_ledgers, rho_global
+        provider_ledgers,
+        rho_anchor=rho_anchor,
+        horizons=horizons,
+        stop_time=stop_time,
+        anchor_horizon=anchor_horizon,
+        sigma_target=sigma_target,
     )
-
-    if not (region_table["joint_coverage"].astype(float) + EVENT_TOLERANCE >= float(rho_global)).all():
-        raise RuntimeError("derived provider A_i failed its joint empirical coverage target")
 
     provider_surfaces = build_real_i1_surfaces(
         provider_ledgers,
@@ -317,6 +351,12 @@ def run_real_trace_diagnostic(
         rho_support,
         horizons,
         workload,
+    )
+    region_table = _add_joint_anchor_sigma_diagnostic(
+        region_table,
+        provider_surfaces,
+        rho_anchor,
+        anchor_horizon,
     )
     m0_curve = build_same_rho_m0_curve(provider_surfaces, rho_global, horizons)
 
@@ -389,16 +429,19 @@ def run_real_trace_diagnostic(
 
     diagnostic_manifest = {
         "status": "REAL_TRACE_DIAGNOSTIC_NOT_A_FREEZE_ARTIFACT",
-        "rho_global": float(rho_global),
+        "rho_global_evaluated": float(rho_global),
         "A_i_rule": {
-            "inputs": ["provider-local trace bank T_i", "rho_G"],
-            "family": "rectangular_LCQ_common_empirical_rank",
-            "selection": "minimal common rank whose joint empirical coverage reaches rho_G",
+            "inputs": ["provider-local trace bank T_i", "frozen anchor rho_G=0.95"],
+            "rho_anchor": rho_anchor,
+            "H_star": anchor_horizon,
+            "sigma_target": sigma_target,
+            "coordinate_selection": "first sigma crossing below target closest to H_star",
+            "combine": "independently calibrated L/C/Q thresholds form the joint rectangle",
+            "joint_sigma_forced_to_target": False,
             "external_A_i_input": False,
-            "separate_marginal_rho_thresholds": False,
-            "sigma_target_used_to_choose_A_i": False,
+            "request_level_percentile_target": False,
         },
-        "rho_policy": "M0 reads rho_i=rho_G for all providers",
+        "rho_policy": "M0 reads rho_i=rho_G for all providers at evaluation time",
         "m0_probability_rule": "product_i sigma_i(A_i,H;rho_G)",
         "whitebox_source": str(whitebox_ledger_path),
         "provider_source_root": str(provider_root),
@@ -424,8 +467,14 @@ def run_real_trace_diagnostic(
     print("PHASE3_REAL_WB_VS_I1_M0_DIAGNOSTIC_PASS")
     print("all_sigma_values_from_real_frozen_trace_banks=true")
     print("A_i_external_input=false")
-    print("A_i_rule=minimal_common_rank_joint_coverage_from_T_i_and_rho_G")
-    print("rho_policy=M0_rho_i_equals_rho_G")
+    print(
+        "A_i_rule=coordinate_first_sigma_crossing_below_0p95_closest_to_H120_"
+        "using_anchor_rho_G_0p95"
+    )
+    print(f"A_i_calibration_rho_anchor={rho_anchor:g}")
+    print(f"A_i_calibration_H_star={anchor_horizon:g}")
+    print(f"A_i_calibration_sigma_target={sigma_target:g}")
+    print("rho_policy=M0_rho_i_equals_evaluated_rho_G")
     print("\nDERIVED_LOCAL_A_I")
     print(region_table.to_string(index=False))
     print("\nSIGMA_SNAPSHOT")
@@ -439,8 +488,8 @@ def run_real_trace_diagnostic(
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Compute real Phase-1 white-box sigma and real I1-M0 sigma; "
-            "derive A_i by the joint common-rank T_i + rho_G rule."
+            "Compute real Phase-1 white-box sigma and real I1-M0 sigma using "
+            "the frozen Phase-2 coordinate-wise H*=120 A_i calibration."
         )
     )
     parser.add_argument("--rho", type=float, default=0.95)
