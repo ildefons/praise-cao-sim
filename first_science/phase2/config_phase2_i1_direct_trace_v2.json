@@ -1,0 +1,59 @@
+{
+  "status": "PHASE2_DIRECT_I1_CONSTRUCTION_V2_AI_SELECTION_OPEN",
+  "phase": "phase2_i1",
+  "revision_date": "2026-09-10",
+  "scientific_role": "Construct each provider I1 card directly from that provider's local evidence extracted from the frozen physical regime, with no A_G-to-A_i localization step.",
+  "supersedes": {
+    "A_i_ownership_only": [
+      "config_phase2_i1_query_instantiation_v1.json",
+      "phase2_i1_exact_query_declaration_v1.json"
+    ],
+    "retained_valid_evidence": "The Phase-2 acquisition corpus and its SHA-256 fingerprints remain valid and unchanged."
+  },
+  "physical_regime_source": "the already frozen Phase-1 physical setting D300000000_d0.200",
+  "provider_acquisition": {
+    "seed_bank": "6000..6099",
+    "n_trajectories": 100,
+    "source_directory": "results/i1_acquisition_v1",
+    "full_native_trajectory_role": "transient source from which provider-local evidence was extracted",
+    "persistent_evidence": "provider-local request ledgers for ProviderA, ProviderB and ProviderC"
+  },
+  "direct_pipeline": [
+    "frozen physical regime",
+    "fresh Phase-2 full trajectories",
+    "provider-local subtraces/ledgers",
+    "choose and freeze A_i from provider i evidence only",
+    "compute sigma_i(A_i,H;rho) directly from provider i evidence",
+    "freeze I1_i"
+  ],
+  "I1_definition": "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})",
+  "A_i_ownership": {
+    "owner": "Phase2 information construction",
+    "source": "provider_i_local_acquisition_evidence_only",
+    "A_G_is_input": false,
+    "global_budget_split_allowed": false,
+    "M0_or_M1_may_choose_A_i": false,
+    "same_rule_form_for_all_providers": true,
+    "selection_rule_status": "OPEN_BEFORE_FINAL_CARD_FREEZE"
+  },
+  "surface_support": {
+    "H": {
+      "minimum": 0.0,
+      "maximum": 240.0,
+      "step": 5.0
+    },
+    "R": [0.95, 0.975, 0.9833333333333333, 0.99, 1.0]
+  },
+  "information_firewall": {
+    "A_G_values_used_to_choose_A_i": false,
+    "Phase1_global_sigma_outcomes_used_to_choose_A_i": false,
+    "M0_results_used_to_choose_A_i": false,
+    "M1_results_used_to_choose_A_i": false
+  },
+  "finalization": {
+    "A_i_rule_frozen": false,
+    "final_cards_materialized": false,
+    "final_cards_hash_frozen": false,
+    "phase3_allowed": false
+  }
+}
