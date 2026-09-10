@@ -88,7 +88,10 @@ def load_and_verify_region_provider_ledgers(
     evidence_manifest: dict[str, Any],
 ) -> dict[str, pd.DataFrame]:
     """Load the frozen T_i^Gamma corpus used only to construct A_i(rho)."""
-    if evidence_manifest.get("status") != "FROZEN_PHASE2_I1_V1":
+    if (
+        evidence_manifest.get("status")
+        != "FROZEN_PHASE2_I1_REGION_EVIDENCE_V1"
+    ):
         raise ValueError("unexpected region-construction evidence freeze manifest")
     return _load_verified_ledgers(
         provider_root,
@@ -373,7 +376,7 @@ def main() -> None:
     parser.add_argument(
         "--evidence-manifest",
         type=Path,
-        default=HERE / "phase2_i1_freeze_manifest_v1.json",
+        default=HERE / "phase2_i1_region_evidence_manifest_v1.json",
     )
     parser.add_argument(
         "--region-acquisition-config",
