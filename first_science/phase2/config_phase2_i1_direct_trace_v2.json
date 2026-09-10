@@ -1,8 +1,8 @@
 {
-  "status": "PHASE2_DIRECT_I1_CONSTRUCTION_V2_REPRESENTATION_RECONCILIATION_OPEN",
+  "status": "PHASE2_DIRECT_I1_CONSTRUCTION_V2_CONCRETE_A_I_INSTANTIATION_OPEN",
   "phase": "phase2_i1",
   "revision_date": "2026-09-10",
-  "scientific_role": "Construct provider information directly from the frozen provider-local evidence without inserting an unstated admissibility-envelope calibration layer.",
+  "scientific_role": "Construct the already-defined I1 provider card from frozen provider-local evidence without A_G localization or percentile-based local-envelope invention.",
   "retained_valid_evidence": {
     "physical_regime": "D300000000_d0.200",
     "seed_bank": "6000..6099",
@@ -11,42 +11,45 @@
     "persistent_evidence": "provider-local request ledgers for ProviderA, ProviderB and ProviderC",
     "corpus_hashes": "phase2_i1_freeze_manifest_v1.json"
   },
+  "frozen_I1_schema": {
+    "status": "FROZEN_PHASE2_I1_CARD_CONTRACT_V2_DIRECT_TRACE",
+    "contract_file": "config_phase2_i1_provider_card_v2.json",
+    "definition": "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})",
+    "sigma": "sigma_i(A_i,H;rho)=P(c_i(A_i,H)>=rho)",
+    "H": {"minimum": 0.0, "maximum": 240.0, "step": 5.0},
+    "R": [0.95,0.975,0.9833333333333333,0.99,1.0]
+  },
   "direct_pipeline": [
     "frozen physical regime",
     "fresh Phase-2 full trajectories",
     "provider-local subtraces/ledgers T_i",
-    "explicitly frozen direct-trace I1 representation",
-    "deterministic construction of I1_i from T_i",
-    "freeze I1_i before numerical M0/M1 evaluation"
+    "freeze one concrete provider-local A_i from T_i under the agreed direct-trace principle",
+    "compute sigma_i(A_i,H;rho) over the frozen H x R support",
+    "materialize and hash-freeze I1_i",
+    "supply the identical finished I1_i to M0 and M1"
   ],
-  "representation_reconciliation": {
-    "status": "OPEN_HARD_STOP_BEFORE_MORE_I1_MATERIALIZATION_CODE",
-    "previous_single_A_i_sigma_surface_schema": "REOPENED_BECAUSE_IT_CREATED_PRESSURE_TO_INVENT_AN_UNAGREED_A_i_ENVELOPE",
-    "previous_schema_text": "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho)})",
-    "public_I1_schema": "NOT_YET_FROZEN",
-    "direct_trace_meaning": "T_i is the sole provider evidence source. Any transformation from T_i to public I1 must be explicitly specified in the design document before implementation.",
-    "raw_trace_publication_assumed": false
+  "A_i_instantiation": {
+    "status": "OPEN_HARD_STOP",
+    "owner": "Phase2 information construction",
+    "source": "provider_i_local_acquisition_evidence_only",
+    "A_G_is_input": false,
+    "global_budget_split_allowed": false,
+    "M0_or_M1_may_choose_A_i": false,
+    "quantile_or_percentile_rule_authorized": false,
+    "support_extrema_rule_authorized_without_explicit_agreement": false,
+    "local_sigma_shape_tuning_authorized": false,
+    "required_behavior_if_operational_rule_is_not_explicit": "STOP_AND_RECONCILE_ONLY_T_i_TO_A_i"
   },
   "hard_design_harness": {
+    "I1_schema_may_not_be_reopened_to_solve_A_i_instantiation": true,
     "A_G_to_A_i_forbidden": true,
     "global_budget_split_forbidden": true,
     "quantile_or_percentile_based_A_i_forbidden": true,
-    "support_extrema_based_A_i_forbidden_without_explicit_design_change": true,
     "local_sigma_shape_tuning_forbidden": true,
-    "Phase1_global_sigma_used_to_construct_I1": false,
-    "M0_result_used_to_construct_I1": false,
-    "M1_result_used_to_construct_I1": false,
-    "infer_unspecified_scientific_choice_from_old_code": false,
-    "required_behavior_when_design_is_unspecified": "STOP_AND_RECONCILE_THE_DESIGN_DOCUMENT"
-  },
-  "retained_previous_surface_support_if_sigma_surface_remains_in_final_I1": {
-    "status": "RESERVED_NOT_ACTIVE_UNTIL_PUBLIC_I1_SCHEMA_IS_FROZEN",
-    "H": {
-      "minimum": 0.0,
-      "maximum": 240.0,
-      "step": 5.0
-    },
-    "R": [0.95, 0.975, 0.9833333333333333, 0.99, 1.0]
+    "Phase1_global_sigma_used_to_construct_A_i": false,
+    "M0_result_used_to_construct_A_i": false,
+    "M1_result_used_to_construct_A_i": false,
+    "infer_unspecified_A_i_rule_from_old_code": false
   },
   "information_firewall": {
     "private_provider_ledgers_remain_private": true,
@@ -56,11 +59,12 @@
   },
   "m0_boundary": {
     "generic_topology_aware_LCQ_algebra_remains_frozen": true,
-    "numerical_I1_to_M0_adapter_status": "BLOCKED_PENDING_FINAL_I1_SCHEMA",
-    "M0_may_not_force_a_particular_I1_representation": true
+    "numerical_I1_to_M0_status": "BLOCKED_PENDING_CONCRETE_A_i_AND_FINAL_I1_CARDS",
+    "M0_may_not_choose_or_modify_A_i": true
   },
   "finalization": {
-    "public_I1_schema_frozen": false,
+    "public_I1_schema_frozen": true,
+    "concrete_A_i_frozen": false,
     "final_I1_materialized": false,
     "final_I1_hash_frozen": false,
     "numerical_phase3_allowed": false,
