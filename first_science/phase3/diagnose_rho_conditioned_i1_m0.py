@@ -1,18 +1,9 @@
-"""Two-axis diagnostic for rho-conditioned I1 with the frozen M0 algebra.
+"""Two-axis diagnostic for rho-conditioned I1 with unchanged M0 algebra.
 
-This candidate Phase-3 path consumes only the public rho-conditioned I1 cards.
-For each same-rho diagonal point rho_region=rho_query=rho_G it:
-
-1. selects A_i(rho_G) from each provider card;
-2. composes the bottom-up A_G^M0(rho_G);
-3. computes region agreement J_A against each frozen Phase-1 v2 A_G^WB;
-4. composes the M0 sigma curve by independent product; and
-5. reports whole-horizon sigma MAE against the corresponding WB reference.
-
-Unlike the historical applicability-only diagnostic, this two-axis diagnostic
-does not suppress sigma discrepancy when regions differ. Region mismatch is
-explicitly represented on the x axis by J_A; sigma discrepancy is represented
-on the y axis by MAE. Containment is retained as an additional relation.
+For each same-rho diagonal point rho_region=rho_query=rho_G:
+A_i(rho_G) -> A_G^M0(rho_G) -> J_A,
+and provider sigma_i -> product -> whole-horizon MAE against WB.
+Phase 3 reads public I1 only; WB traces are external evaluation truth.
 """
 from __future__ import annotations
 
@@ -36,7 +27,9 @@ for module_directory in (PHASE1, PHASE2):
     if str(module_directory) not in sys.path:
         sys.path.insert(0, str(module_directory))
 
-from i1_provider_card import load_i1_provider_card  # noqa: E402
+from i1_rho_conditioned_card import (  # noqa: E402
+    load_rho_conditioned_i1_provider_card,
+)
 from m0_analytic_composition import (  # noqa: E402
     AdmissibilityBoundary,
     independent_product_probability,
@@ -93,11 +86,9 @@ def load_rho_conditioned_i1_cards(
             raise RuntimeError(f"{provider} public card.json hash mismatch")
         if _sha256(surface_csv) != str(record["sigma_surface_sha256"]):
             raise RuntimeError(f"{provider} public sigma surface hash mismatch")
-        metadata, surface = load_i1_provider_card(directory)
+        metadata, surface = load_rho_conditioned_i1_provider_card(directory)
         if str(metadata.get("provider_id")) != provider:
             raise RuntimeError(f"{provider} provider_id mismatch")
-        if "region_rho" not in surface.columns:
-            raise RuntimeError(f"{provider} surface is missing region_rho")
         metadata_by_provider[provider] = metadata
         surfaces[provider] = surface
     return metadata_by_provider, surfaces, manifest
@@ -109,12 +100,8 @@ def common_same_rho_support(
     supports: list[tuple[float, ...]] = []
     for provider in PROVIDERS:
         metadata = metadata_by_provider[provider]
-        region = tuple(
-            float(x) for x in metadata["supported_region_rho_values"]
-        )
-        query = tuple(
-            float(x) for x in metadata["supported_query_rho_values"]
-        )
+        region = tuple(float(x) for x in metadata["supported_region_rho_values"])
+        query = tuple(float(x) for x in metadata["supported_query_rho_values"])
         if region != query:
             raise RuntimeError(
                 f"{provider} does not expose a common same-rho diagonal support"
@@ -283,9 +270,7 @@ def run_rho_conditioned_m0_two_axis_diagnostic(
     wb_manifest = _read_json(whitebox_manifest_path)
     if wb_manifest.get("status") != "FROZEN_PHASE1_V2_AR_SELECTION_V1":
         raise ValueError("unexpected Phase-1 v2 white-box manifest status")
-    by_role = {
-        str(x["selection_role"]): x for x in wb_manifest["whiteboxes"]
-    }
+    by_role = {str(x["selection_role"]): x for x in wb_manifest["whiteboxes"]}
     all_top_level_ledgers = pd.read_csv(whitebox_ledger_path)
     if int(all_top_level_ledgers["trajectory"].nunique()) != 100:
         raise ValueError("white-box diagnostic expects exactly 100 trajectories")
@@ -347,15 +332,10 @@ def run_rho_conditioned_m0_two_axis_diagnostic(
         ["selection_role", "rho_global", "horizon"]
     ).reset_index(drop=True)
 
-    points.to_csv(
-        output_directory / "i1_m0_two_axis_points.csv", index=False
-    )
-    curves.to_csv(
-        output_directory / "i1_m0_two_axis_curves.csv", index=False
-    )
+    points.to_csv(output_directory / "i1_m0_two_axis_points.csv", index=False)
+    curves.to_csv(output_directory / "i1_m0_two_axis_curves.csv", index=False)
     plot_two_axis_scatter(
-        points,
-        output_directory / "i1_m0_JA_vs_sigma_MAE_scatter.png",
+        points, output_directory / "i1_m0_JA_vs_sigma_MAE_scatter.png"
     )
 
     manifest: dict[str, Any] = {
@@ -374,8 +354,8 @@ def run_rho_conditioned_m0_two_axis_diagnostic(
         "sigma_error_suppressed_when_not_contained": False,
         "sigma_error_interpretation": (
             "Joint reference discrepancy. When A_G_M0 differs from A_G_WB, "
-            "the sigma MAE is not isolated probability-composition error; J_A "
-            "is reported alongside it to expose the region mismatch."
+            "the sigma MAE is not isolated probability-composition error; "
+            "J_A is reported alongside it to expose region mismatch."
         ),
         "i1_manifest_sha256": _sha256(i1_card_manifest_path),
         "whitebox_manifest_sha256": _sha256(whitebox_manifest_path),
@@ -386,9 +366,9 @@ def run_rho_conditioned_m0_two_axis_diagnostic(
             "scatter": "i1_m0_JA_vs_sigma_MAE_scatter.png",
         },
     }
-    (
-        output_directory / "i1_m0_two_axis_manifest_v1.json"
-    ).write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    (output_directory / "i1_m0_two_axis_manifest_v1.json").write_text(
+        json.dumps(manifest, indent=2), encoding="utf-8"
+    )
 
     print("PHASE3_RHO_CONDITIONED_I1_M0_TWO_AXIS_PASS")
     print("PHASE3_PUBLIC_I1_ONLY_FIREWALL_PASS")
@@ -401,17 +381,12 @@ def run_rho_conditioned_m0_two_axis_diagnostic(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description=(
-            "Evaluate rho-conditioned I1-M0 on the J_A vs sigma-MAE plane"
-        )
+        description="Evaluate rho-conditioned I1-M0 on J_A vs sigma-MAE"
     )
     parser.add_argument(
         "--i1-card-root",
         type=Path,
-        default=PHASE2
-        / "results"
-        / "i1_cards_v2_rho_conditioned"
-        / "public",
+        default=PHASE2 / "results" / "i1_cards_v2_rho_conditioned" / "public",
     )
     parser.add_argument(
         "--i1-card-manifest",
@@ -443,12 +418,9 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=HERE
-        / "results"
-        / "rho_conditioned_i1_m0_two_axis_v1",
+        default=HERE / "results" / "rho_conditioned_i1_m0_two_axis_v1",
     )
     args = parser.parse_args()
-
     run_rho_conditioned_m0_two_axis_diagnostic(
         whitebox_ledger_path=args.whitebox_ledgers.resolve(),
         whitebox_manifest_path=args.whitebox_manifest.resolve(),
