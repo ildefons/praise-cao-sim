@@ -1,132 +1,112 @@
 # PRAISE first science - Phase 3 / (I1,M0)
 
-Phase 3 contains the frozen topology-aware analytic M0 baseline and its concrete adapter for the frozen Phase-1 G0 benchmark.
+Phase 3 contains the frozen topology-aware analytic M0 baseline, the frozen Phase-1 G0 boundary adapter, and the preliminary WB-vs-M0 evaluation harness.
+
+## M0 input firewall
+
+Phase 3 consumes only the finished public I1 cards produced by Phase 2. It must not read provider request ledgers, acquisition seeds, hidden stochastic parameters, or otherwise reconstruct `A_i`.
+
+The executable handoff is therefore:
+
+`Phase 2: T_i -> hash-frozen public I1_i`
+
+followed by
+
+`Phase 3: (public I1, G, A_G, H, rho_G, M0) -> sigma_hat_G`
+
+White-box truth is consulted only after the M0 prediction is formed, for external evaluation.
 
 ## Frozen M0 baseline
 
-`config_phase3_m0_contract_v1.json` and `m0_analytic_composition.py` define the agreed M0 anchor:
+M0 uses topology-aware LCQ algebra:
 
-- recursive topology-aware LCQ composition;
 - Sequence: `L=sum, C=sum, Q=min`;
-- ParAll: `L=max, C=sum, Q=min`;
-- same-rho policy: `rho_i=rho_G` for every required provider;
-- independent product `sigma_hat_G,M0=product_i sigma_i(A_i,H;rho_G)`;
-- no violation-budget redistribution;
-- analytic predictor/baseline, not a global-rho certificate.
+- ParAll: `L=max, C=sum, Q=min`.
 
-M0 consumes the finished Phase-2 I1 cards unchanged and may not create or alter `A_i`.
+At evaluation time it reads every provider card at exactly
 
-## I1 input
+`rho_i=rho_G`.
 
-Each provider card has the frozen form
+For the independent anchor:
 
-`I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})`.
+`sigma_hat_G,M0(H;rho_G)=product_i sigma_i(A_i,H;rho_G)`.
 
-Phase 2 calibrates each fixed `A_i` from provider-local evidence using the frozen coordinate-wise first-crossing rule at `rho_anchor=0.95`, `H*=120 s`, `sigma_target=0.95`. The same `A_i` is used for every later rho slice. M0 simply reads the already-exposed slice with `rho_i=rho_G`.
+This is an analytic baseline predictor, not a certification lower bound. M0 intentionally does not redistribute the global violation budget.
 
-## Full Phase-1 G0 applicability adapter
+## Full Phase-1 G0 applicability
 
-`m0_phase1_benchmark_adapter.py` instantiates the generic M0 algebra for the frozen benchmark
+`m0_phase1_benchmark_adapter.py` instantiates the frozen graph
 
 `Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost`.
 
-The adapter reads deterministic numerical terms from `../phase1/config_phase1_discovery_v1.json` and uses the exact AICon/YAFS network law employed by Phase 1:
-
-`latency_hop = message_bytes/(BW_mbps*1e6) + PR`.
-
-For the frozen benchmark, each 1000-byte hop at 1000 Mbps and `PR=0.001` contributes `0.001001 s`. Fpre and Fpost each execute 5M instructions at `IPT=1e9`, hence each contributes `0.005 s` latency and `0.015` cost at `COST=3`.
-
-Therefore the deterministic terms outside the provider boundaries are
+The exact frozen deterministic terms give
 
 `L_fixed=0.013003`, `C_fixed=0.03`,
 
-and the full induced M0 boundary is
+hence
 
-`l_M0 = 0.013003 + max_i(l_i)`,
+`l_M0=0.013003+max_i(l_i)`,
 
-`c_M0 = 0.03 + sum_i(c_i)`,
+`c_M0=0.03+sum_i(c_i)`,
 
-`q_M0 = min_i(q_i)`.
+`q_M0=min_i(q_i)`.
 
-M0 is applicable to an exogenous `A_G` only when
+M0 produces a prediction only if this induced boundary is contained in the exogenous `A_G`. Otherwise the case is `NOT_APPLICABLE`. A raw provider-probability product may be retained for diagnostics but is not an M0 prediction and is not scored.
 
-`l_M0<=l_G`, `c_M0<=c_G`, `q_M0>=q_G`.
+## Real WB vs public-I1 M0 diagnostic
 
-If containment fails, M0 reports `NOT_APPLICABLE`. The raw provider-probability product may still be retained as a diagnostic quantity, but it is not an M0 prediction and is not scored against white-box truth.
+`diagnose_real_wb_vs_i1_m0.py` now loads and hash-verifies the materialized public cards from
 
-With the current trace-derived provider boundaries, the full induced boundary is expected to be approximately
+`first_science/phase2/results/i1_cards_v1/public/`.
 
-`A_G^M0=(L<=0.587611774, C<=2.400071385, Q>=0.5)`.
+It has no private-provider-ledger input and no `T_i -> A_i` code path. It reads the public `A_i`, H/rho support and sigma surfaces, computes M0, applies full boundary containment, then compares applicable predictions with the independent frozen Phase-1 white-box bank.
 
-Against the frozen Phase-1 v2 query battery this makes the latency case applicable, while the cost and mixed cases fail the cost-containment precondition.
+## Preliminary four-rho consolidation
 
-## Real-trace WB vs I1-M0 diagnostic
+`consolidate_preliminary_i1_m0_results.py` runs the predeclared diagnostic sweep
 
-`diagnose_real_wb_vs_i1_m0.py` uses only real frozen scientific data:
+`rho_G in {0.95,0.975,0.9833333333333333,0.99}`
 
-- Phase-1 v2 fresh-confirmation top-level ledgers, seeds `7000..7099`, for `sigma_G^WB`;
-- Phase-2 provider-local ledgers, seeds `6000..6099`, for I1;
-- the frozen Phase-2 A_i calibration;
-- the frozen same-rho M0 probability rule;
-- the full G0 deterministic boundary adapter above.
+from the same hash-frozen I1 cards. It writes:
 
-For every frozen white-box query the diagnostic now reports `PREDICTED` or `NOT_APPLICABLE`. For applicable cases it reports and plots the M0 estimate. For non-applicable cases it suppresses the estimate and its error metrics while retaining `sigma_i1_m0_raw_probability_component` explicitly as diagnostic-only information.
+- `preliminary_i1_m0_summary.csv`;
+- `preliminary_i1_m0_sigma_snapshot.csv`;
+- `preliminary_i1_m0_manifest_v1.json`.
 
-Because the provider cards expose multiple rho slices, the same fixed I1 can be evaluated without simulator reruns at
+The manifest records the I1-card manifest hash, white-box manifest hash, git commit, applicability counts and case identities. Its status is explicitly `PRELIMINARY_I1_M0_DIAGNOSTIC_V1`; it is not the final paper evaluation.
 
-`rho in {0.95,0.975,0.9833333333333333,0.99,1.0}`.
-
-## Current implementation
-
-- `config_phase3_m0_contract_v1.json`: frozen M0 contract and frozen G0 numeric adapter contract.
-- `m0_analytic_composition.py`: generic topology-aware M0 kernel.
-- `m0_phase1_benchmark_adapter.py`: frozen Phase-1 G0 deterministic adapter.
-- `test_m0_analytic_composition.py`: generic M0 regression tests.
-- `test_m0_phase1_benchmark_adapter.py`: hand-checkable G0 adapter tests.
-- `diagnose_real_wb_vs_i1_m0.py`: real-trace white-box versus applicable I1-M0 diagnostic.
-- `test_diagnose_real_wb_vs_i1_m0.py`: diagnostic contract tests, including NOT_APPLICABLE suppression.
-
-## Validation
+## Validation and execution
 
 Starting from the repository root:
 
 ```bash
 cd ~/praise/praise-cao-sim
+
+python first_science/phase2/test_phase2_direct_i1_contract.py
+python first_science/phase2/test_materialize_frozen_i1_cards.py
+python first_science/phase2/materialize_frozen_i1_cards.py
+
 python first_science/phase3/test_m0_analytic_composition.py
 python first_science/phase3/test_m0_phase1_benchmark_adapter.py
 python first_science/phase3/test_diagnose_real_wb_vs_i1_m0.py
+python first_science/phase3/test_preliminary_i1_m0_consolidation_contract.py
+
+python first_science/phase3/consolidate_preliminary_i1_m0_results.py
 ```
 
-Expected adapter markers include:
+Important expected markers include:
 
 ```text
-PHASE3_M0_PHASE1_BENCHMARK_ADAPTER_TESTS_PASS
-M0_FIXED_NETWORK_LAW_PASS
-M0_FIXED_PRE_POST_SERVICE_PASS
-M0_FULL_G0_BOUNDARY_PASS
-M0_V2_APPLICABILITY_LATENCY_ONLY_PASS
-```
+PHASE2_I1_CARD_MATERIALIZATION_PASS
+PUBLIC_I1_CARD_HASH_FREEZE_PASS
+SAME_I1_FOR_M0_M1_PASS
 
-Expected diagnostic markers include:
-
-```text
-PHASE3_REAL_WB_VS_I1_M0_DIAGNOSTIC_TESTS_PASS
-A_I_COORDINATE_FIRST_CROSSING_H120_RULE_PASS
-CUMULATIVE_COORDINATE_ACCOUNTING_PASS
-CONSTANT_QUALITY_NO_ARTIFICIAL_THRESHOLD_PASS
-NO_EXTERNAL_A_I_INPUT_PASS
-FULL_M0_APPLICABILITY_INPUT_PASS
-M0_REAL_CURVE_COMPOSITION_KERNEL_PASS
+PHASE3_PUBLIC_I1_ONLY_FIREWALL_PASS
+PHASE3_PRIVATE_PROVIDER_TRACE_ACCESS_BLOCKED_PASS
 M0_NOT_APPLICABLE_SUPPRESSION_PASS
-RAW_PRODUCT_RETAINED_AS_DIAGNOSTIC_ONLY_PASS
-WB_M0_ERROR_METRICS_PASS
-```
 
-After validation, run the real diagnostic on the informative rho slices:
-
-```bash
-cd ~/praise/praise-cao-sim
-for rho in 0.95 0.975 0.9833333333333333 0.99; do
-  python first_science/phase3/diagnose_real_wb_vs_i1_m0.py --rho "$rho"
-done
+PHASE3_PRELIMINARY_I1_M0_CONSOLIDATION_PASS
+PUBLIC_HASH_FROZEN_I1_INPUT_PASS
+FOUR_RHO_PRELIMINARY_SWEEP_PASS
+PRELIMINARY_RESULT_MANIFEST_WRITTEN_PASS
 ```
