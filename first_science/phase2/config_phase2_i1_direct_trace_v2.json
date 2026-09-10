@@ -56,6 +56,17 @@
     "posthoc_method_result_tuning_forbidden": true,
     "implementation_module": "i1_local_region.py"
   },
+  "materialization": {
+    "status": "FROZEN_PIPELINE_READY",
+    "implementation_module": "materialize_frozen_i1_cards.py",
+    "input": "only the frozen private T_i corpora plus frozen Phase-2 contracts",
+    "private_evidence_hash_check_required": true,
+    "output_root": "results/i1_cards_v1/public",
+    "instance_manifest": "results/i1_cards_v1/public/i1_card_instances_manifest_v1.json",
+    "card_files": ["card.json", "sigma_surface.csv"],
+    "card_hash_freeze_required": true,
+    "same_materialized_cards_for_M0_and_M1": true
+  },
   "hard_design_harness": {
     "I1_schema_may_not_be_reopened_to_solve_A_i_instantiation": true,
     "A_G_to_A_i_forbidden": true,
@@ -72,7 +83,9 @@
     "private_provider_ledgers_remain_private": true,
     "acquisition_seeds_not_public_I1": true,
     "hidden_provider_parameters_not_public_I1": true,
-    "Phase1_whitebox_sigma_not_public_I1": true
+    "Phase1_whitebox_sigma_not_public_I1": true,
+    "phase3_may_read_private_provider_ledgers": false,
+    "phase3_must_consume_hash_frozen_public_I1_cards": true
   },
   "m0_boundary": {
     "generic_topology_aware_LCQ_algebra_remains_frozen": true,
@@ -81,17 +94,17 @@
     "rho_slice_policy": "rho_i=rho_G for every required provider",
     "violation_budget_redistribution": false,
     "M0_interpretation": "analytic baseline prediction, not a global-rho certification lower bound",
-    "numerical_I1_to_M0_status": "READY_FOR_DIAGNOSTIC_AFTER_TRACE_DERIVED_A_i",
+    "numerical_I1_to_M0_status": "REQUIRES_HASH_FROZEN_PUBLIC_I1_INSTANCE_MANIFEST",
     "M0_may_not_choose_or_modify_A_i": true
   },
   "finalization": {
     "public_I1_schema_frozen": true,
     "A_i_construction_rule_frozen": true,
-    "concrete_A_i_calibrated_from_anchor_rho_G_0p95": true,
+    "concrete_A_i_rule_implemented": true,
     "phase2_rho_i_selected": false,
-    "final_I1_materialized": false,
-    "final_I1_hash_frozen": false,
-    "numerical_phase3_diagnostic_allowed": true,
+    "materialization_pipeline_frozen": true,
+    "materialized_instance_state_is_recorded_only_by_instance_manifest": true,
+    "numerical_phase3_requires_materialized_instance_manifest": true,
     "numerical_phase4_allowed": false
   }
 }
