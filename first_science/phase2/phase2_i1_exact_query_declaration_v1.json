@@ -1,0 +1,99 @@
+{
+  "status": "FROZEN_PHASE2_I1_EXACT_QUERY_DECLARATION_V1",
+  "query_declaration_id": "PHASE2_I1_FROM_FROZEN_PHASE1_V2_AG_V1",
+  "scientific_role": "method-independent exact A_i declaration used to instantiate the public I1 cards before M0/M1",
+  "source_global_manifest_status": "FROZEN_PHASE1_V2_AR_SELECTION_V1",
+  "source_physical_setting_id": "D300000000_d0.200",
+  "declared_without_i1_sigma_inspection": true,
+  "derived_deterministically_from_already_frozen_A_G": true,
+  "no_post_A_G_freeze_whitebox_outcome_tuning": true,
+  "rho_localization_performed": false,
+  "rho_reason": "I1 exposes the complete frozen rho support R; rho-slice consumption belongs to M.",
+  "same_materialized_cards_for_M0_and_M1": true,
+  "public_localization_context": {
+    "latency_common": 0.012002,
+    "branch_network_latency": [0.001001, 0.001001, 0.001001],
+    "fixed_execution_cost": 0.03,
+    "fixed_quality_floor": 1.0
+  },
+  "regions_by_provider": {
+    "ProviderA": [
+      {
+        "region_id": "V2_LATENCY_LOCAL",
+        "global_case_id": "V2_LATENCY",
+        "global_selection_role": "latency",
+        "l_max": 0.6755498419999432,
+        "c_max": 0.8579676517266361,
+        "q_min": 0.5
+      },
+      {
+        "region_id": "V2_COST_LOCAL",
+        "global_case_id": "V2_COST",
+        "global_selection_role": "cost",
+        "l_max": 0.734391139000015,
+        "c_max": 0.703264227,
+        "q_min": 0.5
+      },
+      {
+        "region_id": "V2_MIXED_LOCAL",
+        "global_case_id": "V2_MIXED",
+        "global_selection_role": "mixed",
+        "l_max": 0.734391139000015,
+        "c_max": 0.714699775,
+        "q_min": 0.5
+      }
+    ],
+    "ProviderB": [
+      {
+        "region_id": "V2_LATENCY_LOCAL",
+        "global_case_id": "V2_LATENCY",
+        "global_selection_role": "latency",
+        "l_max": 0.6755498419999432,
+        "c_max": 0.8579676517266361,
+        "q_min": 0.5
+      },
+      {
+        "region_id": "V2_COST_LOCAL",
+        "global_case_id": "V2_COST",
+        "global_selection_role": "cost",
+        "l_max": 0.734391139000015,
+        "c_max": 0.703264227,
+        "q_min": 0.5
+      },
+      {
+        "region_id": "V2_MIXED_LOCAL",
+        "global_case_id": "V2_MIXED",
+        "global_selection_role": "mixed",
+        "l_max": 0.734391139000015,
+        "c_max": 0.714699775,
+        "q_min": 0.5
+      }
+    ],
+    "ProviderC": [
+      {
+        "region_id": "V2_LATENCY_LOCAL",
+        "global_case_id": "V2_LATENCY",
+        "global_selection_role": "latency",
+        "l_max": 0.6755498419999432,
+        "c_max": 0.8579676517266361,
+        "q_min": 0.5
+      },
+      {
+        "region_id": "V2_COST_LOCAL",
+        "global_case_id": "V2_COST",
+        "global_selection_role": "cost",
+        "l_max": 0.734391139000015,
+        "c_max": 0.703264227,
+        "q_min": 0.5
+      },
+      {
+        "region_id": "V2_MIXED_LOCAL",
+        "global_case_id": "V2_MIXED",
+        "global_selection_role": "mixed",
+        "l_max": 0.734391139000015,
+        "c_max": 0.714699775,
+        "q_min": 0.5
+      }
+    ]
+  }
+}
