@@ -27,9 +27,9 @@ import pandas as pd
 from i1_provider_card import (
     assert_public_i1_card_has_no_forbidden_information,
     build_i1_provider_card,
-    load_i1_provider_card,
     write_i1_provider_card,
 )
+from i1_rho_conditioned_card import load_rho_conditioned_i1_provider_card
 from i1_rho_conditioned_region import derive_nested_rho_regions
 
 HERE = Path(__file__).resolve().parent
@@ -187,8 +187,8 @@ def materialize_rho_conditioned_i1_cards(
         card_json, surface_csv = write_i1_provider_card(
             metadata, surface, card_directory
         )
-        reloaded_metadata, reloaded_surface = load_i1_provider_card(
-            card_directory
+        reloaded_metadata, reloaded_surface = (
+            load_rho_conditioned_i1_provider_card(card_directory)
         )
         expected_points = len(regions) * len(query_rhos) * len(horizons)
         if str(reloaded_metadata["provider_id"]) != provider:
