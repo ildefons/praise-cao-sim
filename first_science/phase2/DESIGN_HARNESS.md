@@ -18,7 +18,15 @@ The private Phase-2 evidence is the frozen ProviderA/B/C provider-local request-
 
 The active construction path is therefore
 
-`T_i -> concrete provider-local A_i -> sigma_i(A_i,H;rho) -> I1_i`.
+`T_i -> concrete provider-local A_i -> {sigma_i(A_i,H;rho) for all rho in R} -> I1_i`.
+
+## Rho handling in Phase 2 - FROZEN
+
+Phase 2 does **not** select a local `rho_i`.
+
+`rho_i` is not an input to `T_i -> A_i` and is not part of provider-local A_i construction. Once `A_i` is fixed, Phase 2 materializes the full already-frozen `R` support into the I1 card.
+
+A later method may consume one or more of those already-exposed rho slices according to its own separately frozen rule. No new rho value may be added after method outcomes are inspected.
 
 ## Only open Phase-2 scientific item
 
@@ -26,11 +34,12 @@ The only unresolved item is the concrete provider-local instantiation
 
 `T_i -> A_i`.
 
-This gap must not be expanded into a redesign of I1 itself.
+This gap must not be expanded into a redesign of I1 itself or into a local-rho selection problem.
 
 Until that concrete rule is explicitly agreed and frozen, Phase 2 must not:
 
 - derive `A_i` from `A_G`;
+- derive `A_i` from a chosen `rho_i`;
 - split a global latency/cost/quality budget into provider budgets;
 - define `A_i` by quantiles or percentiles;
 - substitute a min/max support envelope without explicit agreement;
@@ -48,6 +57,7 @@ If implementation requires a concrete `A_i` rule and that rule is not explicit, 
 - provider-local evidence audit;
 - I1 card schema and sigma semantics;
 - H/R support and accounting semantics;
+- the decision that Phase 2 exposes all of R and selects no `rho_i`;
 - `i1_provider_card.py` as the deterministic card builder once an exact `A_i` is supplied;
 - generic Phase-3 M0 topology-aware LCQ composition kernel and its unit tests.
 
@@ -55,4 +65,4 @@ If implementation requires a concrete `A_i` rule and that rule is not explicit, 
 
 M0 does not choose `A_i`. Once Phase 2 freezes the three concrete `A_i` values and materializes/hash-freezes the corresponding I1 cards, M0 consumes those exact cards unchanged.
 
-The generic M0 structural algebra may remain frozen and tested now. Numerical M0 evaluation is blocked only because the concrete `A_i` values and final card instances are not yet frozen, not because the I1 schema is unresolved.
+The M0 structural LCQ algebra is frozen. The separate question of which existing rho slice or slices M0 consumes is a Phase-3 method choice and is intentionally not fixed by Phase 2.
