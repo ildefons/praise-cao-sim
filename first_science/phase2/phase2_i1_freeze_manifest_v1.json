@@ -1,7 +1,7 @@
 {
   "status": "FROZEN_PHASE2_I1_V1",
   "freeze_date": "2026-09-04",
-  "scientific_role": "freeze I1 contract, acquisition protocol, and provider-local evidence corpus before any M0/M1 evaluation",
+  "scientific_role": "Freeze the Phase-2 acquisition protocol and provider-local evidence corpus before any M0/M1 evaluation; current public I1 instances are deterministically derived from this evidence under the separately frozen card contract.",
   "phase1_dependency": "read-only frozen Step-0 white-box benchmark",
   "validation": {
     "provider_card_test": "PHASE2_I1_PROVIDER_CARD_TESTS_PASS",
@@ -9,11 +9,7 @@
     "private_acquisition_manifest_status": "FROZEN_PHASE2_I1_PRIVATE_ACQUISITION_CORPUS_V1"
   },
   "n_trajectories": 100,
-  "providers": [
-    "ProviderA",
-    "ProviderB",
-    "ProviderC"
-  ],
+  "providers": ["ProviderA", "ProviderB", "ProviderC"],
   "provider_rows": {
     "ProviderA": 119900,
     "ProviderB": 119900,
@@ -35,7 +31,10 @@
     "horizon_max": 240.0
   },
   "I1_definition": "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})",
-  "A_i_policy": "I1 does not select A_i; a consuming method declares exact A_i before inspecting I1 sigma values, then cards are deterministically materialized from this frozen corpus",
+  "A_i_policy": "Phase 2 derives one fixed provider-local A_i from T_i using the frozen coordinate-wise first-sigma-crossing-below-0.95 closest to H*=120 rule at rho_anchor=0.95. M0/M1 do not choose or alter A_i.",
+  "phase2_selects_provider_specific_rho_i": false,
   "same_materialized_I1_for_M0_and_M1": true,
+  "public_instance_materializer": "materialize_frozen_i1_cards.py",
+  "public_instance_hash_manifest": "results/i1_cards_v1/public/i1_card_instances_manifest_v1.json",
   "frozen": true
 }
