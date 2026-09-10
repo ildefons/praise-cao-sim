@@ -7,7 +7,7 @@ It produces two complementary comparisons on the same-rho diagonal:
 
 1. Frozen-reference comparison
    sigma_G^WB(A_G^WB, H; rho) versus sigma_hat_G,M0(H; rho)
-   for each frozen Phase-1 latency/cost/mixed reference region.  This remains a
+   for each frozen Phase-1 latency/cost/mixed reference region. This remains a
    joint discrepancy because A_G^WB and A_G^M0(rho) may differ.
 
 2. Same-region comparison
@@ -16,7 +16,7 @@ It produces two complementary comparisons on the same-rho diagonal:
    direct diagnostic of the M0 probability-integration approximation, up to
    finite-sample estimation noise.
 
-Phase 3 reads only the finalized public I1 cards.  Phase-1 white-box ledgers are
+Phase 3 reads only the finalized public I1 cards. Phase-1 white-box ledgers are
 used only after M0 has formed its boundary and probability prediction.
 """
 from __future__ import annotations
@@ -180,7 +180,7 @@ def _plot_same_region_panels(
             linestyle="--",
             label=r"I1-M0 $\hat{\sigma}_G$",
         )
-        axis.set_title(rf"$\rho={rho:g}$, MAE={float(row.sigma_mae):.3f}")
+        axis.set_title(rf"$\rho={rho:g}$, MAE={float(row['sigma_mae']):.3f}")
         axis.set_ylim(0.0, 1.02)
         axis.grid(True, alpha=0.22)
     for axis in flat_axes[len(rho_values):]:
@@ -238,8 +238,15 @@ def run_sigma_curve_diagnostics(
         m0_curve = build_same_rho_conditioned_m0_curve(
             surfaces, rho=float(rho), horizons=horizons
         )
+        if not np.allclose(
+            m0_curve["rho_global"].astype(float).to_numpy(),
+            float(rho),
+            atol=1e-12,
+            rtol=0.0,
+        ):
+            raise RuntimeError("M0 curve rho_global disagrees with diagonal rho")
 
-        # Same-region WB truth.  The boundary is formed by M0 before any WB
+        # Same-region WB truth. The boundary is formed by M0 before any WB
         # values are consulted, then evaluated on the independent Phase-1 bank.
         induced_query = {
             "l_max": float(induced.l_max),
@@ -258,7 +265,6 @@ def run_sigma_curve_diagnostics(
             m0_curve,
             whitebox_column="sigma_whitebox_same_region",
         )
-        same_comparison.insert(0, "rho_global", float(rho))
         same_comparison.insert(1, "A_G_M0_l_max", float(induced.l_max))
         same_comparison.insert(2, "A_G_M0_c_max", float(induced.c_max))
         same_comparison.insert(3, "A_G_M0_q_min", float(induced.q_min))
@@ -273,7 +279,7 @@ def run_sigma_curve_diagnostics(
             }
         )
 
-        # Frozen Phase-1 references.  These are intentionally retained as the
+        # Frozen Phase-1 references. These are intentionally retained as the
         # joint benchmark view used by the two-axis diagnostic.
         for role in ROLE_ORDER:
             wb = by_role[role]
@@ -291,7 +297,6 @@ def run_sigma_curve_diagnostics(
             )
             comparison.insert(0, "case_id", str(wb["case_id"]))
             comparison.insert(1, "selection_role", role)
-            comparison.insert(2, "rho_global", float(rho))
             comparison["reference_sigma_mae"] = float(metrics["sigma_mae"])
             comparison["reference_sigma_bias"] = float(metrics["sigma_bias"])
             reference_curve_rows.append(comparison)
