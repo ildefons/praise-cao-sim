@@ -2,7 +2,7 @@
   "status": "PHASE2_DIRECT_I1_CONSTRUCTION_V2_CONCRETE_A_I_INSTANTIATION_OPEN",
   "phase": "phase2_i1",
   "revision_date": "2026-09-10",
-  "scientific_role": "Construct the already-defined I1 provider card from frozen provider-local evidence without A_G localization, percentile-based local-envelope invention, or choosing a method-specific local rho.",
+  "scientific_role": "Construct the already-defined I1 provider card from frozen provider-local evidence without A_G localization, percentile-based local-envelope invention, or method-driven construction choices.",
   "retained_valid_evidence": {
     "physical_regime": "D300000000_d0.200",
     "seed_bank": "6000..6099",
@@ -23,9 +23,8 @@
     "phase2_selects_rho_i": false,
     "phase2_exposes_full_R": true,
     "rho_i_is_part_of_A_i_instantiation": false,
-    "method_may_later_consume_one_or_more_existing_rho_slices": true,
     "posthoc_addition_of_new_rho_values_after_method_results": false,
-    "scientific_note": "Phase 2 constructs one A_i and materializes the complete frozen rho support. It does not choose a local rho_i for M0 or M1."
+    "scientific_note": "Phase 2 constructs one A_i and materializes the complete frozen rho support. It does not choose a local rho_i while constructing I1."
   },
   "direct_pipeline": [
     "frozen physical regime",
@@ -70,8 +69,11 @@
   "m0_boundary": {
     "generic_topology_aware_LCQ_algebra_remains_frozen": true,
     "rho_slice_policy_belongs_to_M0_not_Phase2": true,
-    "rho_slice_policy_status": "OPEN_BEFORE_NUMERIC_M0",
-    "numerical_I1_to_M0_status": "BLOCKED_PENDING_CONCRETE_A_i_FINAL_I1_CARDS_AND_FROZEN_M0_RHO_SLICE_POLICY",
+    "rho_slice_policy_status": "FROZEN_SAME_AS_GLOBAL",
+    "rho_slice_policy": "rho_i=rho_G for every required provider",
+    "violation_budget_redistribution": false,
+    "M0_interpretation": "analytic baseline prediction, not a global-rho certification lower bound",
+    "numerical_I1_to_M0_status": "BLOCKED_PENDING_CONCRETE_A_i_AND_FINAL_I1_CARDS",
     "M0_may_not_choose_or_modify_A_i": true
   },
   "finalization": {
