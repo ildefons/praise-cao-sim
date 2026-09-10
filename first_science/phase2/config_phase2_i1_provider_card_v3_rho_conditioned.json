@@ -1,0 +1,153 @@
+{
+  "status": "PHASE2_I1_RHO_CONDITIONED_CONTRACT_V1",
+  "phase": "phase2_i1",
+  "revision_date": "2026-09-10",
+  "schema": "PRAISE_I1_PROVIDER_RHO_CONDITIONED_CARD_V1",
+  "information_technology": "I1_LOCAL_RHO_CONDITIONED_SIGMA_SURFACE_CARD",
+  "scientific_role": "Provider-local information representation derived only from frozen private provider evidence. For each predeclared region-content quantile rho_region, a joint log(L,C) Gaussian-mixture model induces a nested minimum-area local admissibility region A_i(rho_region). The public card then materializes sigma_i(A_i(rho_region),H;rho_query) on the complete declared H x rho_region x rho_query support.",
+  "supersedes_after_validation": "The historical single-A_i H*=120/rho=.95/sigma=.95 first-crossing calibration only. The frozen provider evidence corpus, workload, accounting semantics and Phase-1 white-box benchmark remain unchanged.",
+  "provider_scope": [
+    "ProviderA",
+    "ProviderB",
+    "ProviderC"
+  ],
+  "local_admissibility": "A_i(rho_region)={L_i<=l_i(rho_region),C_i<=c_i(rho_region),Q_i>=q_i}",
+  "region_rho": {
+    "semantics": "joint fitted-distribution probability-content level used to construct A_i(rho_region)",
+    "values": [
+      0.95,
+      0.975,
+      0.9833333333333333,
+      0.99,
+      0.995
+    ],
+    "one_point_zero_allowed": false,
+    "nested_regions_required": true
+  },
+  "query_rho": {
+    "semantics": "trajectory cumulative-admissibility-fraction threshold in sigma_i(A_i,H;rho_query)",
+    "values": [
+      0.95,
+      0.975,
+      0.9833333333333333,
+      0.99,
+      0.995
+    ],
+    "official_M0_diagonal": "rho_region=rho_query=rho_i",
+    "off_diagonal_surface_role": "information_support_and_sensitivity_not_automatic_global_prediction"
+  },
+  "joint_model": {
+    "family": "GaussianMixture",
+    "coordinates": [
+      "log_L",
+      "log_C"
+    ],
+    "why_log": "L and C are strictly positive and may be skewed; log fitting prevents artificial negative-support mass",
+    "covariance_type": "full",
+    "component_selection": "minimum_BIC",
+    "min_components": 1,
+    "max_components": 4,
+    "n_init": 3,
+    "reg_covar": 1e-08,
+    "max_iter": 500,
+    "random_state": 271828,
+    "model_samples": 100000,
+    "region_extraction": "On one deterministic synthetic sample from the fitted joint model, choose the minimum-area origin-anchored [0,l]x[0,c] rectangle containing at least ceil(rho_region*N)/N mass, subject to containing the preceding lower-rho rectangle.",
+    "quality_rule": "Current benchmark Q is degenerate at one value; preserve that exact q_min. Non-degenerate Q is rejected in this version rather than assigned an unvalidated multivariate rule.",
+    "fit_uses_phase1_whitebox": false
+  },
+  "sigma_semantics": {
+    "definition": "sigma_i(A_i(rho_region),H;rho_query)=P(c_i(A_i(rho_region),H)>=rho_query)",
+    "accounting_origin": 0.0,
+    "accounting_window": "cumulative_[0,H]_from_t0",
+    "zero_decided_requests_compliance": 1.0,
+    "latency_timeout": "decision_at_provider_local_latency_deadline",
+    "cost_quality_after_timeout": "not_evaluated_after_latency_failure",
+    "unresolved_at_H": "excluded_from_c_i_denominator",
+    "nonmonotone_in_horizon_allowed": true
+  },
+  "workload_contract": {
+    "period": 0.2,
+    "accounting_origin": 0.0,
+    "horizon_max": 240.0
+  },
+  "H": {
+    "status": "UNCHANGED_FROM_FROZEN_PHASE2_SUPPORT",
+    "minimum": 0.0,
+    "maximum": 240.0,
+    "step": 5.0,
+    "values": [
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      25.0,
+      30.0,
+      35.0,
+      40.0,
+      45.0,
+      50.0,
+      55.0,
+      60.0,
+      65.0,
+      70.0,
+      75.0,
+      80.0,
+      85.0,
+      90.0,
+      95.0,
+      100.0,
+      105.0,
+      110.0,
+      115.0,
+      120.0,
+      125.0,
+      130.0,
+      135.0,
+      140.0,
+      145.0,
+      150.0,
+      155.0,
+      160.0,
+      165.0,
+      170.0,
+      175.0,
+      180.0,
+      185.0,
+      190.0,
+      195.0,
+      200.0,
+      205.0,
+      210.0,
+      215.0,
+      220.0,
+      225.0,
+      230.0,
+      235.0,
+      240.0
+    ]
+  },
+  "public_private_boundary": {
+    "private": [
+      "raw provider traces",
+      "provider request ledgers",
+      "acquisition seeds",
+      "fitted GMM parameters",
+      "GMM BIC table",
+      "synthetic model sample"
+    ],
+    "public": [
+      "rho-conditioned A_i regions",
+      "workload contract",
+      "region-rho support",
+      "query-rho support",
+      "sigma surfaces",
+      "confidence metadata",
+      "construction family metadata"
+    ],
+    "Phase1_whitebox_sigma_public_to_I1": false
+  },
+  "same_I1_for_M0_and_M1": true,
+  "candidate_until_empirical_validation": true
+}
