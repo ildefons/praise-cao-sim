@@ -1,0 +1,24 @@
+{
+  "status": "FROZEN_PHASE2_I1_QUERY_INSTANTIATION_V1",
+  "phase": "phase2_i1",
+  "scientific_role": "method-independent localization of each frozen global admissibility region A_G into provider-local A_i values before public I1 cards are materialized",
+  "phase1_global_region_source": "../phase1/phase1_v2_ar_freeze_manifest_v1.json",
+  "phase1_public_structure_source": "../phase1/config_phase1_discovery_v1.json",
+  "principle": "A_i is part of the instantiated I1 card. Therefore A_G to A_i localization belongs to Phase 2 and is frozen before M0 or M1 consumes I1.",
+  "same_instantiated_I1_for_M0_and_M1": true,
+  "localization_rule": {
+    "graph": "Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "latency": "For every provider i: L_i_max = L_G_max - L_common - L_branch_i, because global latency is L_common + max_i(L_branch_i + L_i).",
+    "cost": "For every provider i: C_i_max = (C_G_max - C_fixed)/3. The residual global additive cost budget is split equally as a method-independent benchmark convention.",
+    "quality": "For every provider i: Q_i_min = Q_G_min, because global quality is the minimum over quality-neutral fixed stages and providers.",
+    "provider_specific_hidden_information_used": false,
+    "i1_sigma_values_used": false,
+    "whitebox_sigma_values_used_after_A_G_freeze": false
+  },
+  "rho_policy": {
+    "rho_is_not_localized_here": true,
+    "reason": "Each I1 card exposes the full frozen rho support R. A composition method may choose which rho slice or slices to consume without changing I1.",
+    "frozen_R_source": "config_phase2_i1_provider_card_v1.json"
+  },
+  "phase_boundary": "Phase 2 is complete only after the exact A_i query declaration is frozen, the public I1 cards are materialized from the frozen provider corpus, and the resulting card set is frozen for identical use by M0 and M1."
+}
