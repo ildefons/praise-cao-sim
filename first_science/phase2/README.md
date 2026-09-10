@@ -4,9 +4,9 @@ Phase 2 owns construction of the provider information object `I1`. Phase 1 is th
 
 The active path is:
 
-`frozen physical regime -> fresh Phase-2 full trajectories -> provider-local subtraces/ledgers T_i -> concrete provider-local A_i -> sigma_i(A_i,H;rho) -> frozen I1_i -> M0/M1`
+`frozen physical regime -> fresh Phase-2 full trajectories -> provider-local subtraces/ledgers T_i -> concrete provider-local A_i -> full sigma_i(A_i,H;rho) surface over R -> frozen I1_i -> M0/M1`
 
-There is no `A_G -> A_i` step.
+There is no `A_G -> A_i` step and Phase 2 does not select a local `rho_i`.
 
 ## 2A - provider evidence acquisition - FROZEN AND RETAINED
 
@@ -38,11 +38,19 @@ The frozen support is:
 - `H={0,5,...,240}`;
 - `R={0.95,0.975,0.9833333333333333,0.99,1.0}`.
 
-The provider traces/ledgers remain private. The public object contains the fixed local admissibility region `A_i`, workload/context information `W_i`, the frozen rho support, and the corresponding local sigma surface plus confidence metadata.
+The provider traces/ledgers remain private. The public object contains the fixed local admissibility region `A_i`, workload/context information `W_i`, the entire frozen rho support, and the corresponding local sigma surface plus confidence metadata.
 
 The I1 schema is not reopened by the direct-trace correction.
 
-## 2C - direct-trace A_i instantiation - CURRENT HARD STOP
+## 2C - rho handling - FROZEN
+
+Phase 2 selects **no special local `rho_i`**.
+
+`rho_i` is not an input to `T_i -> A_i`. Once `A_i` is fixed, the complete frozen `R` support is materialized from the same provider-local evidence. This deliberately leaves multiple already-declared rho slices available to M0 and M1.
+
+Which slice or slices a method consumes is part of that method's own frozen composition/integration rule. Phase 2 neither chooses the slice nor adds new rho values after seeing method results.
+
+## 2D - direct-trace A_i instantiation - CURRENT HARD STOP
 
 `config_phase2_i1_direct_trace_v2.json` and `DESIGN_HARNESS.md` enforce the exact remaining boundary.
 
@@ -55,6 +63,7 @@ The only unresolved mapping is:
 Until the exact operational rule is explicitly agreed and frozen, Phase 2 must not:
 
 - derive `A_i` from `A_G`;
+- derive `A_i` from a chosen `rho_i`;
 - split a global latency/cost/quality budget into local budgets;
 - define `A_i` using quantiles or percentiles;
 - silently replace percentiles with a min/max support envelope;
@@ -62,25 +71,25 @@ Until the exact operational rule is explicitly agreed and frozen, Phase 2 must n
 - use Phase-1 global sigma, M0, or M1 outcomes to choose `A_i`;
 - infer an unspecified rule from historical code.
 
-If code needs a concrete `A_i` before that rule is explicit, the required action is **STOP AND RECONCILE ONLY `T_i -> A_i`**. Do not reopen I1.
+If code needs a concrete `A_i` before that rule is explicit, the required action is **STOP AND RECONCILE ONLY `T_i -> A_i`**. Do not reopen I1 and do not introduce a local-rho choice.
 
-## 2D - final I1 materialization - BLOCKED ONLY ON 2C
+## 2E - final I1 materialization - BLOCKED ONLY ON A_i
 
-Once the three concrete `A_i` values are frozen, `i1_provider_card.py` can deterministically compute
+Once the three concrete `A_i` values are frozen, `i1_provider_card.py` can deterministically compute the entire
 
-`sigma_i(A_i,H;rho)`
+`{sigma_i(A_i,H;rho): H in H, rho in R}`
 
-from the existing provider-local ledgers for the complete frozen `H x R` support. No simulator rerun is required merely to materialize those surfaces.
+surface from the existing provider-local ledgers. No simulator rerun is required merely to materialize those surfaces.
 
 The final cards are then inspected and hash-frozen. The exact same finished I1 cards are supplied unchanged to M0 and M1.
 
 ## Removed premature branch
 
-The percentile-based local-AR diagnostic and p99/p99/minQ materialization branch were removed because they filled the open `T_i -> A_i` step with an unagreed choice. Their removal does not change the frozen I1 schema.
+The percentile-based local-AR diagnostic and p99/p99/minQ materialization branch were removed because they filled the open `T_i -> A_i` step with an unagreed choice. Their removal does not change the frozen I1 schema or rho support.
 
 ## Phase-3 boundary
 
-The generic M0 topology-aware structural kernel is already frozen and unit-tested. Numerical M0 evaluation is blocked only until the concrete `A_i` values and final I1 card instances are frozen.
+The generic M0 topology-aware structural LCQ kernel is already frozen and unit-tested. Phase 3, not Phase 2, owns the still-open choice of which already-exposed rho slice or slices M0 will use for a particular global query.
 
 ## Validation
 
@@ -96,11 +105,12 @@ Expected harness markers:
 ```text
 PHASE2_DIRECT_I1_DESIGN_HARNESS_TESTS_PASS
 I1_SCHEMA_REMAINS_FROZEN_PASS
+PHASE2_EXPOSES_FULL_R_WITHOUT_RHO_I_SELECTION_PASS
 ONLY_T_I_TO_A_I_INSTANTIATION_OPEN_PASS
 PERCENTILE_A_I_BRANCH_REMOVED_PASS
-M0_KERNEL_PRESERVED_PENDING_FINAL_I1_INSTANCES_PASS
+M0_KERNEL_PRESERVED_RHO_POLICY_LEFT_TO_PHASE3_PASS
 ```
 
 ## Freeze rule
 
-The acquisition evidence, I1 schema, sigma semantics, H/R support, accounting semantics, and M0 structural kernel are read-only. The only open design choice is the concrete provider-local `T_i -> A_i` rule. Once that is frozen, Phase 2 proceeds mechanically to final card materialization and hash freeze.
+The acquisition evidence, I1 schema, sigma semantics, H/R support, accounting semantics, and the no-`rho_i` Phase-2 rule are read-only. The only open Phase-2 design choice is the concrete provider-local `T_i -> A_i` rule. Once that is frozen, Phase 2 proceeds mechanically to final card materialization and hash freeze.
