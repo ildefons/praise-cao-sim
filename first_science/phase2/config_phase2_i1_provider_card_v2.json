@@ -44,16 +44,24 @@
     "adapt_after_method_results": false
   },
   "A_i": {
-    "status": "CONCRETE_PROVIDER_LOCAL_INSTANTIATION_OPEN",
+    "status": "FROZEN_TRACE_PLUS_RHO_G_JOINT_COMMON_RANK_V1",
     "owner": "Phase2 information construction",
     "source": "provider_i_local_acquisition_evidence_only",
-    "one_region_per_provider": true,
+    "one_region_per_provider_per_global_query": true,
     "A_G_is_input": false,
+    "rho_G_is_input": true,
     "rho_i_is_input": false,
     "M0_or_M1_may_choose_or_alter_A_i": false,
-    "quantile_or_percentile_rule_authorized": false,
-    "local_sigma_shape_tuning_authorized": false,
-    "note": "The I1 schema is frozen. Only the concrete provider-local instantiation T_i->A_i remains to be fixed before final card materialization. No local rho_i is selected while constructing A_i."
+    "construction_rule": {
+      "joint_finite_population": "rows of T_i with finite L_i,C_i,Q_i",
+      "common_rank_family": "A_i(k)={L_i<=L_(k),C_i<=C_(k),Q_i>=Q_[k]}, with L/C kth ascending and Q kth descending order statistics on the same joint-finite sample",
+      "selection": "choose the smallest common rank k whose joint empirical coverage P_hat_Ti[(L_i,C_i,Q_i) in A_i(k)] is at least rho_G",
+      "marginal_rho_thresholds_selected_independently": false,
+      "additional_percentile_level": false,
+      "sigma_target_used": false,
+      "posthoc_sigma_shape_tuning": false
+    },
+    "note": "rho_G parameterizes the deterministic trace-to-A_i construction. This is distinct from rho_i, which is not selected by Phase 2. After A_i is fixed for the global query, I1 still exposes the complete frozen R surface."
   },
   "acquisition_principle": {
     "one_frozen_private_provider_ledger_corpus": true,
