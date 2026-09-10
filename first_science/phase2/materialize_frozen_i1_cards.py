@@ -109,6 +109,10 @@ def materialize_frozen_i1_cards(
     )
 
     output_root.mkdir(parents=True, exist_ok=True)
+    audit_root = output_root.parent / "private_audit"
+    audit_root.mkdir(parents=True, exist_ok=True)
+    calibration_table.to_csv(audit_root / "A_i_calibration_diagnostics.csv", index=False)
+
     cards_manifest: dict[str, Any] = {}
     for provider in PROVIDERS:
         metadata, surface = build_i1_provider_card(
@@ -155,7 +159,6 @@ def materialize_frozen_i1_cards(
             "sigma_surface_sha256": sha256_file(surface_csv),
         }
 
-    calibration_table.to_csv(output_root / "A_i_calibration_diagnostics.csv", index=False)
     manifest: dict[str, Any] = {
         "status": "FROZEN_PHASE2_I1_CARD_INSTANCES_V1",
         "schema": str(contract["schema"]),
@@ -183,7 +186,8 @@ def materialize_frozen_i1_cards(
     print("THREE_PUBLIC_I1_CARDS_WRITTEN_PASS")
     print("PUBLIC_I1_CARD_HASH_FREEZE_PASS")
     print("SAME_I1_FOR_M0_M1_PASS")
-    print(f"output={output_root.resolve()}")
+    print(f"public_output={output_root.resolve()}")
+    print(f"private_audit={audit_root.resolve()}")
     return manifest
 
 
