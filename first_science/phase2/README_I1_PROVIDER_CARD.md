@@ -1,93 +1,84 @@
 # Phase 2 - I1 provider admissibility-probability surface
 
-Phase 2 constructs and freezes the first provider information technology. Phase 1 remains the immutable Step-0 white-box benchmark.
+Phase 2 constructs and freezes the first provider information technology. Phase 1 remains the immutable white-box benchmark.
 
-## Public I1 object - FROZEN
+## Public I1 object
 
-For one provider-local admissibility region
+For one fixed provider-local admissibility region
 
-`A_i = {L_i <= l_i, C_i <= c_i, Q_i >= q_i}`
+`A_i={L_i<=l_i, C_i<=c_i, Q_i>=q_i}`
 
-and declared workload/context `W_i`, a public card is
+and workload/context `W_i`, the public card is
 
-`I1_i = (A_i, W_i, R, {sigma_i(A_i,H;rho): H in H, rho in R})`
+`I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})`
 
 with
 
-`sigma_i(A_i,H;rho) = P(c_i(A_i,H) >= rho)`.
+`sigma_i(A_i,H;rho)=P(c_i(A_i,H)>=rho)`.
 
-The frozen first-experiment axes are:
+The frozen axes are `H={0,5,...,240}` and `R={0.95,0.975,0.9833333333333333,0.99,1.0}`. Wilson confidence intervals and trajectory counts may accompany each point.
 
-- `H = 0..240` in steps of 5;
-- `R = {0.95, 0.975, 0.9833333333333333, 0.99, 1.0}`.
+## A_i ownership and construction
 
-The card may also expose the Wilson 95% interval, successful-trajectory count and acquisition-trajectory count at each surface point. `config_phase2_i1_provider_card_v2.json` is the active frozen card contract.
+`A_i` is part of the finished I1 card and is fixed by Phase 2 before M0 or M1 runs. The construction is
 
-## Corrected A_i ownership
+`T_i -> frozen coordinate calibration -> A_i -> full H x R sigma surface -> public I1_i`.
 
-`A_i` is part of the finished I1 card. It is therefore fixed in Phase 2, before M0 or M1 runs.
+For each provider and each coordinate separately, the frozen anchor calibration uses
 
-The current direct construction is:
+- `rho_anchor=0.95`;
+- `H*=120 s`;
+- `sigma_target=0.95`.
 
-`frozen physical regime -> fresh full Phase-2 trajectories -> provider-local subtraces/ledgers T_i -> concrete provider-local A_i -> empirical sigma_i -> finished I1_i`.
+The selected coordinate threshold is the observed candidate whose first local sigma crossing below 0.95 occurs closest to 120 s. The three coordinate thresholds form the joint rectangle. Its joint sigma at 120 s is measured rather than forced to 0.95. Constant quality uses its unique observed value.
 
-The local `A_i` for ProviderA is obtained only from ProviderA evidence; likewise for ProviderB and ProviderC. There is no `A_G -> A_i` step. Global admissibility-region values, global white-box sigma outcomes, M0 and M1 are forbidden inputs when fixing `A_i`.
-
-The I1 schema itself is not open. The only remaining design choice is the exact operational mapping `T_i -> A_i`.
+There is no `A_G -> A_i` step, no request-level p95/p99 construction, and no M0/M1 feedback into `A_i`.
 
 ## Provider-local semantics
 
-The local accounting mirrors the frozen Phase-1 admissibility semantics:
+The local accounting mirrors the frozen cumulative-admissibility semantics:
 
-- cumulative `[0,H]` from common `t=0`;
-- `L_i` is provider arrival to provider completion, including queue wait and service;
-- an in-time request is decided at provider completion;
-- a local latency miss is decided at its local latency deadline;
+- cumulative `[0,H]` from `t=0`;
+- `L_i` is provider arrival to provider completion including queue wait and service;
+- local latency misses are decided at the local latency deadline;
 - cost and quality are not evaluated after a timeout;
-- unresolved requests at `H` are excluded;
+- unresolved requests at H are excluded;
 - zero decided requests implies compliance fraction 1;
-- `sigma_i(H;rho)` may be non-monotone in `H` when `rho<1`;
-- at fixed `A_i,H`, `sigma_i(H;rho)` is non-increasing in rho.
-
-`C_i` is native provider execution cost and `Q_i` is native provider-observed quality.
+- sigma may be non-monotone in H for rho<1;
+- sigma is non-increasing in rho at fixed A_i,H.
 
 ## Frozen provider evidence
 
-The provider evidence was acquired once in the frozen physical regime using the independent seed bank `6000..6099` (`N=100`). Each seed executes the complete native graph so the provider arrival/queue context is real. The full native trajectory is transient; only the provider-local ledgers persist.
+The provider evidence was acquired once using seeds `6000..6099`, N=100. Only provider-local ledgers persist. Their SHA-256 values are frozen in `phase2_i1_freeze_manifest_v1.json`.
 
-The retained local ledger columns are
+Private ledger columns are
 
-`trajectory, request_id, emission, completion, L, C, Q`
+`trajectory, request_id, emission, completion, L, C, Q`.
 
-where `emission` means provider-local arrival.
+## Hash-frozen public instance handoff
 
-The existing evidence-corpus hashes in `phase2_i1_freeze_manifest_v1.json` remain valid.
+`materialize_frozen_i1_cards.py` is the only production path from the frozen private evidence to concrete public I1 instances. Before materialization it verifies the evidence hashes. It then writes, for each provider,
 
-## Current direct-I1 status
+- `card.json`;
+- `sigma_surface.csv`.
 
-`config_phase2_i1_direct_trace_v2.json` and `DESIGN_HARNESS.md` freeze the ownership and information firewall and place the hard stop only at `T_i -> A_i`.
+It also writes `i1_card_instances_manifest_v1.json` with the SHA-256 fingerprints of those public files. M0 and M1 must consume the same files unchanged.
 
-`inspect_provider_local_evidence.py` verifies the exact frozen provider-corpus hashes and prints descriptive L/C/Q summaries. It does not choose `A_i`.
-
-The rejected quantile/p99 branch is not active. Until the exact provider-local `T_i -> A_i` rule is explicitly agreed, no percentile rule, `A_G` localization, support-extrema substitute, or local-sigma tuning may be inserted.
-
-Once the three exact `A_i` values are frozen, the existing generic functions in `i1_provider_card.py` can compute the full empirical `H x R` sigma surfaces directly from the frozen provider ledgers. No simulator rerun is required.
-
-## Information firewall
-
-A public I1 card must not expose raw provider traces, private request ledgers, acquisition seeds, hidden generator parameters, provider instruction means, hidden physical parameters, simulator state, or top-level Phase-1 white-box curves/outcomes.
-
-M0 and M1 receive exactly the same finished I1 cards and may not alter or rematerialize `A_i`.
+Phase 3 is explicitly forbidden from reading the private provider ledgers or recalculating `A_i`. It loads and verifies the public card hashes before evaluating M0.
 
 ## Validation
 
-From `~/praise/praise-cao-sim`:
+From the repository root:
 
 ```bash
+cd ~/praise/praise-cao-sim
 python first_science/phase2/test_i1_provider_card.py
 python first_science/phase2/test_i1_provider_acquisition.py
 python first_science/phase2/test_phase2_direct_i1_contract.py
-python first_science/phase2/inspect_provider_local_evidence.py
+python first_science/phase2/test_materialize_frozen_i1_cards.py
+python first_science/phase2/materialize_frozen_i1_cards.py
 ```
 
-The first three are contract/unit tests. The final command is a read-only audit of the already acquired private provider evidence.
+The generated public card root is
+
+`first_science/phase2/results/i1_cards_v1/public/`.
