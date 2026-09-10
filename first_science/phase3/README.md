@@ -1,6 +1,6 @@
 # PRAISE first science - Phase 3 / (I1,M0)
 
-Phase 3 contains the frozen topology-aware analytic M0 baseline. The public I1 schema is already frozen in Phase 2. Numerical M0 evaluation waits only for the three concrete provider-local `A_i` instances and the corresponding final hash-frozen I1 cards.
+Phase 3 contains the frozen topology-aware analytic M0 baseline. The public I1 schema is already frozen in Phase 2. Final numerical M0 evaluation waits for the three concrete provider-local `A_i` instances and the corresponding final hash-frozen I1 cards.
 
 ## Frozen M0 baseline
 
@@ -23,7 +23,7 @@ For rectangular LCQ contract inputs:
 | cost C | sum | sum |
 | quality Q | minimum | minimum |
 
-The `A_i` are already part of the frozen I1 card instances produced by Phase 2. M0 may not create or alter them.
+The `A_i` are already part of the I1 card instances produced by Phase 2. M0 may not create or alter them.
 
 ## Frozen I1 input semantics
 
@@ -63,13 +63,63 @@ M0 first composes the fixed provider boundaries forward through the public graph
 
 M0 also requires the requested horizon `H` and the exact `rho_G` slice to exist in every required I1 card. If these structural inputs are unavailable, it returns `NOT_APPLICABLE`; it does not modify Phase 2, interpolate an unexposed rho, or allocate a different local rho.
 
+## Real-trace WB vs I1-M0 diagnostic
+
+`diagnose_real_wb_vs_i1_m0.py` provides a read-only numerical diagnostic using the actual frozen trace banks rather than illustrative curves.
+
+It uses:
+
+- the fresh Phase-1 v2 white-box confirmation ledger (`7000..7099`) to recompute `sigma_G^WB(A_G,H;rho_G)` for each frozen latency/cost/mixed `A_G`;
+- the frozen Phase-2 provider-local acquisition ledgers (`6000..6099`) to build the provider I1 sigma surfaces;
+- the frozen M0 same-rho rule to compute `product_i sigma_i(A_i,H;rho_G)`.
+
+The diagnostic **never chooses `A_i`**. The caller must provide an explicit JSON file containing one rectangular `A_i` for ProviderA, ProviderB and ProviderC. It also rejects `rho` or `rho_i` inside that file, so the plotting utility cannot silently mix the Phase-2 `T_i -> A_i` problem with M0's same-rho rule.
+
+Minimal input format:
+
+```json
+{
+  "regions": {
+    "ProviderA": {"l_max": 0.0, "c_max": 0.0, "q_min": 0.0},
+    "ProviderB": {"l_max": 0.0, "c_max": 0.0, "q_min": 0.0},
+    "ProviderC": {"l_max": 0.0, "c_max": 0.0, "q_min": 0.0}
+  }
+}
+```
+
+The zero values above document the schema only; they are not scientific defaults and must not be used as provider regions.
+
+For example, once an explicit provider-region file exists:
+
+```bash
+cd ~/praise/praise-cao-sim
+python first_science/phase3/diagnose_real_wb_vs_i1_m0.py \
+  --local-regions-json /path/to/explicit_A_i.json \
+  --rho 0.95
+```
+
+The script writes rho-specific output under `first_science/phase3/results/`, including:
+
+- the real provider I1 surfaces;
+- the real I1-M0 probability curve;
+- aligned WB/M0 curve data;
+- MAE, RMSE, bias and maximum absolute error;
+- one clean WB-vs-I1-M0 PNG for each frozen latency/cost/mixed white-box case;
+- a diagnostic manifest recording every input and explicitly marking the run as non-freeze evidence.
+
+The plotted probability curve is real. However, this diagnostic intentionally does **not** claim the separate full-M0 boundary applicability condition yet. It reports the provider-only ParAll boundary for transparency, but it does not invent the deterministic Fpre/Fpost/network numerical adapter. Final M0 evaluation should assert that adapter separately once it is frozen.
+
+Because the white-box request ledgers are retained, the same diagnostic can also be run at another rho already present in the frozen I1 support, for example `--rho 0.99`, without rerunning the simulator.
+
 ## Current implementation
 
 - `config_phase3_m0_contract_v1.json`: frozen same-rho M0 information/composition contract.
 - `m0_analytic_composition.py`: recursive Sequence/ParAll LCQ algebra, containment check, same-rho selector, independent-product predictor, and applicability guard.
-- `test_m0_analytic_composition.py`: simulator-independent hand-checkable regression tests.
+- `test_m0_analytic_composition.py`: simulator-independent hand-checkable M0 regression tests.
+- `diagnose_real_wb_vs_i1_m0.py`: real-trace WB versus I1-M0 probability-composition diagnostic.
+- `test_diagnose_real_wb_vs_i1_m0.py`: simulator-independent guard tests for the diagnostic.
 
-The implementation contains no private provider evidence, no Phase-1 white-box sigma values, no inverse `A_G -> A_i` construction, and no equal-violation-budget allocator.
+The M0 implementation contains no private provider evidence, no Phase-1 white-box sigma values, no inverse `A_G -> A_i` construction, and no equal-violation-budget allocator.
 
 ## Validation
 
@@ -78,9 +128,10 @@ Starting from the repository root:
 ```bash
 cd ~/praise/praise-cao-sim
 python first_science/phase3/test_m0_analytic_composition.py
+python first_science/phase3/test_diagnose_real_wb_vs_i1_m0.py
 ```
 
-Expected:
+Expected M0 markers:
 
 ```text
 PHASE3_M0_ANALYTIC_COMPOSITION_TESTS_PASS
@@ -90,4 +141,14 @@ M0_INDEPENDENT_PRODUCT_BASELINE_PASS
 M0_NOT_A_CERTIFICATE_PASS
 ```
 
-These tests validate the frozen M0 baseline. Numerical evaluation against the white-box benchmark begins only after Phase 2 freezes the concrete `A_i` instances and final I1 cards.
+Expected diagnostic-test markers:
+
+```text
+PHASE3_REAL_WB_VS_I1_M0_DIAGNOSTIC_TESTS_PASS
+DIAGNOSTIC_DOES_NOT_SELECT_A_I_OR_RHO_I_PASS
+M0_REAL_CURVE_COMPOSITION_KERNEL_PASS
+WB_M0_ERROR_METRICS_PASS
+DIAGNOSTIC_FILENAME_RHO_TAG_PASS
+```
+
+These tests validate the frozen M0 baseline and the diagnostic harness. Producing the actual real-data plots still requires explicit concrete `A_i` values; the diagnostic will not invent them.
