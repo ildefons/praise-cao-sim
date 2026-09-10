@@ -1,0 +1,33 @@
+{
+  "status": "FROZEN_PHASE2_I1_REGION_EVIDENCE_V1",
+  "freeze_date": "2026-09-04",
+  "scientific_role": "Immutable T_i^Gamma provider-local evidence used only to fit the rho-conditioned joint model and construct A_i(rho_region). Public sigma surfaces must be estimated from an independent T_i^sigma corpus.",
+  "source_historical_freeze_manifest": "phase2_i1_freeze_manifest_v1.json",
+  "phase1_dependency": "read-only frozen Step-0 white-box benchmark for acquisition mechanics only; Phase-1 outcomes are not inputs to Gamma",
+  "n_trajectories": 100,
+  "providers": ["ProviderA", "ProviderB", "ProviderC"],
+  "provider_rows": {
+    "ProviderA": 119900,
+    "ProviderB": 119900,
+    "ProviderC": 119900
+  },
+  "provider_trajectories": {
+    "ProviderA": 100,
+    "ProviderB": 100,
+    "ProviderC": 100
+  },
+  "provider_corpus_sha256": {
+    "ProviderA": "2a2e31876ac54734ea4c58e8c4f5aaa022da133a341a0c5df9daf99deb3de8c1",
+    "ProviderB": "f235fe8a3bba1ea4df2e9953d2045dfffa091d45069fc74381c40697f8c68528",
+    "ProviderC": "d0260b6fbf7e1b14e81c423aba4bf8896f2746ae4a095e82597f01953360c4dc"
+  },
+  "workload_contract": {
+    "period": 0.2,
+    "accounting_origin": 0.0,
+    "horizon_max": 240.0
+  },
+  "allowed_use": "fit Gamma and derive nested A_i(rho_region) only",
+  "forbidden_use": "estimate public sigma_i(A_i(rho_region),H;rho_query)",
+  "same_regions_supplied_in_public_I1_to_M0_and_M1": true,
+  "frozen": true
+}
