@@ -1,8 +1,9 @@
 """Simulator-independent checks for the direct-trace Phase-2 design harness.
 
-This test is intentionally a scientific-boundary test, not a materialization
-test. If the public I1 representation is not explicitly frozen in the design,
-Phase 2 must stop rather than infer an A_i envelope from older code.
+The I1 schema is frozen. The only open scientific item checked here is the
+concrete provider-local mapping T_i -> A_i. The test prevents that narrow gap
+from being silently filled by A_G localization, percentile rules, or method
+feedback.
 """
 from __future__ import annotations
 
@@ -18,45 +19,61 @@ def _load(path: Path) -> dict:
 
 def run_all_tests() -> None:
     contract = _load(HERE / "config_phase2_i1_direct_trace_v2.json")
+    card = _load(HERE / "config_phase2_i1_provider_card_v2.json")
     evidence = _load(HERE / "phase2_i1_freeze_manifest_v1.json")
 
     assert contract["status"] == (
-        "PHASE2_DIRECT_I1_CONSTRUCTION_V2_REPRESENTATION_RECONCILIATION_OPEN"
+        "PHASE2_DIRECT_I1_CONSTRUCTION_V2_CONCRETE_A_I_INSTANTIATION_OPEN"
     )
-    retained = contract["retained_valid_evidence"]
-    assert retained["seed_bank"] == "6000..6099"
-    assert retained["n_trajectories"] == 100
+    assert contract["finalization"]["public_I1_schema_frozen"] is True
+    assert contract["frozen_I1_schema"]["definition"] == (
+        "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})"
+    )
+    assert contract["frozen_I1_schema"]["sigma"] == (
+        "sigma_i(A_i,H;rho)=P(c_i(A_i,H)>=rho)"
+    )
+    assert contract["frozen_I1_schema"]["R"] == [
+        0.95, 0.975, 0.9833333333333333, 0.99, 1.0
+    ]
 
-    reconciliation = contract["representation_reconciliation"]
-    assert reconciliation["status"] == "OPEN_HARD_STOP_BEFORE_MORE_I1_MATERIALIZATION_CODE"
-    assert reconciliation["public_I1_schema"] == "NOT_YET_FROZEN"
-    assert reconciliation["raw_trace_publication_assumed"] is False
+    assert card["status"] == "FROZEN_PHASE2_I1_CARD_CONTRACT_V2_DIRECT_TRACE"
+    assert card["frozen"] is True
+    assert card["card_instance"] == (
+        "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})"
+    )
+    assert card["A_i"]["status"] == "CONCRETE_PROVIDER_LOCAL_INSTANTIATION_OPEN"
+    assert card["A_i"]["owner"] == "Phase2 information construction"
+    assert card["A_i"]["A_G_is_input"] is False
+    assert card["A_i"]["M0_or_M1_may_choose_or_alter_A_i"] is False
+
+    ai = contract["A_i_instantiation"]
+    assert ai["status"] == "OPEN_HARD_STOP"
+    assert ai["source"] == "provider_i_local_acquisition_evidence_only"
+    assert ai["A_G_is_input"] is False
+    assert ai["global_budget_split_allowed"] is False
+    assert ai["M0_or_M1_may_choose_A_i"] is False
+    assert ai["quantile_or_percentile_rule_authorized"] is False
+    assert ai["local_sigma_shape_tuning_authorized"] is False
+    assert ai["required_behavior_if_operational_rule_is_not_explicit"] == (
+        "STOP_AND_RECONCILE_ONLY_T_i_TO_A_i"
+    )
 
     harness = contract["hard_design_harness"]
+    assert harness["I1_schema_may_not_be_reopened_to_solve_A_i_instantiation"] is True
     assert harness["A_G_to_A_i_forbidden"] is True
     assert harness["global_budget_split_forbidden"] is True
     assert harness["quantile_or_percentile_based_A_i_forbidden"] is True
-    assert harness["support_extrema_based_A_i_forbidden_without_explicit_design_change"] is True
     assert harness["local_sigma_shape_tuning_forbidden"] is True
-    assert harness["Phase1_global_sigma_used_to_construct_I1"] is False
-    assert harness["M0_result_used_to_construct_I1"] is False
-    assert harness["M1_result_used_to_construct_I1"] is False
-    assert harness["infer_unspecified_scientific_choice_from_old_code"] is False
-    assert harness["required_behavior_when_design_is_unspecified"] == (
-        "STOP_AND_RECONCILE_THE_DESIGN_DOCUMENT"
-    )
+    assert harness["infer_unspecified_A_i_rule_from_old_code"] is False
 
-    # The p99/quantile branch was a design-harness violation and must not remain
-    # as active Phase-2 materialization code.
-    forbidden_active_files = [
+    # The rejected percentile branch must not be active.
+    for filename in [
         "config_phase2_i1_local_region_rule_v1.json",
-        "config_phase2_i1_provider_card_v2.json",
         "materialize_direct_i1_cards.py",
         "test_materialize_direct_i1_cards.py",
         "diagnose_direct_i1_local_ar.py",
         "test_diagnose_direct_i1_local_ar.py",
-    ]
-    for filename in forbidden_active_files:
+    ]:
         assert not (HERE / filename).exists(), filename
 
     # The already acquired evidence is preserved exactly.
@@ -67,33 +84,25 @@ def run_all_tests() -> None:
         "ProviderC": 119900,
     }
     assert set(evidence["provider_corpus_sha256"]) == {
-        "ProviderA",
-        "ProviderB",
-        "ProviderC",
+        "ProviderA", "ProviderB", "ProviderC"
     }
 
     m0 = contract["m0_boundary"]
     assert m0["generic_topology_aware_LCQ_algebra_remains_frozen"] is True
-    assert m0["numerical_I1_to_M0_adapter_status"] == "BLOCKED_PENDING_FINAL_I1_SCHEMA"
-    assert m0["M0_may_not_force_a_particular_I1_representation"] is True
+    assert m0["numerical_I1_to_M0_status"] == (
+        "BLOCKED_PENDING_CONCRETE_A_i_AND_FINAL_I1_CARDS"
+    )
+    assert m0["M0_may_not_choose_or_modify_A_i"] is True
 
-    finalization = contract["finalization"]
-    assert finalization["public_I1_schema_frozen"] is False
-    assert finalization["final_I1_materialized"] is False
-    assert finalization["numerical_phase3_allowed"] is False
-
-    # The active contract itself must not encode the rejected percentile rule.
-    active_text = (HERE / "config_phase2_i1_direct_trace_v2.json").read_text(
-        encoding="utf-8"
-    ).lower()
-    assert "p99" not in active_text
-    assert '"quantile":' not in active_text
-    assert '"percentile":' not in active_text
+    assert contract["finalization"]["concrete_A_i_frozen"] is False
+    assert contract["finalization"]["final_I1_materialized"] is False
+    assert contract["finalization"]["numerical_phase3_allowed"] is False
 
     print("PHASE2_DIRECT_I1_DESIGN_HARNESS_TESTS_PASS")
-    print("UNSPECIFIED_I1_REPRESENTATION_HARD_STOP_PASS")
+    print("I1_SCHEMA_REMAINS_FROZEN_PASS")
+    print("ONLY_T_I_TO_A_I_INSTANTIATION_OPEN_PASS")
     print("PERCENTILE_A_I_BRANCH_REMOVED_PASS")
-    print("M0_STRUCTURAL_KERNEL_PRESERVED_NUMERIC_ADAPTER_BLOCKED_PASS")
+    print("M0_KERNEL_PRESERVED_PENDING_FINAL_I1_INSTANCES_PASS")
 
 
 if __name__ == "__main__":
