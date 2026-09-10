@@ -2,7 +2,7 @@
 
 Phase 2 constructs and freezes the first provider information technology. Phase 1 remains the immutable Step-0 white-box benchmark.
 
-## Public I1 object
+## Public I1 object - FROZEN
 
 For one provider-local admissibility region
 
@@ -16,12 +16,12 @@ with
 
 `sigma_i(A_i,H;rho) = P(c_i(A_i,H) >= rho)`.
 
-The frozen first-experiment axes remain:
+The frozen first-experiment axes are:
 
 - `H = 0..240` in steps of 5;
 - `R = {0.95, 0.975, 0.9833333333333333, 0.99, 1.0}`.
 
-The card may also expose the Wilson 95% interval, successful-trajectory count and acquisition-trajectory count at each surface point.
+The card may also expose the Wilson 95% interval, successful-trajectory count and acquisition-trajectory count at each surface point. `config_phase2_i1_provider_card_v2.json` is the active frozen card contract.
 
 ## Corrected A_i ownership
 
@@ -29,11 +29,11 @@ The card may also expose the Wilson 95% interval, successful-trajectory count an
 
 The current direct construction is:
 
-`frozen physical regime -> fresh full Phase-2 trajectories -> provider-local subtraces/ledgers -> provider-local A_i -> empirical sigma_i -> finished I1_i`.
+`frozen physical regime -> fresh full Phase-2 trajectories -> provider-local subtraces/ledgers T_i -> concrete provider-local A_i -> empirical sigma_i -> finished I1_i`.
 
-The local `A_i` for ProviderA is chosen only from ProviderA evidence; likewise for ProviderB and ProviderC. The same rule form must be used for all three providers.
+The local `A_i` for ProviderA is obtained only from ProviderA evidence; likewise for ProviderB and ProviderC. There is no `A_G -> A_i` step. Global admissibility-region values, global white-box sigma outcomes, M0 and M1 are forbidden inputs when fixing `A_i`.
 
-There is no `A_G -> A_i` step. Global admissibility-region values, global white-box sigma outcomes, M0 and M1 are forbidden inputs when choosing `A_i`.
+The I1 schema itself is not open. The only remaining design choice is the exact operational mapping `T_i -> A_i`.
 
 ## Provider-local semantics
 
@@ -61,15 +61,17 @@ The retained local ledger columns are
 
 where `emission` means provider-local arrival.
 
-The existing evidence-corpus hashes in `phase2_i1_freeze_manifest_v1.json` remain valid. The old v1 statement that a consuming method supplies `A_i` is superseded by `config_phase2_i1_direct_trace_v2.json`.
+The existing evidence-corpus hashes in `phase2_i1_freeze_manifest_v1.json` remain valid.
 
 ## Current direct-I1 status
 
-`config_phase2_i1_direct_trace_v2.json` freezes the corrected ownership and information firewall, while leaving only the small provider-local `A_i` selection rule open.
+`config_phase2_i1_direct_trace_v2.json` and `DESIGN_HARNESS.md` freeze the ownership and information firewall and place the hard stop only at `T_i -> A_i`.
 
 `inspect_provider_local_evidence.py` verifies the exact frozen provider-corpus hashes and prints descriptive L/C/Q summaries. It does not choose `A_i`.
 
-After one provider-local `A_i` rule is frozen, the existing generic functions in `i1_provider_card.py` can compute the full empirical `H x R` sigma surface directly from each provider ledger. No simulator rerun is required.
+The rejected quantile/p99 branch is not active. Until the exact provider-local `T_i -> A_i` rule is explicitly agreed, no percentile rule, `A_G` localization, support-extrema substitute, or local-sigma tuning may be inserted.
+
+Once the three exact `A_i` values are frozen, the existing generic functions in `i1_provider_card.py` can compute the full empirical `H x R` sigma surfaces directly from the frozen provider ledgers. No simulator rerun is required.
 
 ## Information firewall
 
