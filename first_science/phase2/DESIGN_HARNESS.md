@@ -98,10 +98,12 @@ M0 consumes the public Phase-2 cards unchanged. On the official same-rho diagona
 
 Its LCQ topology algebra and deterministic Phase-1 graph/network adapter are unchanged. Because `A_i` now depends on `rho_G`, the induced `A_G^M0(rho_G)` may also vary with rho.
 
-Evaluation reports region agreement `J_A` and whole-horizon sigma MAE together. When regions differ, sigma MAE is a joint reference discrepancy and must not be described as isolated probability-composition error.
+Evaluation reports region agreement `J_A` and whole-horizon sigma MAE together. When regions differ, sigma MAE is a joint reference discrepancy and must not be described as isolated probability-composition error. Under the cumulative-compliance semantics, the M0 product is a baseline prediction, not a guaranteed lower bound/certificate.
 
 ## Forbidden constructions
 
 Phase 2 must not derive `A_i` from `A_G`, Phase-1 white-box outcomes, M0/M1 results, a post-hoc global budget split, or the sigma-estimation corpus. It must not reuse the same trajectories to both select `A_i(rho)` and estimate their public sigma curves.
 
-Do not start the I1-M1 numerical fit until the independent-evidence I1 materialization and the resulting M0 two-axis diagnostic have been inspected and accepted.
+## Acceptance gate - CLOSED
+
+The independent-evidence I1 materialization, rho-conditioned M0 two-axis diagnostic, and same-region sigma diagnostic were inspected and accepted on 10 September 2026. The formal freeze record is `phase2_i1_rho_conditioned_freeze_manifest_v1.json`. M1 may now proceed from this public I1 handoff. Reopen Phase 2 only for a concrete scientific or implementation defect.
