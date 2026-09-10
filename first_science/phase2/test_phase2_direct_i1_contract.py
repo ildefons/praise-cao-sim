@@ -1,9 +1,9 @@
 """Simulator-independent checks for the direct-trace Phase-2 design harness.
 
-The I1 schema is frozen. The only open scientific item checked here is the
-concrete provider-local mapping T_i -> A_i. The test prevents that narrow gap
-from being silently filled by A_G localization, percentile rules, or method
-feedback.
+The I1 schema is frozen. The only open Phase-2 scientific item checked here is
+the concrete provider-local mapping T_i -> A_i. The test prevents that narrow
+gap from being silently filled by A_G localization, percentile rules, rho-driven
+A_i construction, or method feedback.
 """
 from __future__ import annotations
 
@@ -41,15 +41,18 @@ def run_all_tests() -> None:
     assert card["card_instance"] == (
         "I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho): H in H, rho in R})"
     )
+    assert card["R"]["phase2_selects_rho_i"] is False
     assert card["A_i"]["status"] == "CONCRETE_PROVIDER_LOCAL_INSTANTIATION_OPEN"
     assert card["A_i"]["owner"] == "Phase2 information construction"
     assert card["A_i"]["A_G_is_input"] is False
+    assert card["A_i"]["rho_i_is_input"] is False
     assert card["A_i"]["M0_or_M1_may_choose_or_alter_A_i"] is False
 
     ai = contract["A_i_instantiation"]
     assert ai["status"] == "OPEN_HARD_STOP"
     assert ai["source"] == "provider_i_local_acquisition_evidence_only"
     assert ai["A_G_is_input"] is False
+    assert ai["rho_i_is_input"] is False
     assert ai["global_budget_split_allowed"] is False
     assert ai["M0_or_M1_may_choose_A_i"] is False
     assert ai["quantile_or_percentile_rule_authorized"] is False
@@ -61,6 +64,7 @@ def run_all_tests() -> None:
     harness = contract["hard_design_harness"]
     assert harness["I1_schema_may_not_be_reopened_to_solve_A_i_instantiation"] is True
     assert harness["A_G_to_A_i_forbidden"] is True
+    assert harness["rho_i_to_A_i_forbidden"] is True
     assert harness["global_budget_split_forbidden"] is True
     assert harness["quantile_or_percentile_based_A_i_forbidden"] is True
     assert harness["local_sigma_shape_tuning_forbidden"] is True
@@ -87,14 +91,23 @@ def run_all_tests() -> None:
         "ProviderA", "ProviderB", "ProviderC"
     }
 
+    # M0 is now frozen independently of I1 construction: same rho as the global
+    # query, no violation-budget redistribution, and no certification claim.
     m0 = contract["m0_boundary"]
     assert m0["generic_topology_aware_LCQ_algebra_remains_frozen"] is True
+    assert m0["rho_slice_policy_status"] == "FROZEN_SAME_AS_GLOBAL"
+    assert m0["rho_slice_policy"] == "rho_i=rho_G for every required provider"
+    assert m0["violation_budget_redistribution"] is False
+    assert m0["M0_interpretation"] == (
+        "analytic baseline prediction, not a global-rho certification lower bound"
+    )
     assert m0["numerical_I1_to_M0_status"] == (
         "BLOCKED_PENDING_CONCRETE_A_i_AND_FINAL_I1_CARDS"
     )
     assert m0["M0_may_not_choose_or_modify_A_i"] is True
 
     assert contract["finalization"]["concrete_A_i_frozen"] is False
+    assert contract["finalization"]["phase2_rho_i_selected"] is False
     assert contract["finalization"]["final_I1_materialized"] is False
     assert contract["finalization"]["numerical_phase3_allowed"] is False
 
@@ -102,7 +115,7 @@ def run_all_tests() -> None:
     print("I1_SCHEMA_REMAINS_FROZEN_PASS")
     print("ONLY_T_I_TO_A_I_INSTANTIATION_OPEN_PASS")
     print("PERCENTILE_A_I_BRANCH_REMOVED_PASS")
-    print("M0_KERNEL_PRESERVED_PENDING_FINAL_I1_INSTANCES_PASS")
+    print("M0_SAME_RHO_POLICY_FROZEN_PASS")
 
 
 if __name__ == "__main__":
