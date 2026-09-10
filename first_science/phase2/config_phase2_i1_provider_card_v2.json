@@ -39,6 +39,8 @@
   "R": {
     "status": "FROZEN_BEFORE_M0_AND_M1",
     "values": [0.95,0.975,0.9833333333333333,0.99,1.0],
+    "phase2_selects_rho_i": false,
+    "method_consumption": "M0 or M1 may later consume one or more already-exposed rho slices according to its own frozen method rule.",
     "adapt_after_method_results": false
   },
   "A_i": {
@@ -47,10 +49,11 @@
     "source": "provider_i_local_acquisition_evidence_only",
     "one_region_per_provider": true,
     "A_G_is_input": false,
+    "rho_i_is_input": false,
     "M0_or_M1_may_choose_or_alter_A_i": false,
     "quantile_or_percentile_rule_authorized": false,
     "local_sigma_shape_tuning_authorized": false,
-    "note": "The I1 schema is frozen. Only the concrete provider-local instantiation T_i->A_i remains to be fixed before final card materialization."
+    "note": "The I1 schema is frozen. Only the concrete provider-local instantiation T_i->A_i remains to be fixed before final card materialization. No local rho_i is selected while constructing A_i."
   },
   "acquisition_principle": {
     "one_frozen_private_provider_ledger_corpus": true,
