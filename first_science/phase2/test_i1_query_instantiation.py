@@ -11,6 +11,7 @@ from i1_query_instantiation import (
     derive_public_localization_context,
     validate_exact_i1_query_declaration,
 )
+from materialize_i1_cards import _validate_predeclared_i1_query_regions
 
 HERE = Path(__file__).resolve().parent
 PHASE1 = HERE.parent / "phase1"
@@ -25,6 +26,7 @@ def run_all_tests() -> None:
     phase1_config = _load(PHASE1 / "config_phase1_discovery_v1.json")
     contract = _load(HERE / "config_phase2_i1_query_instantiation_v1.json")
     card_contract = _load(HERE / "config_phase2_i1_provider_card_v1.json")
+    frozen_declaration = _load(HERE / "phase2_i1_exact_query_declaration_v1.json")
 
     context = derive_public_localization_context(phase1_config)
     assert abs(context.latency_common - 0.012002) < 1e-15
@@ -39,6 +41,11 @@ def run_all_tests() -> None:
         contract,
     )
     validate_exact_i1_query_declaration(declaration)
+
+    # The tracked declaration must be exactly reproducible from the frozen
+    # Phase-1 A_G battery plus the frozen method-independent localization rule.
+    assert declaration == frozen_declaration
+    _validate_predeclared_i1_query_regions(frozen_declaration)
 
     assert declaration["status"] == QUERY_DECLARATION_STATUS
     assert declaration["rho_localization_performed"] is False
