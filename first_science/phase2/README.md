@@ -50,6 +50,8 @@ Phase 2 selects **no special local `rho_i`**.
 
 Which slice or slices a method consumes is part of that method's own frozen composition/integration rule. Phase 2 neither chooses the slice nor adds new rho values after seeing method results.
 
+For M0, that separate Phase-3 choice is now frozen as `rho_i=rho_G` for every required provider. This does not change Phase-2 construction: I1 still exposes the whole frozen `R` support and selects no method-specific local rho.
+
 ## 2D - direct-trace A_i instantiation - CURRENT HARD STOP
 
 `config_phase2_i1_direct_trace_v2.json` and `DESIGN_HARNESS.md` enforce the exact remaining boundary.
@@ -87,30 +89,41 @@ The final cards are then inspected and hash-frozen. The exact same finished I1 c
 
 The percentile-based local-AR diagnostic and p99/p99/minQ materialization branch were removed because they filled the open `T_i -> A_i` step with an unagreed choice. Their removal does not change the frozen I1 schema or rho support.
 
-## Phase-3 boundary
+## Phase-3 boundary - M0 FROZEN
 
-The generic M0 topology-aware structural LCQ kernel is already frozen and unit-tested. Phase 3, not Phase 2, owns the still-open choice of which already-exposed rho slice or slices M0 will use for a particular global query.
+The M0 topology-aware LCQ kernel and probability rule are now frozen and unit-tested. For a global query `(A_G,H,rho_G)`, M0 reads every provider card at the same already-exposed rho slice `rho_i=rho_G` and, under its independent-local-events model, predicts
+
+`sigma_hat_G,M0(H;rho_G) = product_i sigma_i(A_i,H;rho_G)`.
+
+It performs no equal-violation-budget redistribution and does not claim a global-rho lower-bound certificate. This deliberate limitation is part of the baseline comparison with richer methods.
 
 ## Validation
 
 Starting from the repository root:
 
 ```bash
+cd ~/praise/praise-cao-sim
 python first_science/phase2/test_phase2_direct_i1_contract.py
 python first_science/phase2/inspect_provider_local_evidence.py
+python first_science/phase3/test_m0_analytic_composition.py
 ```
 
-Expected harness markers:
+Expected contract markers include:
 
 ```text
 PHASE2_DIRECT_I1_DESIGN_HARNESS_TESTS_PASS
 I1_SCHEMA_REMAINS_FROZEN_PASS
-PHASE2_EXPOSES_FULL_R_WITHOUT_RHO_I_SELECTION_PASS
 ONLY_T_I_TO_A_I_INSTANTIATION_OPEN_PASS
 PERCENTILE_A_I_BRANCH_REMOVED_PASS
-M0_KERNEL_PRESERVED_RHO_POLICY_LEFT_TO_PHASE3_PASS
+M0_SAME_RHO_POLICY_FROZEN_PASS
+
+PHASE3_M0_ANALYTIC_COMPOSITION_TESTS_PASS
+M0_FORWARD_BOUNDARY_ALGEBRA_PASS
+M0_SAME_RHO_POLICY_PASS
+M0_INDEPENDENT_PRODUCT_BASELINE_PASS
+M0_NOT_A_CERTIFICATE_PASS
 ```
 
 ## Freeze rule
 
-The acquisition evidence, I1 schema, sigma semantics, H/R support, accounting semantics, and the no-`rho_i` Phase-2 rule are read-only. The only open Phase-2 design choice is the concrete provider-local `T_i -> A_i` rule. Once that is frozen, Phase 2 proceeds mechanically to final card materialization and hash freeze.
+The acquisition evidence, I1 schema, sigma semantics, H/R support, accounting semantics, the no-`rho_i` Phase-2 rule, and the Phase-3 same-rho M0 baseline are read-only. The only open Phase-2 design choice is the concrete provider-local `T_i -> A_i` rule. Once that is frozen, Phase 2 proceeds mechanically to final card materialization and hash freeze, after which numerical M0 evaluation can begin.
