@@ -2,7 +2,7 @@
   "status": "PHASE2_DIRECT_I1_CONSTRUCTION_V2_CONCRETE_A_I_INSTANTIATION_OPEN",
   "phase": "phase2_i1",
   "revision_date": "2026-09-10",
-  "scientific_role": "Construct the already-defined I1 provider card from frozen provider-local evidence without A_G localization or percentile-based local-envelope invention.",
+  "scientific_role": "Construct the already-defined I1 provider card from frozen provider-local evidence without A_G localization, percentile-based local-envelope invention, or choosing a method-specific local rho.",
   "retained_valid_evidence": {
     "physical_regime": "D300000000_d0.200",
     "seed_bank": "6000..6099",
@@ -19,12 +19,20 @@
     "H": {"minimum": 0.0, "maximum": 240.0, "step": 5.0},
     "R": [0.95,0.975,0.9833333333333333,0.99,1.0]
   },
+  "rho_handling": {
+    "phase2_selects_rho_i": false,
+    "phase2_exposes_full_R": true,
+    "rho_i_is_part_of_A_i_instantiation": false,
+    "method_may_later_consume_one_or_more_existing_rho_slices": true,
+    "posthoc_addition_of_new_rho_values_after_method_results": false,
+    "scientific_note": "Phase 2 constructs one A_i and materializes the complete frozen rho support. It does not choose a local rho_i for M0 or M1."
+  },
   "direct_pipeline": [
     "frozen physical regime",
     "fresh Phase-2 full trajectories",
     "provider-local subtraces/ledgers T_i",
-    "freeze one concrete provider-local A_i from T_i under the agreed direct-trace principle",
-    "compute sigma_i(A_i,H;rho) over the frozen H x R support",
+    "freeze one concrete provider-local A_i from T_i under the agreed direct-trace principle without selecting rho_i",
+    "compute sigma_i(A_i,H;rho) for every rho in the frozen R support",
     "materialize and hash-freeze I1_i",
     "supply the identical finished I1_i to M0 and M1"
   ],
@@ -33,6 +41,7 @@
     "owner": "Phase2 information construction",
     "source": "provider_i_local_acquisition_evidence_only",
     "A_G_is_input": false,
+    "rho_i_is_input": false,
     "global_budget_split_allowed": false,
     "M0_or_M1_may_choose_A_i": false,
     "quantile_or_percentile_rule_authorized": false,
@@ -43,6 +52,7 @@
   "hard_design_harness": {
     "I1_schema_may_not_be_reopened_to_solve_A_i_instantiation": true,
     "A_G_to_A_i_forbidden": true,
+    "rho_i_to_A_i_forbidden": true,
     "global_budget_split_forbidden": true,
     "quantile_or_percentile_based_A_i_forbidden": true,
     "local_sigma_shape_tuning_forbidden": true,
@@ -59,12 +69,15 @@
   },
   "m0_boundary": {
     "generic_topology_aware_LCQ_algebra_remains_frozen": true,
-    "numerical_I1_to_M0_status": "BLOCKED_PENDING_CONCRETE_A_i_AND_FINAL_I1_CARDS",
+    "rho_slice_policy_belongs_to_M0_not_Phase2": true,
+    "rho_slice_policy_status": "OPEN_BEFORE_NUMERIC_M0",
+    "numerical_I1_to_M0_status": "BLOCKED_PENDING_CONCRETE_A_i_FINAL_I1_CARDS_AND_FROZEN_M0_RHO_SLICE_POLICY",
     "M0_may_not_choose_or_modify_A_i": true
   },
   "finalization": {
     "public_I1_schema_frozen": true,
     "concrete_A_i_frozen": false,
+    "phase2_rho_i_selected": false,
     "final_I1_materialized": false,
     "final_I1_hash_frozen": false,
     "numerical_phase3_allowed": false,
