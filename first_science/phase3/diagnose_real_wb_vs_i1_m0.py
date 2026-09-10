@@ -1,19 +1,20 @@
-"""Real-trace diagnostic for white-box sigma versus the I1-M0 probability baseline.
+"""Real-trace diagnostic for white-box sigma versus the I1-M0 baseline.
 
-This script uses only already-generated scientific data:
-
-* white-box truth: fresh Phase-1 v2 confirmation top-level request ledgers;
-* I1 evidence: frozen Phase-2 provider-local acquisition ledgers;
+Scientific inputs
+-----------------
+* White-box truth: frozen Phase-1 v2 fresh-confirmation top-level ledgers.
+* Provider information: frozen Phase-2 provider-local acquisition ledgers.
 * M0 probability rule: rho_i = rho_G and product_i sigma_i(A_i,H;rho_G).
 
-The script deliberately does NOT choose A_i. An explicit provider-local region
-file must be supplied by the caller. This prevents a plotting/diagnostic utility
-from silently solving the still-separate T_i -> A_i design problem.
+This diagnostic never derives or tunes A_i. The caller must supply the three
+explicit provider-local rectangular regions. Therefore plotting cannot silently
+solve the separate Phase-2 T_i -> A_i design problem.
 
-The plotted I1-M0 curve is the real same-rho probability-composition component
-computed from the real provider evidence. This diagnostic does not, by itself,
-assert the separate full-graph A_G containment/applicability condition because
-that requires the concrete frozen Phase-3 numerical boundary adapter.
+All plotted sigma values are recomputed from the real frozen trace banks. The
+I1-M0 curve is the real probability-composition component of M0. This script
+intentionally does not claim the separate full-graph boundary-applicability
+check because the final numerical adapter for deterministic graph/network terms
+must be frozen independently.
 """
 from __future__ import annotations
 
@@ -63,8 +64,13 @@ def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _rho_tag(rho: float) -> str:
+    """Return a filesystem-safe rho label without altering filename suffixes."""
+    return f"{float(rho):.6f}".rstrip("0").rstrip(".").replace(".", "p")
+
+
 def load_explicit_local_regions(path: Path) -> dict[str, AdmissibilityBoundary]:
-    """Load caller-supplied A_i values without deriving or tuning any threshold.
+    """Load caller-supplied A_i values without deriving or tuning thresholds.
 
     Expected minimal format::
 
@@ -76,8 +82,8 @@ def load_explicit_local_regions(path: Path) -> dict[str, AdmissibilityBoundary]:
           }
         }
 
-    ``rho`` and ``rho_i`` are rejected because A_i construction is independent
-    of M0's later same-rho slice selection.
+    ``rho`` and ``rho_i`` are rejected. A_i construction is independent of the
+    later M0 same-rho slice selection.
     """
     document = _read_json(path)
     if "rho" in document or "rho_i" in document:
@@ -102,11 +108,11 @@ def load_explicit_local_regions(path: Path) -> dict[str, AdmissibilityBoundary]:
             raise ValueError(
                 f"{provider} region missing fields: {', '.join(sorted(missing))}"
             )
-        values = [
+        values = (
             float(region["l_max"]),
             float(region["c_max"]),
             float(region["q_min"]),
-        ]
+        )
         if not all(math.isfinite(value) for value in values):
             raise ValueError(f"{provider} region values must be finite")
         parsed[provider] = AdmissibilityBoundary(*values)
@@ -117,18 +123,19 @@ def load_i1_contract_support(
     contract_path: Path,
     rho_global: float,
 ) -> tuple[list[float], list[float], dict[str, object]]:
-    """Return the frozen I1 H/R support and workload contract."""
+    """Return frozen I1 H/R support and workload context."""
     contract = _read_json(contract_path)
     if contract.get("status") != "FROZEN_PHASE2_I1_CARD_CONTRACT_V2_DIRECT_TRACE":
         raise ValueError("unexpected Phase-2 I1 card contract status")
     horizons = [float(value) for value in contract["H"]["values"]]
     rho_support = [float(value) for value in contract["R"]["values"]]
-    if not any(abs(float(rho_global) - rho) <= EVENT_TOLERANCE for rho in rho_support):
+    if not any(
+        abs(float(rho_global) - rho) <= EVENT_TOLERANCE for rho in rho_support
+    ):
         raise ValueError(
             f"rho_G={rho_global:g} is not present in frozen I1 support {rho_support}"
         )
-    workload = dict(contract["workload_contract"])
-    return horizons, rho_support, workload
+    return horizons, rho_support, dict(contract["workload_contract"])
 
 
 def load_provider_evidence(provider_root: Path) -> dict[str, pd.DataFrame]:
@@ -182,9 +189,12 @@ def build_same_rho_m0_curve(
     rho_global: float,
     horizons: list[float],
 ) -> pd.DataFrame:
-    """Compose the real provider I1 points with frozen M0 same-rho product rule."""
+    """Compose real I1 points with the frozen M0 same-rho product rule."""
     rho_map = same_rho_as_global(rho_global, PROVIDERS)
-    if any(abs(rho - float(rho_global)) > EVENT_TOLERANCE for rho in rho_map.values()):
+    if any(
+        abs(rho - float(rho_global)) > EVENT_TOLERANCE
+        for rho in rho_map.values()
+    ):
         raise RuntimeError("M0 same-rho contract was violated")
 
     rows: list[dict[str, float]] = []
@@ -193,12 +203,21 @@ def build_same_rho_m0_curve(
         for provider in PROVIDERS:
             surface = provider_surfaces[provider]
             selected = surface[
-                np.isclose(surface["rho"].astype(float), float(rho_global), atol=EVENT_TOLERANCE)
-                & np.isclose(surface["horizon"].astype(float), float(horizon), atol=EVENT_TOLERANCE)
+                np.isclose(
+                    surface["rho"].astype(float),
+                    float(rho_global),
+                    atol=EVENT_TOLERANCE,
+                )
+                & np.isclose(
+                    surface["horizon"].astype(float),
+                    float(horizon),
+                    atol=EVENT_TOLERANCE,
+                )
             ]
             if len(selected) != 1:
                 raise RuntimeError(
-                    f"expected one I1 point for {provider}, H={horizon:g}, rho={rho_global:g}"
+                    f"expected one I1 point for {provider}, "
+                    f"H={horizon:g}, rho={rho_global:g}"
                 )
             provider_sigma[provider] = float(selected.iloc[0]["sigma_hat"])
 
@@ -237,7 +256,9 @@ def build_real_whitebox_curve(
         stop_time=float(stop_time),
         sla_definition=definition,
     )
-    return sigma[["horizon", "sigma"]].rename(columns={"sigma": "sigma_whitebox"})
+    return sigma[["horizon", "sigma"]].rename(
+        columns={"sigma": "sigma_whitebox"}
+    )
 
 
 def compare_curves(
@@ -289,14 +310,17 @@ def plot_one_comparison(
         linestyle="--",
         label=r"I1-M0 $\hat{\sigma}_G$",
     )
-    axis.set_xlim(float(comparison["horizon"].min()), float(comparison["horizon"].max()))
+    axis.set_xlim(
+        float(comparison["horizon"].min()),
+        float(comparison["horizon"].max()),
+    )
     axis.set_ylim(0.0, 1.02)
     axis.set_xlabel("Horizon H (s)")
     axis.set_ylabel("Admissibility probability")
     role_title = ROLE_TITLES.get(role, role)
     axis.set_title(
         f"{role_title}: white-box vs I1-M0\n"
-        f"Real independent trace banks, $\\rho_G={rho_global:g}$"
+        f"Frozen real trace banks, $\\rho_G={rho_global:g}$"
     )
     axis.grid(True, alpha=0.22)
     axis.legend(frameon=False)
@@ -352,21 +376,31 @@ def run_real_trace_diagnostic(
         provider_surfaces, rho_global, horizons
     )
 
-    # Provider-only boundary is reported for transparency. It is not the full
-    # graph-induced A_G^M0 because deterministic stage/network terms are not
-    # silently invented by this diagnostic.
+    # Provider-only boundary is useful bookkeeping but is not the full graph
+    # A_G^M0. This diagnostic never invents deterministic stage/network terms.
     provider_only_boundary = compose_parallel_all(
         [local_regions[provider] for provider in PROVIDERS]
     )
 
     output_directory.mkdir(parents=True, exist_ok=True)
+    provider_surface_table = pd.concat(
+        [provider_surfaces[provider] for provider in PROVIDERS],
+        ignore_index=True,
+    )
+    provider_surface_table.to_csv(
+        output_directory / "real_i1_provider_surfaces.csv", index=False
+    )
+    m0_curve.to_csv(
+        output_directory / "real_i1_m0_probability_curve.csv", index=False
+    )
+
     all_comparisons: list[pd.DataFrame] = []
     summary_rows: list[dict[str, object]] = []
-
     by_role = {
         str(whitebox["selection_role"]): whitebox
         for whitebox in whitebox_manifest["whiteboxes"]
     }
+
     for role in ROLE_ORDER:
         if role not in by_role:
             raise RuntimeError(f"frozen white-box manifest lacks role {role}")
@@ -383,7 +417,9 @@ def run_real_trace_diagnostic(
         comparison.insert(0, "case_id", str(whitebox["case_id"]))
         all_comparisons.append(comparison)
 
-        plot_name = f"real_wb_vs_i1_m0_{role}_rho_{rho_global:g}.png".replace(".", "p")
+        plot_name = (
+            f"real_wb_vs_i1_m0_{role}_rho_{_rho_tag(rho_global)}.png"
+        )
         plot_one_comparison(
             comparison,
             role,
@@ -406,8 +442,12 @@ def run_real_trace_diagnostic(
 
     comparison_table = pd.concat(all_comparisons, ignore_index=True)
     summary_table = pd.DataFrame(summary_rows)
-    comparison_table.to_csv(output_directory / "real_wb_vs_i1_m0_curves.csv", index=False)
-    summary_table.to_csv(output_directory / "real_wb_vs_i1_m0_summary.csv", index=False)
+    comparison_table.to_csv(
+        output_directory / "real_wb_vs_i1_m0_curves.csv", index=False
+    )
+    summary_table.to_csv(
+        output_directory / "real_wb_vs_i1_m0_summary.csv", index=False
+    )
 
     diagnostic_manifest = {
         "status": "REAL_TRACE_DIAGNOSTIC_NOT_A_FREEZE_ARTIFACT",
@@ -432,10 +472,11 @@ def run_real_trace_diagnostic(
         },
         "full_M0_boundary_applicability_asserted": False,
         "note": (
-            "All plotted sigma values are computed from real frozen trace banks. "
+            "All sigma values are computed from real frozen trace banks. "
             "A_i values are caller-supplied and are not selected by this script. "
-            "The probability-composition curve is real; final full-M0 use also "
-            "requires the frozen deterministic stage/network boundary adapter."
+            "The plotted I1-M0 curve is the real probability-composition component; "
+            "full numerical M0 additionally requires the separately frozen "
+            "deterministic stage/network boundary adapter."
         ),
     }
     (output_directory / "real_wb_vs_i1_m0_diagnostic_manifest.json").write_text(
@@ -454,13 +495,16 @@ def run_real_trace_diagnostic(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Plot real Phase-1 white-box sigma against real I1-M0 probability composition."
+        description=(
+            "Plot real Phase-1 white-box sigma against real I1-M0 "
+            "same-rho probability composition."
+        )
     )
     parser.add_argument(
         "--local-regions-json",
         type=Path,
         required=True,
-        help="Explicit ProviderA/B/C A_i values. The diagnostic never derives A_i.",
+        help="Explicit ProviderA/B/C A_i values. This script never derives A_i.",
     )
     parser.add_argument("--rho", type=float, default=0.95)
     parser.add_argument(
@@ -489,9 +533,18 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=PHASE3_DIRECTORY / "results" / "real_wb_vs_i1_m0_diagnostic",
+        default=None,
+        help="Output directory. Default is rho-specific under phase3/results.",
     )
     args = parser.parse_args()
+
+    output = args.output
+    if output is None:
+        output = (
+            PHASE3_DIRECTORY
+            / "results"
+            / f"real_wb_vs_i1_m0_rho_{_rho_tag(float(args.rho))}"
+        )
 
     run_real_trace_diagnostic(
         whitebox_ledger_path=args.whitebox_ledgers.resolve(),
@@ -500,7 +553,7 @@ def main() -> None:
         i1_contract_path=args.i1_contract.resolve(),
         local_regions_path=args.local_regions_json.resolve(),
         rho_global=float(args.rho),
-        output_directory=args.output.resolve(),
+        output_directory=output.resolve(),
     )
 
 
