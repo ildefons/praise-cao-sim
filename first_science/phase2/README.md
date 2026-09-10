@@ -1,12 +1,12 @@
 # PRAISE first science - Phase 2 / I1
 
-Phase 2 owns construction of the provider information object `I1`. Phase 1 is the frozen Step-0 white-box benchmark. Numerical M0/M1 evaluation starts only after the public I1 representation is explicitly frozen, materialized, inspected, and hash-frozen.
+Phase 2 owns construction of the provider information object `I1`. Phase 1 is the frozen Step-0 white-box benchmark. The public I1 schema is already frozen. The only currently open Phase-2 scientific item is the concrete provider-local instantiation `T_i -> A_i`.
 
-The current evidence path is deliberately simple:
+The active path is:
 
-`frozen physical regime -> fresh Phase-2 full trajectories -> provider-local subtraces/ledgers T_i -> explicitly frozen public I1_i`
+`frozen physical regime -> fresh Phase-2 full trajectories -> provider-local subtraces/ledgers T_i -> concrete provider-local A_i -> sigma_i(A_i,H;rho) -> frozen I1_i -> M0/M1`
 
-There is no `A_G -> A_i` step and no provider-envelope calibration step authorized by the current design.
+There is no `A_G -> A_i` step.
 
 ## 2A - provider evidence acquisition - FROZEN AND RETAINED
 
@@ -19,59 +19,68 @@ There is no `A_G -> A_i` step and no provider-envelope calibration step authoriz
 - 119900 provider-request rows per provider;
 - provider-corpus SHA-256 fingerprints recorded in `phase2_i1_freeze_manifest_v1.json`.
 
-The old `phase2_i1_freeze_manifest_v1.json` remains the evidence-corpus checkpoint. Historical statements in that manifest about who supplies `A_i` are not an active final-I1 design contract. The underlying provider evidence and hashes are unchanged.
+The provider evidence and hashes remain read-only. `inspect_provider_local_evidence.py` audits these exact ledgers.
 
-`inspect_provider_local_evidence.py` is the read-only audit of these exact ledgers.
+## 2B - public I1 object - FROZEN
 
-## 2B - direct-trace construction principle - FROZEN
+`config_phase2_i1_provider_card_v2.json` is the active public-card contract.
 
-`config_phase2_i1_direct_trace_v2.json` and `DESIGN_HARNESS.md` mirror the current design document.
+For each provider:
 
-The frozen principle is:
+`I1_i = (A_i, W_i, R, {sigma_i(A_i,H;rho): H in H, rho in R})`
 
-`T_i -> explicitly specified I1_i`
+with
 
-where `T_i` is provider `i`'s frozen local evidence. The implementation must not insert an unstated transformation merely because older code expects one.
+`sigma_i(A_i,H;rho) = P(c_i(A_i,H) >= rho)`.
 
-The following are explicitly forbidden unless the design document is revised first:
+The frozen support is:
 
-- `A_G -> A_i` localization;
-- global latency/cost/quality budget splitting;
-- quantile or percentile based `A_i` construction;
-- replacing percentiles by min/max support extrema without an explicit design decision;
-- searching local `A_i` values to obtain a preferred sigma shape;
-- using Phase-1 global sigma, M0, or M1 outcomes to construct I1;
-- inferring unresolved scientific choices from historical code.
+- `H={0,5,...,240}`;
+- `R={0.95,0.975,0.9833333333333333,0.99,1.0}`.
 
-If implementation needs an unspecified scientific choice, the required action is **STOP AND RECONCILE THE DESIGN DOCUMENT**.
+The provider traces/ledgers remain private. The public object contains the fixed local admissibility region `A_i`, workload/context information `W_i`, the frozen rho support, and the corresponding local sigma surface plus confidence metadata.
 
-## 2C - public I1 representation - REOPENED / CURRENT HARD STOP
+The I1 schema is not reopened by the direct-trace correction.
 
-The previous active schema
+## 2C - direct-trace A_i instantiation - CURRENT HARD STOP
 
-`I1_i=(A_i,W_i,R,{sigma_i(A_i,H;rho)})`
+`config_phase2_i1_direct_trace_v2.json` and `DESIGN_HARNESS.md` enforce the exact remaining boundary.
 
-is reopened because forcing the direct provider traces through a required single rectangular `A_i` repeatedly led to invented envelope-selection rules. It remains useful historical code, but it is not currently authorized as the final public I1 contract.
+The only unresolved mapping is:
 
-"Use the traces directly" fixes the evidence path. It does not, by itself, mean that raw private ledgers become public. The exact public transformation
+`T_i -> A_i`.
 
-`I1_i = F(T_i)`
+`A_i` belongs to Phase-2 information construction and must come from provider `i`'s own frozen local evidence. M0 and M1 may not choose or alter it.
 
-must be written and frozen in the design document before more final-I1 materialization code is written.
+Until the exact operational rule is explicitly agreed and frozen, Phase 2 must not:
 
-The previously frozen H/rho support is retained as reserved support if the reconciled representation still contains a cumulative-admissibility sigma surface. It is not permission to assume that the old single-`A_i` schema survives unchanged.
+- derive `A_i` from `A_G`;
+- split a global latency/cost/quality budget into local budgets;
+- define `A_i` using quantiles or percentiles;
+- silently replace percentiles with a min/max support envelope;
+- search `A_i` values to obtain a preferred local sigma shape;
+- use Phase-1 global sigma, M0, or M1 outcomes to choose `A_i`;
+- infer an unspecified rule from historical code.
 
-## 2D - M0/M1 boundary while I1 is reopened
+If code needs a concrete `A_i` before that rule is explicit, the required action is **STOP AND RECONCILE ONLY `T_i -> A_i`**. Do not reopen I1.
 
-The generic Phase-3 M0 topology-aware LCQ composition kernel remains frozen and unit-tested. It may continue to exist independently of the final I1 adapter.
+## 2D - final I1 materialization - BLOCKED ONLY ON 2C
 
-However, numerical `I1 -> M0` consumption is blocked until the final public I1 representation is frozen. M0 may not force a particular provider representation merely because its current structural kernel accepts rectangular local contracts.
+Once the three concrete `A_i` values are frozen, `i1_provider_card.py` can deterministically compute
 
-The same rule applies to M1: no final M1 fitting/integration code may dictate the I1 representation.
+`sigma_i(A_i,H;rho)`
+
+from the existing provider-local ledgers for the complete frozen `H x R` support. No simulator rerun is required merely to materialize those surfaces.
+
+The final cards are then inspected and hash-frozen. The exact same finished I1 cards are supplied unchanged to M0 and M1.
 
 ## Removed premature branch
 
-The percentile-based local-AR diagnostic and the p99/p99/minQ materialization branch were removed because they violated the design harness. They are not part of the active Phase-2 implementation.
+The percentile-based local-AR diagnostic and p99/p99/minQ materialization branch were removed because they filled the open `T_i -> A_i` step with an unagreed choice. Their removal does not change the frozen I1 schema.
+
+## Phase-3 boundary
+
+The generic M0 topology-aware structural kernel is already frozen and unit-tested. Numerical M0 evaluation is blocked only until the concrete `A_i` values and final I1 card instances are frozen.
 
 ## Validation
 
@@ -86,13 +95,12 @@ Expected harness markers:
 
 ```text
 PHASE2_DIRECT_I1_DESIGN_HARNESS_TESTS_PASS
-UNSPECIFIED_I1_REPRESENTATION_HARD_STOP_PASS
+I1_SCHEMA_REMAINS_FROZEN_PASS
+ONLY_T_I_TO_A_I_INSTANTIATION_OPEN_PASS
 PERCENTILE_A_I_BRANCH_REMOVED_PASS
-M0_STRUCTURAL_KERNEL_PRESERVED_NUMERIC_ADAPTER_BLOCKED_PASS
+M0_KERNEL_PRESERVED_PENDING_FINAL_I1_INSTANCES_PASS
 ```
-
-The evidence audit should continue to verify the already frozen ProviderA/B/C corpus hashes.
 
 ## Freeze rule
 
-The provider acquisition evidence is read-only. The next scientific action is not card materialization. It is to state the exact public direct-trace I1 representation in the design document. Only after that representation is explicitly frozen may implementation continue.
+The acquisition evidence, I1 schema, sigma semantics, H/R support, accounting semantics, and M0 structural kernel are read-only. The only open design choice is the concrete provider-local `T_i -> A_i` rule. Once that is frozen, Phase 2 proceeds mechanically to final card materialization and hash freeze.
