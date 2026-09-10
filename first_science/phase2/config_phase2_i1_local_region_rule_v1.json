@@ -1,0 +1,35 @@
+{
+  "status": "FROZEN_PHASE2_I1_LOCAL_REGION_RULE_V1",
+  "phase": "phase2_i1",
+  "freeze_date": "2026-09-10",
+  "scientific_role": "Define one provider-native admissibility region A_i from provider i's own frozen local evidence, identically in rule form across providers and without using A_G or any composition-method result.",
+  "rule": {
+    "latency_threshold": {
+      "source": "provider_local_L",
+      "operation": "empirical_quantile",
+      "quantile": 0.99,
+      "interpolation": "higher"
+    },
+    "cost_threshold": {
+      "source": "provider_local_C",
+      "operation": "empirical_quantile",
+      "quantile": 0.99,
+      "interpolation": "higher"
+    },
+    "quality_threshold": {
+      "source": "provider_local_Q",
+      "operation": "minimum_finite_observed_value"
+    }
+  },
+  "one_region_per_provider": true,
+  "same_rule_form_for_all_providers": true,
+  "A_G_is_input": false,
+  "global_budget_split_allowed": false,
+  "Phase1_global_sigma_used": false,
+  "M0_result_used": false,
+  "M1_result_used": false,
+  "local_sigma_gate_used_for_selection": false,
+  "generic_L_C_Q_grid": false,
+  "scientific_note": "The p99/p99/minQ rule is a provider-description rule, not a requirement that each local card reproduce the Phase-1 global AR selection gate. Provider-local sigma shapes are allowed to differ.",
+  "frozen": true
+}
