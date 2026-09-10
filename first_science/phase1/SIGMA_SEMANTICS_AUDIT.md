@@ -1,68 +1,61 @@
-# Sigma semantics audit — Phase 0 / Phase 1
+# Sigma semantics audit - current Phase-1 v2 / Phase-2 / Phase-3
 
-## Primary scientific event
+## Status
 
-The authoritative definition is cumulative admissibility through the horizon:
+The current first-science pipeline uses **rho-thresholded cumulative request compliance**. Earlier first-violation/no-violation survival semantics are historical development provenance and are not the authoritative semantics for the frozen Phase-1 v2 AR battery, rho-conditioned I1, or M0 evaluation.
 
-`σ_G(A,H) = P(no violation of A occurs at any time t <= H)`.
+## Authoritative trajectory state
 
-For the event-driven benchmark, define `T_violation,A` as the time of the first **actual simulator violation event** under the declared latency/cost/quality observation semantics, with `T_violation,A = +inf` when no such event is observed. Then, exactly:
+For admissibility region `A`, let every emitted request receive one decision time:
 
-`no violation of A through H  <=>  T_violation,A > H`.
+- completion time, when it completes no later than its latency deadline;
+- latency deadline, when it has not completed in time;
+- unresolved, when the decision time lies after the observable horizon/stop.
 
-A violation occurring exactly at `H` counts as a violation by `H`.
+At horizon `H`, only requests decided by `H` enter the cumulative compliance fraction:
 
-The first-event representation is therefore a lossless compression for this specific cumulative survival functional. It does not replace the primary semantics; it is the computational representation used by the simulator analysis.
+`c(A,H) = n_compliant_decided_by_H / n_decided_by_H`.
 
-## Phase 0 audit
+Before any request is decided, the frozen convention is `c(A,H)=1.0`.
 
-Phase 0 is already numerically consistent with the primary definition:
+For required fraction `rho`, a trajectory is SLA-compliant at `H` exactly when
 
-- every provider request is checked for an admissibility violation;
-- latency violations occur at the request deadline when completion has not occurred;
-- cost/quality violations occur when those request outcomes become observable;
-- the trajectory event is the earliest actual request-level violation;
-- empirical sigma at H averages `1[T_violation > H]` over independent trajectories;
-- unresolved requests are right-censored unless a violation is already known.
+`c(A,H) >= rho`.
 
-Therefore **Phase 0 remains FROZEN**. No scientific numeric change is required.
+Across independent trajectories the authoritative probability is
 
-The wording `P(T_violation > H)` should be read only as the exact event-driven implementation of the primary cumulative no-violation event above.
+`sigma(A,H;rho) = P(c(A,H) >= rho)`.
 
-## Phase 1 audit
+## Consequence: recovery is allowed
 
-The current atlas also evaluates every top-level request and takes the earliest actual latency/cost/quality violation event. Its anchor value at `H*=120` is therefore consistent with the primary cumulative definition.
+This is not a first-passage event. After a failure lowers the cumulative fraction below `rho`, later compliant decisions can raise the fraction above `rho` again. Therefore both trajectory SLA state and empirical `sigma(H;rho)` may be non-monotone in horizon.
 
-Two implementation consequences are now explicit:
+The exact-compliant-time area utilities in `sla_compliance_analysis.py` integrate every compliant interval and explicitly do not compute RMST/first-passage survival.
 
-1. The horizon grid is a reporting/comparison grid only. It must not define the geometry of sigma or quantize a first-crossing time.
-2. Scientific calibration/search code must locate `first sigma < target` crossings from exact first-violation event times. The helper `calculate_exact_first_crossing_below_target(...)` in `sigma_curve_diagnostics.py` implements this rule and is intended for the later scientific search driver.
+## Request-level semantics
 
-The PNG post-process already reconstructs exact first-violation times from `all_top_level_request_ledgers.csv` and draws the empirical staircase over the complete horizon domain rather than linearly interpolating the 5-unit reporting table.
+- `L <= l_max` is evaluated using the request latency deadline. A missed deadline is a latency failure at that deadline.
+- `C <= c_max` and `Q >= q_min` are evaluated when an in-time completion makes those outcomes observable.
+- Cost and quality are not evaluated after a latency failure.
+- Requests not yet decided by `H` are excluded from the cumulative denominator.
+- A decision exactly at `H` counts as decided by `H`.
 
-## Finite-N curve resolution and "smoothness"
+These rules are implemented in `build_request_sla_decision_table(...)` and `calculate_trajectory_cumulative_sla_curve(...)` in `sla_compliance_analysis.py`.
 
-The true survival function may be smooth, but the nonparametric Monte Carlo estimator is necessarily a staircase. Horizon samples are not independent probability samples and must never be averaged as if they increased N.
+## Relation to historical first-violation code
 
-For N independent trajectories the vertical probability resolution is `1/N`. Around a target survival of 0.95, the expected number of failures observed by the target horizon is only about `0.05*N`. Therefore:
+Earlier Phase-0/Phase-1 development used `T_violation` and `P(T_violation>H)` to represent a strict no-violation-through-H event. That event is mathematically different from the current `P(c(A,H)>=rho)` query whenever `rho<1`, and it forbids the recovery behavior intentionally allowed by the current benchmark.
 
-- N=10 development atlas: 0.1 vertical resolution; shape is intentionally very coarse;
-- N=100 scientific coarse search: 0.01 vertical resolution but only about five failures by a 0.95 crossing, so it remains a coarse location diagnostic;
-- final high-N confirmation must be chosen by convergence/resolution evidence rather than visual preference.
+Accordingly:
 
-`sigma_curve_diagnostics.py` records, for each best/bracketing AR:
+- do not use first-violation crossing utilities to define current sigma;
+- do not infer monotonicity in H for current sigma;
+- do not describe the M0 same-rho product as a theorem-level lower bound merely by importing the old no-violation conjunction argument.
 
-- N and vertical probability resolution;
-- exact sigma at H*;
-- failures by H* and by stop;
-- number of unique first-violation event times;
-- maximum empirical jump;
-- longest plateau and its fraction of the horizon domain;
-- exact first crossing below the target;
-- deterministic split-half difference at H* and the full-curve sup difference.
+## Frozen provenance
 
-These diagnostics are a **resolution/convergence check**, not a smoothing method. Artificial smoothing of empirical white-box sigma is prohibited.
+The authoritative Phase-1 v2 contract is `phase1_v2_ar_freeze_manifest_v1.json`, which records
 
-## Final freeze implication
+`sigma_G(A,H;rho)=P(c_G(A,H)>=rho)`
 
-Before freezing the final white-box reference regime/cards, inspect the exact-event best sigma curves and their resolution diagnostics using fresh high-N seeds. If the staircase remains too coarse or split-half curves are materially unstable for the effect sizes being compared, increase N without changing the physical regime, admissibility region, graph, or method definitions.
+with cumulative `[0,H]` accounting, zero-decision compliance `1.0`, and the frozen latency/cost/mixed AR battery. Phase 2 and Phase 3 reuse these accounting semantics through `sla_compliance_analysis.py`.
