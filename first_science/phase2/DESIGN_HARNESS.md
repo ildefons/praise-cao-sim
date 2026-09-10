@@ -59,10 +59,20 @@ If implementation requires a concrete `A_i` rule and that rule is not explicit, 
 - H/R support and accounting semantics;
 - the decision that Phase 2 exposes all of R and selects no `rho_i`;
 - `i1_provider_card.py` as the deterministic card builder once an exact `A_i` is supplied;
-- generic Phase-3 M0 topology-aware LCQ composition kernel and its unit tests.
+- the frozen Phase-3 M0 topology-aware LCQ composition kernel and same-rho probability rule.
 
-## M0 boundary
+## M0 boundary - FROZEN
 
 M0 does not choose `A_i`. Once Phase 2 freezes the three concrete `A_i` values and materializes/hash-freezes the corresponding I1 cards, M0 consumes those exact cards unchanged.
 
-The M0 structural LCQ algebra is frozen. The separate question of which existing rho slice or slices M0 consumes is a Phase-3 method choice and is intentionally not fixed by Phase 2.
+For a global query `(A_G,H,rho_G)`, the frozen M0 rho rule is
+
+`rho_i = rho_G  for every required provider`.
+
+Under M0's deliberately simple independent-local-events model,
+
+`sigma_hat_G,M0(H;rho_G) = product_i sigma_i(A_i,H;rho_G)`.
+
+M0 performs **no equal-violation-budget redistribution**. Therefore this product is an analytic baseline prediction, not a guaranteed lower bound or certificate for the global `rho_G` query. The fact that `c_i>=rho_G` for every provider need not imply `c_G>=rho_G` is an intentional limitation of M0 and part of the scientific comparison with richer integration methods.
+
+The forward LCQ boundary algebra remains topology-aware. M0 is applicable to an exogenous `A_G` only when its forward-composed fixed `A_i` boundary is contained in `A_G`.
