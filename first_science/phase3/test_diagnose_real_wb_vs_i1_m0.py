@@ -87,7 +87,10 @@ def main() -> None:
         }
     )
     comparison, metrics = compare_curves(whitebox, m0)
-    assert list(comparison["error_m0_minus_wb"]) == [-0.05, -0.1]
+    errors = comparison["error_m0_minus_wb"].astype(float).tolist()
+    assert len(errors) == 2
+    assert isclose(errors[0], -0.05, abs_tol=1e-12)
+    assert isclose(errors[1], -0.1, abs_tol=1e-12)
     assert isclose(metrics["mae"], 0.075, abs_tol=1e-12)
     assert isclose(metrics["bias"], -0.075, abs_tol=1e-12)
     assert isclose(metrics["rmse"], sqrt((0.05**2 + 0.1**2) / 2), abs_tol=1e-12)
