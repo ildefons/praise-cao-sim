@@ -1,8 +1,8 @@
 {
-  "status": "FROZEN_PHASE3_M0_STRUCTURAL_CONTRACT_V1",
+  "status": "FROZEN_PHASE3_M0_BASELINE_V2_SAME_RHO",
   "phase": "phase3_i1_m0",
   "revision_date": "2026-09-10",
-  "scientific_role": "Topology-aware analytic certification from already-fixed I1 provider cards, without reconstructing hidden provider distributions or changing A_i.",
+  "scientific_role": "Minimal topology-aware analytic baseline from already-fixed I1 provider cards. M0 composes local LCQ boundaries forward through G, reads every provider card at rho_i=rho_G, and multiplies the corresponding local sigma values under its independence model. It is a predictor/baseline, not a guaranteed certificate for the global rho_G query.",
   "information_contract": {
     "allowed": [
       "exogenous global admissibility query A_G and rho_G",
@@ -15,7 +15,8 @@
       "acquisition seeds",
       "hidden provider stochastic parameters",
       "Phase-1 white-box sigma outcomes",
-      "changing or rematerializing provider A_i"
+      "changing or rematerializing provider A_i",
+      "redistributing or optimizing rho_G across providers"
     ]
   },
   "supported_operators": [
@@ -34,34 +35,37 @@
       "quality": "minimum"
     }
   },
-  "global_query_relation": "Compose the already-fixed local A_i boundaries forward through G. The resulting sufficient boundary A_G_M0 certifies an exogenous A_G only when A_G_M0 is contained in A_G: l_M0<=l_G, c_M0<=c_G, q_M0>=q_G.",
-  "rho_allocation": {
-    "rule": "equal_violation_budget_over_required_stochastic_providers",
-    "epsilon_G": "1-rho_G",
-    "epsilon_i": "epsilon_G/m",
-    "rho_i": "1-epsilon_i",
+  "global_query_relation": "Compose the already-fixed local A_i boundaries forward through G. M0 is applicable to an exogenous A_G only when the induced boundary is contained in A_G: l_M0<=l_G, c_M0<=c_G, q_M0>=q_G.",
+  "rho_policy": {
+    "status": "FROZEN",
+    "rule": "same_as_global_for_every_required_provider",
+    "formula": "rho_i=rho_G for all i",
     "anchor_rho_G": 0.95,
-    "anchor_required_stochastic_providers": 3,
-    "anchor_rho_i": 0.9833333333333333,
-    "rationale": "If the same required root requests are aligned across local and global accounting, the union of local violation sets has fraction at most sum_i epsilon_i<=epsilon_G."
+    "anchor_rho_i": 0.95,
+    "no_violation_budget_allocation": true,
+    "rationale": "M0 deliberately uses the most direct local reading of the I1 cards. It does not engineer local tolerances to preserve the global violation fraction. Any error caused by this simplification is part of the baseline limitation being measured."
   },
   "probability_composition": {
-    "anchor": "independent_required_local_events",
+    "model": "independent_required_local_events",
     "rule": "product",
-    "formula": "sigma_G_M0_lower(H;rho_G)=product_i sigma_i(A_i,H;rho_i)",
-    "interpretation": "lower-bound/certification probability, not an unbiased point estimate"
+    "formula": "sigma_hat_G_M0(H;rho_G)=product_i sigma_i(A_i,H;rho_G)",
+    "interpretation": "analytic prediction/baseline for the global admissibility probability, not a lower bound or certification guarantee"
   },
-  "hard_preconditions_for_numeric_certificate": [
+  "known_limitation": {
+    "statement": "Even if c_i>=rho_G for every provider, this does not in general imply c_G>=rho_G for an all-required composition. For m providers, the union of local violation sets can be as large as m(1-rho_G). M0 intentionally does not correct this by allocating a tighter local violation budget.",
+    "scientific_role": "This is a deliberate borderline limitation of M0 and motivates richer integration methods such as M1."
+  },
+  "hard_preconditions_for_numeric_prediction": [
     "forward-composed fixed A_i boundary is contained in the requested A_G",
-    "local and global cumulative accounting refer to aligned required root-request populations at the evaluated horizon",
-    "required local trajectory-level SLA events are independent for the anchor product rule",
-    "requested rho_i and H points exist in the frozen I1 cards"
+    "the requested H point exists in every required I1 card",
+    "the requested rho_G slice exists in every required I1 card"
   ],
-  "failure_semantics": "If a hard precondition is not established, M0 reports that the fixed I1 information cannot certify that global query; Phase 2 is not reopened.",
+  "failure_semantics": "If a required boundary or card point is unavailable, M0 reports NOT_APPLICABLE rather than changing Phase 2, interpolating an unexposed rho, or redistributing rho_G.",
   "phase2_independence": {
     "A_i_created_by_M0": false,
     "A_G_to_A_i_mapping": false,
+    "rho_i_used_to_construct_A_i": false,
     "M0_may_modify_I1": false
   },
-  "evaluation_lock": "The structural contract is frozen before M0 is compared with any Phase-1 white-box sigma outcome."
+  "evaluation_lock": "The same-rho M0 rule is frozen before M0 is compared with any Phase-1 white-box sigma outcome."
 }
