@@ -1,47 +1,58 @@
 # Phase 2 direct-trace design harness
 
-This file is the executable-development mirror of the current PRAISE/CAO design document. It exists to prevent implementation convenience, historical code, or later method needs from silently filling an unresolved scientific-design gap.
+This file mirrors the current PRAISE/CAO design document and acts as a hard development contract.
 
-## Binding source principle
+## Frozen provider information object
 
-The retained Phase-2 evidence is the frozen ProviderA/B/C provider-local request-ledger corpus extracted from the frozen physical regime on seeds `6000..6099`.
+The public I1 schema is already frozen:
 
-The active construction direction is therefore
+`I1_i = (A_i, W_i, R, {sigma_i(A_i,H;rho): H in H, rho in R})`
 
-`frozen physical regime -> provider-local evidence T_i -> explicitly defined I1_i`.
+with
 
-The provider-local evidence is the source. It is not a cue to invent an intermediate local admissibility envelope.
+`sigma_i(A_i,H;rho) = P(c_i(A_i,H) >= rho)`.
 
-## Hard invariants
+The horizon support is `H={0,5,...,240}` and the rho support is `R={0.95,0.975,0.9833333333333333,0.99,1.0}`. These definitions are not reopened by the direct-trace correction.
 
-Until the design document explicitly freezes a public I1 representation, Phase 2 must not:
+The private Phase-2 evidence is the frozen ProviderA/B/C provider-local request-ledger corpus extracted from the frozen physical regime on seeds `6000..6099`.
+
+The active construction path is therefore
+
+`T_i -> concrete provider-local A_i -> sigma_i(A_i,H;rho) -> I1_i`.
+
+## Only open Phase-2 scientific item
+
+The only unresolved item is the concrete provider-local instantiation
+
+`T_i -> A_i`.
+
+This gap must not be expanded into a redesign of I1 itself.
+
+Until that concrete rule is explicitly agreed and frozen, Phase 2 must not:
 
 - derive `A_i` from `A_G`;
 - split a global latency/cost/quality budget into provider budgets;
 - define `A_i` by quantiles or percentiles;
-- define `A_i` by min/max support extrema merely as a substitute for the rejected percentile rule;
+- substitute a min/max support envelope without explicit agreement;
 - search local `A_i` values to obtain an attractive local sigma shape;
-- inspect M0 or M1 outcomes to shape I1;
-- infer an unspecified scientific choice from historical Phase-1 or Phase-2 code;
-- materialize or hash-freeze a final I1 object whose public schema has not first been frozen in the design document.
+- inspect Phase-1 global sigma, M0, or M1 outcomes to choose `A_i`;
+- infer an unspecified `A_i` rule from historical code.
 
-If implementation requires one of those choices and the design does not specify it, the required behavior is **STOP AND RECONCILE THE DESIGN DOCUMENT**.
+If implementation requires a concrete `A_i` rule and that rule is not explicit, the required behavior is **STOP AND RECONCILE ONLY `T_i -> A_i`**.
 
-## What remains valid
+## What remains valid and read-only
 
-The following remain valid and read-only:
+- Phase-1 v2 benchmark and AR freeze;
+- Phase-2 acquisition protocol;
+- private ProviderA/B/C ledgers and their SHA-256 hashes;
+- provider-local evidence audit;
+- I1 card schema and sigma semantics;
+- H/R support and accounting semantics;
+- `i1_provider_card.py` as the deterministic card builder once an exact `A_i` is supplied;
+- generic Phase-3 M0 topology-aware LCQ composition kernel and its unit tests.
 
-- the Phase-2 acquisition protocol;
-- the private ProviderA/B/C ledgers and their recorded SHA-256 hashes;
-- the provider-local evidence audit;
-- the benchmark time origin and workload context;
-- the Phase-1 v2 white-box benchmark, which is not an input to I1 construction;
-- the generic Phase-3 M0 topology-aware LCQ composition kernel and its unit tests.
+## M0 boundary
 
-The old single-`A_i` sigma-surface card code remains historical implementation evidence only. It is not an active final-I1 contract while the public representation is being reconciled.
+M0 does not choose `A_i`. Once Phase 2 freezes the three concrete `A_i` values and materializes/hash-freezes the corresponding I1 cards, M0 consumes those exact cards unchanged.
 
-## Current hard stop
-
-The exact public representation `I1_i = F(T_i)` is **not yet frozen**. "Use the traces directly" fixes the evidence path and forbids an added calibration/search layer; it does not by itself authorize exposing raw private traces or choosing a replacement envelope.
-
-Numerical M0/M1 integration is therefore blocked until the design document explicitly states the public I1 object and the transformation from `T_i` to that object. The M0 structural algebra may remain frozen and tested in parallel, but it may not dictate the I1 representation.
+The generic M0 structural algebra may remain frozen and tested now. Numerical M0 evaluation is blocked only because the concrete `A_i` values and final card instances are not yet frozen, not because the I1 schema is unresolved.
