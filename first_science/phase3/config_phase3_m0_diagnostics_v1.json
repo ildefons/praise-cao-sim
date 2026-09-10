@@ -1,0 +1,57 @@
+{
+  "status": "FROZEN_PHASE3_M0_DIAGNOSTIC_EXTENSION_V1",
+  "phase": "phase3_i1_m0_evaluation",
+  "revision_date": "2026-09-10",
+  "scientific_role": "Evaluate the already-frozen I1-M0 method along two complementary result axes without changing I1, A_i, M0, or the Phase-1 benchmark.",
+  "core_method_unchanged": true,
+  "region_evaluation": {
+    "reference_object": "A_G_WB",
+    "estimated_object": "A_G_M0_bottom_up",
+    "force_equal": false,
+    "primary_metric": "J_A=mu(A_G_WB intersection A_G_M0)/mu(A_G_WB union A_G_M0)",
+    "additional_metrics": [
+      "intersection_over_A_G_WB",
+      "intersection_over_A_G_M0",
+      "delta_l_M0_minus_WB",
+      "delta_c_M0_minus_WB",
+      "delta_q_M0_minus_WB",
+      "region_relation"
+    ],
+    "current_benchmark_measure": {
+      "semantics": "LC_projection_exact_same_Q_threshold",
+      "rationale": "All current frozen A_G comparisons use the same Q>=0.5 threshold. The common Q extent therefore cancels exactly from intersection-over-union, avoiding an arbitrary finite Q ceiling.",
+      "future_unequal_quality_rule": "If q_min differs, an explicit finite quality_upper evaluation domain is required before computing 3-D Jaccard."
+    },
+    "containment": "Retain containment/applicability as a coarse relation, but do not use it as the sole region-quality result."
+  },
+  "probability_evaluation": {
+    "official_M0_rule": {
+      "rho_policy": "rho_A=rho_B=rho_C=rho_G",
+      "composition": "sigma_hat_G_M0(H;rho_G)=product_i sigma_i(A_i,H;rho_G)",
+      "status": "unchanged_frozen_baseline"
+    },
+    "rho_vector_sensitivity": {
+      "support": "Cartesian product R^3 of rho values already exposed by the three hash-frozen public I1 cards",
+      "current_R": [0.95, 0.975, 0.9833333333333333, 0.99, 1.0],
+      "n_vectors": 125,
+      "curve": "H -> product_i sigma_i(A_i,H;rho_i)",
+      "same_rho_diagonal": "official M0 probability-composition rule",
+      "off_diagonal": "diagnostic sensitivity only; not a prediction for a common global rho_G",
+      "new_simulation_required": false,
+      "I1_rematerialization_required": false
+    }
+  },
+  "outputs": [
+    "preliminary_i1_m0_region_overlap.csv",
+    "preliminary_i1_m0_rho_vector_family.csv",
+    "preliminary_i1_m0_rho_vector_shape_summary.csv",
+    "preliminary_i1_m0_manifest_v2.json"
+  ],
+  "information_firewall": {
+    "public_hash_frozen_I1_only": true,
+    "private_provider_traces_allowed": false,
+    "A_i_recalibration_allowed": false,
+    "Phase1_A_G_recalibration_allowed": false,
+    "off_diagonal_rho_used_to_retune_M0": false
+  }
+}
