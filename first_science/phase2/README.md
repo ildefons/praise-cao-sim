@@ -1,10 +1,12 @@
 # PRAISE first science - Phase 2 / I1
 
-Phase 2 owns the complete construction of the information object `I1`. Phase 1 is the frozen Step-0 white-box benchmark. Phase 3 starts only after the concrete public I1 cards are materialized and frozen.
+Phase 2 owns the complete construction of the provider information object `I1`. Phase 1 is the frozen Step-0 white-box benchmark. Phase 3 starts only after the concrete public I1 cards are materialized, inspected and frozen.
 
-The corrected development sequence is:
+The current sequence is:
 
-`Phase 1 frozen A_G battery -> Phase 2 I1 contract/acquisition/A_G->A_i instantiation/materialized cards -> Phase 3 (I1,M0) -> Phase 4 (I1,M1)`
+`frozen physical regime -> fresh Phase-2 full trajectories -> provider-local subtraces/ledgers -> provider-local A_i -> empirical sigma_i(A_i,H;rho) -> frozen I1 cards -> Phase 3 M0 -> Phase 4 M1`
+
+There is no `A_G -> A_i` step in I1 construction.
 
 ## Phase-2 object
 
@@ -12,87 +14,67 @@ A concrete provider card is
 
 `I1_i = (A_i, W_i, R, {sigma_i(A_i,H;rho): H in H, rho in R})`.
 
-Therefore `A_i` is part of `I1`. It is not chosen by M0 or M1. For the first benchmark, each frozen global admissibility region `A_G` is localized into provider-local `A_i` values by one method-independent benchmark rule using only the public composition structure. Those exact local regions are then materialized against the frozen provider corpus. M0 and M1 receive the resulting cards unchanged.
+`A_i` is part of `I1`. It is selected and frozen in Phase 2 from provider `i`'s own acquisition evidence only. `A_G` is not an input to that selection. M0 and M1 may not choose or alter `A_i`.
 
-The full rho support `R` is also part of the card. Phase 2 does not choose a method-specific `rho_i`; a composition method may choose which already-exposed rho slice or slices it consumes.
+The full rho support `R` is part of the card. Phase 2 does not choose a method-specific rho slice.
 
-## 2A - I1 representation contract - FROZEN
+## 2A - provider evidence acquisition - FROZEN AND RETAINED
 
-`config_phase2_i1_provider_card_v1.json` freezes:
+`config_phase2_i1_acquisition_v1.json` defines the acquisition protocol. The already completed acquisition remains valid:
 
-- provider-local admissibility semantics;
-- `H=0..240` in steps of 5;
-- `R={0.95,0.975,0.9833333333333333,0.99,1.0}`;
-- Wilson 95% uncertainty;
-- exact materialized `A_i` queries only;
-- public/private information firewall.
+- frozen physical regime `D300000000_d0.200`;
+- independent seeds `6000..6099`;
+- 100 full native trajectories;
+- each full trajectory reduced to the ProviderA/B/C local request ledgers;
+- 119900 provider-request rows per provider;
+- provider-corpus SHA-256 fingerprints recorded in `phase2_i1_freeze_manifest_v1.json`.
 
-## 2B - provider evidence acquisition - FROZEN
+The old `phase2_i1_freeze_manifest_v1.json` remains useful as the frozen evidence-corpus checkpoint. Its historical statement that a consuming method declares `A_i` is superseded by the direct-I1 v2 contract. The underlying provider evidence and hashes are unchanged.
 
-`config_phase2_i1_acquisition_v1.json` freezes the provider-side acquisition protocol. The real acquisition completed successfully with 100 trajectories and 119900 provider-request rows for each of ProviderA, ProviderB and ProviderC. The corpus and SHA-256 fingerprints are recorded in `phase2_i1_freeze_manifest_v1.json`.
+## 2B - corrected direct I1 construction contract - CURRENT
 
-This manifest is an evidence-corpus freeze checkpoint. It is not the final Phase-2 boundary anymore: Phase 2 now explicitly ends at the frozen materialized I1 card set.
+`config_phase2_i1_direct_trace_v2.json` records the corrected information boundary:
 
-## 2C - method-independent I1 query instantiation - FROZEN
+- provider `i`'s `A_i` comes only from provider `i`'s local acquisition ledger;
+- no `A_G` values enter `A_i` construction;
+- no global latency/cost budget is split into local budgets;
+- no Phase-1 global sigma outcome is used;
+- no M0/M1 result is used;
+- the same selection-rule form must be used for all three providers;
+- the already frozen `H={0,5,...,240}` and `R={0.95,0.975,0.9833333333333333,0.99,1.0}` support is retained.
 
-`config_phase2_i1_query_instantiation_v1.json` and `phase2_i1_exact_query_declaration_v1.json` freeze the mapping from the already frozen Phase-1 v2 `A_G` battery to exact provider-local `A_i` regions.
+`inspect_provider_local_evidence.py` is the read-only audit of the actual frozen provider ledgers before the final local `A_i` rule is chosen. It verifies the stored SHA-256 hashes and prints provider-local L/C/Q evidence summaries. The printed quantiles are descriptive only; they are not an `A_i` selection rule.
 
-For the public graph
+## 2C - provider-local A_i selection - NEXT
 
-`Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost`,
+Freeze one small rule that maps
 
-the first benchmark localization uses:
+`provider i local evidence -> A_i={L_i<=l_i, C_i<=c_i, Q_i>=q_i}`
 
-- latency: every branch receives the complete residual latency because global latency uses a parallel maximum;
-- cost: the residual additive global cost budget is split equally among the three providers;
-- quality: every provider receives the global minimum quality threshold.
+using that provider's evidence only. The rule must have the same form for ProviderA/B/C and must not inspect `A_G`, global white-box sigma outcomes, M0 or M1.
 
-This step uses no I1 sigma values, no private provider parameters and no post-freeze white-box tuning. It also performs no rho allocation.
+Once that rule is frozen, apply it to the existing 6000..6099 ledgers and write one fixed `A_i` per provider.
 
-## 2D - final I1 card materialization - NEXT
+## 2D - final direct I1 card materialization - AFTER 2C
 
-`materialize_i1_cards.py` consumes:
+For each provider, compute directly from the same frozen provider evidence
 
-1. the frozen I1 representation contract;
-2. the frozen private provider corpus;
-3. the frozen Phase-2 exact `A_i` declaration.
+`sigma_i(A_i,H;rho) = P(c_i(A_i,H) >= rho)`
 
-It deterministically produces the public I1 surfaces for all three benchmark `A_i` regions, all frozen horizons `H`, and the complete frozen rho support `R` for every provider.
-
-After materialization, the card files and their hashes must be validated and frozen. Only then is Phase 2 complete.
+for the complete frozen `H x R` support, then write, inspect, hash and freeze the public card. No provider simulator rerun is required.
 
 The final invariant is:
 
-`same materialized I1 cards -> M0 and M1`.
+`same finished I1 cards -> M0 and M1`.
 
-## Current Phase-2 files
+## Superseded A_G -> A_i path
 
-- `config_phase2_i1_provider_card_v1.json`
-- `config_phase2_i1_acquisition_v1.json`
-- `config_phase2_i1_query_instantiation_v1.json`
-- `phase2_i1_exact_query_declaration_v1.json`
-- `i1_provider_card.py`
-- `i1_provider_acquisition.py`
-- `i1_query_instantiation.py`
-- `materialize_i1_cards.py`
-- `test_i1_provider_card.py`
-- `test_i1_provider_acquisition.py`
-- `test_i1_query_instantiation.py`
-- `README_I1_PROVIDER_CARD.md`
-- `phase2_i1_freeze_manifest_v1.json`
+The earlier benchmark-localization path is not part of the current design. In particular, the old query-instantiation declaration, equal global cost split, global latency residual localization, and diagnostics built on those materialized cards must not be used for the final I1 cards. They are historical development artifacts only.
 
 ## Information / method boundary
 
-Phase 2 may construct and freeze `I1`, including its `A_i` values and full `H x R` sigma surface. It may not choose an M0-specific or M1-specific rho slice or alter the cards based on method performance.
-
-Phase 3 and Phase 4 may only consume the already frozen cards. They may not change `A_i`, rerun provider acquisition, or request a different I1 card set.
-
-## Human-auditable implementation convention
-
-Comments and docstrings may be improved without changing frozen numerical semantics or evidence. Scientific boundaries should remain visible as:
-
-`frozen Phase-1 A_G -> method-independent Phase-2 A_i -> frozen provider evidence -> public I1 cards -> M0/M1`.
+Phase 2 may use the private provider-local evidence to construct and freeze `I1`. After the final cards are frozen, Phase 3 and Phase 4 receive only the public cards plus their method-allowed public inputs. They may not access the private provider ledgers, alter `A_i`, or rematerialize I1 after seeing method results.
 
 ## Freeze rule
 
-Do not modify Phase-2 scientific definitions, provider evidence, exact `A_i` declaration, rho support, horizon support or materialized card values to improve later M0/M1 results. Once the final card set is hash-frozen, Phase 2 becomes a read-only dependency.
+The acquisition evidence, H/R support and accounting semantics remain read-only. The only currently open Phase-2 scientific choice is the simple provider-local `A_i` selection rule. Once that rule and the resulting cards are frozen, Phase 2 becomes a read-only dependency.
