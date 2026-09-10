@@ -34,9 +34,19 @@ def main() -> None:
         whitebox_column="sigma_whitebox_same_region",
     )
     assert "sigma_whitebox_same_region" in comparison.columns
-    assert isclose(float(metrics["sigma_mae"]), (0.0 + 0.2 + 0.3) / 3.0, abs_tol=1e-12)
+    assert list(comparison["rho_global"].astype(float)) == [0.95, 0.95, 0.95]
+    assert comparison.columns.tolist().count("rho_global") == 1
+    assert isclose(
+        float(metrics["sigma_mae"]),
+        (0.0 + 0.2 + 0.3) / 3.0,
+        abs_tol=1e-12,
+    )
     assert isclose(float(metrics["sigma_bias"]), (-0.5) / 3.0, abs_tol=1e-12)
-    assert isclose(float(comparison.loc[2, "error_m0_minus_whitebox"]), -0.3, abs_tol=1e-12)
+    assert isclose(
+        float(comparison.loc[2, "error_m0_minus_whitebox"]),
+        -0.3,
+        abs_tol=1e-12,
+    )
 
     source = (
         HERE / "diagnose_rho_conditioned_i1_m0_sigma_curves.py"
@@ -53,11 +63,14 @@ def main() -> None:
     assert "i1_sigma_acquisition_v1" not in source
     assert "derive_nested_rho_regions" not in source
     assert "phase1_whitebox_used_only_for_external_evaluation" in source
+    assert 'same_comparison.insert(0, "rho_global"' not in source
+    assert 'comparison.insert(2, "rho_global"' not in source
 
     print("PHASE3_RHO_CONDITIONED_I1_M0_SIGMA_CURVE_TESTS_PASS")
     print("FROZEN_REFERENCE_CURVE_DIAGNOSTIC_PASS")
     print("SAME_M0_REGION_WHITEBOX_DIAGNOSTIC_PASS")
     print("SAME_REGION_ERROR_METRICS_PASS")
+    print("SINGLE_RHO_GLOBAL_COLUMN_PASS")
     print("PHASE3_SIGMA_CURVE_PUBLIC_I1_FIREWALL_PASS")
 
 
