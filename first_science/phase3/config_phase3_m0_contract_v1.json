@@ -1,0 +1,67 @@
+{
+  "status": "FROZEN_PHASE3_M0_STRUCTURAL_CONTRACT_V1",
+  "phase": "phase3_i1_m0",
+  "revision_date": "2026-09-10",
+  "scientific_role": "Topology-aware analytic certification from already-fixed I1 provider cards, without reconstructing hidden provider distributions or changing A_i.",
+  "information_contract": {
+    "allowed": [
+      "exogenous global admissibility query A_G and rho_G",
+      "public composition graph G",
+      "deterministic fixed-stage and network boundary terms",
+      "already-frozen public I1 provider cards"
+    ],
+    "forbidden": [
+      "private provider traces or ledgers",
+      "acquisition seeds",
+      "hidden provider stochastic parameters",
+      "Phase-1 white-box sigma outcomes",
+      "changing or rematerializing provider A_i"
+    ]
+  },
+  "supported_operators": [
+    "sequence",
+    "parallel_all"
+  ],
+  "boundary_algebra": {
+    "sequence": {
+      "latency": "sum",
+      "cost": "sum",
+      "quality": "minimum"
+    },
+    "parallel_all": {
+      "latency": "maximum",
+      "cost": "sum",
+      "quality": "minimum"
+    }
+  },
+  "global_query_relation": "Compose the already-fixed local A_i boundaries forward through G. The resulting sufficient boundary A_G_M0 certifies an exogenous A_G only when A_G_M0 is contained in A_G: l_M0<=l_G, c_M0<=c_G, q_M0>=q_G.",
+  "rho_allocation": {
+    "rule": "equal_violation_budget_over_required_stochastic_providers",
+    "epsilon_G": "1-rho_G",
+    "epsilon_i": "epsilon_G/m",
+    "rho_i": "1-epsilon_i",
+    "anchor_rho_G": 0.95,
+    "anchor_required_stochastic_providers": 3,
+    "anchor_rho_i": 0.9833333333333333,
+    "rationale": "If the same required root requests are aligned across local and global accounting, the union of local violation sets has fraction at most sum_i epsilon_i<=epsilon_G."
+  },
+  "probability_composition": {
+    "anchor": "independent_required_local_events",
+    "rule": "product",
+    "formula": "sigma_G_M0_lower(H;rho_G)=product_i sigma_i(A_i,H;rho_i)",
+    "interpretation": "lower-bound/certification probability, not an unbiased point estimate"
+  },
+  "hard_preconditions_for_numeric_certificate": [
+    "forward-composed fixed A_i boundary is contained in the requested A_G",
+    "local and global cumulative accounting refer to aligned required root-request populations at the evaluated horizon",
+    "required local trajectory-level SLA events are independent for the anchor product rule",
+    "requested rho_i and H points exist in the frozen I1 cards"
+  ],
+  "failure_semantics": "If a hard precondition is not established, M0 reports that the fixed I1 information cannot certify that global query; Phase 2 is not reopened.",
+  "phase2_independence": {
+    "A_i_created_by_M0": false,
+    "A_G_to_A_i_mapping": false,
+    "M0_may_modify_I1": false
+  },
+  "evaluation_lock": "The structural contract is frozen before M0 is compared with any Phase-1 white-box sigma outcome."
+}
