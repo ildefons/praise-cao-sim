@@ -1,0 +1,43 @@
+{
+  "status": "FROZEN_PHASE3_I1_M0_V1",
+  "freeze_date": "2026-09-10",
+  "phase": "phase3_i1_m0",
+  "scientific_role": "Low-information analytic boundary-case baseline for the first controlled comparison.",
+  "source_code_commit_used_for_final_diagnostics": "7039db9e631439cc5aab845a05610458170b83c8",
+  "inputs": {
+    "public_i1_manifest_sha256": "8345a3430f0a6b6af9934d839d2d578485a9e47ea3daa01a6093f222bb3a5dc4",
+    "phase1_whitebox_manifest_sha256": "71e85056d90c85e36abc576c1fd1822733a5d29f458743d656a0fc1334c08e30",
+    "phase1_whitebox_ledger_sha256": "fbc061dccc3afbdf535d809568d28bbd97696410d45ead2e8a10d3517bf728b4"
+  },
+  "same_rho_diagonal": [0.95, 0.975, 0.9833333333333333, 0.99, 0.995],
+  "boundary_algebra": {
+    "sequence": "L=sum,C=sum,Q=min",
+    "parallel_all": "L=max,C=sum,Q=min",
+    "phase1_G0_adapter": "l_G=0.013003+max_i(l_i); c_G=0.03+sum_i(c_i); q_G=min_i(q_i)"
+  },
+  "probability_rule": "sigma_hat_G,M0(H;rho_G)=product_i sigma_i(A_i(rho_G),H;rho_G)",
+  "interpretation": "Baseline prediction under the deliberately minimal same-rho independent-product rule. It is not a guaranteed lower bound or certificate for the global cumulative-compliance query because c_i>=rho_G for every provider does not generally imply c_G>=rho_G.",
+  "accepted_diagnostics": {
+    "two_axis": "J_A versus whole-horizon MAE against each frozen Phase-1 latency/cost/mixed reference",
+    "same_region": "white-box sigma at A_G^M0(rho) versus M0 sigma to isolate probability-integration discrepancy up to finite-sample noise",
+    "same_region_sigma_mae": {
+      "0.95": 0.494579,
+      "0.975": 0.436665,
+      "0.9833333333333333": 0.427784,
+      "0.99": 0.408810,
+      "0.995": 0.418106
+    }
+  },
+  "result_artifact_sha256": {
+    "i1_m0_two_axis_manifest_v1.json": "9bff1650dd597757dff559c561818e20af1d065a40dc253d0f64b565635bb6e8",
+    "i1_m0_two_axis_points.csv": "ac57e8610259c5bab3338aa98180cc367184828f4a8c191877d9602d35fac030",
+    "i1_m0_two_axis_curves.csv": "550b32d85b6b88969b5813fbf8da425a9e72047e994ba4c13b6620103fec0919",
+    "i1_m0_JA_vs_sigma_MAE_scatter.png": "c2187dd9b9eca8742ed404c652cd34fe261a937037d240315a97e78b7f6616fc",
+    "i1_m0_sigma_curve_manifest_v1.json": "d6d0364eb7a771bc34fc9d7952befeecdcfd47f5dda970b419f9fae6ba4d2a2f",
+    "i1_m0_same_region_sigma_summary.csv": "a0fca58fb77e369accd399319e13d5ee8a9f17570cccb31357d0d906a9c25450",
+    "i1_m0_same_region_sigma_curves.csv": "21f9163d871f8af1e20a137f217c4de94428f348472bf36600f23e8013f08425",
+    "i1_m0_reference_sigma_curves.csv": "fe100f012d8806437149f4cea534ede63d63a3c80f3cd846fec213f8fb236dad"
+  },
+  "freeze_rule": "Do not change M0 algebra, rho allocation, probability rule, or diagnostics merely to reduce the observed gap to white box. Reopen only for a concrete scientific or implementation defect.",
+  "frozen": true
+}
