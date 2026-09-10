@@ -1,5 +1,5 @@
 {
-  "status": "PHASE2_DIRECT_I1_CONSTRUCTION_V2_AI_SELECTION_OPEN",
+  "status": "PHASE2_DIRECT_I1_CONSTRUCTION_V2_LOCAL_RULE_FROZEN",
   "phase": "phase2_i1",
   "revision_date": "2026-09-10",
   "scientific_role": "Construct each provider I1 card directly from that provider's local evidence extracted from the frozen physical regime, with no A_G-to-A_i localization step.",
@@ -22,7 +22,7 @@
     "frozen physical regime",
     "fresh Phase-2 full trajectories",
     "provider-local subtraces/ledgers",
-    "choose and freeze A_i from provider i evidence only",
+    "derive frozen A_i by the provider-local p99(L)/p99(C)/min(Q) rule",
     "compute sigma_i(A_i,H;rho) directly from provider i evidence",
     "freeze I1_i"
   ],
@@ -34,7 +34,8 @@
     "global_budget_split_allowed": false,
     "M0_or_M1_may_choose_A_i": false,
     "same_rule_form_for_all_providers": true,
-    "selection_rule_status": "OPEN_BEFORE_FINAL_CARD_FREEZE"
+    "selection_rule_status": "FROZEN_PHASE2_I1_LOCAL_REGION_RULE_V1",
+    "selection_rule_config": "config_phase2_i1_local_region_rule_v1.json"
   },
   "surface_support": {
     "H": {
@@ -51,7 +52,7 @@
     "M1_results_used_to_choose_A_i": false
   },
   "finalization": {
-    "A_i_rule_frozen": false,
+    "A_i_rule_frozen": true,
     "final_cards_materialized": false,
     "final_cards_hash_frozen": false,
     "phase3_allowed": false
