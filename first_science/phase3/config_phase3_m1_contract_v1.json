@@ -34,6 +34,7 @@
   "fixed_closure_conventions": {
     "provider_queue": "one FCFS native provider module",
     "arrival_process": "periodic with period and accounting origin read from W_i",
+    "arrival_phase": "canonical YAFS periodic source convention: first provider-local arrival occurs one period after accounting origin, then at integer multiples of the period; the current public W_i does not expose an additional phase parameter",
     "canonical_IPT": 1000000.0,
     "canonical_IPT_role": "numerical gauge only; not interpreted as recovered provider hardware",
     "networking_during_local_lift": "provider-local calibration excludes network latency; source and provider are colocated",
