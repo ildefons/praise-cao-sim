@@ -24,7 +24,7 @@ with the following fixed inputs/conventions:
 - `W_i` comes from the public I1 workload contract and actively drives arrivals;
 - one native FCFS provider module;
 - canonical `IPT0=1e6` as a numerical gauge only;
-- source and provider colocated so local latency excludes networking;
+- a dedicated workload-injector node is connected to the provider by a zero-delay native link (`PR=0`, request `bytes=0`), because AICon permits only one application module per device; therefore local latency still excludes networking;
 - `x=0.5` and `LinearQoS(0,1)`, because the current public cards expose only `Q=0.5`;
 - nominal instructions are `mu_i * IPT0 / x`;
 - local cost is native `COST(node) * service`.

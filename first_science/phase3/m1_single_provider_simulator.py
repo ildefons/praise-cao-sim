@@ -7,7 +7,7 @@ and the M1 surrogate parameters being calibrated.
 Pilot closure conventions
 -------------------------
 * one native FCFS provider module;
-* source and provider colocated, so local L excludes network delay;
+* source uses a dedicated logical injector node connected to the provider by a zero-delay hop, so local L excludes network delay;
 * canonical IPT is a numerical gauge, not recovered hardware;
 * x=0.5 and LinearQoS(0,1) because the current public I1 cards have degenerate
   Q=0.5;
@@ -55,7 +55,8 @@ DEFAULT_PILOT_EXECUTION_FRACTION = 0.5
 APPLICATION_NAME = "PraiseM1SingleProviderLift"
 SOURCE_MODULE = "M1Source"
 REQUEST_MESSAGE = "M1.REQUEST"
-HOST_NODE = 0
+SOURCE_NODE = 0
+PROVIDER_NODE = 1
 
 
 @dataclass(frozen=True)
@@ -89,7 +90,7 @@ class FixedSingleProviderPlacement(Placement):
             app_name,
             self.provider_id,
             services[self.provider_id],
-            [HOST_NODE],
+            [PROVIDER_NODE],
         )
         if len(deployed) != 1:
             raise RuntimeError(
@@ -98,8 +99,8 @@ class FixedSingleProviderPlacement(Placement):
         sim.des_pct_instructions[deployed[0]] = self.execution_fraction
 
 
-class ColocatedSingleProviderSelection(Selection):
-    """Route each local request to the unique provider deployment."""
+class ZeroDelaySingleProviderSelection(Selection):
+    """Route each injector request to the unique provider deployment."""
 
     def get_path(
         self,
@@ -226,7 +227,7 @@ def create_single_provider_topology(
     *,
     canonical_ipt: float,
 ) -> Topology:
-    """Create one local host carrying both source and provider deployment."""
+    """Create the zero-delay two-node adapter used for provider-local calibration."""
     ipt = float(canonical_ipt)
     if ipt <= 0.0:
         raise ValueError("canonical_ipt must be positive")
@@ -235,16 +236,36 @@ def create_single_provider_topology(
         {
             "entity": [
                 {
-                    "id": HOST_NODE,
+                    "id": SOURCE_NODE,
+                    "model": "m1-local-source-host",
+                    "mytag": "m1-local-source-host",
+                    "IPT": ipt,
+                    "RAM": 4000,
+                    "COST": 0.0,
+                    "WATT": 0.0,
+                },
+                {
+                    "id": PROVIDER_NODE,
                     "model": "m1-local-provider-host",
                     "mytag": "m1-local-provider-host",
                     "IPT": ipt,
                     "RAM": 4000,
                     "COST": float(parameters.cost_rate),
                     "WATT": 0.0,
+                },
+            ],
+            # AICon permits only one application module per device. The
+            # workload injector therefore occupies a separate logical node.
+            # bytes=0 and PR=0 make this hop exactly zero-delay, preserving
+            # provider-local calibration semantics.
+            "link": [
+                {
+                    "s": SOURCE_NODE,
+                    "d": PROVIDER_NODE,
+                    "BW": 1.0,
+                    "PR": 0.0,
                 }
             ],
-            "link": [],
         }
     )
     return topology
@@ -373,7 +394,7 @@ def execute_one_single_provider_trajectory(
     population = Statical("m1_periodic_provider_workload")
     population.set_src_control(
         {
-            "model": "m1-local-provider-host",
+            "model": "m1-local-source-host",
             "number": 1,
             "message": application.get_message(REQUEST_MESSAGE),
             "distribution": deterministic_distribution(
@@ -393,7 +414,7 @@ def execute_one_single_provider_trajectory(
             application,
             placement,
             population,
-            ColocatedSingleProviderSelection(),
+            ZeroDelaySingleProviderSelection(),
             management_network,
         )
         simulation.run(stop_time, show_progress_monitor=False)

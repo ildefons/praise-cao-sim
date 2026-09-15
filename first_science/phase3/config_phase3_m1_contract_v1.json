@@ -37,8 +37,8 @@
     "arrival_phase": "canonical YAFS periodic source convention: first provider-local arrival occurs one period after accounting origin, then at integer multiples of the period; the current public W_i does not expose an additional phase parameter",
     "canonical_IPT": 1000000.0,
     "canonical_IPT_role": "numerical gauge only; not interpreted as recovered provider hardware",
-    "networking_during_local_lift": "provider-local calibration excludes network latency; source and provider are colocated",
-    "local_latency": "provider arrival to provider completion including queue waiting and native service",
+    "networking_during_local_lift": "Provider-local calibration uses a dedicated workload-injector node and provider node because AICon enforces at most one application module per device. They are connected by a native link with PR=0 and requests have bytes=0, so the adapter contributes zero network delay.",
+    "local_latency": "provider arrival to provider completion including queue waiting and native service; the zero-delay injector-to-provider adapter contributes no network latency",
     "local_cost": "native COST(node)*service for the provider module only",
     "local_quality": "native provider qos"
   },
