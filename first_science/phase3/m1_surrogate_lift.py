@@ -244,15 +244,37 @@ def calculate_stage1_nominal_loss(
             + ", ".join(sorted(missing_targets))
         )
 
-    keys = ["provider_id", "region_id", "region_rho", "horizon"]
+    keys = ["provider_id", "region_id", "horizon"]
+    deterministic_for_merge = deterministic_compliance[
+        [
+            "provider_id",
+            "region_id",
+            "region_rho",
+            "horizon",
+            "compliance_fraction",
+        ]
+    ].rename(columns={"region_rho": "region_rho_deterministic"})
+
     merged = median_targets.merge(
-        deterministic_compliance[list(required_compliance)],
+        deterministic_for_merge,
         on=keys,
         how="left",
         validate="one_to_one",
     )
     if merged["compliance_fraction"].isna().any():
         raise RuntimeError("deterministic compliance does not cover every Stage-1 target")
+
+    region_rho_matches = np.isclose(
+        merged["region_rho"].astype(float),
+        merged["region_rho_deterministic"].astype(float),
+        atol=TOLERANCE,
+        rtol=0.0,
+    )
+    if not bool(np.all(region_rho_matches)):
+        raise RuntimeError(
+            "Stage-1 region_rho values disagree between public targets "
+            "and deterministic compliance"
+        )
 
     residuals: list[float] = []
     for row in merged.itertuples(index=False):
@@ -281,8 +303,14 @@ def calculate_stage2_sigma_loss(
     exclude_horizon_zero: bool = True,
 ) -> tuple[dict[str, float], pd.DataFrame]:
     """Compare a stochastic surrogate against the complete public I1 surface."""
-    keys = ["provider_id", "region_id", "region_rho", "rho", "horizon"]
-    required = set(keys) | {"sigma_hat"}
+    required = {
+        "provider_id",
+        "region_id",
+        "region_rho",
+        "rho",
+        "horizon",
+        "sigma_hat",
+    }
     for label, surface in (
         ("public", public_surface),
         ("simulated", simulated_surface),
@@ -302,13 +330,40 @@ def calculate_stage2_sigma_loss(
             simulated["horizon"].astype(float) > TOLERANCE
         ].copy()
 
-    comparison = public[keys + ["sigma_hat"]].rename(
-        columns={"sigma_hat": "sigma_i1"}
-    ).merge(
-        simulated[keys + ["sigma_hat"]].rename(
-            columns={"sigma_hat": "sigma_m1_local"}
-        ),
-        on=keys,
+    base_keys = ["provider_id", "region_id", "horizon"]
+
+    public_for_merge = public[
+        base_keys + ["region_rho", "rho", "sigma_hat"]
+    ].sort_values(base_keys + ["rho"]).reset_index(drop=True)
+    public_for_merge["_rho_ordinal"] = public_for_merge.groupby(
+        base_keys, sort=False
+    ).cumcount()
+    public_for_merge = public_for_merge.rename(
+        columns={
+            "region_rho": "region_rho_i1",
+            "rho": "rho_i1",
+            "sigma_hat": "sigma_i1",
+        }
+    )
+
+    simulated_for_merge = simulated[
+        base_keys + ["region_rho", "rho", "sigma_hat"]
+    ].sort_values(base_keys + ["rho"]).reset_index(drop=True)
+    simulated_for_merge["_rho_ordinal"] = simulated_for_merge.groupby(
+        base_keys, sort=False
+    ).cumcount()
+    simulated_for_merge = simulated_for_merge.rename(
+        columns={
+            "region_rho": "region_rho_m1",
+            "rho": "rho_m1",
+            "sigma_hat": "sigma_m1_local",
+        }
+    )
+
+    match_keys = base_keys + ["_rho_ordinal"]
+    comparison = public_for_merge.merge(
+        simulated_for_merge,
+        on=match_keys,
         how="left",
         validate="one_to_one",
     )
@@ -316,6 +371,46 @@ def calculate_stage2_sigma_loss(
         raise RuntimeError("simulated surface does not cover every public I1 point")
     if len(comparison) != len(public):
         raise RuntimeError("Stage-2 comparison changed the public point count")
+
+    if not bool(
+        np.all(
+            np.isclose(
+                comparison["region_rho_i1"].astype(float),
+                comparison["region_rho_m1"].astype(float),
+                atol=TOLERANCE,
+                rtol=0.0,
+            )
+        )
+    ):
+        raise RuntimeError(
+            "Stage-2 region_rho values disagree between public and simulated surfaces"
+        )
+
+    if not bool(
+        np.all(
+            np.isclose(
+                comparison["rho_i1"].astype(float),
+                comparison["rho_m1"].astype(float),
+                atol=TOLERANCE,
+                rtol=0.0,
+            )
+        )
+    ):
+        raise RuntimeError(
+            "Stage-2 query-rho values disagree between public and simulated surfaces"
+        )
+
+    comparison["region_rho"] = comparison["region_rho_i1"].astype(float)
+    comparison["rho"] = comparison["rho_i1"].astype(float)
+    comparison = comparison.drop(
+        columns=[
+            "_rho_ordinal",
+            "region_rho_i1",
+            "region_rho_m1",
+            "rho_i1",
+            "rho_m1",
+        ]
+    )
 
     error = (
         comparison["sigma_m1_local"].astype(float)

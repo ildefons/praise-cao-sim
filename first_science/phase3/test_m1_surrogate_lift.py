@@ -117,6 +117,15 @@ def main() -> None:
     assert isclose(loss, 0.0, abs_tol=1e-15)
     assert isclose(float(detail["squared_loss"].sum()), 0.0, abs_tol=1e-15)
 
+    deterministic_roundtrip = deterministic.copy()
+    deterministic_roundtrip["region_rho"] = (
+        deterministic_roundtrip["region_rho"].astype(float) + 5e-16
+    )
+    roundtrip_loss, _ = calculate_stage1_nominal_loss(
+        deterministic_roundtrip, targets
+    )
+    assert isclose(roundtrip_loss, 0.0, abs_tol=1e-15)
+
     violating = deterministic.copy()
     violating.loc[violating["horizon"] == 10.0, "compliance_fraction"] = 0.98
     violating.loc[violating["horizon"] == 15.0, "compliance_fraction"] = 0.97
@@ -131,6 +140,20 @@ def main() -> None:
     assert isclose(metrics["mae"], 0.05, abs_tol=1e-12)
     assert isclose(metrics["mse"], 0.0025, abs_tol=1e-12)
     assert isclose(metrics["bias"], -0.05, abs_tol=1e-12)
+
+    simulated_roundtrip = simulated.copy()
+    simulated_roundtrip["region_rho"] = (
+        simulated_roundtrip["region_rho"].astype(float) + 5e-16
+    )
+    simulated_roundtrip["rho"] = (
+        simulated_roundtrip["rho"].astype(float) + 5e-16
+    )
+    roundtrip_metrics, roundtrip_comparison = calculate_stage2_sigma_loss(
+        public, simulated_roundtrip
+    )
+    assert len(roundtrip_comparison) == 9
+    assert isclose(roundtrip_metrics["mae"], 0.05, abs_tol=1e-12)
+    assert isclose(roundtrip_metrics["mse"], 0.0025, abs_tol=1e-12)
 
     # Hand-check the generic search wrappers without a simulator dependency.
     def stage1_evaluator(mu: float, kappa: float) -> pd.DataFrame:
