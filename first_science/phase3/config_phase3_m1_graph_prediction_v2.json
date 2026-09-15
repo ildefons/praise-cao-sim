@@ -1,0 +1,74 @@
+{
+  "status": "IMPLEMENTATION_CANDIDATE_PHASE3_M1_GRAPH_PREDICTION_V2_NOT_FROZEN",
+  "phase": "phase3_i1_m1_graph_prediction",
+  "revision_date": "2026-09-15",
+  "scientific_role": "Compose the already-selected M1-v2 provider surrogates in the native AICon/YAFS G0 graph, extract top-level request traces, and estimate graph-level sigma_G before consulting graph-level white-box outcomes.",
+  "information_contract": {
+    "allowed_before_prediction": [
+      "hash-frozen public rho-conditioned I1 provider cards",
+      "selected non-smoke M1-v2 provider lift parameters",
+      "public composition graph G0",
+      "public deterministic fixed-stage and network terms already frozen for M0",
+      "public workload contract W"
+    ],
+    "forbidden_before_prediction": [
+      "private Phase-2 provider traces or ledgers",
+      "Phase-2 acquisition seeds",
+      "hidden Phase-1 provider stochastic parameters",
+      "Phase-1 graph-level white-box sigma outcomes",
+      "Phase-1 graph-level white-box request ledgers",
+      "retuning provider lift parameters from graph-level outcomes"
+    ],
+    "external_evaluation_after_prediction": [
+      "frozen Phase-1 graph-level white-box request ledgers"
+    ]
+  },
+  "provider_lift_requirements": {
+    "status": "M1_V2_JOINT_LOCAL_FIT_COMPLETE_NOT_FROZEN",
+    "smoke_mode_must_be": false,
+    "graph_level_whitebox_used_must_be": false,
+    "boundary_diagnostics_any_near_boundary_must_be": false,
+    "providers": ["ProviderA", "ProviderB", "ProviderC"]
+  },
+  "graph_contract": {
+    "public_numeric_source": "config_phase3_m0_contract_v1.json::phase1_benchmark_adapter",
+    "grammar": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "provider_execution_fraction_source": "config_phase3_m1_contract_v2.json::pilot_scope.execution_fraction",
+    "provider_canonical_IPT_source": "config_phase3_m1_contract_v2.json::fixed_closure_conventions.canonical_IPT",
+    "provider_service_family": "Gamma(mean=lifted_mu,CV=lifted_CV), mapped natively through Message.instructions",
+    "provider_cost_rate": "lifted_kappa for each provider",
+    "fixed_stages_and_network": "Use the already-public deterministic G0 adapter values; do not read hidden provider fields from Phase 1.",
+    "provider_rng_streams": "independent deterministic streams derived from the graph-trajectory seed and provider ordinal"
+  },
+  "graph_simulation": {
+    "trajectory_seed_start": 25000,
+    "trajectory_seed_end_inclusive": 25099,
+    "n_trajectories": 100,
+    "same_seed_bank_for_all_graph_queries": true,
+    "raw_native_trace_retention": false,
+    "extracted_trace": "one reduced top-level request ledger per trajectory plus one concatenated ledger",
+    "smoke_n_trajectories": 5
+  },
+  "graph_query": {
+    "rho_policy": "same-rho diagonal: rho_region=rho_query=rho_G",
+    "A_G_construction": "For each rho_G, forward-compose the public A_i(rho_G) boundaries with the public deterministic fixed-stage/network terms exactly as in M0.",
+    "sigma_definition": "sigma_G(A_G,H;rho_G)=P(c_G(A_G,H)>=rho_G)",
+    "horizon_support": "use the common public I1 horizon support",
+    "accounting_origin": "use the common public I1 workload accounting origin",
+    "zero_decision_compliance": 1.0,
+    "one_graph_simulation_bank_reused_for_all_rho_queries": true
+  },
+  "prediction_outputs": [
+    "m1_graph_top_level_request_ledgers.csv",
+    "traces/trajectory_<index>_seed_<seed>.csv",
+    "m1_graph_prediction_curves.csv",
+    "m1_graph_prediction_manifest_v2.json"
+  ],
+  "external_evaluation": {
+    "enabled_after_prediction_materialization": true,
+    "comparison": "At each rho_G, compare I1-M1 and I1-M0 with white-box sigma evaluated at the same induced A_G(rho_G).",
+    "plot": "five same-rho panels containing WB, I1-M0, and I1-M1 curves",
+    "whitebox_may_change_prediction": false
+  },
+  "freeze_rule": "This remains an implementation/evaluation candidate. The graph prediction is materialized from public I1 and frozen M1-v2 lifts before white-box ledgers are opened. White-box evaluation may assess but never retune the provider lifts or graph simulator in this run."
+}
