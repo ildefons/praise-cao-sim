@@ -1,0 +1,108 @@
+{
+  "status": "IMPLEMENTATION_CANDIDATE_PHASE3_M1_LIFT_V1_NOT_FROZEN",
+  "phase": "phase3_i1_m1",
+  "revision_date": "2026-09-15",
+  "scientific_role": "Simulator-based M1 integration method. The first implementation step lifts each public I1 provider card into the simplest native single-provider AICon/YAFS surrogate that is compatible with the exposed information, before any graph-level white-box evaluation is consulted.",
+  "information_contract": {
+    "allowed": [
+      "already-frozen public rho-conditioned I1 provider cards",
+      "public provider workload contract W_i",
+      "public composition graph G when the later composition step is executed",
+      "fixed M1 closure conventions declared in this contract"
+    ],
+    "forbidden": [
+      "private Phase-2 provider request ledgers",
+      "Phase-2 acquisition seeds",
+      "fitted GMM parameters or private GMM samples",
+      "hidden Phase-1 provider instruction means",
+      "hidden Phase-1 provider instruction CV",
+      "hidden Phase-1 effective IPT",
+      "hidden Phase-1 cost rate",
+      "Phase-1 graph-level white-box sigma outcomes during lifting",
+      "retuning I1 or M0 to improve M1"
+    ]
+  },
+  "lift_definition": "L_M1: I1_i -> theta_i^M1, with W_i actively determining the arrival process used during local inverse calibration.",
+  "pilot_scope": {
+    "quality_status": "DEGENERATE_Q_PILOT_ONLY",
+    "quality_observation": 0.5,
+    "execution_fraction": 0.5,
+    "qos_mapping": "LinearQoS(L=0,R=1), hence native Q=x",
+    "rule": "For this pilot only, Q is fixed rather than optimized because every public A_i has q_min=0.5 and the public card contains no quality diversity.",
+    "generalization_warning": "This is not a general M1 assumption. Beyond the pilot, non-degenerate Q requires an explicit QoS-generating surrogate and q_i(rho_region) may vary with the admissibility region."
+  },
+  "fixed_closure_conventions": {
+    "provider_queue": "one FCFS native provider module",
+    "arrival_process": "periodic with period and accounting origin read from W_i",
+    "canonical_IPT": 1000000.0,
+    "canonical_IPT_role": "numerical gauge only; not interpreted as recovered provider hardware",
+    "networking_during_local_lift": "provider-local calibration excludes network latency; source and provider are colocated",
+    "local_latency": "provider arrival to provider completion including queue waiting and native service",
+    "local_cost": "native COST(node)*service for the provider module only",
+    "local_quality": "native provider qos"
+  },
+  "stage1_deterministic_nominal_lift": {
+    "free_parameters": [
+      "mean_service_time_mu_seconds",
+      "cost_rate_kappa"
+    ],
+    "fixed_parameters": {
+      "service_cv": 0.0,
+      "quality_execution_fraction": 0.5
+    },
+    "native_instruction_mapping": "mean_nominal_instructions = mu * canonical_IPT / execution_fraction",
+    "public_target_construction": {
+      "source": "full public query-rho survival slice sigma_i(A_i(rho_region),H;rho_query)",
+      "exclude_horizon_zero": true,
+      "central_probability": 0.5,
+      "interpretation": "At fixed A_i and H, rho_query -> sigma is the sampled survival function of the random cumulative compliance fraction c_i(A_i,H).",
+      "crossing_rule": "Infer a median compliance target where sigma crosses 0.5. Use linear interpolation between adjacent exposed rho_query points when the crossing is bracketed.",
+      "low_side_censoring": "If sigma at the smallest exposed rho_query is below 0.5, the median is upper-censored below that rho value.",
+      "high_side_censoring": "If sigma at the largest exposed rho_query is at least 0.5, the median is lower-censored at or above that rho value."
+    },
+    "loss": "uniform mean squared point/hinge loss over all public A_i(rho_region) and H>0 targets; point targets use squared error, lower/upper censored targets use one-sided squared hinge loss",
+    "optimization": {
+      "method": "coarse_to_fine_grid",
+      "mu_over_workload_period_bounds": [0.05, 2.0],
+      "cost_rate_reference": "median over public regions of c_max/max(l_max,1e-12)",
+      "cost_rate_reference_multiplier_bounds": [0.1, 10.0],
+      "grid_points_per_axis": 21,
+      "refinement_rounds": 2,
+      "refinement_fraction_of_previous_width": 0.25,
+      "boundary_rule": "If the best candidate remains on a search boundary after refinement, do not freeze the lift; extend the relevant bound using public-I1 reconstruction only."
+    }
+  },
+  "stage2_stochastic_variability_lift": {
+    "free_parameters": [
+      "service_cv"
+    ],
+    "fixed_from_stage1": [
+      "mean_service_time_mu_seconds",
+      "cost_rate_kappa"
+    ],
+    "service_distribution": "Gamma with the Stage-1 mean and fitted coefficient of variation; CV=0 is interpreted as deterministic service",
+    "fit_target": "the full public rho-conditioned I1 sigma surface over all A_i(rho_region), H>0, and exposed rho_query values",
+    "loss": "uniform mean squared error between simulated sigma_hat and public I1 sigma_hat",
+    "optimization": {
+      "method": "one_dimensional_coarse_to_fine_grid",
+      "cv_bounds": [0.0, 2.0],
+      "grid_points": 41,
+      "refinement_rounds": 2,
+      "refinement_fraction_of_previous_width": 0.25,
+      "trajectory_seed_start": 20000,
+      "trajectory_seed_end_inclusive": 20099,
+      "n_trajectories": 100,
+      "boundary_rule": "If the best CV remains on the upper search boundary after refinement, do not freeze the lift; extend the CV range using local I1 reconstruction only."
+    }
+  },
+  "pilot_surrogate": "theta_i^M1=(mu_i,kappa_i,CV_i), with W_i, canonical IPT, x_i=0.5, and the QoS mapping fixed.",
+  "stage_separation": "Stage 2 fits only CV. It does not silently re-optimize mu or kappa. Any later joint-refinement variant requires a new declared M1 revision.",
+  "whitebox_firewall": "The complete provider lift is frozen from public I1 reconstruction diagnostics before graph-level white-box sigma is read for M1 evaluation.",
+  "beyond_pilot": {
+    "quality_diversity": "Introduce non-degenerate provider quality through a native quality/resource trade-off rather than independent noise. A natural first extension is a varying execution fraction x, for which Q and executed work are coupled.",
+    "general_region": "A_i(rho_region)={L_i<=l_i(rho_region), C_i<=c_i(rho_region), Q_i>=q_i(rho_region)} with q_i allowed to vary.",
+    "workload_diversity": "Exercise multiple W_i contracts and topologies that induce different provider-local arrival processes. A surrogate lifted under one W_i is not assumed valid under an unsupported W_i'.",
+    "graph_diversity": "After the pilot, evaluate sequential, parallel, nested, conditional/dependent, and heterogeneous-provider compositions while preserving the same public-information firewall."
+  },
+  "freeze_rule": "This file defines an implementation candidate, not a frozen M1 result. Freeze only after simulator-independent tests, native single-provider smoke tests, and provider-local I1 reconstruction diagnostics pass without graph-level white-box tuning."
+}
