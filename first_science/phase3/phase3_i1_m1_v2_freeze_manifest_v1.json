@@ -1,0 +1,71 @@
+{
+  "status": "FROZEN_PHASE3_I1_M1_V2_PILOT",
+  "freeze_date": "2026-09-16",
+  "scientific_role": "Frozen simulator-based integration baseline for the first PRAISE I-M experiment. M1-v2 consumes the same public rho-conditioned I1 as M0, performs a public-I1-only inverse lift to one native surrogate process per provider, then composes those surrogates in native AICon/YAFS G0.",
+  "freeze_rule": "Do not retune or enrich M1-v2 to improve the observed G0 white-box result. Reopen only for a concrete implementation or scientific defect. New integration ideas belong to M2.",
+  "information_contract": {
+    "same_public_I1_as_M0": true,
+    "graph_level_whitebox_used_for_provider_selection": false,
+    "private_phase2_provider_traces_used": false,
+    "fitted_GMM_parameters_used": false,
+    "hidden_phase1_provider_parameters_used": false,
+    "trace_specific_arrival_phase_used": false
+  },
+  "base_contract": "config_phase3_m1_contract_v2.json",
+  "providerC_boundary_expansion_contract": "config_phase3_m1_contract_v2_providerC_expanded_v1.json",
+  "graph_contract": "config_phase3_m1_graph_prediction_v2.json",
+  "provider_surrogates": {
+    "ProviderA": {
+      "mean_service_time": 0.03515902181174001,
+      "cost_rate": 0.5010610641116193,
+      "service_cv": 1.4559952139534043,
+      "search_space": "base_v2",
+      "boundary_clear": true
+    },
+    "ProviderB": {
+      "mean_service_time": 0.04788017702777221,
+      "cost_rate": 2.1024570659802144,
+      "service_cv": 1.2555234974919558,
+      "search_space": "base_v2",
+      "boundary_clear": true
+    },
+    "ProviderC": {
+      "mean_service_time": 0.0026819926073551946,
+      "cost_rate": 87.30698671847529,
+      "service_cv": 0.9941982270091521,
+      "search_space": "one_declared_public_I1_only_expansion",
+      "boundary_clear": true
+    }
+  },
+  "native_G0_semantics": {
+    "graph": "Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "fixed_latency_outside_provider_boundaries_seconds": 0.014003,
+    "fixed_cost_outside_provider_boundaries": 0.03,
+    "completion_control_return_hop_seconds": 0.001,
+    "quality_rule": "min",
+    "pilot_quality": 0.5
+  },
+  "external_graph_evaluation": {
+    "n_m1_trajectories": 100,
+    "n_whitebox_trajectories": 100,
+    "same_region": true,
+    "same_rho_diagonal": true,
+    "m1_prediction_materialized_before_whitebox_read": true,
+    "whitebox_firewall_passed": true,
+    "whole_horizon_mae": {
+      "0.95": {"M0": 0.500497, "M1": 0.218163},
+      "0.975": {"M0": 0.438298, "M1": 0.218776},
+      "0.9833333333333333": {"M0": 0.428397, "M1": 0.179592},
+      "0.99": {"M0": 0.410442, "M1": 0.171224},
+      "0.995": {"M0": 0.421576, "M1": 0.128367}
+    }
+  },
+  "diagnostic_interpretation": {
+    "M0": "systematically pessimistic",
+    "M1": "systematically optimistic and near-saturated at graph level after short horizons",
+    "main_observation": "The selected point inverse lifts generate a graph request distribution that is substantially faster and cheaper than the WB graph process, especially in latency tails, even though native composition semantics are correct.",
+    "next_method": "M2",
+    "first_M2_gate": "Test whether substantially different theta_i vectors with similarly good public-I1 reconstruction loss produce materially different graph-level sigma. If yes, preserve inverse ambiguity; if no, enrich the latent process family while keeping the same I1 information boundary."
+  },
+  "current_design_note": "../PRAISE_I1_M0_M1_M2_DESIGN_2026-09-16.md"
+}
