@@ -27,6 +27,12 @@ def main() -> None:
         propagation=0.001,
     )
     assert isclose(hop, 0.001001, abs_tol=1e-15)
+    control_hop = network_hop_latency(
+        message_bytes=0,
+        bandwidth_mbps=1000.0,
+        propagation=0.001,
+    )
+    assert isclose(control_hop, 0.001, abs_tol=1e-15)
 
     stage = deterministic_service_boundary(
         instructions=5_000_000.0,
@@ -49,11 +55,12 @@ def main() -> None:
 
     assert isclose(breakdown.root_network_latency, 0.001001, abs_tol=1e-15)
     assert isclose(breakdown.branch_network_latency, 0.001001, abs_tol=1e-15)
+    assert isclose(breakdown.completion_control_latency, 0.001, abs_tol=1e-15)
     assert isclose(breakdown.join_network_latency, 0.001001, abs_tol=1e-15)
-    assert isclose(breakdown.fixed_latency_outside_provider, 0.013003, abs_tol=1e-15)
+    assert isclose(breakdown.fixed_latency_outside_provider, 0.014003, abs_tol=1e-15)
     assert isclose(breakdown.fixed_cost_outside_provider, 0.03, abs_tol=1e-15)
 
-    assert isclose(induced.l_max, 0.5876117740002395, abs_tol=1e-12)
+    assert isclose(induced.l_max, 0.5886117740002395, abs_tol=1e-12)
     assert isclose(induced.c_max, 2.400071385, abs_tol=1e-12)
     assert isclose(induced.q_min, 0.5, abs_tol=1e-12)
 
@@ -78,6 +85,7 @@ def main() -> None:
 
     print("PHASE3_M0_PHASE1_BENCHMARK_ADAPTER_TESTS_PASS")
     print("M0_FIXED_NETWORK_LAW_PASS")
+    print("M0_NATIVE_CONTROL_RETURN_HOP_PASS")
     print("M0_FIXED_PRE_POST_SERVICE_PASS")
     print("M0_FULL_G0_BOUNDARY_PASS")
     print("M0_V2_APPLICABILITY_LATENCY_ONLY_PASS")
