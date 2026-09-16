@@ -1,23 +1,30 @@
 """Benchmark-specific deterministic boundary adapter for PRAISE Phase-3 M0.
 
-This module instantiates the already-frozen generic M0 boundary algebra for the
-frozen Phase-1 benchmark graph
+This module instantiates the generic M0 boundary algebra for the frozen Phase-1
+benchmark graph
 
     Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost.
 
-Provider boundaries come from the public I1 cards.  Only deterministic benchmark
+Provider boundaries come from the public I1 cards. Only deterministic benchmark
 terms are added here:
 
 * one Source->Fpre network hop;
 * deterministic Fpre execution;
 * one Fpre->Provider_i branch-network hop on each parallel branch;
+* one zero-byte Provider_i->composition-controller completion-control hop;
 * one composition-controller/Fpre->Fpost join-network hop;
 * deterministic Fpost execution.
 
+The completion-control hop is native PRAISE runtime semantics: terminal branch
+completion creates ``__PRAISE_COMPLETE__`` with zero instructions and zero
+bytes, routed from the provider node back to the join controller colocated with
+Fpre. It therefore contributes propagation delay but no transmission, compute,
+or cost.
+
 The network latency law is the exact law used by the AICon/YAFS fork employed by
-Phase 1: ``message.bytes / (BW_mbps * 1e6) + PR`` per traversed link.  Network
-terms add latency only.  Fpre/Fpost cost is ``COST * service_time`` and their QoS
-is neutral.  No white-box sigma outcome enters this calculation.
+Phase 1: ``message.bytes / (BW_mbps * 1e6) + PR`` per traversed link. Network
+terms add latency only. Fpre/Fpost cost is ``COST * service_time`` and their QoS
+is neutral. No white-box sigma outcome enters this calculation.
 """
 from __future__ import annotations
 
@@ -38,6 +45,7 @@ class Phase1G0BoundaryBreakdown:
     root_network_latency: float
     pre_service_latency: float
     branch_network_latency: float
+    completion_control_latency: float
     join_network_latency: float
     post_service_latency: float
     pre_service_cost: float
@@ -50,6 +58,7 @@ class Phase1G0BoundaryBreakdown:
             self.root_network_latency
             + self.pre_service_latency
             + self.branch_network_latency
+            + self.completion_control_latency
             + self.join_network_latency
             + self.post_service_latency
         )
@@ -112,13 +121,7 @@ def build_phase1_g0_full_m0_boundary(
     configuration: Mapping[str, object],
     provider_boundaries: Mapping[str, AdmissibilityBoundary],
 ) -> tuple[AdmissibilityBoundary, Phase1G0BoundaryBreakdown]:
-    """Compose the full frozen Phase-1 G0 M0 boundary.
-
-    ``provider_boundaries`` must contain exactly ProviderA/B/C.  The function
-    validates the benchmark graph and reads all deterministic numerical terms
-    from the frozen Phase-1 configuration rather than duplicating them as magic
-    constants.
-    """
+    """Compose the full frozen Phase-1 G0 M0 boundary."""
     if set(provider_boundaries) != set(PROVIDERS):
         raise ValueError("provider_boundaries must contain exactly ProviderA/B/C")
 
@@ -159,6 +162,11 @@ def build_phase1_g0_full_m0_boundary(
         bandwidth_mbps=bandwidth,
         propagation=propagation,
     )
+    completion_control_latency = network_hop_latency(
+        message_bytes=0.0,
+        bandwidth_mbps=bandwidth,
+        propagation=propagation,
+    )
     join_network_latency = network_hop_latency(
         message_bytes=float(topology["join_bytes"]),
         bandwidth_mbps=bandwidth,
@@ -170,10 +178,13 @@ def build_phase1_g0_full_m0_boundary(
         "Fpre": pre,
         "NetA": _network_boundary(branch_network_latency),
         "ProviderA": provider_boundaries["ProviderA"],
+        "CtrlA": _network_boundary(completion_control_latency),
         "NetB": _network_boundary(branch_network_latency),
         "ProviderB": provider_boundaries["ProviderB"],
+        "CtrlB": _network_boundary(completion_control_latency),
         "NetC": _network_boundary(branch_network_latency),
         "ProviderC": provider_boundaries["ProviderC"],
+        "CtrlC": _network_boundary(completion_control_latency),
         "NetJoin": _network_boundary(join_network_latency),
         "Fpost": post,
     }
@@ -190,6 +201,7 @@ def build_phase1_g0_full_m0_boundary(
                         "children": [
                             {"type": "leaf", "id": "NetA"},
                             {"type": "leaf", "id": "ProviderA"},
+                            {"type": "leaf", "id": "CtrlA"},
                         ],
                     },
                     {
@@ -197,6 +209,7 @@ def build_phase1_g0_full_m0_boundary(
                         "children": [
                             {"type": "leaf", "id": "NetB"},
                             {"type": "leaf", "id": "ProviderB"},
+                            {"type": "leaf", "id": "CtrlB"},
                         ],
                     },
                     {
@@ -204,6 +217,7 @@ def build_phase1_g0_full_m0_boundary(
                         "children": [
                             {"type": "leaf", "id": "NetC"},
                             {"type": "leaf", "id": "ProviderC"},
+                            {"type": "leaf", "id": "CtrlC"},
                         ],
                     },
                 ],
@@ -217,6 +231,7 @@ def build_phase1_g0_full_m0_boundary(
         root_network_latency=root_network_latency,
         pre_service_latency=pre.l_max,
         branch_network_latency=branch_network_latency,
+        completion_control_latency=completion_control_latency,
         join_network_latency=join_network_latency,
         post_service_latency=post.l_max,
         pre_service_cost=pre.c_max,
