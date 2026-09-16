@@ -1,16 +1,23 @@
 # PRAISE first scientific experiment
 
-This directory contains immutable-by-convention implementation checkpoints for the first PRAISE tau=(I,M) experiment.
+This directory contains immutable-by-convention implementation checkpoints for the first PRAISE `tau=(I,M)` experiment.
 
-- `phase0/`: early frozen mechanics/probe checkpoint retained for provenance.
-- `phase1/`: **frozen Step-0 white-box benchmark**. Physical benchmark construction, SLA-native admissibility-region selection, shortlist stability calibration, and final untouched N=100 confirmation.
-- `phase2/`: **frozen I1 information technology**. Provider-local SLA-compliance surface contract, fresh private provider-acquisition corpus, deterministic exact-card materialization interface, and validated corpus fingerprints.
-- `phase3/`: **(I1,M0)** analytic/topology-aware composition. Begins from the frozen Phase-2 I1 and must not alter it.
-- `phase4/`: **(I1,M1)** minimum-information lifting plus native composed simulation. Begins from the same frozen I1.
-- `phase5/`: locked comparative tau analysis, if/when needed.
+Current design/development source of truth:
 
-The intended dependency direction is one-way:
+`PRAISE_I1_M0_M1_M2_DESIGN_2026-09-16.md`
 
-`phase1 white-box target -> phase2 I1 [FROZEN] -> phase3 (I1,M0) / phase4 (I1,M1) -> phase5 comparison`
+Current frozen state:
 
-A frozen phase is not edited to implement the next phase. Later phases may consume scientific outputs and stable accounting utilities from earlier checkpoints without silently redefining them.
+- `phase0/`: early mechanics/probe checkpoint retained for provenance.
+- `phase1/`: **frozen white-box benchmark**. Physical benchmark construction, admissibility-region calibration, and untouched N=100 confirmation.
+- `phase2/`: **frozen I1 information representation**. Rho-conditioned provider-local admissibility regions and sigma surfaces built from independent evidence.
+- `phase3/`: **frozen M0 and frozen M1-v2 pilot baselines** over the same public I1. M0 is direct analytic composition. M1-v2 is public-I1-only inverse lifting to native provider surrogates followed by native graph composition.
+- M2 is the next method-development stage. It must consume the same frozen I1 initially and must not repair or retune M1.
+
+The dependency direction is one-way:
+
+`phase1 WB [FROZEN] -> phase2 I1 [FROZEN] -> phase3 M0/M1 [FROZEN] -> M2 development -> fresh validation`
+
+A frozen phase is not edited merely because a later result is inconvenient. Reopen only for a concrete implementation or scientific defect. Later methods may consume stable outputs/utilities from earlier checkpoints without silently redefining them.
+
+The strict PPG firewall remains in force throughout this experiment.
