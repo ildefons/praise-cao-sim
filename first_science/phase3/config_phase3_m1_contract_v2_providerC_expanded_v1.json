@@ -1,0 +1,116 @@
+{
+  "status": "IMPLEMENTATION_CANDIDATE_PHASE3_M1_LIFT_V2_NOT_FROZEN",
+  "phase": "phase3_i1_m1",
+  "revision_date": "2026-09-16",
+  "scientific_role": "One-round public-I1-only search-bound expansion for ProviderC after the original M1-v2 selected candidate hit the declared mu lower and kappa upper boundary gates. No graph-level white-box outcome is used.",
+  "intended_provider": "ProviderC",
+  "supersedes_for_provider": "config_phase3_m1_contract_v2.json",
+  "boundary_expansion_basis": {
+    "evidence_source": "ProviderC local reconstruction against the frozen public I1 sigma surface only",
+    "trigger": "The confirmation-selected ProviderC candidate lay within boundary_fraction=0.02 of both the mean-service-time lower bound and cost-rate upper bound.",
+    "original_selected_mu": 0.010019691901666999,
+    "original_selected_kappa": 18.05007353407479,
+    "original_selected_cv": 1.2917901237263683,
+    "original_normalized_mu_position": 0.0005332930711823749,
+    "original_normalized_kappa_position": 0.9814785333732913,
+    "rule": "Expand only the two implicated log-scale directions by one decade. Keep the opposite edges, CV bounds, optimizer budget, seed banks, objective, I1, and simulator closure unchanged.",
+    "one_round_only": true,
+    "stop_rule": "If the confirmation-selected candidate remains within boundary_fraction=0.02 of any expanded edge, do not expand again automatically. Treat this as unresolved lift identifiability/closure evidence and do not freeze or compose ProviderC."
+  },
+  "information_contract": {
+    "allowed": [
+      "already-frozen public rho-conditioned I1 provider cards",
+      "public provider workload contract W_i",
+      "fixed M1-v2 closure conventions declared in this contract",
+      "public local-reconstruction boundary diagnostics from the preceding M1-v2 run",
+      "public composition graph G only after the provider lift is frozen"
+    ],
+    "forbidden": [
+      "private Phase-2 provider request ledgers",
+      "Phase-2 acquisition seeds",
+      "fitted GMM parameters or private GMM samples",
+      "hidden Phase-1 provider instruction means",
+      "hidden Phase-1 provider instruction CV",
+      "hidden Phase-1 effective IPT",
+      "hidden Phase-1 cost rate",
+      "Phase-1 graph-level white-box sigma outcomes during lifting",
+      "retuning I1 or M0 to improve M1"
+    ]
+  },
+  "lift_definition": "L_M1_v2: (I1_i,W_i) -> theta_i^M1=(mu_i,kappa_i,CV_i) by black-box inverse simulation against the complete public I1 sigma surface.",
+  "pilot_scope": {
+    "quality_status": "DEGENERATE_Q_PILOT_ONLY",
+    "quality_observation": 0.5,
+    "execution_fraction": 0.5,
+    "qos_mapping": "LinearQoS(L=0,R=1), hence native Q=x",
+    "rule": "For this pilot only, Q is fixed rather than optimized because every public A_i has q_min=0.5 and the public card contains no quality diversity.",
+    "generalization_warning": "This is not a general M1 assumption. Beyond the pilot, non-degenerate Q requires an explicit QoS-generating surrogate and q_i(rho_region) may vary with the admissibility region."
+  },
+  "fixed_closure_conventions": {
+    "provider_queue": "one FCFS native provider module",
+    "arrival_process": "periodic with period and accounting origin read from W_i",
+    "arrival_phase": "canonical YAFS periodic source convention: first provider-local arrival occurs one period after accounting origin, then at integer multiples of the period; the current public W_i does not expose an additional phase parameter",
+    "canonical_IPT": 1000000.0,
+    "canonical_IPT_role": "numerical gauge only; not interpreted as recovered provider hardware",
+    "networking_during_local_lift": "Provider-local calibration uses a dedicated workload-injector node and provider node because AICon enforces at most one application module per device. They are connected by a native link with PR=0 and requests have bytes=0, so the adapter contributes zero network delay.",
+    "local_latency": "provider arrival to provider completion including queue waiting and native service; the zero-delay injector-to-provider adapter contributes no network latency",
+    "local_cost": "native COST(node)*service for the provider module only",
+    "local_quality": "native provider qos",
+    "service_distribution": "Gamma with fitted mean service time and coefficient of variation; CV=0 is interpreted as deterministic service"
+  },
+  "joint_full_surface_lift": {
+    "free_parameters": [
+      "mean_service_time_mu_seconds",
+      "cost_rate_kappa",
+      "service_cv"
+    ],
+    "native_instruction_mapping": "mean_nominal_instructions = mu * canonical_IPT / execution_fraction",
+    "fit_target": "the complete public rho-conditioned I1 sigma surface over all A_i(rho_region), all H>0, and all exposed rho_query values",
+    "loss": "uniform mean squared error between native-simulator sigma_hat and public I1 sigma_hat over every public surface point with H>0",
+    "optimization": {
+      "method": "Optuna TPESampler black-box optimization",
+      "sampler_seed": 314159,
+      "n_trials": 100,
+      "n_startup_trials": 20,
+      "search_space": {
+        "mu_over_workload_period_bounds": [0.005, 2.0],
+        "mu_sampling": "log",
+        "cost_rate_reference": "median over public regions of c_max/max(l_max,1e-12)",
+        "cost_rate_reference_multiplier_bounds": [0.1, 100.0],
+        "cost_rate_sampling": "log",
+        "cv_bounds": [0.0, 2.0],
+        "cv_sampling": "linear"
+      },
+      "calibration_common_random_numbers": {
+        "trajectory_seed_start": 22000,
+        "n_trajectories": 25,
+        "rule": "Every optimizer candidate is evaluated with exactly the same trajectory seed bank."
+      },
+      "shortlist_confirmation": {
+        "top_k": 5,
+        "trajectory_seed_start": 23000,
+        "n_trajectories": 100,
+        "rule": "The top search candidates are re-evaluated with the same larger common seed bank; the lowest confirmation MSE selects the final fitted surrogate. This is part of calibration."
+      },
+      "independent_replay": {
+        "trajectory_seed_start": 24000,
+        "n_trajectories": 100,
+        "rule": "After the final surrogate is selected, replay it on a disjoint seed bank. This replay is diagnostic only and cannot change the selected parameters."
+      },
+      "boundary_fraction": 0.02,
+      "boundary_rule": "This is the single predeclared expansion round for ProviderC. If the selected candidate remains within the declared boundary fraction of an expanded edge, do not freeze or compose it and do not expand again automatically."
+    }
+  },
+  "smoke_mode": {
+    "n_trials": 8,
+    "n_startup_trials": 4,
+    "calibration_n_trajectories": 5,
+    "shortlist_top_k": 2,
+    "confirmation_n_trajectories": 10,
+    "independent_replay_n_trajectories": 10,
+    "role": "implementation test only; smoke outputs cannot be frozen as scientific M1 parameters"
+  },
+  "common_random_numbers_rationale": "Finite-trajectory sigma estimates are discrete and noisy. Reusing the same calibration seed bank across candidates makes the black-box objective deterministic conditional on theta and reduces Monte Carlo noise in parameter comparisons without adding provider information.",
+  "whitebox_firewall": "The complete provider lift is selected and its independent replay recorded before graph-level white-box sigma is read for M1 evaluation.",
+  "freeze_rule": "For ProviderC this expansion run passes only if local reconstruction and independent replay are recorded and the confirmation-selected candidate is not near any expanded search boundary. Graph-level white-box outcomes cannot affect the result."
+}
