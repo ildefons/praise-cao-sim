@@ -1,13 +1,21 @@
 {
   "status": "FROZEN_PHASE3_M0_BASELINE_V2_SAME_RHO",
   "phase": "phase3_i1_m0",
-  "revision_date": "2026-09-10",
+  "revision_date": "2026-09-16",
+  "native_semantics_defect_correction": {
+    "previous_revision_date": "2026-09-10",
+    "previous_fixed_latency_outside_provider": 0.013003,
+    "corrected_fixed_latency_outside_provider": 0.014003,
+    "reason": "Native PRAISE ParAll terminal-branch completion sends a zero-byte __PRAISE_COMPLETE__ message from each provider back to the composition controller colocated with Fpre. The prior deterministic G0 adapter omitted the resulting one-hop propagation delay on the critical branch.",
+    "whitebox_sigma_used_to_make_correction": false,
+    "scientific_interpretation": "Exact simulator-semantics bug fix only. The M0 probability rule, public I1 cards, rho policy, and provider boundaries are unchanged."
+  },
   "scientific_role": "Minimal topology-aware analytic baseline from already-fixed I1 provider cards. M0 composes local LCQ boundaries forward through G, reads every provider card at rho_i=rho_G, and multiplies the corresponding local sigma values under its independence model. It is a predictor/baseline, not a guaranteed certificate for the global rho_G query.",
   "information_contract": {
     "allowed": [
       "exogenous global admissibility query A_G and rho_G",
       "public composition graph G",
-      "deterministic fixed-stage and network boundary terms",
+      "deterministic fixed-stage, native composition-control, and network boundary terms",
       "already-frozen public I1 provider cards"
     ],
     "forbidden": [
@@ -37,7 +45,7 @@
   },
   "global_query_relation": "Compose the already-fixed local A_i boundaries forward through G. M0 is applicable to an exogenous A_G only when the induced boundary is contained in A_G: l_M0<=l_G, c_M0<=c_G, q_M0>=q_G.",
   "phase1_benchmark_adapter": {
-    "status": "FROZEN_PHASE1_G0_NUMERIC_ADAPTER_V1",
+    "status": "FROZEN_PHASE1_G0_NUMERIC_ADAPTER_V1_NATIVE_CONTROL_RETURN_CORRECTED",
     "implementation": "m0_phase1_benchmark_adapter.py",
     "physical_configuration": "../phase1/config_phase1_discovery_v1.json",
     "graph": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
@@ -46,9 +54,11 @@
       "request_bytes": 1000,
       "branch_bytes": 1000,
       "join_bytes": 1000,
+      "completion_control_bytes": 0,
       "BW_mbps": 1000.0,
       "PR": 0.001,
-      "latency_per_hop": 0.001001,
+      "latency_per_data_hop": 0.001001,
+      "completion_control_latency": 0.001,
       "cost_per_hop": 0.0,
       "qos_neutral": true
     },
@@ -64,15 +74,15 @@
       "qos_neutral": true
     },
     "fixed_terms_outside_provider_boundaries": {
-      "latency": 0.013003,
+      "latency": 0.014003,
       "cost": 0.03
     },
     "full_boundary_formula": {
-      "latency": "l_M0=0.013003+max_i(l_i)",
+      "latency": "l_M0=0.014003+max_i(l_i)",
       "cost": "c_M0=0.03+sum_i(c_i)",
       "quality": "q_M0=min_i(q_i)"
     },
-    "network_path_accounting": "root hop + Fpre service + one branch hop on the parallel critical path + join hop + Fpost service",
+    "network_path_accounting": "root hop + Fpre service + one outbound branch hop + one zero-byte provider-to-controller completion-control hop on the parallel critical path + join hop + Fpost service",
     "whitebox_sigma_used": false
   },
   "rho_policy": {
@@ -95,7 +105,7 @@
     "scientific_role": "This is a deliberate borderline limitation of M0 and motivates richer integration methods such as M1."
   },
   "hard_preconditions_for_numeric_prediction": [
-    "forward-composed fixed A_i boundary including deterministic fixed-stage and network terms is contained in the requested A_G",
+    "forward-composed fixed A_i boundary including deterministic fixed-stage, native composition-control, and network terms is contained in the requested A_G",
     "the requested H point exists in every required I1 card",
     "the requested rho_G slice exists in every required I1 card"
   ],
@@ -106,5 +116,5 @@
     "rho_i_used_to_construct_A_i": false,
     "M0_may_modify_I1": false
   },
-  "evaluation_lock": "The same-rho M0 rule and Phase-1 deterministic boundary adapter are frozen independently of Phase-1 white-box sigma outcomes."
+  "evaluation_lock": "The same-rho M0 rule remains frozen independently of Phase-1 white-box sigma outcomes. The only September 16 correction is the omitted native completion-control propagation delay in the deterministic G0 adapter."
 }
