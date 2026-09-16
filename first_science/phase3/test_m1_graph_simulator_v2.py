@@ -62,15 +62,29 @@ def main() -> None:
     assert completed["C"].astype(float).gt(0.0).all()
     assert completed["Q"].astype(float).eq(0.5).all()
 
-    # With deterministic equal providers and no queueing, G0 latency is:
-    # root hop + Fpre + branch hop + max(provider) + join hop + Fpost.
-    expected_latency = 0.001001 + 0.005 + 0.001001 + 0.02 + 0.001001 + 0.005
+    # Native PRAISE ParAll sends one zero-byte completion-control message from
+    # each completed provider back to the join controller. In this topology the
+    # controller is colocated with Fpre, so the critical branch pays one reverse
+    # branch propagation delay PR before the join message can be emitted.
+    # Hence deterministic G0 latency is:
+    # root hop + Fpre + branch hop + max(provider + control-return hop)
+    # + join hop + Fpost.
+    completion_control_latency = 0.001
+    expected_latency = (
+        0.001001
+        + 0.005
+        + 0.001001
+        + 0.02
+        + completion_control_latency
+        + 0.001001
+        + 0.005
+    )
     assert isclose(
         float(completed.iloc[0]["L"]), expected_latency, rel_tol=0.0, abs_tol=1e-8
     )
 
     # Cost is Fpre+Fpost (2*3*0.005) plus all three provider costs
-    # (3*2*0.02).
+    # (3*2*0.02). The completion-control message has zero instructions/cost.
     expected_cost = 0.03 + 3.0 * 2.0 * 0.02
     assert isclose(
         float(completed.iloc[0]["C"]), expected_cost, rel_tol=0.0, abs_tol=1e-8
