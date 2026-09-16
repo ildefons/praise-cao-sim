@@ -1,0 +1,106 @@
+{
+  "status": "FROZEN_PHASE3_M0_BASELINE_V2_1_NATIVE_CONTROL_RETURN_FIX",
+  "phase": "phase3_i1_m0",
+  "revision_date": "2026-09-16",
+  "supersedes_for_numeric_G0_adapter": "config_phase3_m0_contract_v1.json",
+  "correction_reason": "Native PRAISE ParAll terminal-branch completion sends a zero-byte __PRAISE_COMPLETE__ message from each provider back to the composition controller colocated with Fpre. The prior G0 adapter omitted the resulting one-hop propagation delay from the critical branch latency. This is a simulator-semantics defect correction, not retuning from white-box outcomes.",
+  "scientific_role": "Minimal topology-aware analytic baseline from already-fixed I1 provider cards. M0 composes local LCQ boundaries forward through G, reads every provider card at rho_i=rho_G, and multiplies the corresponding local sigma values under its independence model. It is a predictor/baseline, not a guaranteed certificate for the global rho_G query.",
+  "information_contract": {
+    "allowed": [
+      "exogenous global admissibility query A_G and rho_G",
+      "public composition graph G",
+      "deterministic fixed-stage, native composition-control, and network boundary terms",
+      "already-frozen public I1 provider cards"
+    ],
+    "forbidden": [
+      "private provider traces or ledgers",
+      "acquisition seeds",
+      "hidden provider stochastic parameters",
+      "Phase-1 white-box sigma outcomes",
+      "changing or rematerializing provider A_i",
+      "redistributing or optimizing rho_G across providers"
+    ]
+  },
+  "supported_operators": ["sequence", "parallel_all"],
+  "boundary_algebra": {
+    "sequence": {"latency": "sum", "cost": "sum", "quality": "minimum"},
+    "parallel_all": {"latency": "maximum", "cost": "sum", "quality": "minimum"}
+  },
+  "global_query_relation": "Compose the already-fixed local A_i boundaries forward through G. M0 is applicable to an exogenous A_G only when the induced boundary is contained in A_G: l_M0<=l_G, c_M0<=c_G, q_M0>=q_G.",
+  "phase1_benchmark_adapter": {
+    "status": "FROZEN_PHASE1_G0_NUMERIC_ADAPTER_V1_1_NATIVE_CONTROL_RETURN_FIX",
+    "implementation": "m0_phase1_benchmark_adapter.py",
+    "physical_configuration": "../phase1/config_phase1_discovery_v1.json",
+    "graph": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "network_model": {
+      "law": "latency_hop=message_bytes/(BW_mbps*1e6)+PR",
+      "request_bytes": 1000,
+      "branch_bytes": 1000,
+      "join_bytes": 1000,
+      "completion_control_bytes": 0,
+      "BW_mbps": 1000.0,
+      "PR": 0.001,
+      "data_latency_per_hop": 0.001001,
+      "completion_control_latency": 0.001,
+      "cost_per_hop": 0.0,
+      "qos_neutral": true
+    },
+    "native_parallel_control": {
+      "message": "__PRAISE_COMPLETE__<composition>__<branch>",
+      "source": "terminal provider branch",
+      "destination": "composition controller colocated with Fpre",
+      "instructions": 0,
+      "bytes": 0,
+      "latency_on_this_topology": 0.001,
+      "whitebox_sigma_used_to_identify_fix": false,
+      "identified_by": "native graph smoke exact-latency audit plus AICon/YAFS runtime source semantics"
+    },
+    "fixed_service_model": {
+      "Fpre_instructions": 5000000.0,
+      "Fpost_instructions": 5000000.0,
+      "effective_IPT": 1000000000.0,
+      "COST_rate": 3.0,
+      "Fpre_latency": 0.005,
+      "Fpost_latency": 0.005,
+      "Fpre_cost": 0.015,
+      "Fpost_cost": 0.015,
+      "qos_neutral": true
+    },
+    "fixed_terms_outside_provider_boundaries": {
+      "latency": 0.014003,
+      "cost": 0.03
+    },
+    "full_boundary_formula": {
+      "latency": "l_M0=0.014003+max_i(l_i)",
+      "cost": "c_M0=0.03+sum_i(c_i)",
+      "quality": "q_M0=min_i(q_i)"
+    },
+    "network_path_accounting": "root hop + Fpre service + one outbound branch hop + one zero-byte provider-to-controller completion-control hop on the critical parallel branch + join hop + Fpost service",
+    "whitebox_sigma_used": false
+  },
+  "rho_policy": {
+    "status": "FROZEN",
+    "rule": "same_as_global_for_every_required_provider",
+    "formula": "rho_i=rho_G for all i",
+    "anchor_rho_G": 0.95,
+    "anchor_rho_i": 0.95,
+    "no_violation_budget_allocation": true
+  },
+  "probability_composition": {
+    "model": "independent_required_local_events",
+    "rule": "product",
+    "formula": "sigma_hat_G_M0(H;rho_G)=product_i sigma_i(A_i,H;rho_G)",
+    "interpretation": "analytic prediction/baseline for the global admissibility probability, not a lower bound or certification guarantee"
+  },
+  "known_limitation": {
+    "statement": "Even if c_i>=rho_G for every provider, this does not in general imply c_G>=rho_G for an all-required composition. M0 deliberately does not allocate a tighter local violation budget.",
+    "scientific_role": "Deliberate baseline limitation motivating richer integration methods such as M1."
+  },
+  "phase2_independence": {
+    "A_i_created_by_M0": false,
+    "A_G_to_A_i_mapping": false,
+    "rho_i_used_to_construct_A_i": false,
+    "M0_may_modify_I1": false
+  },
+  "evaluation_lock": "The same-rho M0 probability rule remains unchanged. Only the omitted native completion-control latency in the public deterministic G0 adapter is corrected."
+}
