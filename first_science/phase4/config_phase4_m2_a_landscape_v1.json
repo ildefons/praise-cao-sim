@@ -1,0 +1,55 @@
+{
+  "status": "PHASE4_M2_A_LOCAL_LANDSCAPE_INSPECTION_V1",
+  "date": "2026-09-17",
+  "pilot_scope": true,
+  "scientific_role": "Inspect the already-generated M1-v2 public-I1 inverse-search landscapes without rerunning Optuna, identify whether multiple parameter-diverse near-equivalent local fits exist, and prepare a public-I1-only candidate-selection rule before any M2 graph composition.",
+  "information_boundary": {
+    "allowed": [
+      "frozen public rho-conditioned I1 cards",
+      "existing M1-v2 search-trial tables generated from public I1",
+      "M1-v2 public search contracts",
+      "frozen M1-v2 selected-surrogate manifest for provenance only"
+    ],
+    "forbidden": [
+      "graph-level white-box outcomes",
+      "graph-level white-box request ledgers",
+      "M1 graph-level prediction outcomes for candidate selection",
+      "private Phase-2 provider traces",
+      "fitted I1 GMM parameters or synthetic samples",
+      "hidden Phase-1 provider parameters"
+    ]
+  },
+  "existing_search_landscape_policy": {
+    "rerun_optuna": false,
+    "minimum_completed_trials_per_source": 100,
+    "search_trial_filename": "m1_v2_search_trials.csv",
+    "discover_recursively_under": "../phase3/results",
+    "providerA_search_space": "config_phase3_m1_contract_v2.json",
+    "providerB_search_space": "config_phase3_m1_contract_v2.json",
+    "providerC_normalization_search_space": "config_phase3_m1_contract_v2_providerC_expanded_v1.json",
+    "providerC_pool_policy": "Combine all existing non-smoke 100-trial M1-v2 ProviderC landscapes that use the same public-I1 objective and calibration seed bank, including the original and one declared expanded-bound run. Deduplicate identical parameter vectors."
+  },
+  "loss_bands": {
+    "metric": "search_mse",
+    "relative_to_best_observed_search_mse": true,
+    "multipliers": [1.05, 1.10, 1.25, 1.50, 2.00],
+    "interpretation": "Exploratory local-I1-only bands. This run does not freeze the final compatibility threshold. The final threshold is chosen and frozen after inspecting only these local landscape summaries, before graph composition."
+  },
+  "diversity": {
+    "coordinates": [
+      "log(mean_service_time) normalized to declared search bounds",
+      "log(cost_rate) normalized to declared search bounds",
+      "service_cv linearly normalized to declared search bounds"
+    ],
+    "distance": "Euclidean",
+    "preview_candidates_per_provider_per_band": 8,
+    "selection": "Anchor at the lowest-search-MSE candidate, then greedy farthest-point sampling maximizing minimum distance to already selected candidates; ties prefer lower search_mse then lower trial_number."
+  },
+  "outputs": [
+    "m2_a_all_candidates.csv",
+    "m2_a_loss_band_summary.csv",
+    "m2_a_diverse_candidate_preview.csv",
+    "m2_a_landscape_manifest_v1.json"
+  ],
+  "next_gate": "After reviewing only the local-I1 outputs above, freeze one compatibility rule and re-evaluate the selected diverse candidates on a common 100-trajectory local confirmation bank. No graph or white-box data may be consulted before that rule is frozen."
+}
