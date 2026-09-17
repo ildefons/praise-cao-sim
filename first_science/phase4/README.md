@@ -71,4 +71,51 @@ Expected outputs include:
 
 The confirmation stage does not run Optuna, does not simulate the graph, does not read graph predictions, and does not read graph white-box outcomes.
 
-Only after `M2_A_LOCAL_CONFIRMATION_PASS` should the M2 graph-identifiability experiment be specified. The graph stage should first vary locally compatible providers in a predeclared way, preferably including one-at-a-time substitutions against the frozen M1 combination before any larger factorial or sampled ensemble experiment.
+The first completed confirmation produced 3 compatible candidates for ProviderA, 3 for ProviderB, and 2 for ProviderC. ProviderC ALT2 failed the frozen confirmation rule and is excluded from graph composition.
+
+## M2-B: one-at-a-time graph identifiability diagnostic
+
+The next stage freezes the confirmed M2-A set before any new graph prediction. It first asks how much graph-level sigma changes when one provider at a time is replaced by a different locally public-I1-compatible surrogate.
+
+The graph variants are:
+
+- `BASE_M1`: all three frozen M1 anchors;
+- one variant for each confirmed non-M1 ProviderA candidate;
+- one variant for each confirmed non-M1 ProviderB candidate;
+- one variant for each confirmed non-M1 ProviderC candidate.
+
+With the current confirmed set this gives six graph variants total: one baseline plus five one-at-a-time substitutions. Every variant uses the independent common graph seed bank `26000..26099`. This bank is separate from the earlier Phase-3 `25000..25099` graph run.
+
+No graph white-box outcome is read in this stage. The outputs quantify spread relative to `BASE_M1` using whole-surface and per-rho MAE/RMSE, signed delta, maximum absolute delta, and request-level latency/cost summaries. No binary materiality threshold is introduced after seeing the result.
+
+Run a smoke test first:
+
+```bash
+mkdir -p results/m2_b_one_at_a_time_graph_v1_smoke
+/usr/bin/time -v python m2_b_one_at_a_time_graph.py \
+  --smoke \
+  --output results/m2_b_one_at_a_time_graph_v1_smoke \
+  2>&1 | tee results/m2_b_one_at_a_time_graph_v1_smoke/run.log
+```
+
+If the smoke test passes, run the scientific diagnostic:
+
+```bash
+mkdir -p results/m2_b_one_at_a_time_graph_v1
+/usr/bin/time -v python m2_b_one_at_a_time_graph.py \
+  2>&1 | tee results/m2_b_one_at_a_time_graph_v1/run.log
+```
+
+Expected outputs include:
+
+- `m2_b_variant_design.csv`
+- `m2_b_frozen_candidate_set.csv`
+- `m2_b_graph_sigma_curves.csv`
+- `m2_b_surface_spread_summary.csv`
+- `m2_b_per_rho_spread_summary.csv`
+- `m2_b_graph_sigma_deltas_vs_base.csv`
+- `m2_b_request_distribution_summary.csv`
+- `m2_b_graph_diagnostic_manifest_v1.json`
+- one combined graph ledger per variant under `ledgers/`
+
+Interpretation comes only after these prediction artifacts are materialized. If locally compatible one-at-a-time substitutions produce substantial graph-sigma spread, the next M2 step is an ambiguity-preserving ensemble or factorial composition design. If the graph predictions remain essentially the same and saturated, the evidence instead points toward insufficiency of the current Gamma/FCFS latent family.
