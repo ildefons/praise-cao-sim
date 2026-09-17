@@ -1,0 +1,60 @@
+{
+  "status": "PHASE4_M2_A2_NONADAPTIVE_COVERAGE_AUDIT_V1",
+  "scientific_stage": "M2-A2 audit of whether the TPE search concentrated locally compatible solutions into one region",
+  "information_representation": "I1",
+  "purpose": "Test whether the apparent lack of consequential point ambiguity in M2-A/B could be an artifact of adaptive TPE concentration. Sample each final declared M1 parameter domain non-adaptively, score only against public I1, and compare any compatible samples geometrically with the existing TPE-compatible set.",
+  "sampler": {
+    "type": "latin_hypercube",
+    "n_points_per_provider": 48,
+    "seed": 20260917,
+    "coordinates": ["log_mean_service_time", "log_cost_rate", "service_cv"],
+    "adaptive": false,
+    "provider_domains": {
+      "ProviderA": "phase3 base M1-v2 declared search bounds",
+      "ProviderB": "phase3 base M1-v2 declared search bounds",
+      "ProviderC": "phase3 ProviderC expanded M1-v2 declared search bounds"
+    }
+  },
+  "local_scoring": {
+    "trajectory_seed_start": 22000,
+    "n_trajectories": 25,
+    "common_random_numbers_across_samples": true,
+    "same_seed_bank_as_original_M1_search": true,
+    "reason": "Make LHS MSE directly comparable with the existing TPE search MSE without rerunning Optuna."
+  },
+  "compatibility_rule": {
+    "loss_ratio_max_to_existing_best_search_mse": 1.25,
+    "reference": "existing provider-specific best M1-v2 search MSE from m2_a_all_candidates.csv",
+    "reason": "Reuse the already frozen M2-A screening ceiling. Do not change the compatibility definition after seeing the non-adaptive sample."
+  },
+  "geometry": {
+    "normalization": "unit cube in the declared provider search domain, using log coordinates for mean_service_time and cost_rate and linear service_cv",
+    "report": [
+      "existing compatible count and spans",
+      "existing compatible maximum pairwise distance",
+      "LHS compatible count",
+      "distance of each LHS compatible point to the nearest existing compatible TPE point",
+      "distance from frozen M1 anchor",
+      "whether each compatible LHS point lies outside the existing compatible axis-aligned bounding box",
+      "union compatible spans and maximum pairwise distance"
+    ],
+    "binary_remote_threshold": null,
+    "reason": "Report geometric expansion continuously rather than introduce a post-hoc remote/not-remote threshold."
+  },
+  "inputs": {
+    "existing_landscape": "results/m2_a_landscape_v1/m2_a_all_candidates.csv",
+    "frozen_m1": "../phase3/phase3_i1_m1_v2_freeze_manifest_v1.json",
+    "base_m1_contract": "../phase3/config_phase3_m1_contract_v2.json",
+    "providerC_expanded_contract": "../phase3/config_phase3_m1_contract_v2_providerC_expanded_v1.json",
+    "public_i1_root": "../phase2/results/i1_cards_v2_rho_conditioned/public"
+  },
+  "firewall": {
+    "rerun_optuna": false,
+    "graph_simulation": false,
+    "graph_prediction_read": false,
+    "graph_whitebox_read": false,
+    "private_phase2_provider_traces_read": false,
+    "hidden_phase1_provider_parameters_read": false
+  },
+  "interpretation_guard": "This audit can show that TPE missed remote public-I1-compatible regions if non-adaptive samples discover them. Failure to discover such regions in 48 LHS points per provider is evidence of concentration/small compatible volume, not a proof that no remote compatible region exists."
+}
