@@ -1,0 +1,41 @@
+{
+  "status": "PHASE4_M2_A_CONFIRMATION_CONTRACT_V1",
+  "scientific_stage": "M2-A public-I1-only compatibility confirmation before any graph composition",
+  "information_representation": "I1",
+  "integration_method_stage": "M2-A",
+  "input_landscape": "results/m2_a_landscape_v1",
+  "screening_rule": {
+    "search_loss_ratio_max": 1.25,
+    "n_candidates_per_provider": 3,
+    "anchor": "frozen_M1_v2_provider_surrogate",
+    "diversity_coordinates": ["normalized_log_mean_service_time", "normalized_log_cost_rate", "normalized_service_cv"],
+    "alternative_selection": "Starting from the frozen M1-v2 surrogate, greedily add the candidate maximizing its minimum Euclidean distance to the already selected set. Break ties by lower search MSE, then lower trial number, then source path.",
+    "rationale": "A single uniform 1.25x local-search-MSE ceiling is the first inspected predefined band that contains at least three candidates for every provider. It preserves a common public-I1-only compatibility ceiling while leaving visible parameter diversity in all three providers."
+  },
+  "confirmation": {
+    "trajectory_seed_start": 23000,
+    "n_trajectories": 100,
+    "common_random_numbers_across_candidates": true,
+    "compatibility_mse_ratio_max_to_best_confirmed_in_provider_screen_set": 1.25,
+    "minimum_confirmed_compatible_candidates_per_provider": 2,
+    "purpose": "Reduce 25-trajectory search noise and freeze the locally compatible M2-A candidate set. Confirmation uses only the public I1 surface."
+  },
+  "independent_replay": {
+    "trajectory_seed_start": 24000,
+    "n_trajectories": 100,
+    "common_random_numbers_across_candidates": true,
+    "diagnostic_only": true,
+    "may_change_compatibility_set": false
+  },
+  "pilot_closure_source": "../phase3/config_phase3_m1_contract_v2.json",
+  "frozen_m1_source": "../phase3/phase3_i1_m1_v2_freeze_manifest_v1.json",
+  "firewall": {
+    "rerun_optuna": false,
+    "graph_simulation": false,
+    "graph_prediction_read": false,
+    "graph_whitebox_read": false,
+    "private_phase2_provider_traces_read": false,
+    "hidden_phase1_provider_parameters_read": false
+  },
+  "stop_rule": "If any provider has fewer than two confirmation-compatible candidates, stop M2-A before graph composition. Do not automatically widen the loss ceiling. Revisit the local-I1-only rule explicitly."
+}
