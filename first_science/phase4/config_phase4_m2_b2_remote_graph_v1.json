@@ -1,0 +1,53 @@
+{
+  "status": "PHASE4_M2_B2_REMOTE_GRAPH_DIAGNOSTIC_V1",
+  "scientific_stage": "M2-B2 graph diagnostic for independently discovered and locally confirmed remote public-I1-compatible surrogates",
+  "purpose": "Test whether the remote compatible surrogate solutions discovered by non-adaptive M2-A2 and confirmed by M2-A3 produce graph-level sigma predictions that differ from the frozen M1 combination.",
+  "candidate_sources": {
+    "m1_anchor_candidates": "results/m2_a_confirmation_v1/m2_a_confirmed_compatible_candidates.csv",
+    "m1_confirmation_manifest": "results/m2_a_confirmation_v1/m2_a_confirmation_manifest_v1.json",
+    "remote_candidates": "results/m2_a3_remote_confirmation_v1/m2_a3_confirmed_remote_candidates.csv",
+    "remote_confirmation_manifest": "results/m2_a3_remote_confirmation_v1/m2_a3_remote_confirmation_manifest_v1.json",
+    "require_confirmation_compatible": true
+  },
+  "variant_design": {
+    "baseline": "BASE_M1 uses the frozen M1 anchor for ProviderA, ProviderB, and ProviderC.",
+    "alternatives": "Create one variant for every M2-A3-confirmed remote candidate by substituting only its provider while holding all other providers at their M1 anchors.",
+    "expected_current_variants": [
+      "BASE_M1",
+      "ProviderB_LHS_039",
+      "ProviderC_LHS_038",
+      "ProviderC_LHS_029"
+    ],
+    "full_factorial": false,
+    "rationale": "This isolates whether newly discovered remote inverse solutions transmit to graph sigma before any joint/factorial ambiguity experiment."
+  },
+  "graph_simulation": {
+    "trajectory_seed_start": 27000,
+    "trajectory_seed_end_inclusive": 27099,
+    "n_trajectories_per_variant": 100,
+    "common_random_numbers_across_variants": true,
+    "smoke_n_trajectories_per_variant": 5,
+    "seed_bank_relation": "Independent of Phase-3 M1 graph seeds 25000..25099 and M2-B TPE-candidate graph seeds 26000..26099."
+  },
+  "graph_query": {
+    "rho_policy": "same-rho diagonal: rho_region=rho_query=rho_G",
+    "A_G_construction": "Use the same frozen public I1 A_i(rho_G) boundaries and corrected frozen M0 deterministic G0 adapter for every variant.",
+    "sigma_definition": "sigma_G(A_G,H;rho_G)=P(c_G(A_G,H)>=rho_G)",
+    "comparison_reference": "BASE_M1 on the same 27000..27099 graph seed bank"
+  },
+  "reported_diagnostics": {
+    "whole_surface": ["mae_vs_base", "rmse_vs_base", "mean_delta_vs_base", "max_abs_delta_vs_base"],
+    "per_rho": ["mae_vs_base", "rmse_vs_base", "mean_delta_vs_base", "max_abs_delta_vs_base"],
+    "request_level": ["completed_fraction", "latency_mean", "latency_median", "latency_p90", "latency_p99", "latency_p999", "cost_mean", "cost_median", "cost_p90", "cost_p99", "cost_p999", "quality_mean"],
+    "binary_materiality_threshold": null
+  },
+  "firewall": {
+    "graph_whitebox_may_be_read": false,
+    "graph_whitebox_may_select_variants": false,
+    "graph_prediction_may_select_variants": false,
+    "optuna_may_run": false,
+    "private_phase2_provider_traces_may_be_read": false,
+    "hidden_phase1_provider_parameters_may_be_read": false
+  },
+  "next_gate": "After all graph predictions are materialized, first inspect spread vs BASE_M1. Only then may the already-frozen graph white-box reference be opened for evaluation of whether any remote variant improves predictive accuracy."
+}
