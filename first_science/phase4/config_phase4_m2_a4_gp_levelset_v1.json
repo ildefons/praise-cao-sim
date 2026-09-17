@@ -1,0 +1,118 @@
+{
+  "status": "PHASE4_M2_A4_GP_LEVELSET_PORTFOLIO_CONTRACT_V1",
+  "scientific_stage": "M2-A4 GP level-set search and diverse public-I1-compatible portfolio construction",
+  "purpose": "Systematically explore the public-I1-compatible inverse set after M2-A2 showed that adaptive TPE missed remote high-quality solutions, then extract a small diverse portfolio before any further graph composition.",
+  "information_representation": "I1",
+  "search_space": {
+    "coordinates": [
+      "normalized_log_mean_service_time",
+      "normalized_log_cost_rate",
+      "normalized_service_cv"
+    ],
+    "domain": "[0,1]^3",
+    "bounds_source_A_B": "../phase3/config_phase3_m1_contract_v2.json",
+    "bounds_source_C": "../phase3/config_phase3_m1_contract_v2_providerC_expanded_v1.json"
+  },
+  "inputs": {
+    "existing_tpe_landscape": "results/m2_a_landscape_v1/m2_a_all_candidates.csv",
+    "existing_landscape_manifest": "results/m2_a_landscape_v1/m2_a_landscape_manifest_v1.json",
+    "a2_manifest": "results/m2_a2_nonadaptive_coverage_v1/m2_a2_manifest_v1.json",
+    "a2_lhs_results": "results/m2_a2_nonadaptive_coverage_v1/m2_a2_lhs_results.csv",
+    "a2_existing_geometry": "results/m2_a2_nonadaptive_coverage_v1/m2_a2_existing_geometry.csv",
+    "public_i1_root": "../phase2/results/i1_cards_v2_rho_conditioned/public",
+    "pilot_closure_source": "../phase3/config_phase3_m1_contract_v2.json",
+    "previous_m2a_confirmation_manifest": "results/m2_a_confirmation_v1/m2_a_confirmation_manifest_v1.json",
+    "previous_m2a_confirmation_results": "results/m2_a_confirmation_v1/m2_a_confirmation_results.csv"
+  },
+  "warm_start": {
+    "use_all_existing_tpe_points": true,
+    "use_all_m2_a2_lhs_points": true,
+    "deduplicate_exact_parameter_vectors": true,
+    "required_loss_seed_bank": "22000..22024",
+    "note": "Only 25-trajectory public-I1 losses measured on the original M1 search seed bank enter the GP training set."
+  },
+  "level_set": {
+    "compatibility_loss_ratio_max": 1.25,
+    "ceiling_source": "M2-A2 existing_geometry.compatibility_mse_ceiling, which was frozen from the pre-A2 TPE best loss",
+    "may_recompute_ceiling_from_new_gp_or_lhs_best": false
+  },
+  "gp_model": {
+    "implementation": "scikit-learn GaussianProcessRegressor",
+    "kernel": "ConstantKernel * Matern(nu=2.5, ARD length scales) + WhiteKernel",
+    "normalize_y": true,
+    "alpha_jitter": 1e-08,
+    "initial_length_scale": [
+      0.25,
+      0.25,
+      0.25
+    ],
+    "length_scale_bounds": [
+      0.01,
+      10.0
+    ],
+    "constant_bounds": [
+      0.001,
+      1000.0
+    ],
+    "white_noise_bounds": [
+      1e-06,
+      1.0
+    ],
+    "n_restarts_optimizer": 2,
+    "random_seed": 20260917
+  },
+  "acquisition": {
+    "name": "straddle_level_set",
+    "formula": "a(x)=beta_sigma*s(x)-abs(m(x)-epsilon_i)",
+    "beta_sigma": 1.96,
+    "sequential_batch_size": 1,
+    "candidate_pool": {
+      "sampler": "scrambled_sobol",
+      "points_per_provider": 16384,
+      "sobol_power": 14,
+      "seed": 424242,
+      "exclude_nearest_observed_distance_leq": 1e-08
+    }
+  },
+  "search_budget": {
+    "new_evaluations_per_provider": 48,
+    "trajectory_seed_start": 22000,
+    "n_trajectories_per_evaluation": 25,
+    "common_random_numbers_across_all_points": true,
+    "checkpoint_after_each_evaluation": true
+  },
+  "provisional_portfolio": {
+    "k_per_provider": 5,
+    "eligibility": "Observed 25-trajectory local MSE must be <= the frozen provider-specific level-set ceiling.",
+    "first_member": "lowest observed local MSE; ties by candidate_id",
+    "remaining_members": "greedy maximin Euclidean distance in normalized (log mu, log kappa, CV); ties by lower local MSE then candidate_id",
+    "gp_posterior_only_points_may_enter": false
+  },
+  "confirmation": {
+    "trajectory_seed_start": 23000,
+    "n_trajectories": 100,
+    "common_random_numbers_across_candidates": true,
+    "compatibility_ratio_max_to_previous_m2a_best_confirmed": 1.25,
+    "reference_source": "previous M2-A confirmation results, frozen before M2-A2/A3/A4",
+    "minimum_confirmed_candidates_per_provider": 3,
+    "final_k_per_provider": 3,
+    "selection": "Take the first three confirmation-compatible members in the precomputed provisional portfolio order. Do not reorder using confirmation MSE."
+  },
+  "independent_replay": {
+    "trajectory_seed_start": 24000,
+    "n_trajectories": 100,
+    "diagnostic_only": true,
+    "may_change_final_portfolio": false
+  },
+  "firewall": {
+    "rerun_optuna": false,
+    "graph_simulation": false,
+    "graph_prediction_read": false,
+    "graph_whitebox_read": false,
+    "private_phase2_provider_traces_read": false,
+    "hidden_phase1_provider_parameters_read": false,
+    "ppg_gp_performance_prediction_reused": false
+  },
+  "stop_rule": "Do not alter the frozen level-set ceiling, add extra GP evaluations beyond the 48-per-provider budget, or automatically enlarge the provisional portfolio if fewer than three members per provider pass confirmation. Stop and review the local public-I1 design explicitly.",
+  "graph_gate": "Hold M2-B2 and any new graph composition until the M2-A4 final confirmed portfolio is frozen."
+}
