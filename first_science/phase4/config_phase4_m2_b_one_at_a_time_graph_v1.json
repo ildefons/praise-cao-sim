@@ -1,0 +1,53 @@
+{
+  "status": "PHASE4_M2_B_ONE_AT_A_TIME_GRAPH_DIAGNOSTIC_V1",
+  "scientific_stage": "M2-B graph identifiability diagnostic using only the frozen M2-A locally compatible candidates",
+  "purpose": "Measure whether locally public-I1-compatible surrogate ambiguity changes graph-level sigma when one provider at a time is substituted away from the frozen M1 combination.",
+  "candidate_source": {
+    "confirmation_manifest": "results/m2_a_confirmation_v1/m2_a_confirmation_manifest_v1.json",
+    "confirmed_candidates": "results/m2_a_confirmation_v1/m2_a_confirmed_compatible_candidates.csv",
+    "required_confirmation_status": "PHASE4_M2_A_CONFIRMATION_PASS",
+    "minimum_candidates_per_provider": 2,
+    "require_exactly_one_m1_anchor_per_provider": true
+  },
+  "variant_design": {
+    "baseline": "Use the confirmed candidate with selection_role=M1 for every provider.",
+    "alternatives": "Create one graph variant for every confirmed non-M1 candidate by substituting only that provider and holding the other providers at their M1 anchors.",
+    "full_factorial_in_this_stage": false,
+    "rationale": "One-at-a-time substitutions identify which provider-local inverse ambiguity is transmitted to graph sigma before paying for factorial composition."
+  },
+  "graph_simulation": {
+    "trajectory_seed_start": 26000,
+    "trajectory_seed_end_inclusive": 26099,
+    "n_trajectories_per_variant": 100,
+    "common_random_numbers_across_variants": true,
+    "smoke_n_trajectories_per_variant": 5,
+    "seed_bank_relation_to_frozen_m1_graph": "Independent of the earlier Phase-3 graph bank 25000..25099."
+  },
+  "graph_query": {
+    "rho_policy": "same-rho diagonal: rho_region=rho_query=rho_G",
+    "A_G_construction": "Use the frozen public I1 A_i(rho_G) boundaries and the frozen corrected M0 deterministic G0 adapter.",
+    "sigma_definition": "sigma_G(A_G,H;rho_G)=P(c_G(A_G,H)>=rho_G)",
+    "comparison_reference": "BASE_M1 on the same 26000..26099 graph seed bank"
+  },
+  "reported_diagnostics": {
+    "whole_surface": ["mae_vs_base", "rmse_vs_base", "mean_delta_vs_base", "max_abs_delta_vs_base"],
+    "per_rho": ["mae_vs_base", "rmse_vs_base", "mean_delta_vs_base", "max_abs_delta_vs_base"],
+    "request_level": ["completed_fraction", "latency_mean", "latency_median", "latency_p90", "latency_p99", "latency_p999", "cost_mean", "cost_median", "cost_p90", "cost_p99", "cost_p999", "quality_mean"],
+    "binary_materiality_threshold": null,
+    "note": "This stage quantifies spread without introducing a post-hoc binary threshold. Interpretation follows from the predeclared metrics."
+  },
+  "firewall": {
+    "graph_whitebox_may_be_read": false,
+    "graph_whitebox_may_select_variants": false,
+    "optuna_may_run": false,
+    "private_phase2_provider_traces_may_be_read": false,
+    "hidden_phase1_provider_parameters_may_be_read": false
+  },
+  "cost_accounting": {
+    "record_variant_count": true,
+    "record_graph_trajectory_count": true,
+    "record_request_rows": true,
+    "record_python_wall_seconds": true,
+    "external_wrapper": "/usr/bin/time -v"
+  }
+}
