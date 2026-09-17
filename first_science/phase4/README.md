@@ -38,4 +38,37 @@ Outputs:
 
 The exploratory loss bands are 1.05x, 1.10x, 1.25x, 1.50x and 2.00x the best observed local search MSE. Within each band the preview anchors on the best-loss point and then uses greedy farthest-point sampling in normalized `(log mu, log kappa, CV)` coordinates.
 
-These bands are diagnostic only. After inspecting **only these local-I1 outputs**, freeze one compatibility rule and then re-evaluate the selected diverse candidates on a common 100-trajectory local confirmation bank. Only after that candidate set is frozen should M2 graph composition begin.
+## M2-A second step: freeze and confirm a local compatibility rule
+
+The inspected landscape supports a single uniform public-I1-only screening rule:
+
+- keep candidates with search MSE <= `1.25 x` the best observed search MSE for that provider;
+- include the frozen M1-v2 provider surrogate as the anchor;
+- greedily add the two candidates that maximize minimum Euclidean distance in normalized `(log mu, log kappa, CV)` coordinates;
+- re-evaluate those three candidates per provider on the common local confirmation bank `23000..23099`;
+- call a candidate confirmation-compatible when its confirmation MSE is <= `1.25 x` the best confirmation MSE among the three screened candidates for that provider;
+- require at least two compatible candidates per provider before any graph composition;
+- replay the confirmed set on `24000..24099` for diagnostics only. Replay cannot alter the compatibility set.
+
+This rule is frozen before graph composition and was chosen using only the local-I1 landscape. The uniform 1.25x screening ceiling is the first inspected predefined band containing at least three candidates for every provider.
+
+Run:
+
+```bash
+mkdir -p results/m2_a_confirmation_v1
+/usr/bin/time -v python m2_a_confirm_candidates.py \
+  2>&1 | tee results/m2_a_confirmation_v1/run.log
+```
+
+Expected outputs include:
+
+- `m2_a_screen_candidates.csv`
+- `m2_a_confirmation_results.csv`
+- `m2_a_confirmed_compatible_candidates.csv`
+- `m2_a_replay_results.csv` when the gate passes
+- `m2_a_confirmation_manifest_v1.json`
+- per-candidate confirmation/replay sigma surfaces and comparisons
+
+The confirmation stage does not run Optuna, does not simulate the graph, does not read graph predictions, and does not read graph white-box outcomes.
+
+Only after `M2_A_LOCAL_CONFIRMATION_PASS` should the M2 graph-identifiability experiment be specified. The graph stage should first vary locally compatible providers in a predeclared way, preferably including one-at-a-time substitutions against the frozen M1 combination before any larger factorial or sampled ensemble experiment.
