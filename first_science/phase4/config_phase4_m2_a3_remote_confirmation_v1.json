@@ -1,0 +1,46 @@
+{
+  "status": "PHASE4_M2_A3_REMOTE_LHS_CONFIRMATION_CONTRACT_V1",
+  "scientific_stage": "Confirm remote non-adaptive public-I1-compatible candidates before graph composition",
+  "information_representation": "I1",
+  "integration_method_stage": "M2-A3",
+  "input_a2_compatible_lhs": "results/m2_a2_nonadaptive_coverage_v1/m2_a2_compatible_lhs.csv",
+  "input_a2_manifest": "results/m2_a2_nonadaptive_coverage_v1/m2_a2_manifest_v1.json",
+  "previous_m2a_confirmation_results": "results/m2_a_confirmation_v1/m2_a_confirmation_results.csv",
+  "previous_m2a_confirmation_manifest": "results/m2_a_confirmation_v1/m2_a_confirmation_manifest_v1.json",
+  "selection_rule": {
+    "max_remote_candidates_per_provider": 2,
+    "ranking": [
+      "nearest_existing_compatible_distance descending",
+      "distance_from_frozen_m1 descending",
+      "lhs_mse ascending",
+      "candidate_id ascending"
+    ],
+    "purpose": "Test the most remote public-I1-compatible points found by non-adaptive coverage, without using graph predictions or white-box outcomes. If fewer than two compatible LHS points exist for a provider, select all available points."
+  },
+  "confirmation": {
+    "trajectory_seed_start": 23000,
+    "n_trajectories": 100,
+    "common_random_numbers_across_candidates": true,
+    "reference_ceiling": "For each provider, use 1.25 times the best confirmation MSE already frozen in the preceding M2-A confirmation experiment. The ceiling is not recomputed from the new remote candidates.",
+    "compatibility_ratio_max_to_previous_best_confirmed": 1.25,
+    "purpose": "Determine whether geometrically remote LHS points remain public-I1-compatible after reducing 25-trajectory search noise."
+  },
+  "independent_replay": {
+    "trajectory_seed_start": 24000,
+    "n_trajectories": 100,
+    "common_random_numbers_across_candidates": true,
+    "diagnostic_only": true,
+    "may_change_compatibility_set": false
+  },
+  "pilot_closure_source": "../phase3/config_phase3_m1_contract_v2.json",
+  "firewall": {
+    "rerun_optuna": false,
+    "adaptive_sampling": false,
+    "graph_simulation": false,
+    "graph_prediction_read": false,
+    "graph_whitebox_read": false,
+    "private_phase2_provider_traces_read": false,
+    "hidden_phase1_provider_parameters_read": false
+  },
+  "next_gate": "Only remote candidates that pass the frozen local confirmation ceiling may enter a subsequent one-at-a-time graph test."
+}
