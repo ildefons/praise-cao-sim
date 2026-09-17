@@ -15,6 +15,7 @@ python m2_a_prepare_candidate_landscape.py
 For empirical timing/memory accounting, preferred scientific invocation is:
 
 ```bash
+mkdir -p results/m2_a_landscape_v1
 /usr/bin/time -v python m2_a_prepare_candidate_landscape.py \
   2>&1 | tee results/m2_a_landscape_v1/run.log
 ```
