@@ -138,3 +138,38 @@ or with timing:
 ```
 
 The recovery script validates the six materialized curve variants and per-variant ledgers, recreates the missing spread/request summaries and manifest, runs no graph simulation, reads no graph white-box data, and records the recovery provenance explicitly.
+
+## M2-A2: non-adaptive coverage audit of the inverse landscape
+
+M2-B found negligible graph-level sigma spread among the TPE-discovered compatible point surrogates. Before concluding that point ambiguity is compositionally unimportant, audit whether adaptive TPE exploration itself concentrated the compatible candidates into one basin.
+
+The M2-A2 audit therefore freezes a non-adaptive Latin-hypercube sample of each provider's final declared M1-v2 parameter domain. It uses 48 points per provider in normalized `(log mu, log kappa, CV)` coordinates, scores every point against the same public I1 objective with the original M1 search seed bank `22000..22024`, and reuses the already-frozen `1.25 x` compatibility ceiling. It does not run Optuna, does not simulate the graph, and does not read graph predictions or graph white-box outcomes.
+
+First materialize and inspect the design without any simulation:
+
+```bash
+mkdir -p results/m2_a2_nonadaptive_coverage_v1
+python m2_a2_nonadaptive_coverage.py --prepare-only
+```
+
+Then run the scientific local coverage audit:
+
+```bash
+/usr/bin/time -v python m2_a2_nonadaptive_coverage.py \
+  2>&1 | tee results/m2_a2_nonadaptive_coverage_v1/run.log
+```
+
+The full audit evaluates 144 LHS points, 48 per provider, with 25 local trajectories each, for 3600 local trajectories total. The results file is checkpointed after every point, so rerunning the same command resumes rather than repeating completed candidates.
+
+Key outputs are:
+
+- `m2_a2_lhs_design.csv`
+- `m2_a2_existing_geometry.csv`
+- `m2_a2_lhs_results.csv`
+- `m2_a2_compatible_lhs.csv`
+- `m2_a2_geometry_summary.csv`
+- `m2_a2_manifest_v1.json`
+
+The central quantities are the distance of each non-adaptive compatible point to the nearest existing TPE-compatible point, whether it lies outside the existing compatible bounding box, and how much the union of TPE and LHS compatible points expands the maximum pairwise distance and per-coordinate spans. No post-hoc binary definition of `remote` is introduced.
+
+Interpretation is asymmetric. Discovery of remote compatible LHS points is direct evidence that TPE missed consequential parts of the compatible parameter set and motivates graph testing of those points. Failure to discover them in 48 points per provider strengthens the concentration/small-volume explanation but does not prove that no remote compatible region exists.
