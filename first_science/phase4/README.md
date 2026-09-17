@@ -119,3 +119,22 @@ Expected outputs include:
 - one combined graph ledger per variant under `ledgers/`
 
 Interpretation comes only after these prediction artifacts are materialized. If locally compatible one-at-a-time substitutions produce substantial graph-sigma spread, the next M2 step is an ambiguity-preserving ensemble or factorial composition design. If the graph predictions remain essentially the same and saturated, the evidence instead points toward insufficiency of the current Gamma/FCFS latent family.
+
+### Recovery from the 17 September postprocessing defect
+
+The first full M2-B run completed all six variants and all `600` graph trajectories, and materialized `m2_b_graph_sigma_curves.csv` plus all per-variant ledgers. It then failed during summary construction because `_surface_metrics()` already preserved the `variant_id` column and the runner attempted to insert `variant_id` a second time.
+
+This is a postprocessing defect only. The graph simulations do **not** need to be repeated. After pulling the recovery script, finalize the already-materialized run with:
+
+```bash
+python m2_b_finalize_existing.py
+```
+
+or with timing:
+
+```bash
+/usr/bin/time -v python m2_b_finalize_existing.py \
+  2>&1 | tee -a results/m2_b_one_at_a_time_graph_v1/run.log
+```
+
+The recovery script validates the six materialized curve variants and per-variant ledgers, recreates the missing spread/request summaries and manifest, runs no graph simulation, reads no graph white-box data, and records the recovery provenance explicitly.
