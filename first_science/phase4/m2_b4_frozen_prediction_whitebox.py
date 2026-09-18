@@ -553,11 +553,15 @@ def run(args: argparse.Namespace) -> None:
             f"{whitebox['trajectory'].nunique()}"
         )
 
+    # Use the already-frozen B3 numeric rho labels as the comparison keys.
+    # They have already been verified above to match the public-I1 rho support
+    # within TOL. This avoids exact pandas-merge failures caused only by a CSV
+    # round-trip such as 0.9833333333333332 versus 0.9833333333333333.
     wb_curves = _build_whitebox_curves(
         curves=curves,
         whitebox=whitebox,
         horizons=horizons,
-        rho_support=rho_support,
+        rho_support=curve_rhos,
         stop_time=float(workload["horizon_max"]),
         accounting_origin=float(workload["accounting_origin"]),
     )
