@@ -516,8 +516,28 @@ def run(args: argparse.Namespace) -> None:
 
     curve_rhos = sorted(float(v) for v in curves["rho_global"].unique())
     curve_horizons = sorted(float(v) for v in curves["horizon"].unique())
-    if curve_rhos != sorted(rho_support) or curve_horizons != sorted(horizons):
-        raise RuntimeError("M2-B3 prediction support differs from frozen public I1 support")
+
+    def _same_numeric_support(left: list[float], right: list[float]) -> bool:
+        if len(left) != len(right):
+            return False
+        return bool(
+            np.allclose(
+                np.asarray(left, dtype=float),
+                np.asarray(right, dtype=float),
+                atol=TOL,
+                rtol=0.0,
+            )
+        )
+
+    if not _same_numeric_support(curve_rhos, sorted(rho_support)):
+        raise RuntimeError(
+            "M2-B3 rho support differs from frozen public I1 support beyond tolerance: "
+            f"curves={curve_rhos} public={sorted(rho_support)}"
+        )
+    if not _same_numeric_support(curve_horizons, sorted(horizons)):
+        raise RuntimeError(
+            "M2-B3 horizon support differs from frozen public I1 support beyond tolerance"
+        )
 
     # White-box access begins only here, after prediction fingerprints were checked.
     wb_path = args.whitebox_ledgers.resolve()
