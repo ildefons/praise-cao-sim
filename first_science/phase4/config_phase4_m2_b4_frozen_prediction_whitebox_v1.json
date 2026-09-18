@@ -1,0 +1,53 @@
+{
+  "status": "PHASE4_M2_B4_FROZEN_PREDICTION_WHITEBOX_EVALUATION_V1",
+  "scientific_stage": "M2-B4 external graph white-box evaluation of already-frozen M2-B3 predictions",
+  "purpose": "Evaluate the ten graph-sigma surfaces materialized in M2-B3 against the frozen Phase-1 graph white-box ledger without rerunning graph simulation, changing candidates, or retuning any surrogate.",
+  "prediction_inputs": {
+    "b3_manifest": "results/m2_b3_a4_portfolio_graph_v1/m2_b3_graph_propagation_manifest_v1.json",
+    "b3_curves": "results/m2_b3_a4_portfolio_graph_v1/m2_b3_graph_sigma_curves.csv",
+    "b3_variant_design": "results/m2_b3_a4_portfolio_graph_v1/m2_b3_variant_design.csv",
+    "required_b3_status": "PHASE4_M2_B3_A4_PORTFOLIO_GRAPH_PROPAGATION_COMPLETE_V1",
+    "required_n_variants": 10,
+    "smoke_mode_must_be": false,
+    "graph_whitebox_read_must_be": false
+  },
+  "prediction_freeze": {
+    "prepare_only_required_before_evaluation": true,
+    "freeze_manifest": "results/m2_b4_frozen_prediction_whitebox_v1/m2_b4_prediction_freeze_manifest_v1.json",
+    "hash_b3_manifest": true,
+    "hash_b3_curves": true,
+    "hash_b3_variant_design": true,
+    "evaluation_must_refuse_if_hashes_change": true
+  },
+  "whitebox_input": {
+    "ledger": "../phase1/results/phase1_v2_fresh_confirmation_v1/all_top_level_request_ledgers.csv",
+    "expected_trajectories": 100,
+    "role": "external evaluation only after B3 prediction freeze"
+  },
+  "evaluation_semantics": {
+    "same_global_regions_as_b3": true,
+    "same_rho_diagonal": true,
+    "whitebox_sigma_recomputed_on_b3_A_G": true,
+    "candidate_selection_or_retuning_from_whitebox": false
+  },
+  "reported_diagnostics": {
+    "per_variant_whole_surface": ["mae", "rmse", "bias", "max_abs_error", "mae_improvement_vs_BASE_M1"],
+    "per_variant_per_rho": ["mae", "rmse", "bias", "max_abs_error"],
+    "one_at_a_time_prediction_envelope": [
+      "coverage_fraction_of_whitebox_points",
+      "mean_envelope_width",
+      "max_envelope_width",
+      "mean_distance_outside_envelope",
+      "max_distance_outside_envelope"
+    ],
+    "envelopes": ["all_10_frozen_predictions", "nine_A4_substitution_predictions_without_BASE_M1"]
+  },
+  "firewall": {
+    "graph_simulation_may_run": false,
+    "provider_search_may_run": false,
+    "candidate_set_may_change": false,
+    "provider_parameters_may_change": false,
+    "graph_whitebox_may_be_read_only_after_prediction_freeze": true
+  },
+  "next_gate": "Interpret whether graph white-box behavior is explained by the frozen one-at-a-time I1-compatible prediction envelope. Do not automatically launch a 3x3x3 factorial or retune local surrogates from white-box results."
+}
