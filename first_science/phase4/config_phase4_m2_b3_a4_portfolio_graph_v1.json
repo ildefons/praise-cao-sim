@@ -11,28 +11,35 @@
   },
   "variant_design": {
     "baseline": "BASE_M1 uses the frozen confirmed M1 anchor for all three providers.",
-    "alternatives": "Substitute exactly one provider at a time with each of its three frozen M2-A4 final portfolio members.",
+    "alternatives": "Substitute exactly one provider at a time with each of its three frozen M2-A4 final portfolio members while holding the other two providers at their M1 anchors.",
     "full_factorial": false,
     "n_expected_variants": 10,
     "expected_final_candidate_ids": {
-      "ProviderA": ["ProviderA_GP_006","ProviderA_GP_035","ProviderA_TPE_base_trial079"],
-      "ProviderB": ["ProviderB_LHS_039","ProviderB_GP_031","ProviderB_TPE_base_trial068"],
-      "ProviderC": ["ProviderC_LHS_038","ProviderC_GP_014","ProviderC_TPE_base_trial037"]
-    }
+      "ProviderA": ["ProviderA_GP_006", "ProviderA_GP_035", "ProviderA_TPE_base_trial079"],
+      "ProviderB": ["ProviderB_LHS_039", "ProviderB_GP_031", "ProviderB_TPE_base_trial068"],
+      "ProviderC": ["ProviderC_LHS_038", "ProviderC_GP_014", "ProviderC_TPE_base_trial037"]
+    },
+    "selection_fixed_before_graph": true
   },
   "graph_simulation": {
     "trajectory_seed_start": 28000,
     "trajectory_seed_end_inclusive": 28099,
     "n_trajectories_per_variant": 100,
     "common_random_numbers_across_variants": true,
-    "smoke_n_trajectories_per_variant": 5
+    "smoke_n_trajectories_per_variant": 5,
+    "seed_bank_relation": "Fresh relative to M1 25000..25099, original M2-B 26000..26099, and M2-B2 27000..27099."
   },
   "graph_query": {
     "rho_policy": "same-rho diagonal",
+    "A_G_construction": "Use the same public-I1-induced G0 admissibility boundary for every variant.",
     "comparison_reference": "BASE_M1 on the same seed bank",
     "global_region_varies_by_variant": false
   },
   "reported_diagnostics": {
+    "whole_surface_vs_base": ["mae_vs_base", "rmse_vs_base", "mean_delta_vs_base", "max_abs_delta_vs_base"],
+    "per_rho_vs_base": ["mae_vs_base", "rmse_vs_base", "mean_delta_vs_base", "max_abs_delta_vs_base"],
+    "within_provider_pairwise_a4": ["pairwise_mae", "pairwise_rmse", "pairwise_max_abs_delta"],
+    "request_distribution_summary": true,
     "binary_materiality_threshold": null
   },
   "execution": {
@@ -40,5 +47,11 @@
     "per_variant_ledger_checkpoint_and_resume": true,
     "smoke_output_separate_from_full_output": true
   },
-  "next_gate": "Inspect prediction spread before any graph reference evaluation or 3x3x3 factorial."
+  "access_constraints": {
+    "graph_reference_results_read": false,
+    "earlier_graph_predictions_used_for_selection": false,
+    "provider_private_traces_read": false,
+    "new_optimizer_search_run": false
+  },
+  "next_gate": "Inspect prediction spread versus BASE_M1 and within each provider's three A4 alternatives before any graph reference evaluation or 3x3x3 factorial."
 }
