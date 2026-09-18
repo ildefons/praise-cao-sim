@@ -1,0 +1,44 @@
+{
+  "status": "PHASE4_M2_B3_A4_PORTFOLIO_GRAPH_PROPAGATION_V1",
+  "scientific_stage": "M2-B3 one-at-a-time graph propagation of the frozen M2-A4 diverse portfolio",
+  "purpose": "Test whether independently confirmed public-I1 inverse ambiguity propagates to graph-level sigma when one provider surrogate is substituted at a time into the frozen M1 graph baseline.",
+  "candidate_sources": {
+    "a4_confirmation_manifest": "results/m2_a4_portfolio_confirmation_v1/m2_a4_portfolio_confirmation_manifest_v1.json",
+    "a4_final_portfolio": "results/m2_a4_portfolio_confirmation_v1/m2_a4_final_confirmed_portfolio.csv",
+    "a4_replay_results": "results/m2_a4_portfolio_confirmation_v1/m2_a4_replay_results.csv",
+    "m1_anchor_candidates": "results/m2_a_confirmation_v1/m2_a_confirmed_compatible_candidates.csv",
+    "m1_confirmation_manifest": "results/m2_a_confirmation_v1/m2_a_confirmation_manifest_v1.json"
+  },
+  "variant_design": {
+    "baseline": "BASE_M1 uses the frozen confirmed M1 anchor for all three providers.",
+    "alternatives": "Substitute exactly one provider at a time with each of its three frozen M2-A4 final portfolio members.",
+    "full_factorial": false,
+    "n_expected_variants": 10,
+    "expected_final_candidate_ids": {
+      "ProviderA": ["ProviderA_GP_006","ProviderA_GP_035","ProviderA_TPE_base_trial079"],
+      "ProviderB": ["ProviderB_LHS_039","ProviderB_GP_031","ProviderB_TPE_base_trial068"],
+      "ProviderC": ["ProviderC_LHS_038","ProviderC_GP_014","ProviderC_TPE_base_trial037"]
+    }
+  },
+  "graph_simulation": {
+    "trajectory_seed_start": 28000,
+    "trajectory_seed_end_inclusive": 28099,
+    "n_trajectories_per_variant": 100,
+    "common_random_numbers_across_variants": true,
+    "smoke_n_trajectories_per_variant": 5
+  },
+  "graph_query": {
+    "rho_policy": "same-rho diagonal",
+    "comparison_reference": "BASE_M1 on the same seed bank",
+    "global_region_varies_by_variant": false
+  },
+  "reported_diagnostics": {
+    "binary_materiality_threshold": null
+  },
+  "execution": {
+    "prepare_only_supported": true,
+    "per_variant_ledger_checkpoint_and_resume": true,
+    "smoke_output_separate_from_full_output": true
+  },
+  "next_gate": "Inspect prediction spread before any graph reference evaluation or 3x3x3 factorial."
+}
