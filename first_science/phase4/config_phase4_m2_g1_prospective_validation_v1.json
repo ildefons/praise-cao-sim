@@ -1,0 +1,209 @@
+{
+  "status": "FROZEN_PHASE4_M2_G1_PROSPECTIVE_VALIDATION_CONTRACT_V1",
+  "freeze_date": "2026-09-21",
+  "scientific_stage": "Prospective validation of the already-frozen M2 method on one untouched public composition condition G1",
+  "purpose": "Test whether the frozen M2 small diverse equal-weight ensemble improves graph-level sigma prediction over the frozen single-model M1 baseline when the same provider cards are recomposed under a new public deterministic network embedding, without changing provider workload semantics or using G1 white-box evidence for design, fitting, selection, weighting, or repair.",
+  "evidence_role": {
+    "G0_B6": "retrospective diagnostic evidence",
+    "G1": "prospective validation evidence",
+    "chapter_close_rule": "M2 is frozen permanently after this G1 evaluation regardless of outcome. No G1-driven repair is permitted inside M2."
+  },
+  "required_precondition": {
+    "G1_whitebox_not_generated_or_inspected_before_prediction_freeze": true,
+    "G1_whitebox_not_used_to_choose_graph_parameters": true,
+    "G1_whitebox_not_used_to_choose_success_criteria": true
+  },
+  "frozen_method": {
+    "I1": "unchanged frozen public rho-conditioned provider cards",
+    "M0": "unchanged independent-product probability rule with G1-specific deterministic forward boundary algebra",
+    "M1": "unchanged frozen single latent provider surrogate per provider",
+    "M2_provider_portfolios": {
+      "ProviderA": ["ProviderA_GP_006", "ProviderA_GP_035", "ProviderA_TPE_base_trial079"],
+      "ProviderB": ["ProviderB_LHS_039", "ProviderB_GP_031", "ProviderB_TPE_base_trial068"],
+      "ProviderC": ["ProviderC_LHS_038", "ProviderC_GP_014", "ProviderC_TPE_base_trial037"]
+    },
+    "M2_joint_ensemble": {
+      "construction": "3 x 3 x 3 Cartesian product",
+      "n_members": 27,
+      "member_weight": "1/27",
+      "M1_is_member": false,
+      "point_prediction": "arithmetic mean of the 27 member sigma_G curves",
+      "ambiguity_range": "[minimum member sigma_G, maximum member sigma_G]",
+      "range_is_confidence_interval": false,
+      "posthoc_member_selection": false,
+      "posthoc_reweighting": false
+    }
+  },
+  "G1_public_condition": {
+    "condition_id": "G1_ASYM_PARALL_V1",
+    "logical_graph": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "scientific_change_from_G0": "Keep the same logical parallel-all composition, provider workload, provider cards, fixed service stages, message sizes, bandwidth and QoS semantics, but replace the symmetric provider-branch propagation delays by a frozen asymmetric public network embedding.",
+    "reason_for_condition": "This changes which branch can dominate end-to-end latency while preserving the local periodic workload seen by every provider, so the existing I1 provider cards remain the intended information interface.",
+    "provider_branch_PR_assignment_provenance": {
+      "candidate_PR_seconds": [0.001, 0.005, 0.015],
+      "assignment_rule": "Assign numpy.random.default_rng(20260921).permutation([0.001,0.005,0.015]) in provider order [ProviderA,ProviderB,ProviderC].",
+      "result": {
+        "ProviderA": 0.005,
+        "ProviderB": 0.015,
+        "ProviderC": 0.001
+      },
+      "purpose": "Mechanical provider assignment avoids hand-tuning the asymmetric stress condition to G0 provider-specific behavior."
+    },
+    "network_model": {
+      "request_bytes": 1000,
+      "branch_bytes": 1000,
+      "join_bytes": 1000,
+      "completion_control_bytes": 0,
+      "BW_mbps_all_links": 1000.0,
+      "PR_seconds": {
+        "Source_to_Fpre": 0.001,
+        "Fpre_to_ProviderA": 0.005,
+        "Fpre_to_ProviderB": 0.015,
+        "Fpre_to_ProviderC": 0.001,
+        "Fpre_to_Fpost_join": 0.001
+      },
+      "cost_per_hop": 0.0,
+      "qos_neutral": true
+    },
+    "fixed_service_model": {
+      "Fpre_instructions": 5000000.0,
+      "Fpost_instructions": 5000000.0,
+      "effective_IPT": 1000000000.0,
+      "COST_rate": 3.0,
+      "Fpre_latency": 0.005,
+      "Fpost_latency": 0.005,
+      "Fpre_cost": 0.015,
+      "Fpost_cost": 0.015,
+      "qos_neutral": true
+    },
+    "workload": {
+      "period_seconds": 0.2,
+      "request_rate_per_second": 5.0,
+      "accounting_origin": 0.0,
+      "horizon_max_seconds": 240.0,
+      "rho_values": [0.95, 0.975, 0.9833333333333333, 0.99, 0.995],
+      "horizon_grid": "unchanged from frozen public I1",
+      "same_rho_diagonal": true
+    }
+  },
+  "G1_boundary_algebra": {
+    "common_latency_seconds_excluding_provider_branch_and_local_provider": 0.012002,
+    "provider_branch_fixed_latency_seconds": {
+      "ProviderA": 0.010001,
+      "ProviderB": 0.030001,
+      "ProviderC": 0.002001
+    },
+    "branch_formula": "delta_i = branch_bytes/(BW*1e6) + 2*PR_i, where the second PR_i is the zero-byte completion-control return to the ParAll controller",
+    "latency_formula": "l_G1 = 0.012002 + max(l_A + 0.010001, l_B + 0.030001, l_C + 0.002001)",
+    "cost_formula": "c_G1 = 0.03 + c_A + c_B + c_C",
+    "quality_formula": "q_G1 = min(q_A,q_B,q_C)",
+    "A_G_policy": "At each frozen same-rho region, forward-compose the already-frozen provider A_i boundaries through this G1 algebra. The resulting A_G1 is identical across M0, M1, all 27 M2 members, and WB evaluation."
+  },
+  "prediction_protocol": {
+    "G1_prediction_seed_start": 30000,
+    "G1_prediction_seed_end_inclusive": 30099,
+    "n_prediction_trajectories_per_variant": 100,
+    "common_random_numbers_across_M1_and_all_M2_members": true,
+    "variants": {
+      "M1_reference": 1,
+      "M2_joint_members": 27,
+      "total_simulated_variants": 28
+    },
+    "M0_simulation_required": false,
+    "actual_G1_whitebox_generation_before_prediction_freeze": false,
+    "smoke_testing": {
+      "allowed_for_prediction_simulator": true,
+      "n_trajectories": 5,
+      "scientific_evidence": false,
+      "must_use_separate_output_directory": true
+    }
+  },
+  "prediction_freeze_gate": {
+    "required_before_any_G1_whitebox_generation_or_read": true,
+    "must_hash": [
+      "this G1 contract",
+      "public I1 manifest",
+      "M0 contract and G1 adapter implementation",
+      "M1 frozen candidate inputs",
+      "M2 frozen semantic contract",
+      "M2 frozen candidate set",
+      "G1 simulator implementation",
+      "G1 M0 curve",
+      "G1 M1 curve",
+      "all 27 G1 M2 member curves",
+      "G1 M2 ensemble curve",
+      "G1 variant design"
+    ],
+    "must_record": [
+      "git commit",
+      "rho support",
+      "horizon support",
+      "A_G1 by rho",
+      "prediction seeds",
+      "all candidate IDs and parameters",
+      "equal 1/27 weights",
+      "graph_whitebox_read=false"
+    ]
+  },
+  "whitebox_protocol": {
+    "generation_allowed_only_after_prediction_freeze": true,
+    "private_provider_models": "Use the same frozen Phase-1 hidden provider models that generated the G0 reference. Do not refit or replace them.",
+    "G1_whitebox_seed_start": 31000,
+    "G1_whitebox_seed_end_inclusive": 31099,
+    "n_whitebox_trajectories": 100,
+    "whitebox_seed_bank_independent_of_prediction_seed_bank": true,
+    "G1_public_graph_and_workload_must_match_contract_exactly": true,
+    "whitebox_generator_hash_must_be_recorded": true,
+    "no_whitebox_smoke_with_actual_hidden_G1_configuration_before_prediction_freeze": true
+  },
+  "evaluation": {
+    "surface": "all 5 frozen rho values x all frozen horizons, including H=0",
+    "point_prediction_metrics": ["MAE", "RMSE", "bias", "max_abs_error"],
+    "methods": ["M0", "M1", "M2_equal_weight_mean"],
+    "report_whole_surface": true,
+    "report_per_rho": true,
+    "ambiguity_metrics": [
+      "whitebox_coverage_fraction",
+      "mean_range_width",
+      "max_range_width",
+      "mean_distance_outside_range",
+      "max_distance_outside_range",
+      "fraction_whitebox_below_range",
+      "fraction_whitebox_above_range"
+    ],
+    "Jaccard_D_A": "N/A because the same frozen A_G1 is used by all methods and WB"
+  },
+  "prospective_success_criteria": {
+    "primary": "M2 whole-surface MAE is strictly lower than M1 whole-surface MAE.",
+    "confirmatory": "M2 whole-surface RMSE is strictly lower than M1 whole-surface RMSE.",
+    "rho_consistency": "M2 MAE is lower than M1 MAE in at least 3 of the 5 frozen rho slices.",
+    "M0_comparison": "Report M2 versus M0, but M0 is not needed to define the primary prospective success claim.",
+    "ambiguity_range": "No pass/fail coverage threshold is imposed because the frozen finite 27-member range is not a calibrated confidence interval. Coverage and width are descriptive prospective diagnostics.",
+    "failure_rule": "If the primary criterion fails, the prospective improvement claim is not supported. M2 nevertheless remains frozen and the M2 chapter closes with the observed limitation; no G1-driven repair is permitted."
+  },
+  "firewall": {
+    "change_I1": false,
+    "change_M1_parameters": false,
+    "change_M2_candidates": false,
+    "change_M2_member_weights": false,
+    "add_M2_members": false,
+    "remove_M2_members": false,
+    "select_best_member_from_G1": false,
+    "use_G1_WB_for_model_selection": false,
+    "use_G1_WB_for_threshold_selection": false,
+    "use_G1_WB_for_graph_redesign": false,
+    "use_G1_WB_for_posthoc_success_criteria": false
+  },
+  "chapter_close_outputs": [
+    "G1 prediction-freeze manifest",
+    "G1 public condition manifest",
+    "G1 M0/M1/M2 blind prediction curves",
+    "G1 white-box manifest and curve",
+    "G1 pointwise comparison",
+    "G1 overall and per-rho metric summaries",
+    "G1 M2 ambiguity-range summary",
+    "G1 M0/M1/M2/WB figure",
+    "final M2 chapter-close note stating prospective outcome and limitations"
+  ],
+  "next_gate": "Implement the public G1 asymmetric-path simulator and deterministic M0 adapter without reading or generating G1 white-box evidence. Smoke-test only the prediction side, then run and freeze the full blind G1 M0/M1/M2 predictions before any actual G1 white-box generation."
+}
