@@ -588,10 +588,37 @@ def run(args: argparse.Namespace) -> None:
     horizons = [float(v) for v in common_horizon_support(metadata)]
     workload = _common_workload_contract(metadata)
 
-    if sorted(rho_support) != sorted(float(v) for v in ensemble["rho_global"].unique()):
-        raise RuntimeError("B5 rho support differs from frozen public I1")
-    if sorted(horizons) != sorted(float(v) for v in ensemble["horizon"].unique()):
-        raise RuntimeError("B5 horizon support differs from frozen public I1")
+    b5_rho_support = sorted(float(v) for v in ensemble["rho_global"].unique())
+    public_rho_support = sorted(rho_support)
+    if (
+        len(public_rho_support) != len(b5_rho_support)
+        or not np.allclose(
+            np.asarray(public_rho_support, dtype=float),
+            np.asarray(b5_rho_support, dtype=float),
+            atol=TOL,
+            rtol=0.0,
+        )
+    ):
+        raise RuntimeError(
+            "B5 rho support differs from frozen public I1: "
+            f"public={public_rho_support} b5={b5_rho_support}"
+        )
+
+    b5_horizons = sorted(float(v) for v in ensemble["horizon"].unique())
+    public_horizons = sorted(horizons)
+    if (
+        len(public_horizons) != len(b5_horizons)
+        or not np.allclose(
+            np.asarray(public_horizons, dtype=float),
+            np.asarray(b5_horizons, dtype=float),
+            atol=TOL,
+            rtol=0.0,
+        )
+    ):
+        raise RuntimeError(
+            "B5 horizon support differs from frozen public I1: "
+            f"public={public_horizons} b5={b5_horizons}"
+        )
 
     m0 = _build_m0_curves(
         provider_surfaces=provider_surfaces,
