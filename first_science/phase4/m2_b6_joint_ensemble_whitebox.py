@@ -300,6 +300,52 @@ def _assert_freeze_matches(
     return freeze
 
 
+def _snap_support_values(
+    values: pd.Series,
+    reference_values: list[float],
+    *,
+    label: str,
+) -> pd.Series:
+    """Snap serialized numeric support values to the frozen reference grid.
+
+    CSV round-tripping can move values such as 0.9833333333333333 by one
+    representable float. Scientific support equality is therefore checked with
+    the same frozen absolute tolerance used elsewhere, then values are replaced
+    by the exact frozen reference representatives before joins.
+    """
+    reference = np.asarray(sorted(float(v) for v in reference_values), dtype=float)
+    snapped: list[float] = []
+    for raw in values.astype(float).to_numpy():
+        distances = np.abs(reference - float(raw))
+        matches = np.flatnonzero(distances <= TOL)
+        if len(matches) != 1:
+            raise RuntimeError(
+                f"{label}: value {raw!r} has {len(matches)} matches on frozen support "
+                f"within atol={TOL}"
+            )
+        snapped.append(float(reference[int(matches[0])]))
+    return pd.Series(snapped, index=values.index, dtype=float)
+
+
+def _snap_frame_to_frozen_grid(
+    frame: pd.DataFrame,
+    *,
+    frozen_rhos: list[float],
+    frozen_horizons: list[float],
+    label: str,
+) -> pd.DataFrame:
+    snapped = frame.copy()
+    snapped["rho_global"] = _snap_support_values(
+        snapped["rho_global"], frozen_rhos, label=f"{label} rho"
+    )
+    snapped["horizon"] = _snap_support_values(
+        snapped["horizon"], frozen_horizons, label=f"{label} horizon"
+    )
+    if snapped.duplicated(["rho_global", "horizon"]).any():
+        raise RuntimeError(f"{label}: snapping created duplicate rho/horizon points")
+    return snapped
+
+
 def _metrics(prediction: pd.Series, truth: pd.Series) -> dict[str, float]:
     error = prediction.astype(float).to_numpy() - truth.astype(float).to_numpy()
     return {
@@ -648,12 +694,17 @@ def run(args: argparse.Namespace) -> None:
         accounting_origin=float(workload["accounting_origin"]),
     )
 
-    comparison = ensemble.merge(
+    # Normalize only the serialized support coordinates before joining.
+    # The frozen B5 ensemble is authoritative for the exact rho/H representatives.
+    frozen_rhos = sorted(float(v) for v in ensemble["rho_global"].unique())
+    frozen_horizons = sorted(float(v) for v in ensemble["horizon"].unique())
+    m0_join = _snap_frame_to_frozen_grid(
         m0[["rho_global", "horizon", "sigma_i1_m0"]],
-        on=["rho_global", "horizon"],
-        how="inner",
-        validate="one_to_one",
-    ).merge(
+        frozen_rhos=frozen_rhos,
+        frozen_horizons=frozen_horizons,
+        label="M0",
+    )
+    wb_join = _snap_frame_to_frozen_grid(
         wb[
             [
                 "rho_global",
@@ -664,18 +715,49 @@ def run(args: argparse.Namespace) -> None:
                 "A_G_q_min",
             ]
         ],
-        on=[
-            "rho_global",
-            "horizon",
-            "A_G_l_max",
-            "A_G_c_max",
-            "A_G_q_min",
-        ],
+        frozen_rhos=frozen_rhos,
+        frozen_horizons=frozen_horizons,
+        label="whitebox",
+    ).rename(
+        columns={
+            "A_G_l_max": "wb_A_G_l_max",
+            "A_G_c_max": "wb_A_G_c_max",
+            "A_G_q_min": "wb_A_G_q_min",
+        }
+    )
+
+    comparison = ensemble.merge(
+        m0_join,
+        on=["rho_global", "horizon"],
+        how="inner",
+        validate="one_to_one",
+    ).merge(
+        wb_join,
+        on=["rho_global", "horizon"],
         how="inner",
         validate="one_to_one",
     )
     if len(comparison) != len(ensemble):
-        raise RuntimeError("B6 comparison did not cover every frozen B5 point")
+        raise RuntimeError(
+            "B6 comparison did not cover every frozen B5 point after tolerant "
+            f"support normalization: ensemble={len(ensemble)} comparison={len(comparison)}"
+        )
+
+    for base_col, wb_col in (
+        ("A_G_l_max", "wb_A_G_l_max"),
+        ("A_G_c_max", "wb_A_G_c_max"),
+        ("A_G_q_min", "wb_A_G_q_min"),
+    ):
+        if not np.allclose(
+            comparison[base_col].astype(float).to_numpy(),
+            comparison[wb_col].astype(float).to_numpy(),
+            atol=TOL,
+            rtol=0.0,
+        ):
+            raise RuntimeError(f"B6 white-box {base_col} differs from frozen B5 A_G")
+    comparison = comparison.drop(
+        columns=["wb_A_G_l_max", "wb_A_G_c_max", "wb_A_G_q_min"]
+    )
     comparison = comparison.rename(
         columns={
             "sigma_i1_m0": "sigma_m0",
