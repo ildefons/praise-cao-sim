@@ -1,0 +1,107 @@
+{
+  "status": "FROZEN_PHASE4_M2_B6_JOINT_ENSEMBLE_WHITEBOX_EVALUATION_V1",
+  "freeze_date": "2026-09-21",
+  "scientific_stage": "M2-B6 external graph white-box evaluation of the already-frozen M2-B5 joint ensemble",
+  "purpose": "Evaluate the frozen M2-B5 equal-weight ensemble mean and finite-portfolio ambiguity range against the frozen Phase-1 graph white-box reference, while comparing M0 and the same-seed B5 M1 baseline on the identical A_G/rho/H support.",
+  "prediction_inputs": {
+    "b5_manifest": "results/m2_b5_joint_ensemble_graph_v1/m2_b5_manifest_v1.json",
+    "b5_ensemble_curve": "results/m2_b5_joint_ensemble_graph_v1/m2_b5_ensemble_curve.csv",
+    "b5_joint_curves": "results/m2_b5_joint_ensemble_graph_v1/m2_b5_joint_graph_sigma_curves.csv",
+    "b5_variant_design": "results/m2_b5_joint_ensemble_graph_v1/m2_b5_joint_variant_design.csv",
+    "required_b5_status": "PHASE4_M2_B5_JOINT_ENSEMBLE_GRAPH_COMPLETE_V1",
+    "required_smoke_mode": false,
+    "required_n_m2_joint_variants": 27,
+    "required_n_total_variants_including_m1": 28,
+    "required_n_trajectories_per_variant": 100,
+    "required_graph_seed_start": 29000,
+    "required_graph_seed_end_inclusive": 29099,
+    "required_graph_whitebox_read": false
+  },
+  "prediction_freeze": {
+    "prepare_only_required_before_evaluation": true,
+    "freeze_manifest": "results/m2_b6_joint_ensemble_whitebox_v1/m2_b6_prediction_freeze_manifest_v1.json",
+    "hash_b5_manifest": true,
+    "hash_b5_ensemble_curve": true,
+    "hash_b5_joint_curves": true,
+    "hash_b5_variant_design": true,
+    "hash_public_i1_manifest": true,
+    "evaluation_must_refuse_if_hashes_change": true
+  },
+  "whitebox_input": {
+    "ledger": "../phase1/results/phase1_v2_fresh_confirmation_v1/all_top_level_request_ledgers.csv",
+    "expected_trajectories": 100,
+    "role": "external evaluation only after B5 predictions and B6 prediction-freeze manifest are materialized"
+  },
+  "evaluation_semantics": {
+    "same_global_regions_as_b5": true,
+    "same_rho_diagonal": true,
+    "same_horizon_support_as_b5": true,
+    "whitebox_sigma_recomputed_on_b5_A_G": true,
+    "M0_recomputed_from_same_frozen_public_I1": true,
+    "M1_source": "sigma_m1_same_seed_bank from the frozen B5 ensemble curve",
+    "M2_source": "sigma_m2_mean and [sigma_m2_min,sigma_m2_max] from the frozen B5 ensemble curve",
+    "candidate_selection_or_retuning_from_whitebox": false,
+    "member_weight_changes_from_whitebox": false,
+    "primary_surface_includes_H0": true,
+    "Jaccard_D_A": "N/A because A_G is held fixed across WB, M0, M1, and M2"
+  },
+  "primary_point_prediction_metrics": {
+    "methods": ["M0", "M1", "M2_equal_weight_mean"],
+    "whole_surface": ["MAE", "RMSE", "bias", "max_abs_error"],
+    "per_rho": ["MAE", "RMSE", "bias", "max_abs_error"],
+    "pairwise_improvements": [
+      "M0_MAE_minus_M1_MAE",
+      "M0_MAE_minus_M2_MAE",
+      "M1_MAE_minus_M2_MAE"
+    ]
+  },
+  "primary_ambiguity_metrics": {
+    "range": "frozen finite-portfolio [sigma_m2_min,sigma_m2_max]",
+    "whole_surface": [
+      "whitebox_coverage_fraction",
+      "mean_range_width",
+      "max_range_width",
+      "mean_distance_outside_range",
+      "max_distance_outside_range",
+      "fraction_whitebox_below_range",
+      "fraction_whitebox_above_range"
+    ],
+    "per_rho": [
+      "whitebox_coverage_fraction",
+      "mean_range_width",
+      "max_range_width",
+      "mean_distance_outside_range",
+      "max_distance_outside_range",
+      "fraction_whitebox_below_range",
+      "fraction_whitebox_above_range"
+    ],
+    "interpretation": "The range is model ambiguity across the frozen diverse 27-member portfolio. It is not a statistical confidence interval and is not a proven global bound over all I1-compatible latent models."
+  },
+  "secondary_diagnostics": {
+    "save_pointwise_comparison_table": true,
+    "save_whitebox_curve": true,
+    "save_per_rho_summary": true,
+    "save_overall_summary": true,
+    "save_M0_M1_M2_WB_plot_with_M2_range": true,
+    "individual_27_member_whitebox_accuracy_is_primary": false,
+    "posthoc_best_member_selection_allowed": false
+  },
+  "monte_carlo_uncertainty": {
+    "B6_primary_evaluation_includes_extra_bootstrap_band": false,
+    "reason": "Keep finite-trajectory statistical uncertainty separate from the already-frozen M2 model-ambiguity range. A seed-cluster bootstrap may be added later as a separately frozen diagnostic."
+  },
+  "firewall": {
+    "graph_simulation_may_run": false,
+    "provider_search_may_run": false,
+    "candidate_set_may_change": false,
+    "provider_parameters_may_change": false,
+    "ensemble_weights_may_change": false,
+    "I1_may_change": false,
+    "graph_whitebox_may_be_read_only_after_prediction_freeze": true
+  },
+  "evidence_status": {
+    "G0": "retrospective diagnostic evidence",
+    "prospective_claim_requirement": "Evaluate the already-frozen M2 semantics unchanged on at least one untouched predeclared graph/workload/admissibility condition."
+  },
+  "next_gate": "Interpret M0/M1/M2 point accuracy together with M2 ambiguity-range coverage and width. Do not retune M2 from G0 white-box results. Then define the untouched prospective validation condition before making a strong M2 claim."
+}
