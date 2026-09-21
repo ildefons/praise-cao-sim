@@ -1,7 +1,7 @@
 # PRAISE/CAO: pilot design through I1-M3
 
-**Status:** current pilot-program design source of truth. Phase 1 v2, rho-conditioned I1, M0, and M1-v2 are frozen. M2 and M3 are the next method-development stages within the same pilot program.  
-**Date:** 16 September 2026.
+**Status:** current pilot-program design source of truth. Phase 1 v2, rho-conditioned I1, M0, M1-v2, and the M2 joint-ensemble semantics are frozen. M2-B5 implementation/evaluation and M3 design remain next stages within the same pilot program.  
+**Original date:** 16 September 2026. **M2 semantic freeze update:** 21 September 2026.
 
 This note supersedes `PRAISE_I1_M0_M1_M2_DESIGN_2026-09-16.md` where the two conflict. The previous note remains part of the provenance record.
 
@@ -87,26 +87,55 @@ If near-equivalent local lifts produce materially different graph predictions, i
 
 If they all produce essentially the same saturated graph prediction, the current Gamma/FCFS surrogate family is itself insufficient and M2 must then introduce a richer latent process family as a separate, explicitly documented step.
 
-### 3.2 M2 Gate B: ambiguity-preserving ensemble
+### 3.2 Frozen M2 semantics: small diverse joint ensemble
 
-If Gate A supports non-identifiability, M2 becomes an ensemble or weighted set of I1-compatible provider surrogates rather than one point estimate:
+Gate A has established compositionally material inverse ambiguity, especially for Provider C. M2 therefore keeps the already-frozen M2-A4 portfolio of three independently confirmed, deliberately diverse public-I1-compatible surrogates per provider:
 
-`I1_i -> Pi_i(theta | I1_i)`
+`P_A={theta_A1,theta_A2,theta_A3}`
 
-followed by native composition over draws or members from the provider ensembles.
+`P_B={theta_B1,theta_B2,theta_B3}`
 
-The primary M2 output should not be forced to a single falsely precise curve. Candidate outputs include:
+`P_C={theta_C1,theta_C2,theta_C3}`.
 
-- ensemble mean graph sigma;
-- graph-sigma quantiles or intervals;
-- spread/dispersion attributable to inverse ambiguity;
-- optionally probability of graph admissibility under the ensemble.
+No new local search, GP acquisition, candidate replacement, or parameter retuning is part of the frozen M2 semantics.
 
-The exact ensemble construction and weighting rule are not frozen yet.
+The operational M2 graph portfolio is the full Cartesian product
 
-### 3.3 M2 validation discipline
+`P_G = P_A x P_B x P_C`,
 
-G0 may be used as a development and diagnostic case because its WB result has already been inspected. M2 must be frozen before its main claim is evaluated on at least one untouched composition/topology or other fresh WB condition.
+giving exactly `3 x 3 x 3 = 27` joint latent graph hypotheses. M1 is a separate baseline and is not an ensemble member.
+
+The existing M2-B3 one-provider-at-a-time propagation remains an important diagnostic stage. It established that changing one provider reconstruction while holding the other M1 anchors fixed can materially change graph-level sigma and that Provider C dominates the observed ambiguity. It is not the final operational M2 ensemble.
+
+### 3.3 Frozen M2 weighting and outputs
+
+M2 assigns equal weight to the three frozen representatives of each provider and therefore product weight `1/27` to every joint combination. This is a principle-of-indifference ensemble convention over deliberately diverse representatives. It is **not** a Bayesian posterior, an estimate of natural parameter-space frequency, or a claim that the A4 maximin-selected representatives are iid samples.
+
+For every graph query `(H,rho)`, the two primary M2 outputs are:
+
+`sigma_bar_G^M2(H,rho) = (1/27) sum_m sigma_G^(m)(H,rho)`
+
+and
+
+`R_G^M2(H,rho) = [min_m sigma_G^(m)(H,rho), max_m sigma_G^(m)(H,rho)]`.
+
+The equal-weight mean is the M2 central ensemble prediction. The min-max interval is the **finite-portfolio ambiguity range** induced by the frozen diverse representatives. It is not a statistical confidence interval and is not claimed to be the exact global range over all possible I1-compatible latent models.
+
+Secondary descriptive outputs may include the portfolio median, standard deviation, quantiles, individual member curves, and the identities of the combinations attaining pointwise minima and maxima. Do not weight members by local reconstruction loss in frozen M2, and do not select or weight members using graph WB.
+
+Monte Carlo uncertainty from the finite graph trajectory count is a separate uncertainty source. If reported, it must be displayed separately from the M2 model-ambiguity range.
+
+The current same-region experiment keeps the same induced `A_G` for every joint member. M2 does not infer a new admissibility region in this test, so `D_A`/Jaccard is `N/A`, not zero.
+
+### 3.4 M2 implementation handoff and validation discipline
+
+The next implementation stage is M2-B5 joint portfolio propagation. It must enumerate all 27 frozen A4 combinations, use one fresh common-random-number graph seed bank across combinations, materialize every `sigma_G^(m)` curve, and aggregate the equal-weight mean and finite-portfolio min-max range before any WB evaluation. The exact fresh seed bank belongs in the B5 execution contract.
+
+G0 remains a development and retrospective diagnostic case because its WB result was inspected before this revised M2 semantic freeze. In particular, `ProviderC_LHS_038` remains useful evidence that an independently discovered I1-compatible reconstruction can be highly accurate at graph level, but that post-hoc best member is not the operational M2 prediction.
+
+A strong prospective M2 claim requires the frozen semantics above to be evaluated unchanged on at least one untouched composition/topology, workload, admissibility regime, or other predeclared WB condition.
+
+Authoritative semantic contract: `phase4/config_phase4_m2_joint_ensemble_semantics_v1.json`.
 
 ## 4. Mid-term program: I1-M3 dynamic integration
 
