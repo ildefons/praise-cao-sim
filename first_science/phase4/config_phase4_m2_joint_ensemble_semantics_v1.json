@@ -1,0 +1,112 @@
+{
+  "status": "FROZEN_PHASE4_M2_JOINT_ENSEMBLE_SEMANTICS_V1",
+  "freeze_date": "2026-09-21",
+  "scientific_role": "M2 preserves inverse ambiguity under the frozen public I1 by carrying a small deliberately diverse portfolio of independently confirmed provider surrogates through native graph composition, and reports both an equal-weight ensemble central prediction and a finite-portfolio ambiguity range.",
+  "relationship_to_m1": {
+    "M1": "Collapse each provider inverse problem to one fitted surrogate theta_i and return one graph-sigma prediction.",
+    "M2": "Retain three deliberately diverse, independently confirmed I1-compatible surrogates per provider and propagate their joint combinations.",
+    "M1_anchor_in_M2_ensemble": false
+  },
+  "information_contract": {
+    "I1_changed": false,
+    "uses_same_frozen_public_I1_as_M0_M1": true,
+    "provider_private_traces_allowed": false,
+    "provider_private_parameters_allowed": false,
+    "graph_whitebox_allowed_for_member_selection": false,
+    "graph_whitebox_allowed_for_weight_selection": false,
+    "graph_whitebox_allowed_for_retuning": false,
+    "public_graph_mechanics_allowed_at_composition_time": true
+  },
+  "provider_portfolios": {
+    "source": "frozen M2-A4 independently confirmed diverse portfolios",
+    "portfolio_size_per_provider": 3,
+    "new_local_search_required": false,
+    "candidate_parameters_may_change": false,
+    "selection_principle": "Every member must satisfy the already-frozen public-I1 compatibility/confirmation gate; among compatible members the A4 portfolio is deliberately diverse in latent parameter space.",
+    "probabilistic_interpretation": "The A4 portfolios are diversity-selected representatives, not iid draws or posterior samples."
+  },
+  "joint_graph_portfolio": {
+    "construction": "Cartesian product of the three frozen provider portfolios.",
+    "providers": ["ProviderA", "ProviderB", "ProviderC"],
+    "n_members_per_provider": 3,
+    "n_joint_combinations": 27,
+    "formula": "P_G = P_A x P_B x P_C",
+    "one_provider_at_a_time_is_primary_M2_output": false,
+    "role_of_existing_M2_B3": "Retained as a diagnostic sensitivity stage showing how one-provider-at-a-time inverse ambiguity propagates and which provider dominates; it is not the final operational M2 ensemble."
+  },
+  "weighting": {
+    "provider_member_weights": "equal",
+    "provider_member_weight": 0.3333333333333333,
+    "joint_combination_weights": "product of equal provider weights",
+    "joint_combination_weight": 0.037037037037037035,
+    "fit_loss_weighting": false,
+    "graph_whitebox_weighting": false,
+    "interpretation": "Principle-of-indifference ensemble convention over the deliberately diverse frozen representatives. The equal-weight mean is an ensemble central estimate, not a Bayesian posterior expectation and not an estimate of natural parameter-space frequency."
+  },
+  "primary_outputs": {
+    "ensemble_mean": {
+      "formula": "sigma_bar_G(H,rho) = (1/27) * sum_m sigma_G^(m)(H,rho)",
+      "interpretation": "Equal-weight central prediction across the 27 frozen joint portfolio members."
+    },
+    "ambiguity_range": {
+      "formula": "R_G(H,rho) = [min_m sigma_G^(m)(H,rho), max_m sigma_G^(m)(H,rho)]",
+      "interpretation": "Finite-portfolio ambiguity range induced by the frozen diverse M2 representatives. It is not a statistical confidence interval and is not claimed to be the exact global range over every I1-compatible latent model."
+    }
+  },
+  "secondary_outputs": [
+    "individual member sigma_G curves",
+    "portfolio standard deviation",
+    "portfolio median",
+    "portfolio quantiles for descriptive diagnostics only",
+    "identities of pointwise minimum and maximum joint combinations"
+  ],
+  "current_pilot_graph_semantics": {
+    "same_global_region_across_all_joint_members": true,
+    "same_rho_diagonal_as_current_pilot": true,
+    "M2_predicts_or_reconstructs_A_G": false,
+    "Jaccard_D_A_for_current_same_region_M2_test": "N/A",
+    "reason": "A_G is held fixed across M1, M2 members, and white-box evaluation to isolate graph-sigma integration error from admissibility-region mismatch."
+  },
+  "uncertainty_separation": {
+    "portfolio_ambiguity": "Variation across frozen latent-model combinations.",
+    "monte_carlo_uncertainty": "Finite-trajectory uncertainty in each empirical sigma_G estimate.",
+    "rule": "Do not interpret the M2 min-max portfolio range as a confidence interval. If Monte Carlo bands are reported, compute and display them separately."
+  },
+  "evaluation_metrics": {
+    "ensemble_point_prediction": ["MAE", "RMSE", "bias", "max_abs_error"],
+    "ambiguity_range": [
+      "whitebox_coverage_fraction",
+      "mean_range_width",
+      "max_range_width",
+      "mean_distance_of_whitebox_outside_range",
+      "max_distance_of_whitebox_outside_range"
+    ],
+    "admissibility_region": "D_A/Jaccard is N/A in the current same-region experiment."
+  },
+  "whitebox_discipline": {
+    "G0_status": "development_and_retrospective_diagnostic_only_for_this_revised_M2_semantics",
+    "reason": "G0 white-box results were already inspected before this semantic freeze.",
+    "fresh_validation_requirement": "The frozen M2 semantics must be evaluated unchanged on at least one untouched graph, workload, admissibility regime, or other predeclared white-box condition before a strong prospective validation claim.",
+    "posthoc_best_member": "ProviderC_LHS_038 remains a useful diagnostic showing that a highly accurate graph explanation existed inside the composition-blind compatible set, but it is not the operational M2 prediction."
+  },
+  "cost_semantics": {
+    "build_cost": "Existing M2-A2/A3/A4 portfolio-discovery and confirmation cost is part of M2 build cost.",
+    "query_cost": "Native graph propagation over the 27 frozen joint combinations plus aggregation.",
+    "update_cost": "Not defined for frozen M2; dynamic updates belong to a later method.",
+    "no_new_GP_required_for_joint_ensemble": true
+  },
+  "non_goals": [
+    "Do not interpret equal weights as posterior probabilities.",
+    "Do not weight members by local reconstruction loss in frozen M2.",
+    "Do not select a single M2 member using graph white-box accuracy.",
+    "Do not change I1 or expose additional provider information.",
+    "Do not rerun or replace the frozen A4 portfolio merely to improve G0.",
+    "Do not call the finite-portfolio min-max range a confidence interval."
+  ],
+  "implementation_handoff": {
+    "next_stage": "M2-B5 joint portfolio graph propagation",
+    "required_behavior": "Enumerate all 27 frozen A4 joint combinations, simulate them with one fresh common-random-number graph seed bank, aggregate equal-weight mean and finite-portfolio min-max range before graph white-box evaluation.",
+    "exact_seed_bank": "to be frozen in the B5 execution contract",
+    "existing_B3_B4_results_remain_provenance": true
+  }
+}
