@@ -1,0 +1,152 @@
+{
+  "status": "FROZEN_PHASE4_M2_B5_JOINT_ENSEMBLE_GRAPH_CONTRACT_V1",
+  "freeze_date": "2026-09-21",
+  "scientific_stage": "M2-B5 blind joint propagation of the frozen M2-A4 provider portfolios",
+  "purpose": "Complete the frozen M2 semantics by propagating the full 3x3x3 Cartesian product of independently confirmed diverse I1-compatible provider surrogates through the native graph, then aggregate an equal-weight ensemble mean and finite-portfolio ambiguity range before any graph white-box evaluation.",
+  "semantic_contract": "config_phase4_m2_joint_ensemble_semantics_v1.json",
+  "inputs": {
+    "a4_confirmation_manifest": "results/m2_a4_portfolio_confirmation_v1/m2_a4_portfolio_confirmation_manifest_v1.json",
+    "a4_final_portfolio": "results/m2_a4_portfolio_confirmation_v1/m2_a4_final_confirmed_portfolio.csv",
+    "a4_replay_results": "results/m2_a4_portfolio_confirmation_v1/m2_a4_replay_results.csv",
+    "m1_anchor_candidates": "results/m2_a_confirmation_v1/m2_a_confirmed_compatible_candidates.csv",
+    "m1_confirmation_manifest": "results/m2_a_confirmation_v1/m2_a_confirmation_manifest_v1.json",
+    "public_i1_root": "../phase2/results/i1_cards_v2_rho_conditioned/public",
+    "public_i1_manifest": "../phase2/results/i1_cards_v2_rho_conditioned/public/i1_rho_conditioned_manifest_v1.json",
+    "m1_contract": "../phase3/config_phase3_m1_contract_v2.json",
+    "m0_contract": "../phase3/config_phase3_m0_contract_v1.json"
+  },
+  "frozen_provider_members": {
+    "ProviderA": [
+      "ProviderA_GP_006",
+      "ProviderA_GP_035",
+      "ProviderA_TPE_base_trial079"
+    ],
+    "ProviderB": [
+      "ProviderB_LHS_039",
+      "ProviderB_GP_031",
+      "ProviderB_TPE_base_trial068"
+    ],
+    "ProviderC": [
+      "ProviderC_LHS_038",
+      "ProviderC_GP_014",
+      "ProviderC_TPE_base_trial037"
+    ]
+  },
+  "variant_design": {
+    "m2_joint_portfolio": "Enumerate every tuple (theta_Aj, theta_Bk, theta_Cl) from the three frozen A4 portfolios.",
+    "n_m2_joint_variants": 27,
+    "m1_baseline": "Run BASE_M1 on the same fresh graph seed bank for paired reference only.",
+    "m1_is_m2_member": false,
+    "n_total_simulated_variants_including_m1": 28,
+    "new_provider_search": false,
+    "new_provider_confirmation": false,
+    "candidate_replacement": false,
+    "candidate_parameter_change": false,
+    "graph_prediction_used_for_member_selection": false
+  },
+  "weights": {
+    "provider_member_weight": 0.3333333333333333,
+    "joint_member_weight": 0.037037037037037035,
+    "all_27_joint_members_equal_weight": true,
+    "weight_by_local_loss": false,
+    "weight_by_graph_prediction": false,
+    "weight_by_graph_whitebox": false
+  },
+  "graph_simulation": {
+    "trajectory_seed_start": 29000,
+    "trajectory_seed_end_inclusive": 29099,
+    "n_trajectories_per_variant": 100,
+    "common_random_numbers_across_all_27_m2_variants": true,
+    "common_random_numbers_include_m1_baseline": true,
+    "fresh_relative_to_previous_graph_runs": true,
+    "previous_seed_banks": {
+      "M1_graph": "25000..25099",
+      "M2_B_original": "26000..26099",
+      "M2_B2": "27000..27099",
+      "M2_B3": "28000..28099"
+    },
+    "smoke_n_trajectories_per_variant": 5,
+    "resume_from_per_variant_ledgers": true
+  },
+  "graph_query": {
+    "rho_policy": "same-rho diagonal retained from the frozen current pilot",
+    "A_G_construction": "Use the same public-I1-induced G0 admissibility boundary for every M2 joint member and BASE_M1 at each rho.",
+    "global_region_varies_by_variant": false,
+    "horizon_support": "read from the frozen public I1 cards",
+    "rho_support": "read from the frozen public I1 same-rho support",
+    "Jaccard_D_A": "N/A because A_G is controlled and identical across variants"
+  },
+  "required_member_outputs": [
+    "one request ledger per simulated variant",
+    "one sigma_G curve per M2 joint member",
+    "BASE_M1 sigma_G curve on the same seed bank",
+    "request-distribution summary per simulated variant"
+  ],
+  "required_ensemble_outputs": {
+    "pointwise_keys": ["rho_global", "horizon"],
+    "central_prediction": "equal-weight arithmetic mean over the 27 M2 joint sigma_G values",
+    "ambiguity_lower": "minimum sigma_G across the 27 M2 joint values",
+    "ambiguity_upper": "maximum sigma_G across the 27 M2 joint values",
+    "descriptive_secondary": [
+      "portfolio standard deviation with ddof=0",
+      "portfolio median",
+      "portfolio q25",
+      "portfolio q75",
+      "pointwise argmin joint variant id",
+      "pointwise argmax joint variant id"
+    ],
+    "exclude_BASE_M1_from_all_M2_aggregates": true
+  },
+  "monte_carlo_uncertainty": {
+    "status": "SEPARATE_FROM_MODEL_AMBIGUITY",
+    "required_for_B5_primary_freeze": false,
+    "recommended_followup": "Use seed-cluster bootstrap on the per-seed trajectory pass indicators if a pointwise Monte Carlo band around the ensemble mean is reported. Resample graph seed indices jointly across all 27 M2 members because common random numbers induce cross-member dependence.",
+    "portfolio_min_max_is_not_confidence_interval": true
+  },
+  "blindness_and_firewall": {
+    "graph_whitebox_read": false,
+    "phase1_graph_reference_read": false,
+    "provider_private_trace_read": false,
+    "provider_private_parameter_read": false,
+    "new_I1_information": false,
+    "PPG_firewall_preserved": true
+  },
+  "freeze_order": {
+    "step_1": "Load and verify the frozen semantic contract and frozen A4 candidate set.",
+    "step_2": "Materialize and write the complete 27-member joint design before simulation.",
+    "step_3": "Run all graph simulations on the fresh CRN seed bank and checkpoint ledgers.",
+    "step_4": "Compute every member sigma_G curve and BASE_M1 curve.",
+    "step_5": "Aggregate the 27-member equal-weight mean and finite-portfolio min-max range.",
+    "step_6": "Write hashes/manifest that freeze all B5 predictions and aggregates while graph white-box remains unread.",
+    "step_7": "Only a later external-evaluation stage may open graph white-box."
+  },
+  "required_files": [
+    "m2_b5_joint_variant_design.csv",
+    "m2_b5_frozen_candidate_set.csv",
+    "m2_b5_joint_graph_sigma_curves.csv",
+    "m2_b5_ensemble_curve.csv",
+    "m2_b5_request_distribution_summary.csv",
+    "m2_b5_cost_manifest_v1.json",
+    "m2_b5_manifest_v1.json"
+  ],
+  "cost_accounting": {
+    "provider_local_simulation_trajectories": 0,
+    "new_optimizer_or_GP_evaluations": 0,
+    "m2_graph_trajectories": 2700,
+    "m1_reference_graph_trajectories": 100,
+    "total_graph_trajectories": 2800,
+    "record_wall_clock_seconds": true,
+    "record_cpu_seconds_when_available": true,
+    "record_peak_RSS_when_available": true,
+    "record_git_commit": true,
+    "record_resume_reuse": true
+  },
+  "interpretation_guardrails": [
+    "The M2 ensemble mean is an equal-weight central estimate over deliberately diverse representatives, not a posterior expectation.",
+    "The M2 min-max band is a finite-portfolio ambiguity range, not a statistical confidence interval and not a proven global bound over all I1-compatible theta.",
+    "Do not identify a post-hoc best member as the operational M2 prediction.",
+    "Do not modify portfolio members, weights, or rho/A_G policy after graph white-box inspection.",
+    "Do not compare B5 against graph white-box inside the B5 runner."
+  ],
+  "next_gate": "After B5 prediction freeze, inspect the blind M2 ensemble mean/range internally for consistency only. Then define a separate B6 external white-box evaluation contract. Because G0 white-box has already been seen during method development, B6 on G0 is retrospective diagnostic evidence; prospective validation requires an untouched condition."
+}
