@@ -567,6 +567,52 @@ def _feasible_mask(
     )
 
 
+def _validate_sigma_cube_sentinels(
+    ledger: pd.DataFrame,
+    *,
+    base: AdmissibilityBoundary,
+    rho: float,
+    latency_scales: np.ndarray,
+    cost_scales: np.ndarray,
+    horizons: list[float],
+    sigma_cube: np.ndarray,
+    workload: dict[str, float],
+) -> None:
+    """Cross-check the optimized grid evaluator against canonical SLA code."""
+    sentinel_indices = (
+        (0, 0),
+        (len(latency_scales) // 2, len(cost_scales) // 2),
+        (len(latency_scales) - 1, len(cost_scales) - 1),
+    )
+    for li, ci in sentinel_indices:
+        boundary = relax_g2_boundary(
+            base,
+            latency_scale=float(latency_scales[li]),
+            cost_scale=float(cost_scales[ci]),
+        )
+        canonical = _canonical_curve(
+            ledger,
+            boundary=boundary,
+            rho=float(rho),
+            horizons=horizons,
+            workload=workload,
+            column="sigma_sentinel",
+        )
+        expected = canonical["sigma_sentinel"].astype(float).to_numpy()
+        actual = sigma_cube[li, ci, :].astype(float)
+        if len(expected) != len(actual) or not np.allclose(
+            expected,
+            actual,
+            atol=TOL,
+            rtol=0.0,
+        ):
+            raise RuntimeError(
+                f"rho={rho:g}: optimized Step-0 grid evaluator disagrees with "
+                f"canonical SLA semantics at s_L={latency_scales[li]:g}, "
+                f"s_C={cost_scales[ci]:g}"
+            )
+
+
 def _candidate_diagnostics(
     *,
     rho: float,
@@ -772,6 +818,16 @@ def _selection_stage(
             latency_scales=latency_scales,
             cost_scales=cost_scales,
             horizons=diagnostic_horizons,
+        )
+        _validate_sigma_cube_sentinels(
+            ledger,
+            base=base,
+            rho=float(rho),
+            latency_scales=latency_scales,
+            cost_scales=cost_scales,
+            horizons=diagnostic_horizons,
+            sigma_cube=sigma_cube,
+            workload=workload,
         )
         diagnostics = _candidate_diagnostics(
             rho=float(rho),
