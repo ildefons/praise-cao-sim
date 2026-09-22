@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""Compare frozen G0 and G1 WB/M0/M1/M2 sigma curves side by side.
+"""Compare matched-provider G0 and G1 WB/M0/M1/M2 sigma curves side by side.
 
 This is a read-only diagnostic. It performs no simulation, fitting, selection,
 calibration, or model changes. It reads the already-materialized pointwise
-comparison CSVs from G0 B6 and G1 prospective validation, verifies compatible
-rho/horizon support, and writes:
+comparison CSVs from G0 B6 and the corrected matched-provider G1 v2 validation,
+verifies compatible rho/horizon support, and writes:
 
-  * g0_g1_sigma_comparison.png
-  * g0_g1_sigma_condition_shift_summary.csv
+  * g0_g1_matched_sigma_comparison.png
+  * g0_g1_matched_sigma_condition_shift_summary.csv
 
 The figure has one row per rho and two columns:
-  left  = G0 retrospective diagnostic
-  right = G1 prospective stress test
+  left  = G0 matched D300 reference
+  right = G1 matched D300 asymmetric graph
 
 Each panel shows WB, M0, M1, M2 mean, and the frozen M2 min-max ambiguity range.
+Thus the only intended scientific change between columns is the public graph
+embedding, not the hidden provider process.
 """
 from __future__ import annotations
 
@@ -152,8 +154,8 @@ def _plot(g0: pd.DataFrame, g1: pd.DataFrame, output_path: Path) -> None:
     )
 
     conditions = (
-        ("G0 retrospective", g0),
-        ("G1 prospective stress", g1),
+        ("G0 matched D300", g0),
+        ("G1 matched D300", g1),
     )
 
     for row_idx, rho in enumerate(rhos):
@@ -208,8 +210,8 @@ def _plot(g0: pd.DataFrame, g1: pd.DataFrame, output_path: Path) -> None:
 
     axes[0, 0].legend(frameon=False, fontsize=8, ncol=5, loc="lower left")
     fig.suptitle(
-        "Frozen sigma predictions under two white-box conditions\n"
-        "same I1/M0/M1/M2 machinery, different WB reference",
+        "Sigma under two graphs with matched D300 providers\n"
+        "same I1/M0/M1/M2 machinery; only graph embedding changes",
         fontsize=14,
     )
     fig.supxlabel("Horizon H (s)")
@@ -236,13 +238,13 @@ def main() -> None:
         type=Path,
         default=HERE
         / "results"
-        / "m2_g1_prospective_validation_v1"
+        / "m2_g1_matched_provider_validation_v2"
         / "m2_g1_pointwise_comparison.csv",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=HERE / "results" / "g0_g1_sigma_diagnostic_v1",
+        default=HERE / "results" / "g0_g1_matched_sigma_diagnostic_v2",
     )
     args = parser.parse_args()
 
@@ -267,14 +269,14 @@ def main() -> None:
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    plot_path = output_dir / "g0_g1_sigma_comparison.png"
-    summary_path = output_dir / "g0_g1_sigma_condition_shift_summary.csv"
+    plot_path = output_dir / "g0_g1_matched_sigma_comparison.png"
+    summary_path = output_dir / "g0_g1_matched_sigma_condition_shift_summary.csv"
 
     _plot(g0, g1, plot_path)
     summary = _condition_shift_summary(g0, g1)
     summary.to_csv(summary_path, index=False)
 
-    print("G0_G1_SIGMA_DIAGNOSTIC_COMPLETE")
+    print("G0_G1_MATCHED_SIGMA_DIAGNOSTIC_COMPLETE")
     print("\nCONDITION_SHIFT_SUMMARY")
     print(summary.to_string(index=False))
     print(f"\nplot={plot_path}")
