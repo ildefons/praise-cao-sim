@@ -76,6 +76,7 @@ from m2_g1_public_adapter import (  # noqa: E402
 from m2_g1_whitebox_validation import _validate_hidden_model  # noqa: E402
 
 TOL = 1e-12
+EXPECTED_CONTRACT_STATUS = "FROZEN_PHASE4_DD3_GRAPH_RESPONSE_AUDIT_V1"
 PROVIDERS = ("ProviderA", "ProviderB", "ProviderC")
 EXPECTED_G0_SETTING = "D300000000_d0.200"
 EXPECTED_G0_SEEDS = tuple(range(7000, 7100))
@@ -184,7 +185,26 @@ def _validate_hidden_provider_provenance(args: argparse.Namespace) -> dict[str, 
     return hidden
 
 
+def _load_audit_contract(path: Path) -> dict[str, Any]:
+    contract = _read_json(path)
+    if contract.get("status") != EXPECTED_CONTRACT_STATUS:
+        raise RuntimeError("unexpected DD-3 graph-response audit contract status")
+    paired = dict(contract["paired_whitebox"])
+    if int(paired["G0_seed_start"]) != EXPECTED_G0_SEEDS[0]:
+        raise RuntimeError("DD-3 contract G0 seed start changed")
+    if int(paired["G0_seed_end_inclusive"]) != EXPECTED_G0_SEEDS[-1]:
+        raise RuntimeError("DD-3 contract G0 seed end changed")
+    if int(paired["G1_seed_start"]) != EXPECTED_G0_SEEDS[0]:
+        raise RuntimeError("DD-3 contract G1 seed start changed")
+    if int(paired["G1_seed_end_inclusive"]) != EXPECTED_G0_SEEDS[-1]:
+        raise RuntimeError("DD-3 contract G1 seed end changed")
+    if not bool(paired["common_random_numbers"]):
+        raise RuntimeError("DD-3 contract no longer requires paired common random numbers")
+    return contract
+
+
 def _prepare(args: argparse.Namespace) -> None:
+    contract = _load_audit_contract(args.audit_contract.resolve())
     metadata, rhos, _, _ = _load_public_context(
         args.i1_card_root.resolve(), args.i1_manifest.resolve()
     )
@@ -195,6 +215,11 @@ def _prepare(args: argparse.Namespace) -> None:
         rhos=rhos,
         m0_contract_path=args.m0_contract.resolve(),
     )
+
+    if str(contract["paired_whitebox"]["expected_provider_process_sha256"]) != str(
+        hidden["provider_process_sha256"]
+    ):
+        raise RuntimeError("DD-3 contract provider-process hash differs from matched provenance")
 
     print("DD3_GRAPH_RESPONSE_PREPARE_PASS_NO_SIMULATION")
     print(f"provider_process={hidden['case_id']}")
@@ -211,6 +236,7 @@ def _prepare(args: argparse.Namespace) -> None:
 
 def _generate_paired_g1_wb(args: argparse.Namespace) -> None:
     started = time.perf_counter()
+    audit_contract = _load_audit_contract(args.audit_contract.resolve())
     metadata, _, _, workload = _load_public_context(
         args.i1_card_root.resolve(), args.i1_manifest.resolve()
     )
@@ -227,6 +253,10 @@ def _generate_paired_g1_wb(args: argparse.Namespace) -> None:
     )
     if str(hidden["case_id"]) != EXPECTED_G0_SETTING:
         raise RuntimeError("paired G1 WB hidden process is not D300/d0.20")
+    if str(audit_contract["paired_whitebox"]["expected_provider_process_sha256"]) != str(
+        hidden["provider_process_sha256"]
+    ):
+        raise RuntimeError("DD-3 contract provider-process hash mismatch")
 
     graph_spec = build_g1_public_graph_spec()
     validate_g1_public_graph_spec(graph_spec)
@@ -283,6 +313,8 @@ def _generate_paired_g1_wb(args: argparse.Namespace) -> None:
         "ledger_sha256": _sha256(ledger_path),
         "n_request_rows": int(len(ledger)),
         "checkpoint_reused": bool(reused),
+        "audit_contract_sha256": _sha256(args.audit_contract.resolve()),
+        "audit_contract_sha256": _sha256(args.audit_contract.resolve()),
         "git_commit": _git_head(FIRST_SCIENCE.parent),
     }
     manifest_path = output / "dd3_g1_paired_whitebox_manifest_v1.json"
@@ -566,6 +598,7 @@ def _plot_delta(frame: pd.DataFrame, path: Path) -> None:
 
 def _evaluate(args: argparse.Namespace) -> None:
     started = time.perf_counter()
+    audit_contract = _load_audit_contract(args.audit_contract.resolve())
     output = args.output.resolve()
     ledger_path = output / "dd3_g1_paired_whitebox_ledger.csv"
     manifest_path = output / "dd3_g1_paired_whitebox_manifest_v1.json"
@@ -584,6 +617,12 @@ def _evaluate(args: argparse.Namespace) -> None:
     hidden = _validate_hidden_provider_provenance(args)
     if str(manifest["provider_process_sha256"]) != str(hidden["provider_process_sha256"]):
         raise RuntimeError("paired G1 WB provider fingerprint changed")
+    if str(manifest.get("audit_contract_sha256")) != _sha256(args.audit_contract.resolve()):
+        raise RuntimeError("paired G1 WB is not tied to the current frozen DD-3 contract")
+    if str(audit_contract["paired_whitebox"]["expected_provider_process_sha256"]) != str(
+        hidden["provider_process_sha256"]
+    ):
+        raise RuntimeError("DD-3 contract provider-process hash changed")
 
     g0 = _load_g0_comparison(args.g0_comparison.resolve())
     g0 = _snap_frame_to_frozen_grid(
@@ -741,6 +780,11 @@ def _evaluate(args: argparse.Namespace) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Audit whether frozen M0/M1/M2 capture the G0->G1 graph response"
+    )
+    parser.add_argument(
+        "--audit-contract",
+        type=Path,
+        default=HERE / "config_phase4_dd3_graph_response_audit_v1.json",
     )
     parser.add_argument(
         "--output",
