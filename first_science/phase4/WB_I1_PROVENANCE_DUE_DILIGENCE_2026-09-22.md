@@ -338,6 +338,17 @@ A zero-simulation `--preflight-only` mode is available and must pass before any 
 
 The original G1 v1 output remains reclassified as a provider-drift/stale-information stress result. It is not overwritten.
 
+
+The same stale-provider defect was also present in the unexecuted G2 v1 Step-0 contract. That contract is preserved as a superseded record and is not to be run.
+
+A corrected G2 contract now exists:
+
+```
+config_phase4_m2_g2_step0_calibrated_validation_v2_matched_provider.json
+```
+
+The G2 Step-0 runner now resolves hidden-provider provenance from the final Phase-1 v2 confirmation and both I1 acquisition contracts, requires all of them to agree on `D300000000_d0.200`, records a canonical provider-process hash, and does not use the stale D330 discovery field as a selector. No G2 white-box simulation has been run under the corrected contract yet.
+
 ## 10. Current execution status
 
 ```
@@ -345,7 +356,8 @@ G0 = retained, matched D300 reference, DD-1 independently verified, provenance e
 G1 original = reclassified as mismatched-provider stress diagnostic
 G1 matched-provider v2 = implementation repaired; preflight/fresh validation pending
 G1 corrected N20 = due-diligence evidence only
-G2 = BLOCKED
+G2 v1 = BLOCKED as stale-D330 contract
+G2 v2 matched-provider = implementation repaired; prepare/preflight pending
 M1/M2 = not condemned; further due diligence pending
 M3 = deferred
 ```
