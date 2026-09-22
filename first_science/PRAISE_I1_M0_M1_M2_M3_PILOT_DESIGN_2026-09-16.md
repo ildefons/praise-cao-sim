@@ -137,6 +137,32 @@ A strong prospective M2 claim requires the frozen semantics above to be evaluate
 
 Authoritative semantic contract: `phase4/config_phase4_m2_joint_ensemble_semantics_v1.json`.
 
+
+### 3.5 Final M2 evidence and closure
+
+M2 is now **closed after prospective validation**.
+
+On the retrospective G0 condition, the frozen 27-member equal-weight M2 mean reduced whole-surface MAE from `0.184776` for M1 to `0.077758`, with finite-portfolio range coverage `0.730612`. Because G0 WB behavior had already been inspected during development, this remains diagnostic evidence only.
+
+The untouched G1 condition was predeclared as an asymmetric public network embedding with all provider cards, workload, M1 parameters, M2 members, M2 weights, and success criteria frozen before G1 WB generation. Blind prediction used seeds `30000..30099`; independent WB generation used `31000..31099`.
+
+The predeclared prospective criterion `M2 MAE < M1 MAE` passed:
+
+- M1 MAE `0.765469`;
+- M2 MAE `0.617345`;
+- M1 RMSE `0.804938`;
+- M2 RMSE `0.672633`;
+- M2 MAE lower than M1 in all `5/5` rho slices.
+
+This supports the narrow prospective claim that preserving a small amount of inverse ambiguity improves over collapsing I1 to one latent reconstruction.
+
+However, G1 also exposed a major limitation. M0 MAE was only `0.202037`, far better than M1 and M2. M2 remained strongly optimistic (bias `+0.617164`), and the frozen min-max range covered only `0.114286` of the WB surface, with `0.885714` of WB points below the represented range and none above it. The small diversity-selected portfolio therefore does not span the relevant compatible lower-survival behavior under G1.
+
+No G1-driven repair is permitted inside M2. The final chapter-close record is `phase4/M2_CHAPTER_CLOSE_2026-09-22.md`.
+
+The question carried into M3 is therefore not whether inverse ambiguity matters, but how to represent compatible latent support and mass more faithfully across composition conditions without pretending that local I1 reconstruction error is itself a probability model.
+
+
 ## 4. Mid-term program: I1-M3 dynamic integration
 
 M3 remains within the pilot and keeps the **same information schema class I1**. It is intended to study dynamic integration rather than richer provider disclosure.
