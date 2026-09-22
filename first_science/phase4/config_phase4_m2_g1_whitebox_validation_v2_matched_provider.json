@@ -1,0 +1,132 @@
+{
+  "status": "FROZEN_PHASE4_M2_G1_MATCHED_PROVIDER_WHITEBOX_VALIDATION_V2",
+  "freeze_date": "2026-09-22",
+  "scientific_stage": "Corrected matched-provider G1 white-box validation after provenance defect discovery",
+  "purpose": "Repair the G1 validation provenance defect by evaluating the already-frozen G1 M0/M1/M2 predictions against a fresh white-box generated from exactly the same D300000000_d0.200 hidden provider process that generated the frozen public I1. No prediction artifact, method parameter, graph condition, A_G, success criterion, candidate, or weight is changed.",
+  "prediction_freeze": {
+    "manifest": "results/m2_g1_blind_prediction_v1/m2_g1_prediction_freeze_manifest_v1.json",
+    "required_status": "FROZEN_PHASE4_M2_G1_BLIND_PREDICTIONS_V1",
+    "required_sha256": "9d0667651698e420b0fa4b9b913627967f4cfc5fcaf7158ad38f69636903c1fb",
+    "required_condition_id": "G1_ASYM_PARALL_V1",
+    "required_G1_whitebox_generated": false,
+    "required_G1_whitebox_read": false,
+    "required_prediction_seed_start": 30000,
+    "required_prediction_seed_end_inclusive": 30099,
+    "required_n_trajectories_per_variant": 100,
+    "required_n_m2_joint_variants": 27,
+    "required_equal_weight_joint_ensemble": true,
+    "required_artifact_hashes": {
+      "g1_contract_sha256": "22664519fd9ddf73a30ba8566e85c882c8948ba4cce08db5aae4e0b5438f2ffc",
+      "semantic_contract_sha256": "3a528e012fc50eee6a76bb702e6975cd6cdb58b47f61d49b89af1f4e319346ea",
+      "public_i1_manifest_sha256": "8345a3430f0a6b6af9934d839d2d578485a9e47ea3daa01a6093f222bb3a5dc4",
+      "public_condition_manifest_sha256": "3744dbebe0890a335422e282d0e9a5dd8e719cf88fc460fe88fea33c25a52f7e",
+      "variant_design_sha256": "d54c5c8bc8775d35b0995ec5d030cd56765d2d27dd6198f30ccc42bdde47ea80",
+      "frozen_candidate_set_sha256": "43e5606a9c83e60563f813e9a261e9900b0cf6508b9e5739fd7c73794db3d3fa",
+      "m0_curve_sha256": "c4ff5539fa3094fc8ba339e0b683153a433445b8b60b9dfee0d40f0dc794d216",
+      "joint_graph_sigma_curves_sha256": "cb4e76577da1b4e780c600660522d4993ca49fe542d97c54a6866525d0d2ec07",
+      "ensemble_curve_sha256": "487aef3a0d5c9447a7b208149f7aa17280725e26119560bc0a3ab3fe866bcaca"
+    }
+  },
+  "whitebox_model": {
+    "source_of_truth": {
+      "phase1_v2_confirmation_protocol": "../phase1/config_phase1_v2_confirmation_v1.json",
+      "phase1_v2_confirmation_freeze_manifest": "../phase1/phase1_v2_confirmation_freeze_manifest_v1.json",
+      "i1_region_acquisition": "../phase2/config_phase2_i1_acquisition_v1.json",
+      "i1_sigma_acquisition": "../phase2/config_phase2_i1_sigma_acquisition_v1.json"
+    },
+    "invariant": "WB hidden provider process must equal the provider process that generated both frozen I1 evidence corpora",
+    "case_id": "D300000000_d0.200",
+    "center_instruction_mean": 300000000,
+    "dispersion": 0.2,
+    "provider_instruction_means": {
+      "ProviderA": 240000000,
+      "ProviderB": 300000000,
+      "ProviderC": 360000000
+    },
+    "instruction_cv": 0.3,
+    "effective_IPT": 1000000000,
+    "cost_rate": 3,
+    "execution_fraction_x": 0.5,
+    "quality": 0.5,
+    "derived_mean_service_times_for_native_G1_runner": {
+      "ProviderA": 0.12,
+      "ProviderB": 0.15,
+      "ProviderC": 0.18
+    },
+    "derivation": "mean_service_time = instruction_mean * x / effective_IPT",
+    "refit_or_reselection": false,
+    "stale_phase1_discovery_frozen_after_selection_must_not_be_used": true
+  },
+  "whitebox_generation": {
+    "trajectory_seed_start": 35000,
+    "trajectory_seed_end_inclusive": 35099,
+    "n_trajectories": 100,
+    "seed_bank_independent_of_prediction_bank": true,
+    "graph_condition": "Use exactly the already-frozen public G1 asymmetric network condition",
+    "workload": "Use exactly the frozen public I1/G1 periodic workload",
+    "provider_rng_streams": "Use the existing native provider-specific seeded gamma streams in the G1 simulator",
+    "generate_only_after_prediction_freeze_validation": true,
+    "checkpoint_resume": true,
+    "actual_whitebox_smoke_before_prediction_freeze": false,
+    "seed_bank_fresh_relative_to_original_G1_WB_31000_31099": true,
+    "seed_bank_fresh_relative_to_corrected_N20_diagnostic_31000_31019": true
+  },
+  "evaluation": {
+    "surface_includes_H0": true,
+    "point_prediction_methods": [
+      "M0",
+      "M1",
+      "M2_equal_weight_mean"
+    ],
+    "point_prediction_metrics": [
+      "MAE",
+      "RMSE",
+      "bias",
+      "max_abs_error"
+    ],
+    "report_whole_surface": true,
+    "report_per_rho": true,
+    "ambiguity_metrics": [
+      "whitebox_coverage_fraction",
+      "mean_range_width",
+      "max_range_width",
+      "mean_distance_outside_range",
+      "max_distance_outside_range",
+      "fraction_whitebox_below_range",
+      "fraction_whitebox_above_range"
+    ],
+    "range_is_confidence_interval": false,
+    "same_frozen_A_G1_for_all_methods_and_whitebox": true,
+    "Jaccard_D_A": "N/A"
+  },
+  "prospective_success_criteria": {
+    "primary": "M2 whole-surface MAE < M1 whole-surface MAE",
+    "confirmatory": "M2 whole-surface RMSE < M1 whole-surface RMSE",
+    "rho_consistency": "M2 MAE < M1 MAE in at least 3 of 5 rho slices",
+    "ambiguity_coverage_is_pass_fail": false,
+    "chapter_close": "This is a repair validation after a discovered provenance defect, not the original untouched prospective G1 result. M2 remains frozen; no G1 repair data may alter M2."
+  },
+  "firewall": {
+    "change_prediction_artifacts": false,
+    "change_I1": false,
+    "change_M1_parameters": false,
+    "change_M2_candidates": false,
+    "change_M2_weights": false,
+    "change_G1_graph": false,
+    "change_success_criteria": false,
+    "posthoc_best_member_as_operational_M2": false,
+    "use_G1_whitebox_for_repair": false
+  },
+  "required_outputs": [
+    "m2_g1_whitebox_ledger.csv",
+    "m2_g1_whitebox_generation_manifest_v2.json",
+    "m2_g1_whitebox_curve.csv",
+    "m2_g1_pointwise_comparison.csv",
+    "m2_g1_overall_point_summary.csv",
+    "m2_g1_per_rho_point_summary.csv",
+    "m2_g1_ambiguity_summary.csv",
+    "m2_g1_matched_provider_validation_manifest_v2.json",
+    "m2_g1_m0_m1_m2_whitebox.png"
+  ],
+  "next_gate": "Generate the fresh matched-provider G1 white-box ledger on seeds 35000..35099 only after validating the frozen prediction artifacts and the D300 provider-provenance invariant. Then evaluate without changing any method or prediction artifact."
+}
