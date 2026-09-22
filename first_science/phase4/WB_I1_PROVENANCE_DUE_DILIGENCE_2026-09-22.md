@@ -95,9 +95,9 @@ phase1/results/phase1_v2_fresh_confirmation_v1/
 
 but the B6 contract pins only the ledger path and trajectory count. It does **not** pin a provider-process physical ID or hash.
 
-Historical provenance establishes this ledger as the final D300 fresh-confirmation benchmark, but the evaluation contract itself does not enforce that invariant.
+Phase-1 v2 confirmation artifacts explicitly establish this ledger as the final D300 fresh-confirmation benchmark: `config_phase1_v2_confirmation_v1.json` freezes `physical_setting_id=D300000000_d0.200` with seeds `7000..7099`, and `phase1_v2_confirmation_freeze_manifest_v1.json` records `scientific_confirmation_pass=true`. DD-1 additionally fingerprints the raw ledger itself as D300 from request-cost moments.
 
-Status: **scientifically intended/matched, contractually under-specified**.
+Status: **scientifically matched and independently data-verified; B6 itself is still contractually under-specified because it does not pin the provider-process identity.**
 
 ### Original G1
 
@@ -197,11 +197,32 @@ These require separate checks.
 
 ## 8. Remaining due-diligence gates before any new scientific run
 
-### DD-1: raw G0 ledger fingerprint
+### DD-1: raw G0 ledger fingerprint — PASS
 
-Read the existing G0 top-level ledger only. No simulation.
+Read-only audit of the existing G0 top-level ledger completed with zero simulation.
 
-Verify that its request-cost moments are consistent with D300 rather than D330. Under the frozen provider family, expected total request cost is a strong physical fingerprint because queue waiting and network latency do not contribute to operating cost.
+Observed:
+
+```
+rows = 119900
+finite C rows = 119819
+completion fraction = 0.999324
+seed bank = 7000..7099
+mean C = 1.379616025
+std C = 0.237711476
+estimated center instruction mean = 299914672
+```
+
+Expected fingerprints:
+
+```
+D300000000_d0.200: mean C = 1.380000000, std C = 0.236924038
+D330000000_d0.150: mean C = 1.515000000, std C = 0.259131436
+```
+
+Absolute mean-cost error is `0.000383975` for D300 versus `0.135383975` for D330. The observed standard deviation is also much closer to D300.
+
+Conclusion: **the actual G0 raw ledger is D300-centered.** This independently closes the most important physical-provenance loop. The variance-derived dispersion estimate (`0.226`) is secondary and is not used as the primary classifier because completed-request censoring can bias it slightly.
 
 ### DD-2: I1 materialization identity
 
@@ -277,7 +298,7 @@ and must never be reported as an M-axis integration-accuracy validation.
 ## 10. Current execution status
 
 ```
-G0 = retained, matched D300 reference, provenance enforcement needs repair
+G0 = retained, matched D300 reference, DD-1 independently verified, provenance enforcement still needs repair
 G1 original = reclassified as mismatched-provider stress diagnostic
 G1 corrected N20 = due-diligence evidence only
 G2 = BLOCKED
