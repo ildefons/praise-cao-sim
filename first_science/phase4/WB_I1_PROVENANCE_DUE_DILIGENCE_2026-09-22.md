@@ -249,19 +249,50 @@ Conclusion: **the published public I1 sigma surfaces are an exact deterministic 
 
 This closes the sigma-materialization boundary as a source of the observed G0/G1 discrepancy.
 
-### DD-3: boundary/composition implementation
+### DD-3: graph-response audit — FROZEN, pending execution
 
-Re-run existing deterministic/unit checks for:
+The due-diligence question is now sharpened beyond boundary algebra:
 
 ```
-L_G = fixed + max_i L_i
-C_G = fixed + sum_i C_i
-Q_G = min_i Q_i
+Do frozen M0/M1/M2 capture the change in sigma caused by changing only
+the public graph G0 -> G1 while the hidden provider process remains D300?
 ```
 
-and verify the G0/G1 fixed network terms independently.
+Frozen contract:
 
-No statistical scientific run.
+```
+config_phase4_dd3_graph_response_audit_v1.json
+```
+
+Runner:
+
+```
+dd3_graph_response_audit.py
+```
+
+The design uses the final G0 WB on seeds `7000..7099` and generates a paired G1 D300 WB on the exact same seeds and provider gamma streams. Thus the WB graph response is a common-random-number counterfactual with provider stochasticity fixed.
+
+Primary observable:
+
+```
+Delta sigma_X(rho,H) = sigma_X(G1,rho,H) - sigma_X(G0,rho,H)
+
+e_M(rho,H) = Delta sigma_M(rho,H) - Delta sigma_WB(rho,H)
+```
+
+The paired ledger audit additionally requires identical source emissions, cost and quality across graphs for jointly completed requests. Latency is allowed to change.
+
+A structural fact is frozen before seeing results: under the current same-rho induced-A_G protocol, M0 reads exactly the same local I1 sigma values in G0 and G1. Therefore `Delta sigma_M0 = 0` up to numerical tolerance. If paired WB has nonzero graph response, M0 cannot represent that response by construction. M1/M2 explicitly simulate G and are assessed quantitatively by graph-response error.
+
+The primary DD-3 evaluation reuses the already-frozen G0 and G1 predictor curves. Those predictor simulations used independent N=100 seed banks. No post-hoc pass threshold is introduced. If this Monte Carlo difference materially limits interpretation, a separately frozen paired-predictor confirmation will be run.
+
+DD-3 stages:
+
+```
+--prepare-only          zero simulation
+--generate-paired-wb    100 G1 WB trajectories, paired to G0
+--evaluate              response metrics and plots
+```
 
 ### DD-4: local lift identity
 
@@ -380,6 +411,7 @@ The G2 base-region construction and frozen Step-0 grids also validated without g
 G0 = retained, matched D300 reference, DD-1 independently verified, provenance enforcement still needs repair
 G1 original = reclassified as mismatched-provider stress diagnostic
 G1 matched-provider v2 = implementation repaired; zero-simulation provenance preflight PASS; fresh validation pending
+DD3 graph-response audit = frozen before paired WB execution; pending
 G1 corrected N20 = due-diligence evidence only
 G2 v1 = BLOCKED as stale-D330 contract
 G2 v2 matched-provider = implementation repaired; zero-simulation prepare/provenance gate PASS; Step-0 WB calibration not yet run
