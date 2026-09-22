@@ -1,7 +1,9 @@
 # M2 chapter close
 
+> **REOPENING NOTICE, 22 September 2026:** This closure decision has been superseded by `M2_REOPENING_FOR_G2_2026-09-22.md`. The M2 method itself remains frozen, but final validation is reopened because G1 is retained as a prospective stress test rather than the final dependable-regime validation. The historical G1 results below are preserved unchanged for provenance.
+
 **Date:** 22 September 2026  
-**Status:** CLOSED_AFTER_PROSPECTIVE_G1_VALIDATION  
+**Status:** SUPERSEDED_BY_G2_VALIDATION_REOPENING  
 **Method:** frozen 27-member equal-weight joint ensemble over the already-frozen three-member provider portfolios.
 
 ## Scientific question
