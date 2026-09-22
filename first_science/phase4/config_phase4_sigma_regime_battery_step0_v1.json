@@ -1,0 +1,167 @@
+{
+  "status": "FROZEN_PHASE4_SIGMA_REGIME_BATTERY_STEP0_V1",
+  "freeze_date": "2026-09-22",
+  "scientific_stage": "Step-0 calibration of three clearly separated survival regimes on one fixed composition graph",
+  "purpose": "Construct G0/G1/G2 as three global admissibility-query regimes with clearly separated matched-provider white-box sigma, while keeping graph, hidden provider process, workload, I1, and M0/M1/M2 methods unchanged.",
+  "naming_clarification": {
+    "G0_G1_G2_role": "sigma-regime labels for the final diagnostic battery, not different graph topologies",
+    "historical_G1_DD3": "retained only as graph-response due-diligence evidence and not reused as the final G1 sigma regime",
+    "historical_G2_contracts": "superseded for the final diagnostic battery; do not execute them after this contract is frozen"
+  },
+  "fixed_graph": {
+    "condition_id": "FIXED_G0_PARALL_GRAPH_FOR_SIGMA_REGIMES_V1",
+    "logical_graph": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "source": "../phase3/config_phase3_m0_contract_v1.json::phase1_benchmark_adapter",
+    "network_invariant": "exact frozen G0 symmetric network embedding, including PR=0.001 s on every physical link",
+    "branch_or_sequence_change_across_regimes": false,
+    "network_change_across_regimes": false,
+    "workload_change_across_regimes": false,
+    "provider_process_change_across_regimes": false
+  },
+  "method_freeze": {
+    "I1_unchanged": true,
+    "M0_semantics_unchanged": true,
+    "M1_parameters_unchanged": true,
+    "M2_provider_members_unchanged": true,
+    "M2_joint_members": 27,
+    "M2_member_weight": "1/27",
+    "M1_is_M2_member": false,
+    "step0_may_read_or_run_M0_M1_M2": false
+  },
+  "hidden_whitebox_model": {
+    "source_of_truth": {
+      "phase1_v2_confirmation_protocol": "../phase1/config_phase1_v2_confirmation_v1.json",
+      "phase1_v2_confirmation_freeze_manifest": "../phase1/phase1_v2_confirmation_freeze_manifest_v1.json",
+      "i1_region_acquisition": "../phase2/config_phase2_i1_acquisition_v1.json",
+      "i1_sigma_acquisition": "../phase2/config_phase2_i1_sigma_acquisition_v1.json"
+    },
+    "invariant": "WB hidden provider process must equal the provider process that generated frozen I1",
+    "case_id": "D300000000_d0.200",
+    "center_instruction_mean": 300000000,
+    "dispersion": 0.2,
+    "provider_instruction_means": {
+      "ProviderA": 240000000,
+      "ProviderB": 300000000,
+      "ProviderC": 360000000
+    },
+    "instruction_cv": 0.3,
+    "effective_IPT": 1000000000,
+    "cost_rate": 3,
+    "execution_fraction_x": 0.5,
+    "quality": 0.5,
+    "refit_or_reselection": false,
+    "stale_phase1_discovery_frozen_after_selection_must_not_be_used": true
+  },
+  "step0_calibration": {
+    "role": "Experimental-design calibration only. White-box data may choose G0/G1/G2 query boundaries but may not fit, select, weight, or repair any prediction method.",
+    "diagnostic_horizon_window": {
+      "minimum_horizon_seconds": 60,
+      "maximum_horizon_seconds": 240,
+      "use_every_frozen_grid_point_in_window": true
+    },
+    "candidate_family": {
+      "base": "For each rho, forward-compose the frozen public I1 provider A_i(rho) through the exact fixed G0 graph.",
+      "scalar_tightness_rule": "A_G(s,rho)=(s*l_base(rho), s*c_base(rho), q_base(rho)); one scalar s changes latency and cost bounds together and leaves quality unchanged.",
+      "scale_grid": {
+        "minimum": 0.5,
+        "maximum": 2,
+        "step": 0.01
+      },
+      "reason": "One-dimensional scalar tightness prevents Step-0 from overfitting separate latency/cost knobs and guarantees an interpretable ordered SLA-difficulty axis."
+    },
+    "regimes": {
+      "G0": {
+        "sigma_lower": 0.95,
+        "sigma_upper": 1,
+        "target_center": 0.975,
+        "interpretation": "nominal/high-dependability"
+      },
+      "G1": {
+        "sigma_lower": 0.75,
+        "sigma_upper": 0.9,
+        "target_center": 0.825,
+        "interpretation": "intermediate/degraded"
+      },
+      "G2": {
+        "sigma_lower": 0.4,
+        "sigma_upper": 0.75,
+        "target_center": 0.575,
+        "interpretation": "stress/low-survival"
+      }
+    },
+    "selection_seed_start": 32000,
+    "selection_seed_end_inclusive": 32099,
+    "selection_n_trajectories": 100,
+    "confirmation_seed_start": 32100,
+    "confirmation_seed_end_inclusive": 32199,
+    "confirmation_n_trajectories": 100,
+    "selection_rule_per_rho_and_regime": {
+      "feasible": "Every WB sigma point on H=60..240 must lie inside the regime's frozen interval, inclusive.",
+      "primary": "Among feasible scales, minimize absolute difference between mean sigma on H=60..240 and the frozen target center.",
+      "tie_breakers_in_order": [
+        "maximize minimum distance of the observed curve to the two regime boundaries",
+        "minimize absolute log(scale), preferring the smallest departure from the induced base query",
+        "smallest scale"
+      ],
+      "cross_regime_order_required": "scale_G2 < scale_G1 < scale_G0 for every rho"
+    },
+    "confirmation_rule": {
+      "evaluate_only_selection_chosen_scales": true,
+      "every_H60_H240_sigma_must_remain_inside_same_frozen_interval": true,
+      "no_reselection_on_confirmation_data": true,
+      "all_15_rho_x_regime_queries_must_pass": true
+    },
+    "failure_policy": "If any rho/regime has no feasible candidate, ordering fails, or confirmation leaves its frozen sigma interval, stop. Do not tune this v1 contract after observing Step-0 evidence; use a separately named v2 design."
+  },
+  "post_calibration": {
+    "selected_query_battery_size": 15,
+    "same_execution_ledger_reused_across_G0_G1_G2": true,
+    "selected_A_G_by_rho_and_regime_must_be_hash_frozen_before_predictions": true,
+    "calibration_whitebox_data_may_not_be_used_by_M0_M1_M2": true
+  },
+  "blind_prediction_protocol_after_calibration": {
+    "prediction_seed_start": 33000,
+    "prediction_seed_end_inclusive": 33099,
+    "n_prediction_trajectories_per_variant": 100,
+    "same_fixed_graph_for_all_regimes": true,
+    "one_prediction_ledger_per_variant_reused_for_all_15_queries": true,
+    "common_random_numbers_across_M1_and_all_M2_members": true,
+    "M0_applicability": "Apply the frozen M0 boundary-containment precondition separately to each calibrated query. If a stricter query is not applicable, report M0 as NOT_APPLICABLE; do not fabricate a numeric M0 prediction. Raw local-product may be shown only as an explicitly labeled diagnostic.",
+    "predictions_must_be_hash_frozen_before_final_WB": true
+  },
+  "final_whitebox_evaluation": {
+    "trajectory_seed_start": 34000,
+    "trajectory_seed_end_inclusive": 34099,
+    "n_trajectories": 100,
+    "same_fixed_graph_for_all_regimes": true,
+    "one_hidden_WB_ledger_reused_for_all_15_queries": true,
+    "seed_bank_independent_of_step0_and_prediction_seed_banks": true,
+    "generate_only_after_prediction_freeze": true
+  },
+  "evaluation": {
+    "headline_figure": "For each rho, compare WB/M0/M1/M2 over H for G0, G1 and G2 using identical graph and provider process.",
+    "point_prediction_metrics": [
+      "MAE",
+      "RMSE",
+      "bias",
+      "max_abs_error"
+    ],
+    "report_per_regime": true,
+    "report_per_rho": true,
+    "report_whole_battery": true,
+    "M2_range_is_confidence_interval": false
+  },
+  "firewall": {
+    "change_graph_across_G0_G1_G2": false,
+    "change_provider_process_across_G0_G1_G2": false,
+    "change_workload_across_G0_G1_G2": false,
+    "change_I1": false,
+    "change_M1_parameters": false,
+    "change_M2_candidates_or_weights": false,
+    "use_step0_WB_for_prediction_method_selection": false,
+    "use_final_WB_for_any_selection_or_repair": false,
+    "reuse_PPG_GP_DVI": false,
+    "reuse_PPG_code_or_data": false
+  },
+  "next_gate": "Run prepare-only. It must prove exact fixed-G0 graph reuse, D300/I1 provider-process identity, frozen support, scale grid, regime bands, and disjoint seed banks without generating Step-0 white-box evidence."
+}
