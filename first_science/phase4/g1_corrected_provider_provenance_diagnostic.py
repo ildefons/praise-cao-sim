@@ -196,6 +196,37 @@ def _subset_original_g1_ledger(
     return subset
 
 
+def _snap_frame_to_reference_grid(
+    frame: pd.DataFrame,
+    *,
+    rhos: list[float],
+    horizons: list[float],
+    label: str,
+) -> pd.DataFrame:
+    """Normalize CSV-round-tripped rho/H values onto one canonical grid."""
+    out = frame.copy()
+    rho_ref = np.asarray(sorted(float(v) for v in rhos), dtype=float)
+    h_ref = np.asarray(sorted(float(v) for v in horizons), dtype=float)
+
+    def snap(values: pd.Series, reference: np.ndarray, axis: str) -> pd.Series:
+        snapped: list[float] = []
+        for raw in values.astype(float).to_numpy():
+            matches = np.flatnonzero(np.abs(reference - float(raw)) <= TOL)
+            if len(matches) != 1:
+                raise RuntimeError(
+                    f"{label}: {axis}={raw!r} has {len(matches)} matches "
+                    f"within atol={TOL}"
+                )
+            snapped.append(float(reference[int(matches[0])]))
+        return pd.Series(snapped, index=values.index, dtype=float)
+
+    out["rho_global"] = snap(out["rho_global"], rho_ref, "rho_global")
+    out["horizon"] = snap(out["horizon"], h_ref, "horizon")
+    if out.duplicated(["rho_global", "horizon"]).any():
+        raise RuntimeError(f"{label}: support snapping created duplicate points")
+    return out
+
+
 def _wb_curves(
     ledger: pd.DataFrame,
     *,
@@ -427,18 +458,34 @@ def main() -> None:
         workload=workload,
         output_column="sigma_wb_corrected_n20",
     )
-    curves = original_curve.merge(
-        corrected_curve,
-        on=["rho_global", "horizon"],
-        how="inner",
-        validate="one_to_one",
-    ).merge(
+    # CSV serialization can move values such as rho=0.9833333333333333 by
+    # one representable float. Scientific support is the frozen I1 grid, so
+    # normalize all join keys to that grid before exact merges.
+    original_curve = _snap_frame_to_reference_grid(
+        original_curve, rhos=rhos, horizons=horizons, label="original G1 WB"
+    )
+    corrected_curve = _snap_frame_to_reference_grid(
+        corrected_curve, rhos=rhos, horizons=horizons, label="corrected G1 WB"
+    )
+    frozen_for_join = _snap_frame_to_reference_grid(
         frozen_predictions[
             [
                 "rho_global", "horizon", "sigma_m0", "sigma_m1",
                 "sigma_m2_mean", "sigma_m2_min", "sigma_m2_max",
             ]
         ],
+        rhos=rhos,
+        horizons=horizons,
+        label="frozen G1 predictions",
+    )
+
+    curves = original_curve.merge(
+        corrected_curve,
+        on=["rho_global", "horizon"],
+        how="inner",
+        validate="one_to_one",
+    ).merge(
+        frozen_for_join,
         on=["rho_global", "horizon"],
         how="inner",
         validate="one_to_one",
