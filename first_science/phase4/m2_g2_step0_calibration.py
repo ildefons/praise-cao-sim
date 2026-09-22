@@ -23,6 +23,7 @@ contract is required.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import sys
@@ -69,10 +70,10 @@ from m2_g2_public_adapter import (  # noqa: E402
     validate_g2_public_graph_spec,
 )
 
-EXPECTED_CONTRACT_STATUS = "FROZEN_PHASE4_M2_G2_STEP0_CALIBRATED_VALIDATION_V1"
-SELECTION_STATUS = "FROZEN_PHASE4_M2_G2_STEP0_SELECTION_V1"
-CALIBRATION_COMPLETE_STATUS = "FROZEN_PHASE4_M2_G2_STEP0_CALIBRATION_COMPLETE_V1"
-CALIBRATION_FAILED_STATUS = "PHASE4_M2_G2_STEP0_CALIBRATION_FAILED_V1"
+EXPECTED_CONTRACT_STATUS = "FROZEN_PHASE4_M2_G2_STEP0_CALIBRATED_VALIDATION_V2_MATCHED_PROVIDER"
+SELECTION_STATUS = "FROZEN_PHASE4_M2_G2_STEP0_SELECTION_V2_MATCHED_PROVIDER"
+CALIBRATION_COMPLETE_STATUS = "FROZEN_PHASE4_M2_G2_STEP0_CALIBRATION_COMPLETE_V2_MATCHED_PROVIDER"
+CALIBRATION_FAILED_STATUS = "PHASE4_M2_G2_STEP0_CALIBRATION_FAILED_V2_MATCHED_PROVIDER"
 PROVIDERS = ("ProviderA", "ProviderB", "ProviderC")
 TOL = 1e-12
 
@@ -262,18 +263,67 @@ def _validate_contract(
     return l_grid, c_grid, diagnostic_horizons
 
 
+def _provider_process_sha256(payload: dict[str, Any]) -> str:
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def _validate_hidden_model(
     contract: dict[str, Any],
     *,
     phase1_config_path: Path,
 ) -> tuple[dict[str, GraphProviderSurrogate], float, dict[str, Any]]:
+    """Resolve G2 hidden providers from final Phase-1/I1 provenance.
+
+    The stale D330 confirmation field in config_phase1_discovery_v1.json is
+    explicitly not a provider selector.
+    """
     phase1 = _read_json(phase1_config_path)
+    phase1_confirmation_path = PHASE1 / "config_phase1_v2_confirmation_v1.json"
+    phase1_freeze_path = PHASE1 / "phase1_v2_confirmation_freeze_manifest_v1.json"
+    i1_region_path = PHASE2 / "config_phase2_i1_acquisition_v1.json"
+    i1_sigma_path = PHASE2 / "config_phase2_i1_sigma_acquisition_v1.json"
+
+    phase1_confirmation = _read_json(phase1_confirmation_path)
+    phase1_freeze = _read_json(phase1_freeze_path)
+    i1_region = _read_json(i1_region_path)
+    i1_sigma = _read_json(i1_sigma_path)
     hidden = dict(contract["hidden_whitebox_model"])
 
-    if str(hidden["case_id"]) not in str(
-        phase1["confirmation"]["frozen_after_selection"]
-    ):
-        raise RuntimeError("Phase-1 config does not confirm the frozen G2 hidden case")
+    declared_ids = {
+        "contract": str(hidden["case_id"]),
+        "phase1_confirmation_protocol": str(
+            phase1_confirmation["physical_setting_id"]
+        ),
+        "phase1_confirmation_freeze": str(phase1_freeze["physical_setting_id"]),
+        "i1_region_acquisition": str(
+            i1_region["frozen_physical_reference"]["physical_setting_id"]
+        ),
+        "i1_sigma_acquisition": str(
+            i1_sigma["frozen_physical_reference"]["physical_setting_id"]
+        ),
+    }
+    if len(set(declared_ids.values())) != 1:
+        raise RuntimeError(
+            "G2 matched-provider provenance invariant failed: "
+            + "; ".join(f"{key}={value}" for key, value in declared_ids.items())
+        )
+    if str(hidden["case_id"]) != "D300000000_d0.200":
+        raise RuntimeError("corrected G2 hidden provider process must be D300000000_d0.200")
+    if phase1_freeze.get("scientific_confirmation_pass") is not True:
+        raise RuntimeError("final Phase-1 v2 confirmation is not frozen PASS")
+
+    region_ref = dict(i1_region["frozen_physical_reference"])
+    sigma_ref = dict(i1_sigma["frozen_physical_reference"])
+    center = float(hidden["center_instruction_mean"])
+    delta = float(hidden["dispersion"])
+    for label, ref in (("I1 region", region_ref), ("I1 sigma", sigma_ref)):
+        if abs(float(ref["center_instruction_mean"]) - center) > TOL:
+            raise RuntimeError(f"{label} center differs from G2 hidden contract")
+        if abs(float(ref["dispersion"]) - delta) > TOL:
+            raise RuntimeError(f"{label} dispersion differs from G2 hidden contract")
 
     family = dict(phase1["provider_family"])
     checks = {
@@ -284,10 +334,16 @@ def _validate_hidden_model(
     }
     for key, expected in checks.items():
         if abs(float(family[key]) - expected) > TOL:
-            raise RuntimeError(f"Phase-1 hidden-model {key} differs from G2 contract")
+            raise RuntimeError(
+                f"Phase-1 provider-family {key} differs from corrected G2 contract"
+            )
 
-    center = float(hidden["center_instruction_mean"])
-    delta = float(hidden["dispersion"])
+    workload_period = float(phase1["workload"]["period"])
+    if abs(float(i1_region["workload"]["period"]) - workload_period) > TOL:
+        raise RuntimeError("I1 region workload differs from Phase-1 workload")
+    if abs(float(i1_sigma["workload"]["period"]) - workload_period) > TOL:
+        raise RuntimeError("I1 sigma workload differs from Phase-1 workload")
+
     derived_instructions = {
         "ProviderA": center * (1.0 - delta),
         "ProviderB": center,
@@ -299,12 +355,13 @@ def _validate_hidden_model(
     }
     for provider in PROVIDERS:
         if abs(derived_instructions[provider] - frozen_instructions[provider]) > TOL:
-            raise RuntimeError(f"{provider}: hidden instruction mean mismatch")
+            raise RuntimeError(f"{provider}: corrected hidden instruction mean mismatch")
 
     x = float(hidden["execution_fraction_x"])
     ipt = float(hidden["effective_IPT"])
     cv = float(hidden["instruction_cv"])
     cost_rate = float(hidden["cost_rate"])
+    quality = float(hidden["quality"])
     surrogates = {
         provider: GraphProviderSurrogate(
             mean_service_time=float(derived_instructions[provider]) * x / ipt,
@@ -312,6 +369,16 @@ def _validate_hidden_model(
             service_cv=cv,
         )
         for provider in PROVIDERS
+    }
+    canonical_provider_process = {
+        "physical_setting_id": str(hidden["case_id"]),
+        "provider_instruction_means": derived_instructions,
+        "instruction_cv": cv,
+        "effective_IPT": ipt,
+        "cost_rate": cost_rate,
+        "execution_fraction_x": x,
+        "quality": quality,
+        "workload_period": workload_period,
     }
     provenance = {
         "case_id": str(hidden["case_id"]),
@@ -322,12 +389,26 @@ def _validate_hidden_model(
         "effective_IPT": ipt,
         "cost_rate": cost_rate,
         "execution_fraction_x": x,
-        "quality": float(hidden["quality"]),
+        "quality": quality,
+        "workload_period": workload_period,
         "derived_mean_service_times": {
             provider: float(surrogates[provider].mean_service_time)
             for provider in PROVIDERS
         },
+        "canonical_provider_process": canonical_provider_process,
+        "provider_process_sha256": _provider_process_sha256(
+            canonical_provider_process
+        ),
+        "matched_i1_provider_process": True,
+        "provenance_ids": declared_ids,
         "phase1_config_sha256": _sha256(phase1_config_path),
+        "phase1_confirmation_protocol_sha256": _sha256(
+            phase1_confirmation_path
+        ),
+        "phase1_confirmation_freeze_sha256": _sha256(phase1_freeze_path),
+        "i1_region_acquisition_sha256": _sha256(i1_region_path),
+        "i1_sigma_acquisition_sha256": _sha256(i1_sigma_path),
+        "stale_phase1_discovery_frozen_after_selection_used": False,
     }
     return surrogates, x, provenance
 
@@ -1415,12 +1496,12 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run frozen G2 Step-0 admissibility-region calibration"
+        description="Run corrected matched-provider G2 Step-0 admissibility-region calibration"
     )
     parser.add_argument(
         "--contract",
         type=Path,
-        default=HERE / "config_phase4_m2_g2_step0_calibrated_validation_v1.json",
+        default=HERE / "config_phase4_m2_g2_step0_calibrated_validation_v2_matched_provider.json",
     )
     parser.add_argument(
         "--phase1-config",
@@ -1444,7 +1525,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=HERE / "results" / "m2_g2_step0_calibration_v1",
+        default=HERE / "results" / "m2_g2_step0_calibration_v2_matched_provider",
     )
     stages = parser.add_mutually_exclusive_group(required=True)
     stages.add_argument("--prepare-only", action="store_true")
