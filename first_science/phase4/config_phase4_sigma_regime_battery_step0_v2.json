@@ -1,0 +1,155 @@
+{
+  "status": "FROZEN_PHASE4_SIGMA_REGIME_BATTERY_STEP0_V2",
+  "freeze_date": "2026-09-22",
+  "supersedes_for_final_battery": "config_phase4_sigma_regime_battery_step0_v1.json",
+  "reason_for_v2": "V1 defined regime membership by requiring every one of 37 finite-N sigma estimates on H=60..240 to remain inside the nominal regime interval on an independent N=100 confirmation bank. Four of 15 queries missed only the upper edge by 0.01..0.04. This turns an intended regime-level design criterion into an extreme-value test over many noisy points. V2 defines the regime by the mean survival over the diagnostic horizon window and separately requires large mean separation between regimes.",
+  "evidence_policy": {
+    "v1_selection_seeds_32000_32099": "development/calibration evidence",
+    "v1_confirmation_seeds_32100_32199": "development/calibration evidence after V1 failed",
+    "pooled_development_n": 200,
+    "fresh_v2_confirmation_seeds": "32200..32399",
+    "v1_data_are_not_independent_confirmation_for_v2": true,
+    "no_v1_step0_evidence_may_be_used_for_M0_M1_M2_fit_selection_or_repair": true
+  },
+  "fixed_graph": {
+    "condition_id": "FIXED_G0_PARALL_GRAPH_FOR_SIGMA_REGIMES_V1",
+    "logical_graph": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "source": "../phase3/config_phase3_m0_contract_v1.json::phase1_benchmark_adapter",
+    "network_invariant": "exact frozen G0 symmetric network embedding, PR=0.001 s",
+    "graph_changed_across_G0_G1_G2": false,
+    "workload_changed_across_G0_G1_G2": false,
+    "provider_process_changed_across_G0_G1_G2": false
+  },
+  "method_freeze": {
+    "I1_unchanged": true,
+    "M0_semantics_unchanged": true,
+    "M1_parameters_unchanged": true,
+    "M2_provider_members_unchanged": true,
+    "M2_joint_members": 27,
+    "M2_member_weight": "1/27",
+    "M1_is_M2_member": false,
+    "step0_may_read_or_run_M0_M1_M2": false
+  },
+  "hidden_whitebox_model": {
+    "case_id": "D300000000_d0.200",
+    "center_instruction_mean": 300000000,
+    "dispersion": 0.2,
+    "provider_instruction_means": {
+      "ProviderA": 240000000,
+      "ProviderB": 300000000,
+      "ProviderC": 360000000
+    },
+    "instruction_cv": 0.3,
+    "effective_IPT": 1000000000,
+    "cost_rate": 3,
+    "execution_fraction_x": 0.5,
+    "quality": 0.5,
+    "matched_to_frozen_I1": true,
+    "stale_phase1_discovery_selector_forbidden": true
+  },
+  "step0_calibration": {
+    "regime_statistic": "mean sigma over every frozen horizon H=60..240 inclusive",
+    "diagnostic_horizon_window": {
+      "minimum_horizon_seconds": 60,
+      "maximum_horizon_seconds": 240,
+      "use_every_frozen_grid_point_in_window": true
+    },
+    "candidate_family": {
+      "base": "For each rho, forward-compose the frozen public I1 A_i(rho) through the exact fixed G0 graph.",
+      "scalar_tightness_rule": "A_G(s,rho)=(s*l_base(rho),s*c_base(rho),q_base(rho))",
+      "scale_grid": {
+        "minimum": 0.5,
+        "maximum": 2,
+        "step": 0.01
+      }
+    },
+    "regimes": {
+      "G0": {
+        "mean_sigma_lower": 0.95,
+        "mean_sigma_upper": 1,
+        "target_center": 0.975,
+        "interpretation": "nominal/high-dependability"
+      },
+      "G1": {
+        "mean_sigma_lower": 0.75,
+        "mean_sigma_upper": 0.9,
+        "target_center": 0.825,
+        "interpretation": "intermediate/degraded"
+      },
+      "G2": {
+        "mean_sigma_lower": 0.4,
+        "mean_sigma_upper": 0.75,
+        "target_center": 0.575,
+        "interpretation": "stress/low-survival"
+      }
+    },
+    "minimum_adjacent_mean_sigma_gap": 0.1,
+    "scale_order_required": "s_G2 < s_G1 < s_G0 for every rho",
+    "development_selection": {
+      "source_v1_output_directory": "results/sigma_regime_step0_calibration_v1",
+      "required_seed_banks": [
+        "32000..32099",
+        "32100..32199"
+      ],
+      "pooled_n_trajectories": 200,
+      "selection_rule_per_rho_and_regime": {
+        "feasible": "mean sigma on H=60..240 lies inside the regime interval inclusive",
+        "primary": "minimize absolute difference between mean sigma and frozen target center",
+        "tie_breakers_in_order": [
+          "maximize mean-sigma margin to nearest regime boundary",
+          "minimize absolute log(scale)",
+          "smallest scale"
+        ]
+      },
+      "joint_gate_per_rho": [
+        "s_G2 < s_G1 < s_G0",
+        "mean_sigma_G0 - mean_sigma_G1 >= 0.10",
+        "mean_sigma_G1 - mean_sigma_G2 >= 0.10"
+      ]
+    },
+    "fresh_confirmation": {
+      "seed_start": 32200,
+      "seed_end_inclusive": 32399,
+      "n_trajectories": 200,
+      "evaluate_only_development_selected_queries": true,
+      "no_reselection": true,
+      "per_query_gate": "mean sigma on H=60..240 remains inside its frozen regime interval",
+      "joint_gate_per_rho": [
+        "mean_sigma_G0 - mean_sigma_G1 >= 0.10",
+        "mean_sigma_G1 - mean_sigma_G2 >= 0.10"
+      ],
+      "all_15_queries_must_pass": true
+    },
+    "failure_policy": "If V2 fresh confirmation fails, stop. Do not modify V2 after seeing 32200..32399; any redesign must be separately named."
+  },
+  "blind_prediction_protocol_after_calibration": {
+    "prediction_seed_start": 33000,
+    "prediction_seed_end_inclusive": 33099,
+    "n_prediction_trajectories_per_variant": 100,
+    "same_fixed_graph_for_all_regimes": true,
+    "one_prediction_ledger_per_variant_reused_for_all_15_queries": true,
+    "common_random_numbers_across_M1_and_all_M2_members": true,
+    "M0_applicability": "Apply frozen boundary-containment precondition separately to each query; NOT_APPLICABLE if violated.",
+    "predictions_must_be_hash_frozen_before_final_WB": true
+  },
+  "final_whitebox_evaluation": {
+    "trajectory_seed_start": 34000,
+    "trajectory_seed_end_inclusive": 34099,
+    "n_trajectories": 100,
+    "same_fixed_graph_for_all_regimes": true,
+    "one_hidden_WB_ledger_reused_for_all_15_queries": true,
+    "generate_only_after_prediction_freeze": true
+  },
+  "firewall": {
+    "graph_change": false,
+    "provider_change": false,
+    "workload_change": false,
+    "I1_change": false,
+    "M1_change": false,
+    "M2_change": false,
+    "use_step0_WB_for_method_selection": false,
+    "use_final_WB_for_method_selection": false,
+    "reuse_PPG_GP_DVI": false,
+    "reuse_PPG_code_or_data": false
+  }
+}
