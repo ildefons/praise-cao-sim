@@ -39,7 +39,7 @@ The final Phase-1 fresh-confirmation G0 benchmark used:
 ```
 D300000000_d0.200
 N = 100
-seeds = 5000..5099
+seeds = 7000..7099
 scientific_confirmation_pass = true
 ```
 
@@ -336,6 +336,21 @@ The corrected runner now:
 
 A zero-simulation `--preflight-only` mode is available and must pass before any corrected WB generation.
 
+This preflight has now passed. Observed:
+
+```
+physical_setting_id = D300000000_d0.200
+ProviderA mean instructions = 240000000
+ProviderB mean instructions = 300000000
+ProviderC mean instructions = 360000000
+derived mean service times = 0.12, 0.15, 0.18 s
+provider_process_sha256 = a4942e4a5cc4ebbe018e854e4e0005b6437c408cde3c1de8366a95e4f57281a8
+matched_i1_provider_process = true
+stale_phase1_discovery_frozen_after_selection_used = false
+```
+
+Conclusion: the corrected G1 runner is provenance-matched before any fresh WB simulation.
+
 The original G1 v1 output remains reclassified as a provider-drift/stale-information stress result. It is not overwritten.
 
 
@@ -349,15 +364,25 @@ config_phase4_m2_g2_step0_calibrated_validation_v2_matched_provider.json
 
 The G2 Step-0 runner now resolves hidden-provider provenance from the final Phase-1 v2 confirmation and both I1 acquisition contracts, requires all of them to agree on `D300000000_d0.200`, records a canonical provider-process hash, and does not use the stale D330 discovery field as a selector. No G2 white-box simulation has been run under the corrected contract yet.
 
+The zero-simulation G2 `--prepare-only` gate has now passed. It independently reports the same canonical provider-process hash:
+
+```
+provider_process_sha256 = a4942e4a5cc4ebbe018e854e4e0005b6437c408cde3c1de8366a95e4f57281a8
+matched_i1_provider_process = true
+stale_phase1_discovery_frozen_after_selection_used = false
+```
+
+The G2 base-region construction and frozen Step-0 grids also validated without generating calibration WB data.
+
 ## 10. Current execution status
 
 ```
 G0 = retained, matched D300 reference, DD-1 independently verified, provenance enforcement still needs repair
 G1 original = reclassified as mismatched-provider stress diagnostic
-G1 matched-provider v2 = implementation repaired; preflight/fresh validation pending
+G1 matched-provider v2 = implementation repaired; zero-simulation provenance preflight PASS; fresh validation pending
 G1 corrected N20 = due-diligence evidence only
 G2 v1 = BLOCKED as stale-D330 contract
-G2 v2 matched-provider = implementation repaired; prepare/preflight pending
+G2 v2 matched-provider = implementation repaired; zero-simulation prepare/provenance gate PASS; Step-0 WB calibration not yet run
 M1/M2 = not condemned; further due diligence pending
 M3 = deferred
 ```
