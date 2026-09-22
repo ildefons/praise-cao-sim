@@ -1,0 +1,77 @@
+{
+  "status": "FROZEN_PHASE4_SIGMA_REGIME_BLIND_PREDICTION_V1",
+  "freeze_date": "2026-09-22",
+  "scientific_stage": "Blind M0/M1/M2 prediction on the frozen fixed-graph G0/G1/G2 sigma-regime battery",
+  "step0": {
+    "contract": "config_phase4_sigma_regime_battery_step0_v2.json",
+    "output_directory": "results/sigma_regime_step0_calibration_v2",
+    "required_manifest": "sigma_regime_v2_calibration_manifest.json",
+    "required_manifest_status": "FROZEN_PHASE4_SIGMA_REGIME_CALIBRATION_PASS_V2",
+    "frozen_regions": "sigma_regime_v2_selected_regions_frozen.csv",
+    "required_n_queries": 15
+  },
+  "fixed_graph": {
+    "source": "../phase3/config_phase3_m0_contract_v1.json::phase1_benchmark_adapter",
+    "logical_graph": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "exact_G0_symmetric_graph": true,
+    "graph_change_across_regimes": false,
+    "PR_seconds": 0.001
+  },
+  "methods": {
+    "I1": "unchanged frozen rho-conditioned public cards",
+    "M0": {
+      "semantics": "unchanged frozen same-rho product baseline",
+      "applicability": "induced public-I1 G0 boundary must be contained in requested calibrated A_G",
+      "not_applicable_behavior": "report NOT_APPLICABLE and NaN as operational M0 prediction; retain raw local-product only as explicitly labeled diagnostic"
+    },
+    "M1": "unchanged confirmed BASE_M1 provider surrogates propagated through fixed G0",
+    "M2": {
+      "provider_members_unchanged": true,
+      "joint_members": 27,
+      "weight_each": "1/27",
+      "M1_is_member": false,
+      "mean": "arithmetic mean across 27 frozen joint members",
+      "ambiguity_range": "member min/max; not a confidence interval"
+    }
+  },
+  "prediction_simulation": {
+    "seed_start": 33000,
+    "seed_end_inclusive": 33099,
+    "n_trajectories_per_variant": 100,
+    "n_M2_variants": 27,
+    "n_M1_reference_variants": 1,
+    "n_total_variants": 28,
+    "common_random_numbers_across_all_variants": true,
+    "graph_ledger_independent_of_A_G_query": true,
+    "one_ledger_per_variant_reused_for_all_15_queries": true,
+    "resume_per_variant": true
+  },
+  "frozen_inputs": {
+    "semantic_contract": "config_phase4_m2_joint_ensemble_semantics_v1.json",
+    "b5_contract": "config_phase4_m2_b5_joint_ensemble_graph_v1.json",
+    "a4_confirmation_manifest": "results/m2_a4_portfolio_confirmation_v1/m2_a4_portfolio_confirmation_manifest_v1.json",
+    "a4_final_portfolio": "results/m2_a4_portfolio_confirmation_v1/m2_a4_final_confirmed_portfolio.csv",
+    "a4_replay_results": "results/m2_a4_portfolio_confirmation_v1/m2_a4_replay_results.csv",
+    "m1_confirmation_manifest": "results/m2_a_confirmation_v1/m2_a_confirmation_manifest_v1.json",
+    "m1_anchor_candidates": "results/m2_a_confirmation_v1/m2_a_confirmed_compatible_candidates.csv",
+    "m1_contract": "../phase3/config_phase3_m1_contract_v2.json",
+    "m0_contract": "../phase3/config_phase3_m0_contract_v1.json",
+    "public_i1_manifest": "../phase2/results/i1_cards_v2_rho_conditioned/public/i1_rho_conditioned_manifest_v1.json"
+  },
+  "required_outputs": [
+    "sigma_regime_variant_design.csv",
+    "sigma_regime_member_curves.csv",
+    "sigma_regime_blind_predictions.csv",
+    "sigma_regime_prediction_manifest_v1.json"
+  ],
+  "firewall": {
+    "final_whitebox_seeds_34000_34099_must_not_be_generated_or_read": true,
+    "step0_WB_may_only_define_frozen_queries": true,
+    "no_method_refit": true,
+    "no_candidate_change": true,
+    "no_weight_change": true,
+    "no_posthoc_member_selection": true,
+    "PPG_firewall_preserved": true
+  },
+  "next_gate": "Hash-freeze all blind predictions. Only then may the separately frozen final-evaluation protocol generate D300 white-box seeds 34000..34099."
+}
