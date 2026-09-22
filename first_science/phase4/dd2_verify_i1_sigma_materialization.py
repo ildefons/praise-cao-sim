@@ -7,8 +7,9 @@ For each provider:
 1. verify the frozen private T_i^sigma ledger hash/row/trajectory count;
 2. verify the public card/card-surface hashes against the public manifest;
 3. take the already-public frozen A_i(rho_region) regions as fixed inputs;
-4. recompute the complete sigma_i(A_i,H;rho_query) surface directly from the
-   private T_i^sigma ledger using the authoritative SLA accounting code;
+4. independently recompute the complete sigma_i(A_i,H;rho_query) surface
+   directly from private T_i^sigma arrays, without calling the original
+   materialization routine;
 5. compare every published point, count, CI and boundary field against the
    recomputed surface.
 
@@ -36,7 +37,6 @@ PHASE2 = FIRST_SCIENCE / "phase2"
 if str(PHASE2) not in sys.path:
     sys.path.insert(0, str(PHASE2))
 
-from i1_provider_card import build_i1_provider_card  # noqa: E402
 from i1_rho_conditioned_card import load_rho_conditioned_i1_provider_card  # noqa: E402
 
 PROVIDERS = ("ProviderA", "ProviderB", "ProviderC")
@@ -88,42 +88,138 @@ def _normalize_surface(
     return out.sort_values(keys).reset_index(drop=True)
 
 
+def _wilson_interval(successes: int, trials: int, z: float = 1.959963984540054) -> tuple[float, float]:
+    p = float(successes) / float(trials)
+    z2 = z * z
+    denom = 1.0 + z2 / float(trials)
+    center = (p + z2 / (2.0 * float(trials))) / denom
+    half = (
+        z
+        * np.sqrt(
+            p * (1.0 - p) / float(trials)
+            + z2 / (4.0 * float(trials) * float(trials))
+        )
+        / denom
+    )
+    return max(0.0, float(center - half)), min(1.0, float(center + half))
+
+
 def _recompute_surface(
     *,
     provider: str,
     sigma_ledger: pd.DataFrame,
     public_metadata: dict[str, Any],
 ) -> pd.DataFrame:
+    """Independent vectorized rematerialization of the public sigma surface.
+
+    This deliberately does not call build_i1_provider_card or the original
+    materialization routine. It reproduces the frozen SLA semantics directly
+    from the ledger arrays, which makes DD-2 both faster and less circular.
+    """
     regions = [dict(v) for v in public_metadata["rho_conditioned_regions"]]
-    query_rhos = [float(v) for v in public_metadata["supported_query_rho_values"]]
-    horizons = [float(v) for v in public_metadata["supported_horizons"]]
+    query_rhos = np.asarray(
+        [float(v) for v in public_metadata["supported_query_rho_values"]],
+        dtype=float,
+    )
+    horizons = np.asarray(
+        [float(v) for v in public_metadata["supported_horizons"]],
+        dtype=float,
+    )
     workload = dict(public_metadata["workload_contract"])
     stop_time = float(workload["horizon_max"])
+    accounting_origin = float(workload["accounting_origin"])
+    if abs(accounting_origin) > TOL:
+        raise RuntimeError("DD-2 expects frozen accounting_origin=0")
 
-    _, recomputed = build_i1_provider_card(
-        provider_id=provider,
-        private_provider_ledgers=sigma_ledger,
-        local_regions=regions,
-        rho_values=query_rhos,
-        horizons=horizons,
-        stop_time=stop_time,
-        workload_contract={
-            "period": float(workload["period"]),
-            "accounting_origin": float(workload["accounting_origin"]),
-            "horizon_max": stop_time,
-        },
-    )
+    trajectories = [
+        frame.sort_values(["emission", "request_id"]).copy()
+        for _, frame in sigma_ledger.groupby("trajectory", sort=True)
+    ]
+    n_traj = len(trajectories)
+    if n_traj <= 0:
+        raise RuntimeError(f"{provider}: no T_i^sigma trajectories")
 
-    region_rho_by_id = {
-        str(region["region_id"]): float(region["region_rho"])
-        for region in regions
-    }
-    recomputed.insert(
-        recomputed.columns.get_loc("region_id") + 1,
-        "region_rho",
-        recomputed["region_id"].map(region_rho_by_id).astype(float),
-    )
-    return recomputed
+    rows: list[dict[str, Any]] = []
+    for region in regions:
+        l_max = float(region["l_max"])
+        c_max = float(region["c_max"])
+        q_min = float(region["q_min"])
+
+        # pass_counts[rho_index, horizon_index]
+        pass_counts = np.zeros((len(query_rhos), len(horizons)), dtype=np.int32)
+
+        for frame in trajectories:
+            emission = frame["emission"].astype(float).to_numpy()
+            completion = pd.to_numeric(
+                frame["completion"], errors="coerce"
+            ).to_numpy(dtype=float)
+            cost = pd.to_numeric(frame["C"], errors="coerce").to_numpy(dtype=float)
+            quality = pd.to_numeric(frame["Q"], errors="coerce").to_numpy(dtype=float)
+
+            deadline = emission + l_max
+            completed_in_time = np.isfinite(completion) & (
+                completion <= deadline + TOL
+            )
+            decision_time = np.where(completed_in_time, completion, deadline)
+
+            # Only decisions observable by the frozen simulation stop can ever
+            # enter c_i(A_i,H) for H<=stop_time.
+            observable = decision_time <= stop_time + TOL
+            dt = decision_time[observable]
+            compliant = (
+                completed_in_time[observable]
+                & np.isfinite(cost[observable])
+                & np.isfinite(quality[observable])
+                & (cost[observable] <= c_max)
+                & (quality[observable] >= q_min)
+            )
+
+            order = np.argsort(dt, kind="mergesort")
+            dt = dt[order]
+            compliant = compliant[order].astype(np.int32)
+            cumulative_compliant = np.cumsum(compliant, dtype=np.int32)
+
+            n_decided = np.searchsorted(
+                dt, horizons + TOL, side="right"
+            ).astype(np.int32)
+            n_compliant = np.zeros(len(horizons), dtype=np.int32)
+            nonzero = n_decided > 0
+            n_compliant[nonzero] = cumulative_compliant[n_decided[nonzero] - 1]
+
+            fractions = np.ones(len(horizons), dtype=float)
+            fractions[nonzero] = (
+                n_compliant[nonzero].astype(float)
+                / n_decided[nonzero].astype(float)
+            )
+            pass_counts += (
+                fractions[None, :] + TOL >= query_rhos[:, None]
+            ).astype(np.int32)
+
+        for ri, rho in enumerate(query_rhos):
+            for hi, horizon in enumerate(horizons):
+                success = int(pass_counts[ri, hi])
+                lower, upper = _wilson_interval(success, n_traj)
+                rows.append(
+                    {
+                        "provider_id": provider,
+                        "region_id": str(region["region_id"]),
+                        "region_rho": float(region["region_rho"]),
+                        "l_max": l_max,
+                        "c_max": c_max,
+                        "q_min": q_min,
+                        "rho": float(rho),
+                        "horizon": float(horizon),
+                        "sigma_hat": float(success / n_traj),
+                        "sigma_ci95_lower": float(lower),
+                        "sigma_ci95_upper": float(upper),
+                        "n_success": success,
+                        "n_trajectories": n_traj,
+                    }
+                )
+
+    return pd.DataFrame(rows).sort_values(
+        ["region_id", "rho", "horizon"]
+    ).reset_index(drop=True)
 
 
 def _compare_surfaces(
@@ -423,7 +519,7 @@ def main() -> None:
             if overall_pass
             else "DD2_I1_SIGMA_MATERIALIZATION_FAIL"
         ),
-        "scientific_role": "read-only deterministic rematerialization audit; zero simulation",
+        "scientific_role": "read-only independent vectorized rematerialization audit; zero simulation",
         "T_i_sigma_seed_start": int(expected_seeds[0]),
         "T_i_sigma_seed_end_inclusive": int(expected_seeds[-1]),
         "T_i_sigma_n_trajectories": len(expected_seeds),
@@ -435,7 +531,7 @@ def main() -> None:
         "new_simulation_run": False,
         "regions_refit": False,
         "regions_source": "already-frozen public rho_conditioned_regions",
-        "sigma_recomputed_from": "frozen private T_i^sigma only",
+        "sigma_recomputed_from": "frozen private T_i^sigma only; independent vectorized implementation",
     }
     result_path = output / "dd2_i1_sigma_materialization_result.json"
     result_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
