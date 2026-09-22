@@ -135,6 +135,23 @@ def _validate_graph_intervention(
         if float(g0_net[key0]) != float(g1_net[key1]):
             raise RuntimeError(f"G0/G1 network field differs unexpectedly: {key0}")
 
+    # G1 must preserve the root and join propagation terms; only provider
+    # branch propagation delays are allowed to change.
+    g0_pr = float(g0_net["PR"])
+    g1_pr = dict(g1_net["PR_seconds"])
+    if abs(float(g1_pr["Source_to_Fpre"]) - g0_pr) > TOL:
+        raise RuntimeError("G1 changed Source->Fpre propagation unexpectedly")
+    if abs(float(g1_pr["Fpre_to_Fpost_join"]) - g0_pr) > TOL:
+        raise RuntimeError("G1 changed join propagation unexpectedly")
+    expected_provider_pr = {
+        "Fpre_to_ProviderA": 0.005,
+        "Fpre_to_ProviderB": 0.015,
+        "Fpre_to_ProviderC": 0.001,
+    }
+    for key, expected in expected_provider_pr.items():
+        if abs(float(g1_pr[key]) - expected) > TOL:
+            raise RuntimeError(f"unexpected G1 provider-branch propagation for {key}")
+
     g0_fixed = dict(g0["fixed_service_model"])
     g1_fixed = dict(g1["fixed_service_model"])
     for key in (
@@ -313,7 +330,6 @@ def _generate_paired_g1_wb(args: argparse.Namespace) -> None:
         "ledger_sha256": _sha256(ledger_path),
         "n_request_rows": int(len(ledger)),
         "checkpoint_reused": bool(reused),
-        "audit_contract_sha256": _sha256(args.audit_contract.resolve()),
         "audit_contract_sha256": _sha256(args.audit_contract.resolve()),
         "git_commit": _git_head(FIRST_SCIENCE.parent),
     }
@@ -555,6 +571,13 @@ def _plot_absolute(frame: pd.DataFrame, path: Path) -> None:
         x = group["horizon"].astype(float).to_numpy()
         for col, graph in enumerate(("g0", "g1")):
             ax = axes[row, col]
+            ax.fill_between(
+                x,
+                group[f"sigma_m2_min_{graph}"].astype(float).to_numpy(),
+                group[f"sigma_m2_max_{graph}"].astype(float).to_numpy(),
+                alpha=0.15,
+                label="M2 range",
+            )
             ax.plot(x, group[f"sigma_wb_{graph}"], linewidth=2.5, label="WB")
             ax.plot(x, group[f"sigma_m0_{graph}"], linestyle="--", linewidth=1.6, label="M0")
             ax.plot(x, group[f"sigma_m1_{graph}"], linestyle=":", linewidth=1.8, label="M1")
@@ -562,7 +585,7 @@ def _plot_absolute(frame: pd.DataFrame, path: Path) -> None:
             ax.set_ylim(0.0, 1.02)
             ax.grid(True, alpha=0.2)
             ax.set_title(f"{graph.upper()} matched D300, rho={rho:g}")
-    axes[0, 0].legend(frameon=False, fontsize=8, ncol=4, loc="lower left")
+    axes[0, 0].legend(frameon=False, fontsize=8, ncol=5, loc="lower left")
     fig.suptitle("Matched-provider sigma under G0 and G1")
     fig.supxlabel("Horizon H (s)")
     fig.supylabel("sigma")
@@ -656,6 +679,7 @@ def _evaluate(args: argparse.Namespace) -> None:
         [
             "rho_global", "horizon",
             "sigma_whitebox", "sigma_m0", "sigma_m1", "sigma_m2_mean",
+            "sigma_m2_min", "sigma_m2_max",
         ]
     ].rename(
         columns={
@@ -663,18 +687,23 @@ def _evaluate(args: argparse.Namespace) -> None:
             "sigma_m0": "sigma_m0_g0",
             "sigma_m1": "sigma_m1_g0",
             "sigma_m2_mean": "sigma_m2_g0",
+            "sigma_m2_min": "sigma_m2_min_g0",
+            "sigma_m2_max": "sigma_m2_max_g0",
         }
     )
     g1_small = g1_pred[
         [
             "rho_global", "horizon",
             "sigma_m0", "sigma_m1", "sigma_m2_mean",
+            "sigma_m2_min", "sigma_m2_max",
         ]
     ].rename(
         columns={
             "sigma_m0": "sigma_m0_g1",
             "sigma_m1": "sigma_m1_g1",
             "sigma_m2_mean": "sigma_m2_g1",
+            "sigma_m2_min": "sigma_m2_min_g1",
+            "sigma_m2_max": "sigma_m2_max_g1",
         }
     ).merge(
         g1_wb[["rho_global", "horizon", "sigma_whitebox"]].rename(
@@ -751,6 +780,7 @@ def _evaluate(args: argparse.Namespace) -> None:
             "absolute_sigma_plot": absolute_plot.name,
             "delta_sigma_plot": delta_plot.name,
         },
+        "audit_contract_sha256": _sha256(args.audit_contract.resolve()),
         "interpretation_rule": (
             "A method captures graph response to the extent that Delta sigma_method "
             "tracks paired Delta sigma_WB. M0 is expected to have Delta sigma=0 by "
