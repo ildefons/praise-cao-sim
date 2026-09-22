@@ -17,6 +17,7 @@ selection occurs in this file.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
@@ -59,10 +60,10 @@ from m2_g1_public_adapter import (  # noqa: E402
     validate_g1_public_graph_spec,
 )
 
-EXPECTED_CONTRACT_STATUS = "FROZEN_PHASE4_M2_G1_PROSPECTIVE_WHITEBOX_VALIDATION_V1"
+EXPECTED_CONTRACT_STATUS = "FROZEN_PHASE4_M2_G1_MATCHED_PROVIDER_WHITEBOX_VALIDATION_V2"
 EXPECTED_PREDICTION_STATUS = "FROZEN_PHASE4_M2_G1_BLIND_PREDICTIONS_V1"
-EXPECTED_GENERATION_STATUS = "PHASE4_M2_G1_WHITEBOX_GENERATION_COMPLETE_V1"
-EXPECTED_EVALUATION_STATUS = "PHASE4_M2_G1_PROSPECTIVE_VALIDATION_COMPLETE_V1"
+EXPECTED_GENERATION_STATUS = "PHASE4_M2_G1_MATCHED_PROVIDER_WHITEBOX_GENERATION_COMPLETE_V2"
+EXPECTED_EVALUATION_STATUS = "PHASE4_M2_G1_MATCHED_PROVIDER_VALIDATION_COMPLETE_V2"
 TOL = 1e-12
 PROVIDERS = ("ProviderA", "ProviderB", "ProviderC")
 
@@ -165,16 +166,73 @@ def _validate_prediction_freeze(
     return manifest
 
 
+def _provider_process_sha256(payload: dict[str, Any]) -> str:
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def _validate_hidden_model(
     *,
     contract: dict[str, Any],
     phase1_config_path: Path,
+    phase1_confirmation_protocol_path: Path,
+    phase1_confirmation_freeze_path: Path,
+    i1_region_acquisition_path: Path,
+    i1_sigma_acquisition_path: Path,
 ) -> tuple[dict[str, GraphProviderSurrogate], float, dict[str, Any]]:
+    """Resolve the WB provider model from final matched provenance only.
+
+    The historical discovery config contains a stale D330
+    confirmation.frozen_after_selection field. This corrected validator never
+    uses that field. Instead it requires exact agreement among the final
+    Phase-1 v2 confirmation protocol/freeze and both private I1 acquisition
+    contracts.
+    """
     cfg = _read_json(phase1_config_path)
+    phase1_confirmation = _read_json(phase1_confirmation_protocol_path)
+    phase1_freeze = _read_json(phase1_confirmation_freeze_path)
+    i1_region = _read_json(i1_region_acquisition_path)
+    i1_sigma = _read_json(i1_sigma_acquisition_path)
     wb = dict(contract["whitebox_model"])
 
-    if str(wb["case_id"]) not in str(cfg["confirmation"]["frozen_after_selection"]):
-        raise RuntimeError("Phase-1 config does not confirm the frozen hidden physical case")
+    declared_ids = {
+        "contract": str(wb["case_id"]),
+        "phase1_confirmation_protocol": str(
+            phase1_confirmation["physical_setting_id"]
+        ),
+        "phase1_confirmation_freeze": str(phase1_freeze["physical_setting_id"]),
+        "i1_region_acquisition": str(
+            i1_region["frozen_physical_reference"]["physical_setting_id"]
+        ),
+        "i1_sigma_acquisition": str(
+            i1_sigma["frozen_physical_reference"]["physical_setting_id"]
+        ),
+    }
+    if len(set(declared_ids.values())) != 1:
+        raise RuntimeError(
+            "G1 matched-provider provenance invariant failed: "
+            + "; ".join(f"{key}={value}" for key, value in declared_ids.items())
+        )
+
+    if str(wb["case_id"]) != "D300000000_d0.200":
+        raise RuntimeError("corrected G1 WB must use D300000000_d0.200")
+
+    if int(phase1_confirmation.get("n_trajectories", -1)) != 100:
+        raise RuntimeError("final Phase-1 v2 confirmation must be N=100")
+    if phase1_freeze.get("scientific_confirmation_pass") is not True:
+        raise RuntimeError("final Phase-1 v2 confirmation is not frozen PASS")
+
+    region_ref = dict(i1_region["frozen_physical_reference"])
+    sigma_ref = dict(i1_sigma["frozen_physical_reference"])
+    center = float(wb["center_instruction_mean"])
+    delta = float(wb["dispersion"])
+    for label, ref in (("I1 region", region_ref), ("I1 sigma", sigma_ref)):
+        if abs(float(ref["center_instruction_mean"]) - center) > TOL:
+            raise RuntimeError(f"{label} center differs from G1 WB contract")
+        if abs(float(ref["dispersion"]) - delta) > TOL:
+            raise RuntimeError(f"{label} dispersion differs from G1 WB contract")
 
     family = dict(cfg["provider_family"])
     checks = {
@@ -185,10 +243,16 @@ def _validate_hidden_model(
     }
     for key, expected in checks.items():
         if abs(float(family[key]) - expected) > TOL:
-            raise RuntimeError(f"Phase-1 hidden-model {key} differs from G1 WB contract")
+            raise RuntimeError(
+                f"Phase-1 provider-family {key} differs from corrected G1 WB contract"
+            )
 
-    center = float(wb["center_instruction_mean"])
-    delta = float(wb["dispersion"])
+    workload_period = float(cfg["workload"]["period"])
+    if abs(float(i1_region["workload"]["period"]) - workload_period) > TOL:
+        raise RuntimeError("I1 region workload differs from Phase-1 workload")
+    if abs(float(i1_sigma["workload"]["period"]) - workload_period) > TOL:
+        raise RuntimeError("I1 sigma workload differs from Phase-1 workload")
+
     derived_instruction_means = {
         "ProviderA": center * (1.0 - delta),
         "ProviderB": center,
@@ -199,28 +263,48 @@ def _validate_hidden_model(
     }
     for provider in PROVIDERS:
         if abs(
-            derived_instruction_means[provider] - frozen_instruction_means[provider]
+            derived_instruction_means[provider]
+            - frozen_instruction_means[provider]
         ) > TOL:
-            raise RuntimeError(f"{provider}: hidden instruction-mean derivation mismatch")
+            raise RuntimeError(
+                f"{provider}: corrected hidden instruction-mean derivation mismatch"
+            )
 
     x = float(wb["execution_fraction_x"])
     ipt = float(wb["effective_IPT"])
     cv = float(wb["instruction_cv"])
     cost_rate = float(wb["cost_rate"])
+    quality = float(wb["quality"])
     frozen_mu = {
         str(k): float(v)
         for k, v in wb["derived_mean_service_times_for_native_G1_runner"].items()
     }
     surrogates: dict[str, GraphProviderSurrogate] = {}
+    derived_mu: dict[str, float] = {}
     for provider in PROVIDERS:
         mu = float(derived_instruction_means[provider]) * x / ipt
         if abs(mu - frozen_mu[provider]) > TOL:
-            raise RuntimeError(f"{provider}: hidden service-time derivation mismatch")
+            raise RuntimeError(
+                f"{provider}: corrected hidden service-time derivation mismatch"
+            )
+        derived_mu[provider] = float(mu)
         surrogates[provider] = GraphProviderSurrogate(
             mean_service_time=mu,
             cost_rate=cost_rate,
             service_cv=cv,
         )
+
+    canonical_provider_process = {
+        "physical_setting_id": str(wb["case_id"]),
+        "provider_instruction_means": derived_instruction_means,
+        "instruction_cv": cv,
+        "effective_IPT": ipt,
+        "cost_rate": cost_rate,
+        "execution_fraction_x": x,
+        "quality": quality,
+        "workload_period": workload_period,
+    }
+    provider_process_sha256 = _provider_process_sha256(canonical_provider_process)
 
     hidden_manifest = {
         "case_id": str(wb["case_id"]),
@@ -231,12 +315,23 @@ def _validate_hidden_model(
         "effective_IPT": ipt,
         "cost_rate": cost_rate,
         "execution_fraction_x": x,
-        "quality": float(wb["quality"]),
-        "derived_mean_service_times": {
-            provider: float(surrogates[provider].mean_service_time)
-            for provider in PROVIDERS
-        },
+        "quality": quality,
+        "workload_period": workload_period,
+        "derived_mean_service_times": derived_mu,
+        "canonical_provider_process": canonical_provider_process,
+        "provider_process_sha256": provider_process_sha256,
+        "matched_i1_provider_process": True,
+        "provenance_ids": declared_ids,
         "phase1_config_sha256": _sha256(phase1_config_path),
+        "phase1_confirmation_protocol_sha256": _sha256(
+            phase1_confirmation_protocol_path
+        ),
+        "phase1_confirmation_freeze_sha256": _sha256(
+            phase1_confirmation_freeze_path
+        ),
+        "i1_region_acquisition_sha256": _sha256(i1_region_acquisition_path),
+        "i1_sigma_acquisition_sha256": _sha256(i1_sigma_acquisition_path),
+        "stale_phase1_discovery_frozen_after_selection_used": False,
     }
     return surrogates, x, hidden_manifest
 
@@ -262,6 +357,10 @@ def _generate_whitebox(
     prediction_manifest: dict[str, Any],
     public_condition_path: Path,
     phase1_config_path: Path,
+    phase1_confirmation_protocol_path: Path,
+    phase1_confirmation_freeze_path: Path,
+    i1_region_acquisition_path: Path,
+    i1_sigma_acquisition_path: Path,
     i1_card_root: Path,
     i1_manifest_path: Path,
     output: Path,
@@ -269,6 +368,10 @@ def _generate_whitebox(
     surrogates, execution_fraction, hidden_model = _validate_hidden_model(
         contract=contract,
         phase1_config_path=phase1_config_path,
+        phase1_confirmation_protocol_path=phase1_confirmation_protocol_path,
+        phase1_confirmation_freeze_path=phase1_confirmation_freeze_path,
+        i1_region_acquisition_path=i1_region_acquisition_path,
+        i1_sigma_acquisition_path=i1_sigma_acquisition_path,
     )
 
     public_condition = _read_json(public_condition_path)
@@ -355,7 +458,7 @@ def _generate_whitebox(
             "this generated white-box ledger. No M2 changes are permitted."
         ),
     }
-    manifest_path = output / "m2_g1_whitebox_generation_manifest_v1.json"
+    manifest_path = output / "m2_g1_whitebox_generation_manifest_v2.json"
     _write_json(manifest_path, generation_manifest)
 
     print("M2_G1_WHITEBOX_GENERATION_COMPLETE_AFTER_PREDICTION_FREEZE")
@@ -619,7 +722,7 @@ def _evaluate(
 
     manifest = {
         "status": EXPECTED_EVALUATION_STATUS,
-        "evidence_role": "prospective validation evidence",
+        "evidence_role": "fresh repair validation after confirmed provider-provenance defect",
         "condition_id": "G1_ASYM_PARALL_V1",
         "prediction_freeze_manifest_sha256": _sha256(prediction_manifest_path),
         "whitebox_generation_manifest_sha256": _sha256(generation_manifest_path),
@@ -670,7 +773,7 @@ def _evaluate(
             "from G1. Subsequent methodological development belongs to M3."
         ),
     }
-    manifest_path = output / "m2_g1_prospective_validation_manifest_v1.json"
+    manifest_path = output / "m2_g1_matched_provider_validation_manifest_v2.json"
     _write_json(manifest_path, manifest)
 
     outcome = "PASS" if primary_pass else "FAIL"
@@ -730,6 +833,10 @@ def run(args: argparse.Namespace) -> None:
             prediction_manifest=prediction_manifest,
             public_condition_path=public_condition_path,
             phase1_config_path=args.phase1_config.resolve(),
+            phase1_confirmation_protocol_path=args.phase1_confirmation_protocol.resolve(),
+            phase1_confirmation_freeze_path=args.phase1_confirmation_freeze.resolve(),
+            i1_region_acquisition_path=args.i1_region_acquisition.resolve(),
+            i1_sigma_acquisition_path=args.i1_sigma_acquisition.resolve(),
             i1_card_root=args.i1_card_root.resolve(),
             i1_manifest_path=args.i1_manifest.resolve(),
             output=output,
@@ -758,12 +865,12 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate and evaluate the prospective G1 white-box reference"
+        description="Generate and evaluate the corrected matched-provider G1 white-box reference"
     )
     parser.add_argument(
         "--contract",
         type=Path,
-        default=HERE / "config_phase4_m2_g1_whitebox_validation_v1.json",
+        default=HERE / "config_phase4_m2_g1_whitebox_validation_v2_matched_provider.json",
     )
     parser.add_argument(
         "--prediction-manifest",
@@ -827,6 +934,26 @@ def main() -> None:
         default=PHASE1 / "config_phase1_discovery_v1.json",
     )
     parser.add_argument(
+        "--phase1-confirmation-protocol",
+        type=Path,
+        default=PHASE1 / "config_phase1_v2_confirmation_v1.json",
+    )
+    parser.add_argument(
+        "--phase1-confirmation-freeze",
+        type=Path,
+        default=PHASE1 / "phase1_v2_confirmation_freeze_manifest_v1.json",
+    )
+    parser.add_argument(
+        "--i1-region-acquisition",
+        type=Path,
+        default=PHASE2 / "config_phase2_i1_acquisition_v1.json",
+    )
+    parser.add_argument(
+        "--i1-sigma-acquisition",
+        type=Path,
+        default=PHASE2 / "config_phase2_i1_sigma_acquisition_v1.json",
+    )
+    parser.add_argument(
         "--i1-card-root",
         type=Path,
         default=PHASE2 / "results" / "i1_cards_v2_rho_conditioned" / "public",
@@ -843,7 +970,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=HERE / "results" / "m2_g1_prospective_validation_v1",
+        default=HERE / "results" / "m2_g1_matched_provider_validation_v2",
     )
     parser.add_argument("--generate-only", action="store_true")
     args = parser.parse_args()
