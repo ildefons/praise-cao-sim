@@ -1,0 +1,238 @@
+{
+  "status": "FROZEN_PHASE4_M2_G2_STEP0_CALIBRATED_VALIDATION_V1",
+  "freeze_date": "2026-09-22",
+  "scientific_stage": "Final prospective M2 validation in a Step-0-calibrated dependable-service regime",
+  "purpose": "Create one new public composition condition G2, calibrate only its global admissibility-region battery using independent white-box calibration data under a predeclared rule, freeze those regions, then compare the already-frozen M0/M1/M2 methods blindly against a fresh independent G2 white-box evaluation set.",
+  "evidence_roles": {
+    "G0": "retrospective diagnostic",
+    "G1": "prospective stress test with floor-degenerate WB survival",
+    "G2": "prospective final M2 validation after Step-0 AR calibration"
+  },
+  "method_freeze": {
+    "I1_unchanged": true,
+    "M0_semantics_unchanged": true,
+    "M1_parameters_unchanged": true,
+    "M2_provider_members_unchanged": true,
+    "M2_joint_members": 27,
+    "M2_member_weight": "1/27",
+    "M1_is_M2_member": false,
+    "G1_driven_method_repair_allowed": false
+  },
+  "G2_public_condition": {
+    "condition_id": "G2_MODERATE_SYMMETRIC_PARALL_V1",
+    "logical_graph": "Source -> Fpre -> ParAll(ProviderA,ProviderB,ProviderC) -> Fpost",
+    "scientific_change": "Use a modest symmetric provider-branch propagation delay shift relative to G0, with no provider-specific assignment and no workload change.",
+    "reason": "G2 should test transfer under a realistic network perturbation without the provider-specific severe asymmetry of G1. The scientific novelty of G2 is the predeclared Step-0 calibration of A_G, not an extreme topology stress.",
+    "network_model": {
+      "request_bytes": 1000,
+      "branch_bytes": 1000,
+      "join_bytes": 1000,
+      "completion_control_bytes": 0,
+      "BW_mbps_all_links": 1000.0,
+      "PR_seconds": {
+        "Source_to_Fpre": 0.001,
+        "Fpre_to_ProviderA": 0.004,
+        "Fpre_to_ProviderB": 0.004,
+        "Fpre_to_ProviderC": 0.004,
+        "Fpre_to_Fpost_join": 0.001
+      },
+      "cost_per_hop": 0.0,
+      "qos_neutral": true
+    },
+    "fixed_service_model": {
+      "Fpre_instructions": 5000000.0,
+      "Fpost_instructions": 5000000.0,
+      "effective_IPT": 1000000000.0,
+      "COST_rate": 3.0,
+      "Fpre_latency": 0.005,
+      "Fpost_latency": 0.005,
+      "Fpre_cost": 0.015,
+      "Fpost_cost": 0.015,
+      "qos_neutral": true
+    },
+    "workload": {
+      "period_seconds": 0.2,
+      "request_rate_per_second": 5.0,
+      "accounting_origin": 0.0,
+      "horizon_max_seconds": 240.0,
+      "rho_values": [0.95, 0.975, 0.9833333333333333, 0.99, 0.995],
+      "horizon_grid": "unchanged frozen public I1 horizon support",
+      "same_rho_diagonal": true
+    }
+  },
+  "G2_base_boundary_algebra": {
+    "common_latency_seconds_excluding_provider_branch_and_local_provider": 0.012002,
+    "provider_branch_fixed_latency_seconds": {
+      "ProviderA": 0.008001,
+      "ProviderB": 0.008001,
+      "ProviderC": 0.008001
+    },
+    "latency_formula": "l_G2_base = 0.020003 + max(l_A,l_B,l_C)",
+    "cost_formula": "c_G2_base = 0.03 + c_A + c_B + c_C",
+    "quality_formula": "q_G2_base = min(q_A,q_B,q_C)",
+    "base_region_source": "Forward-compose the already-frozen public provider A_i(rho) boundaries at the same rho through the G2 deterministic graph algebra."
+  },
+  "hidden_whitebox_model": {
+    "source": "../phase1/config_phase1_discovery_v1.json",
+    "case_id": "D330000000_d0.150",
+    "selection_provenance": "Phase-1 confirmation frozen_after_selection = D330000000_d0.150 matched latency/cost/mixed SLA-native battery",
+    "center_instruction_mean": 330000000.0,
+    "dispersion": 0.15,
+    "provider_instruction_means": {
+      "ProviderA": 280500000.0,
+      "ProviderB": 330000000.0,
+      "ProviderC": 379500000.0
+    },
+    "instruction_cv": 0.3,
+    "effective_IPT": 1000000000.0,
+    "cost_rate": 3.0,
+    "execution_fraction_x": 0.5,
+    "quality": 0.5,
+    "refit_or_reselection": false
+  },
+  "step0_calibration": {
+    "role": "Experimental-design calibration only. It may select A_G2(rho) but may not alter any prediction method.",
+    "selection_seed_start": 32000,
+    "selection_seed_end_inclusive": 32099,
+    "selection_n_trajectories": 100,
+    "confirmation_seed_start": 32100,
+    "confirmation_seed_end_inclusive": 32199,
+    "confirmation_n_trajectories": 100,
+    "selection_and_confirmation_seed_banks_independent": true,
+    "single_hidden_G2_ledger_reusable_for_all_candidate_regions": true,
+    "candidate_region_family": {
+      "quality_threshold": "q_G2 = q_G2_base = 0.5",
+      "latency_scale_grid": {
+        "minimum": 1.0,
+        "maximum": 1.8,
+        "step": 0.01,
+        "formula": "l_candidate = s_L * l_G2_base"
+      },
+      "cost_scale_grid": {
+        "minimum": 1.0,
+        "maximum": 1.5,
+        "step": 0.01,
+        "formula": "c_candidate = s_C * c_G2_base"
+      },
+      "same_grid_for_every_rho": true,
+      "regions_only_relax_base_boundary": true
+    },
+    "diagnostic_horizon_window": {
+      "minimum_horizon_seconds": 60.0,
+      "maximum_horizon_seconds": 240.0,
+      "use_every_frozen_grid_point_in_window": true,
+      "reason": "Avoid startup/low-decision artifacts and calibrate the sustained dependable-service regime."
+    },
+    "selection_feasibility_gate_per_rho": {
+      "minimum_sigma_over_diagnostic_window": 0.90,
+      "mean_sigma_over_diagnostic_window_minimum": 0.93,
+      "mean_sigma_over_diagnostic_window_maximum": 0.98,
+      "sigma_at_H240_minimum": 0.90,
+      "sigma_at_H240_maximum": 0.97,
+      "minimum_sigma_range_over_diagnostic_window": 0.03,
+      "minimum_fraction_of_diagnostic_points_at_or_below_0p98": 0.25,
+      "interpretation": "Reject both floor and ceiling regimes while keeping the WB curve in a high-survival dependable-service range with visible temporal structure."
+    },
+    "selection_rule_per_rho": {
+      "step_1": "Enumerate the full frozen (s_L,s_C) candidate grid and retain only candidates satisfying every feasibility gate.",
+      "step_2": "Among feasible candidates choose the one with minimum expansion distance d = sqrt((s_L-1)^2 + (s_C-1)^2).",
+      "step_3_tie_breakers_in_order": [
+        "smallest absolute difference between mean diagnostic sigma and 0.95",
+        "smallest absolute difference between sigma(H=240) and 0.95",
+        "smallest s_L",
+        "smallest s_C"
+      ],
+      "prediction_error_never_used": true,
+      "M0_M1_M2_never_used": true
+    },
+    "confirmation_rule": {
+      "evaluate_only_the_selection_chosen_region_for_each_rho_on_confirmation_seeds": true,
+      "must_satisfy_the_exact_same_feasibility_gate": true,
+      "no_reselection_on_confirmation_data": true,
+      "all_five_rho_regions_must_pass": true
+    },
+    "nesting_check_after_confirmation": {
+      "required": true,
+      "latency_boundary_must_be_nondecreasing_with_rho": true,
+      "cost_boundary_must_be_nondecreasing_with_rho": true,
+      "quality_boundary_must_be_nondecreasing_or_equal_under_current_q_semantics": true,
+      "failure_action": "G2 calibration fails and no prediction/evaluation stage is run."
+    },
+    "failure_policy": "If any rho has no feasible selection candidate, any selected candidate fails confirmation, or nesting fails, stop. Do not alter this contract or retune the grid/targets after observing calibration. A new separately named G2b contract would be required."
+  },
+  "post_calibration_freeze": {
+    "required_before_prediction": true,
+    "must_materialize": [
+      "G2 public condition manifest",
+      "Step-0 selection white-box ledger and hash",
+      "Step-0 confirmation white-box ledger and hash",
+      "all candidate-region diagnostics",
+      "selected A_G2(rho) battery",
+      "selection and confirmation pass/fail summary",
+      "calibration manifest with all input/output hashes"
+    ],
+    "selected_A_G2_is_public_query_input_after_freeze": true,
+    "calibration_whitebox_data_may_not_be_used_by_M0_M1_M2": true
+  },
+  "blind_prediction_protocol_after_calibration": {
+    "prediction_seed_start": 33000,
+    "prediction_seed_end_inclusive": 33099,
+    "n_prediction_trajectories_per_variant": 100,
+    "common_random_numbers_across_M1_and_all_M2_members": true,
+    "variants": {
+      "M1_reference": 1,
+      "M2_joint_members": 27,
+      "total_simulated_variants": 28
+    },
+    "M0_simulation_required": false,
+    "prediction_artifacts_and_hashes_must_be_frozen_before_final_WB_evaluation": true,
+    "actual_final_evaluation_whitebox_generation_before_prediction_freeze": false
+  },
+  "final_whitebox_evaluation": {
+    "trajectory_seed_start": 34000,
+    "trajectory_seed_end_inclusive": 34099,
+    "n_trajectories": 100,
+    "seed_bank_independent_of_step0_and_prediction_seed_banks": true,
+    "generate_only_after_prediction_freeze": true,
+    "use_exactly_frozen_G2_graph_workload_and_selected_A_G2": true
+  },
+  "evaluation": {
+    "surface": "all 5 frozen rho values x all frozen horizons including H=0",
+    "point_prediction_methods": ["M0", "M1", "M2_equal_weight_mean"],
+    "point_prediction_metrics": ["MAE", "RMSE", "bias", "max_abs_error"],
+    "report_whole_surface": true,
+    "report_per_rho": true,
+    "ambiguity_metrics": [
+      "whitebox_coverage_fraction",
+      "mean_range_width",
+      "max_range_width",
+      "mean_distance_outside_range",
+      "max_distance_outside_range",
+      "fraction_whitebox_below_range",
+      "fraction_whitebox_above_range"
+    ],
+    "range_is_confidence_interval": false,
+    "Jaccard_D_A": "N/A because the selected G2 A_G battery is a frozen common query input for M0, M1, M2 and WB"
+  },
+  "prospective_success_criteria": {
+    "primary": "M2 whole-surface MAE < M1 whole-surface MAE",
+    "confirmatory_1": "M2 whole-surface RMSE < M1 whole-surface RMSE",
+    "confirmatory_2": "M2 MAE < M1 MAE in at least 3 of 5 rho slices",
+    "absolute_accuracy_diagnostic": "Report M0, M1 and M2 absolute errors. Do not define M2 success by beating M0 because the scientific M2 mechanism claim is relative to M1 inverse-collapse.",
+    "ambiguity_coverage_is_pass_fail": false,
+    "chapter_close_rule": "After one valid G2 final evaluation, close M2 regardless of outcome. No G2-driven M2 repair is permitted."
+  },
+  "firewall": {
+    "change_I1": false,
+    "change_M1_parameters": false,
+    "change_M2_candidates": false,
+    "change_M2_member_weights": false,
+    "add_or_remove_M2_members": false,
+    "use_step0_WB_for_method_selection": false,
+    "use_step0_WB_for_prediction_error_optimization": false,
+    "use_final_G2_WB_for_any_selection_or_repair": false,
+    "reuse_PPG_GP_DVI": false,
+    "reuse_PPG_code_or_data": false
+  },
+  "next_gate": "Implement only the G2 public adapter and Step-0 calibration runner. Validate the frozen grid/rule, generate selection seeds 32000..32099 and confirmation seeds 32100..32199, and freeze A_G2 only if all five rho regions pass the predeclared gates and nesting check. Do not run M0/M1/M2 G2 predictions before the calibration freeze."
+}
