@@ -783,6 +783,11 @@ def _selection_stage(
         )
         all_diagnostics.append(diagnostics)
 
+        feasible = diagnostics[diagnostics["feasible"].astype(bool)]
+        if feasible.empty:
+            print(f"G2-Step0 selection rho={rho:g}: NO FEASIBLE CANDIDATE", flush=True)
+            continue
+
         selected = _select_candidate(diagnostics, float(rho))
         boundary = relax_g2_boundary(
             base,
@@ -844,6 +849,41 @@ def _selection_stage(
     diagnostics_table = pd.concat(all_diagnostics, ignore_index=True)
     diagnostics_path = output / "m2_g2_step0_selection_candidate_diagnostics.csv"
     diagnostics_table.to_csv(diagnostics_path, index=False)
+
+    if len(selected_rows) != len(rho_support):
+        failed_rhos = [
+            float(rho)
+            for rho in rho_support
+            if not any(abs(float(row["rho_global"]) - float(rho)) <= TOL for row in selected_rows)
+        ]
+        failure_manifest = {
+            "status": "PHASE4_M2_G2_STEP0_SELECTION_FAILED_NO_FEASIBLE_REGION_V1",
+            "condition_id": G2_CONDITION_ID,
+            "failed_rho_values": failed_rhos,
+            "selection_seed_start": int(seeds[0]),
+            "selection_seed_end_inclusive": int(seeds[-1]),
+            "n_selection_trajectories": len(seeds),
+            "prediction_methods_run": False,
+            "confirmation_whitebox_generated": False,
+            "confirmation_whitebox_read": False,
+            "g2_contract_sha256": _sha256(contract_path),
+            "phase1_config_sha256": _sha256(phase1_config_path),
+            "public_i1_manifest_sha256": _sha256(i1_manifest_path),
+            "selection_ledger_sha256": _sha256(ledger_path),
+            "candidate_diagnostics_sha256": _sha256(diagnostics_path),
+            "git_commit": _git_head(FIRST_SCIENCE.parent),
+            "next_gate": (
+                "Stop. Do not run confirmation or G2 prediction. The frozen G2 "
+                "selection gate has no feasible region for at least one rho. Any "
+                "redesign requires a separately named G2b contract."
+            ),
+        }
+        failure_path = output / "m2_g2_step0_selection_failure_manifest_v1.json"
+        _write_json(failure_path, failure_manifest)
+        print("M2_G2_STEP0_SELECTION_FAIL_NO_FEASIBLE_REGION")
+        print(f"failed_rho_values={failed_rhos}")
+        print(f"failure_manifest={failure_path}")
+        return
 
     selected_table = pd.DataFrame(selected_rows).sort_values("rho_global")
     selected_path = output / "m2_g2_step0_selected_regions_from_selection.csv"
