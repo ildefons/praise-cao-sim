@@ -314,11 +314,36 @@ experiment_role = "provider_drift_or_stale_information_robustness"
 
 and must never be reported as an M-axis integration-accuracy validation.
 
+## 9.1 G1 implementation repair
+
+The confirmed G1 provenance defect has now been corrected without rewriting the historical v1 artifacts.
+
+New contract:
+
+```
+config_phase4_m2_g1_whitebox_validation_v2_matched_provider.json
+```
+
+The corrected runner now:
+
+- uses the final Phase-1 v2 confirmation protocol and freeze manifest as provenance inputs;
+- requires both private I1 acquisition contracts to declare the same physical setting;
+- hard-fails unless every provenance source agrees on `D300000000_d0.200`;
+- explicitly refuses to use the stale `config_phase1_discovery_v1.json -> confirmation.frozen_after_selection` field as the provider-case selector;
+- records a canonical provider-process SHA-256 in the generated WB manifest;
+- uses fresh repair-validation WB seeds `35000..35099`, disjoint from the original G1 WB `31000..31099` and the paired corrected-N20 diagnostic `31000..31019`;
+- writes into a new v2 output directory so historical G1 results remain immutable.
+
+A zero-simulation `--preflight-only` mode is available and must pass before any corrected WB generation.
+
+The original G1 v1 output remains reclassified as a provider-drift/stale-information stress result. It is not overwritten.
+
 ## 10. Current execution status
 
 ```
 G0 = retained, matched D300 reference, DD-1 independently verified, provenance enforcement still needs repair
 G1 original = reclassified as mismatched-provider stress diagnostic
+G1 matched-provider v2 = implementation repaired; preflight/fresh validation pending
 G1 corrected N20 = due-diligence evidence only
 G2 = BLOCKED
 M1/M2 = not condemned; further due diligence pending
