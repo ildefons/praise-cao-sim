@@ -5,11 +5,11 @@ This stage is legal only after the full blind G1 prediction freeze exists.
 Two-step usage:
   1. --generate-only:
        validate the pinned pre-whitebox prediction freeze, then generate the
-       independent hidden-model G1 white-box ledger on seeds 31000..31099.
+       matched D300 hidden-model G1 white-box ledger on fresh seeds 35000..35099.
   2. default:
        verify the frozen prediction and white-box-generation manifests, then
        evaluate M0, M1 and the frozen equal-weight M2 ensemble exactly once
-       against the prospective G1 white-box curve.
+       against the corrected matched-provider G1 white-box curve.
 
 No fitting, candidate selection, reweighting, graph redesign or threshold
 selection occurs in this file.
@@ -769,15 +769,15 @@ def _evaluate(
             contract["prospective_success_criteria"]["chapter_close"]
         ),
         "next_gate": (
-            "Write and freeze the final M2 chapter-close note. Do not modify M2 "
-            "from G1. Subsequent methodological development belongs to M3."
+            "Treat this as a fresh repair validation after a confirmed provenance "
+            "defect. Keep M2 frozen and continue the remaining due-diligence gates."
         ),
     }
     manifest_path = output / "m2_g1_matched_provider_validation_manifest_v2.json"
     _write_json(manifest_path, manifest)
 
     outcome = "PASS" if primary_pass else "FAIL"
-    print(f"M2_G1_PROSPECTIVE_PRIMARY_{outcome}")
+    print(f"M2_G1_MATCHED_PROVIDER_PRIMARY_{outcome}")
     print("\nOVERALL_POINT_PREDICTION")
     print(overall.to_string(index=False))
     print("\nPER_RHO_POINT_PREDICTION")
@@ -791,7 +791,7 @@ def _evaluate(
         f"rho_consistency_M2_MAE_better={rho_m2_better}/5 "
         f"pass={rho_consistency_pass}"
     )
-    print("M2_G1_PROSPECTIVE_VALIDATION_COMPLETE")
+    print("M2_G1_MATCHED_PROVIDER_VALIDATION_COMPLETE")
     print(f"plot={plot_path}")
     print(f"manifest={manifest_path}")
 
@@ -825,6 +825,31 @@ def run(args: argparse.Namespace) -> None:
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
 
+    if args.preflight_only:
+        _, _, hidden_model = _validate_hidden_model(
+            contract=contract,
+            phase1_config_path=args.phase1_config.resolve(),
+            phase1_confirmation_protocol_path=args.phase1_confirmation_protocol.resolve(),
+            phase1_confirmation_freeze_path=args.phase1_confirmation_freeze.resolve(),
+            i1_region_acquisition_path=args.i1_region_acquisition.resolve(),
+            i1_sigma_acquisition_path=args.i1_sigma_acquisition.resolve(),
+        )
+        print("M2_G1_MATCHED_PROVIDER_PREFLIGHT_PASS")
+        print(f"physical_setting_id={hidden_model['case_id']}")
+        print(
+            "provider_instruction_means="
+            + json.dumps(hidden_model["provider_instruction_means"], sort_keys=True)
+        )
+        print(
+            "derived_mean_service_times="
+            + json.dumps(hidden_model["derived_mean_service_times"], sort_keys=True)
+        )
+        print(f"provider_process_sha256={hidden_model['provider_process_sha256']}")
+        print("matched_i1_provider_process=true")
+        print("stale_phase1_discovery_frozen_after_selection_used=false")
+        print(f"python_wall_seconds={time.perf_counter() - started:.3f}")
+        return
+
     if args.generate_only:
         _generate_whitebox(
             contract_path=contract_path,
@@ -845,7 +870,7 @@ def run(args: argparse.Namespace) -> None:
         return
 
     generation_manifest_path = (
-        output / "m2_g1_whitebox_generation_manifest_v1.json"
+        output / "m2_g1_whitebox_generation_manifest_v2.json"
     )
     ledger_path = output / "m2_g1_whitebox_ledger.csv"
     _evaluate(
@@ -972,6 +997,7 @@ def main() -> None:
         type=Path,
         default=HERE / "results" / "m2_g1_matched_provider_validation_v2",
     )
+    parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument("--generate-only", action="store_true")
     args = parser.parse_args()
     run(args)
