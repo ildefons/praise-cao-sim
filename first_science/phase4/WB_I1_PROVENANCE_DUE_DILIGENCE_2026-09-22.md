@@ -224,11 +224,30 @@ Absolute mean-cost error is `0.000383975` for D300 versus `0.135383975` for D330
 
 Conclusion: **the actual G0 raw ledger is D300-centered.** This independently closes the most important physical-provenance loop. The variance-derived dispersion estimate (`0.226`) is secondary and is not used as the primary classifier because completed-request censoring can bias it slightly.
 
-### DD-2: I1 materialization identity
+### DD-2: I1 materialization identity — PASS
 
-Recompute the public rho-conditioned I1 sigma surfaces from the already-frozen private `T_i^sigma` corpus and verify exact/expected numerical identity with the public cards and manifest hashes.
+Read-only rematerialization audit completed with zero simulation.
 
-No new trajectories.
+The frozen private `T_i^sigma` corpus on seeds `6100..6199` was independently reduced into the full public rho-conditioned sigma surfaces without calling the original I1 materialization routine.
+
+For every provider:
+
+```
+published points = 1225
+recomputed points = 1225
+missing/extra support points = 0
+sigma_hat max absolute difference = 0
+n_success mismatches = 0
+n_trajectory count mismatches = 0
+```
+
+Only floating-point serialization noise at approximately `1e-16` appears in region-boundary and Wilson-interval fields.
+
+The frozen public I1 manifest hash also matches exactly.
+
+Conclusion: **the published public I1 sigma surfaces are an exact deterministic materialization of the frozen private `T_i^sigma` evidence under the declared SLA accounting semantics.**
+
+This closes the sigma-materialization boundary as a source of the observed G0/G1 discrepancy.
 
 ### DD-3: boundary/composition implementation
 
