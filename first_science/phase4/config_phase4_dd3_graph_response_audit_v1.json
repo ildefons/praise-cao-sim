@@ -1,0 +1,76 @@
+{
+  "status": "FROZEN_PHASE4_DD3_GRAPH_RESPONSE_AUDIT_V1",
+  "freeze_date": "2026-09-22",
+  "question": "Do frozen M0, M1 and M2 capture the effect on graph-level sigma of changing only the public composition graph from G0 to G1 while the hidden provider process is held fixed?",
+  "scientific_role": "Due diligence only. No method fitting, selection, weighting, threshold tuning, or graph redesign.",
+  "intervention": {
+    "G0": "symmetric G0 ParAll public graph",
+    "G1": "asymmetric G1 ParAll public graph",
+    "hidden_provider_process": "D300000000_d0.200",
+    "provider_process_must_match_I1": true,
+    "workload_unchanged": true,
+    "logical_graph_grammar_unchanged": true,
+    "fixed_service_stages_unchanged": true,
+    "message_sizes_and_bandwidth_unchanged": true,
+    "intended_changed_factor": "provider-branch propagation delays only"
+  },
+  "paired_whitebox": {
+    "G0_source": "../phase1/results/phase1_v2_fresh_confirmation_v1/all_top_level_request_ledgers.csv",
+    "G0_seed_start": 7000,
+    "G0_seed_end_inclusive": 7099,
+    "G1_seed_start": 7000,
+    "G1_seed_end_inclusive": 7099,
+    "n_trajectories": 100,
+    "common_random_numbers": true,
+    "expected_provider_process_sha256": "a4942e4a5cc4ebbe018e854e4e0005b6437c408cde3c1de8366a95e4f57281a8",
+    "request_pair_checks": [
+      "same source emission schedule",
+      "same request identity",
+      "same cost for jointly completed requests up to numerical tolerance",
+      "same quality for jointly completed requests",
+      "latency may change because graph changed"
+    ]
+  },
+  "frozen_predictions": {
+    "G0": "results/m2_b6_joint_ensemble_whitebox_v1/m2_b6_pointwise_comparison.csv",
+    "G1_M0": "results/m2_g1_blind_prediction_v1/m2_g1_m0_curve.csv",
+    "G1_M1_M2": "results/m2_g1_blind_prediction_v1/m2_g1_ensemble_curve.csv",
+    "prediction_methods_are_not_rerun_in_primary_audit": true,
+    "prediction_methods_are_not_changed": true,
+    "note": "G0 and G1 frozen predictor simulations used independent N=100 seed banks. The primary audit therefore estimates graph-response fidelity from frozen predictions; a paired predictor rerun is reserved only if Monte Carlo ambiguity materially limits interpretation."
+  },
+  "primary_observable": {
+    "definition": "Delta sigma_X(rho,H) = sigma_X(G1,rho,H) - sigma_X(G0,rho,H)",
+    "response_error": "e_M(rho,H) = Delta sigma_M(rho,H) - Delta sigma_WB(rho,H)",
+    "methods": [
+      "M0",
+      "M1",
+      "M2_equal_weight_mean"
+    ]
+  },
+  "metrics": [
+    "response_MAE",
+    "response_RMSE",
+    "response_bias",
+    "response_max_abs_error",
+    "Delta-sigma correlation",
+    "through-origin response slope",
+    "sign agreement when paired WB Delta sigma is nonzero",
+    "mean absolute predicted graph shift",
+    "mean absolute paired-WB graph shift"
+  ],
+  "structural_expectations": {
+    "M0": "Under the current same-rho induced-A_G protocol, M0's probability product reads the same local I1 sigma values in G0 and G1. Therefore Delta sigma_M0 must be zero up to numerical tolerance. If paired WB Delta sigma is nonzero, M0 cannot represent that graph effect by construction.",
+    "M1_M2": "M1 and M2 simulate the public graph explicitly, so their Delta sigma may be nonzero. Their graph-response fidelity is assessed against paired WB Delta sigma without retuning."
+  },
+  "outputs": [
+    "dd3_g1_paired_whitebox_ledger.csv",
+    "dd3_graph_response_pointwise.csv",
+    "dd3_graph_response_summary.csv",
+    "dd3_graph_response_per_rho.csv",
+    "dd3_g0_g1_absolute_sigma.png",
+    "dd3_g0_g1_delta_sigma.png",
+    "dd3_graph_response_manifest_v1.json"
+  ],
+  "no_binary_threshold_rule": "Do not invent a post-hoc pass threshold. Inspect the predeclared response metrics and curves. If finite-N predictor Monte Carlo noise prevents a clear interpretation, run a separately frozen paired-predictor confirmation."
+}
