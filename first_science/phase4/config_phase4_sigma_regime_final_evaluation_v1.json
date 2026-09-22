@@ -1,0 +1,39 @@
+{
+  "status": "FROZEN_PHASE4_SIGMA_REGIME_FINAL_EVALUATION_V1",
+  "freeze_date": "2026-09-22",
+  "scientific_stage": "Prospective final white-box evaluation of frozen M0/M1/M2 predictions across three fixed-graph survival regimes",
+  "prediction_contract": "config_phase4_sigma_regime_blind_prediction_v1.json",
+  "required_prediction_manifest_status": "FROZEN_PHASE4_SIGMA_REGIME_BLIND_PREDICTIONS_V1",
+  "final_whitebox": {
+    "provider_process": "D300000000_d0.200",
+    "graph": "exact fixed G0 symmetric graph",
+    "seed_start": 34000,
+    "seed_end_inclusive": 34099,
+    "n_trajectories": 100,
+    "one_ledger_reused_for_all_15_queries": true,
+    "generate_only_after_prediction_manifest_hash_verification": true
+  },
+  "primary_metrics": [
+    "MAE",
+    "RMSE",
+    "bias",
+    "max_abs_error"
+  ],
+  "summaries": [
+    "per_regime",
+    "per_rho",
+    "per_rho_x_regime",
+    "whole_battery"
+  ],
+  "M0_metric_rule": "compute operational M0 metrics only where status=PREDICTED; report NOT_APPLICABLE counts separately",
+  "M2_ambiguity_metrics": [
+    "whitebox_coverage_fraction",
+    "mean_range_width",
+    "max_range_width",
+    "mean_distance_outside_range",
+    "max_distance_outside_range"
+  ],
+  "headline_visual": "5 rows of rho x 3 columns G0/G1/G2, with WB, applicable M0, M1, M2 mean, and M2 finite-portfolio range",
+  "no_repair_after_final_WB": true,
+  "close_M2_after_evaluation_regardless_of_outcome": true
+}
