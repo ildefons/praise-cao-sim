@@ -1,6 +1,6 @@
 # PRAISE/CAO: pilot design through I1-M3
 
-**Status:** current pilot-program design source of truth. Phase 1 v2, rho-conditioned I1, M0, M1-v2, and the M2 joint-ensemble semantics are frozen. M2-B5 implementation/evaluation and M3 design remain next stages within the same pilot program.  
+**Status:** current pilot-program design source of truth. Phase 1 v2, rho-conditioned I1, M0, M1-v2, and the M2 joint-ensemble method are frozen. G0 is retrospective diagnostic evidence; G1 is retained as a prospective stress test. Final M2 validation is reopened for a Step-0-calibrated G2 condition before M3 begins.  
 **Original date:** 16 September 2026. **M2 semantic freeze update:** 21 September 2026.
 
 This note supersedes `PRAISE_I1_M0_M1_M2_DESIGN_2026-09-16.md` where the two conflict. The previous note remains part of the provenance record.
@@ -138,29 +138,41 @@ A strong prospective M2 claim requires the frozen semantics above to be evaluate
 Authoritative semantic contract: `phase4/config_phase4_m2_joint_ensemble_semantics_v1.json`.
 
 
-### 3.5 Final M2 evidence and closure
+### 3.5 G1 prospective stress test and validation reopening
 
-M2 is now **closed after prospective validation**.
+The frozen M2 method was prospectively tested on G1 after a blind prediction freeze. G1 changed the public network embedding while preserving the logical ParAll graph, workload, provider cards, M1 parameters, M2 members, and M2 weights. Blind prediction used seeds `30000..30099`; independent WB generation used `31000..31099`.
 
-On the retrospective G0 condition, the frozen 27-member equal-weight M2 mean reduced whole-surface MAE from `0.184776` for M1 to `0.077758`, with finite-portfolio range coverage `0.730612`. Because G0 WB behavior had already been inspected during development, this remains diagnostic evidence only.
-
-The untouched G1 condition was predeclared as an asymmetric public network embedding with all provider cards, workload, M1 parameters, M2 members, M2 weights, and success criteria frozen before G1 WB generation. Blind prediction used seeds `30000..30099`; independent WB generation used `31000..31099`.
-
-The predeclared prospective criterion `M2 MAE < M1 MAE` passed:
+The predeclared M2-vs-M1 criteria passed:
 
 - M1 MAE `0.765469`;
 - M2 MAE `0.617345`;
 - M1 RMSE `0.804938`;
 - M2 RMSE `0.672633`;
-- M2 MAE lower than M1 in all `5/5` rho slices.
+- M2 MAE lower than M1 in `5/5` rho slices.
 
-This supports the narrow prospective claim that preserving a small amount of inverse ambiguity improves over collapsing I1 to one latent reconstruction.
+However, inspection of the G1 sigma curves shows that the WB condition is strongly floor-degenerate for the intended dependable-service use case. For several rho values, the WB survival probability rapidly collapses toward zero over the horizon. M0 MAE is `0.202037`, substantially better than both reconstructed-process methods, while the M2 min-max range covers only `0.114286` of the WB surface and `0.885714` of WB points lie below the range.
 
-However, G1 also exposed a major limitation. M0 MAE was only `0.202037`, far better than M1 and M2. M2 remained strongly optimistic (bias `+0.617164`), and the frozen min-max range covered only `0.114286` of the WB surface, with `0.885714` of WB points below the represented range and none above it. The small diversity-selected portfolio therefore does not span the relevant compatible lower-survival behavior under G1.
+Therefore G1 is retained as a **prospective stress test**, not as the final representative validation condition for M2.
 
-No G1-driven repair is permitted inside M2. The final chapter-close record is `phase4/M2_CHAPTER_CLOSE_2026-09-22.md`.
+This does not reopen the M2 method. I1, M1, the three frozen provider representatives, the 27-member Cartesian product, and equal `1/27` weights remain unchanged. No G1-driven repair is permitted.
 
-The question carried into M3 is therefore not whether inverse ambiguity matters, but how to represent compatible latent support and mass more faithfully across composition conditions without pretending that local I1 reconstruction error is itself a probability model.
+What is reopened is only the final M2 validation conclusion. Before M3 begins, define a new prospective condition G2 with a predeclared **Step-0 admissibility-region calibration**. The purpose of Step 0 is to select and freeze a nondegenerate high-survival WB regime representative of dependable services before comparing M0/M1/M2.
+
+The exact calibration target band, admissibility-region search rule, calibration seed bank, evaluation seed bank, and success criteria must all be frozen before G2 calibration or evaluation is run. Calibration evidence may choose admissibility regions only; it may not tune M1/M2, select members, alter weights, or optimize prediction error.
+
+After calibration, freeze the selected G2 regions, materialize and hash blind M0/M1/M2 predictions, and only then generate fresh independent WB evaluation trajectories.
+
+Authoritative reopening record: `phase4/M2_REOPENING_FOR_G2_2026-09-22.md`.
+
+Current status:
+
+`M2_METHOD_STATUS = FROZEN_UNCHANGED`
+
+`M2_VALIDATION_STATUS = REOPENED_FOR_CALIBRATED_G2`
+
+`G1_EVIDENCE_ROLE = PROSPECTIVE_STRESS_TEST`
+
+`FINAL_M2_VALIDATION = PENDING_G2`
 
 
 ## 4. Mid-term program: I1-M3 dynamic integration
@@ -264,11 +276,11 @@ If Gate A supports non-identifiability, implement the smallest ambiguity-preserv
 
 ### Fresh validation
 
-Before making a strong M2 claim, define at least one untouched graph/composition or WB condition and lock it before evaluation.
+The next scientific priority is G2: predeclare a Step-0 calibration rule, use calibration-only WB seeds to select a nondegenerate high-survival admissibility-region battery, freeze it, then perform blind M0/M1/M2 prediction followed by fresh independent WB evaluation.
 
 ### Mid-term
 
-Once M2 behavior is understood, define M3 as a dynamic/incremental integration method over the same I1 schema and evaluate prediction quality, adaptation behavior, and update cost.
+Do not begin M3 until G2 closes M2 validation. After G2, define M3 over the same frozen I1 schema and evaluate its intended mechanism under a scientifically informative validation regime.
 
 ### Deferred information-axis work
 
