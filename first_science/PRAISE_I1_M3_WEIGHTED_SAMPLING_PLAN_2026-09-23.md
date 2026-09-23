@@ -412,6 +412,24 @@ Recommended final WB size:
 
 The WB bank is generated only after the M3 prediction manifest is frozen. No WB result may alter lambda, retained hypotheses, weights, query regions, trajectory allocation, or budget.
 
+### 9.1 Blind M3-v4 prediction completed
+
+The dominant-mass graph prediction was completed and hash-frozen before any fresh M3 WB was generated.
+
+Observed H60..H240 regime-mean predictions for `B=1400` and `B=2000` are close. Across the 15 rho-regime means, the mean absolute budget-to-budget difference is approximately `0.00377` and the maximum is approximately `0.00740`.
+
+All 15 `B=1400` regime means are slightly above their nested `B=2000` counterparts. This is recorded as a blind finite-Monte-Carlo realization effect, not used to alter the budgets or allocation.
+
+The frozen prediction manifest is:
+
+`phase4/results/m3_v4_dominant_mass_graph_v1/m3_v4_prediction_manifest.json`.
+
+The fresh final-evaluation contract is:
+
+`phase4/config_phase4_m3_v4_final_evaluation_v1.json`.
+
+It freezes a new matched-D300 WB bank with seeds `38000..38199`, `N_WB=200`, opened only after a prepare-only hash gate verifies the M3 predictions and the earlier frozen M0/M1/M2 prediction artifacts.
+
 ## 10. Primary and secondary comparisons
 
 ### 10.1 Primary M3 accuracy-cost comparison
