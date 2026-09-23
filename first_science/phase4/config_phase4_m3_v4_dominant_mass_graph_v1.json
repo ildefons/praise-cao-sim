@@ -1,0 +1,74 @@
+{
+  "status": "FROZEN_PHASE4_M3_V4_DOMINANT_MASS_GRAPH_PREDICTION_V1",
+  "freeze_date": "2026-09-23",
+  "scientific_stage": "Blind M3 dominant-mass weighted graph prediction on the frozen 15-query sigma-regime battery",
+  "method": "M3 public-I1-weighted dominant-mass quadrature",
+  "inputs": {
+    "lambda_cv_manifest": "results/m3_lambda_cv_v3/m3_v3_lambda_cv_manifest.json",
+    "lambda_cv_manifest_status": "FROZEN_PHASE4_M3_V3_PUBLIC_I1_CV_WEIGHTING_COMPLETE",
+    "provider_weights": "results/m3_lambda_cv_v3/m3_v3_provider_weights.csv",
+    "joint_mass_audit": "results/m3_lambda_cv_v3/m3_v3_joint_mass_audit.csv",
+    "selected_regions": "results/sigma_regime_step0_calibration_v2/sigma_regime_v2_selected_regions_frozen.csv",
+    "step0_manifest": "results/sigma_regime_step0_calibration_v2/sigma_regime_v2_calibration_manifest.json",
+    "step0_manifest_status": "FROZEN_PHASE4_SIGMA_REGIME_CALIBRATION_PASS_V2",
+    "m1_contract": "../phase3/config_phase3_m1_contract_v2.json",
+    "m0_contract": "../phase3/config_phase3_m0_contract_v1.json",
+    "public_i1_root": "../phase2/results/i1_cards_v2_rho_conditioned/public"
+  },
+  "dominant_mass": {
+    "target_retained_mass": 0.999,
+    "selection": "minimal descending joint-weight prefix whose cumulative mass is >= target_retained_mass",
+    "expected_n_hypotheses_from_frozen_v3": 14,
+    "expected_retained_mass_approx": 0.999174,
+    "maximum_truncation_error": "1-retained_mass, pointwise for every sigma query after renormalization",
+    "selection_uses_graph_prediction": false,
+    "selection_uses_graph_whitebox": false
+  },
+  "simulation_budget": {
+    "budgets": [700, 1400, 2000],
+    "maximum_total_graph_trajectories": 2000,
+    "allocation": "integer minimax allocation for the renormalized retained weights",
+    "allocation_objective_upper_bound": "minimize (1/4) * sum_j alpha_j^2 / N_j subject to sum_j N_j=B and N_j>=1",
+    "allocation_algorithm": "start N_j=1; allocate each additional trajectory to the member maximizing alpha_j^2/(N_j*(N_j+1)); ties by lower joint rank",
+    "nested_prefixes": true,
+    "independent_seed_streams_across_joint_hypotheses": true,
+    "seed_base": 3600000,
+    "seed_block_stride": 10000,
+    "seed_rule": "rank r in 1..K uses seeds seed_base + (r-1)*stride + k for k=0..N_r(max)-1"
+  },
+  "theory": {
+    "truncation_bound": "|sigma_full(q)-sigma_S(q)| <= 1-m",
+    "conditional_mc_variance": "Var[sum_j alpha_j p_hat_j] = sum_j alpha_j^2 p_j(1-p_j)/N_j under independent member seed streams",
+    "worst_case_mc_variance_bound": "<= (1/4) sum_j alpha_j^2/N_j",
+    "continuous_budget_optimum": "N_j proportional to alpha_j",
+    "integer_budget_rule": "greedy marginal allocation above is the discrete separable-convex minimizer"
+  },
+  "queries": {
+    "battery": "same frozen 15-query G0/G1/G2 battery as final M2 experiment",
+    "same_physical_graph": true,
+    "same_workload": true,
+    "same_provider_process_family": "latent hypotheses only; no hidden WB parameters read",
+    "one_ledger_per_joint_hypothesis_reused_for_all_queries": true
+  },
+  "required_outputs": [
+    "m3_v4_dominant_design.csv",
+    "m3_v4_allocation_table.csv",
+    "m3_v4_member_curves.csv",
+    "m3_v4_blind_predictions.csv",
+    "m3_v4_ledger_hashes.csv",
+    "m3_v4_prediction_manifest.json"
+  ],
+  "firewall": {
+    "graph_whitebox_read": false,
+    "final_whitebox_generate": false,
+    "weight_change": false,
+    "lambda_change": false,
+    "candidate_change": false,
+    "query_change": false,
+    "M0_change": false,
+    "M1_change": false,
+    "M2_change": false,
+    "PPG_firewall_preserved": true
+  },
+  "next_gate": "After all B=700/1400/2000 M3 predictions are materialized and hash-frozen, define a separate fresh matched-D300 white-box evaluation contract. No graph-WB result may alter the retained set, weights, allocation, or budgets."
+}
