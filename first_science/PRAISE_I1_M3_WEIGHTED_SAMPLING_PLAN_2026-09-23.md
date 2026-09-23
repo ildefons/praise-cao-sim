@@ -296,101 +296,89 @@ For the paper, this should be presented as a general property of weighted surviv
 
 ## 6. Graph simulation allocation
 
-Let `Z_jn(q)` be the binary trajectory-level pass indicator for joint latent hypothesis `j`, graph trajectory `n`, and query `q=(A_G,H,rho)`.
+After the V3 mass audit, M3 no longer samples 100 or 200 latent hypotheses with replacement. It deterministically propagates the 14 dominant joint hypotheses whose cumulative frozen weight exceeds 0.999.
 
-For a sampled joint hypothesis,
+For retained hypothesis `j`, let the renormalized retained weight be
 
-`p_j(q) = E[Z_jn(q) | theta_j]`.
+`alpha_j = w_j / m`,
 
-The M3 mixture target is
+where `m` is the total retained mass. Let `Z_jn(q)` be the binary trajectory-level pass indicator for query `q=(A_G,H,rho)`, and let
 
-`sigma_M3(q) = E_theta[p_theta(q)]`
+`p_hat_j(q) = (1/N_j) sum_n Z_jn(q)`.
 
-under the frozen weighted latent distribution.
+The finite M3 dominant-mass estimator is
 
-The finite estimator is
+`sigma_hat_S(q) = sum_j alpha_j p_hat_j(q)`.
 
-`sigma_hat_KN(q) = (1/K) sum_j (1/N) sum_n Z_jn(q)`.
+Two graph budgets are frozen before any M3 graph WB:
 
-### 6.1 Two equal-budget allocations
+- `B=1400` total graph trajectories, 48% below M2's 2700 trajectories;
+- `B=2000` total graph trajectories, the original planned M3 graph budget and 26% below M2.
 
-**M3-200x10**
+The `B=1400` allocation is nested inside the `B=2000` allocation so one maximum-budget simulation bank supports both blind predictions.
 
-- K=200 latent draws;
-- N=10 execution trajectories per latent draw;
-- graph cost = 2000 trajectories.
+### 6.1 Minimax trajectory allocation
 
-**M3-100x20**
+With independent trajectory seed streams across retained latent hypotheses,
 
-- K=100 latent draws;
-- N=20 execution trajectories per latent draw;
-- graph cost = 2000 trajectories.
+`Var[sigma_hat_S(q)] = sum_j alpha_j^2 p_j(q)(1-p_j(q))/N_j`.
 
-Do not enumerate the full `48^3` Cartesian product.
+Since every Bernoulli variance satisfies
 
-### 6.2 Seed nesting
+`p_j(q)(1-p_j(q)) <= 1/4`,
 
-To preserve the variance decomposition cleanly, different latent hypotheses should use independent graph seed streams rather than one common-random-number bank across all hypotheses.
+we obtain the query-independent worst-case bound
 
-For hypothesis `j <= 100`:
+`Var[sigma_hat_S(q)] <= (1/4) sum_j alpha_j^2/N_j`.
 
-- its first 10 execution seeds are identical in M3-200x10 and M3-100x20;
-- M3-100x20 receives 10 additional independent seeds.
+At fixed total graph budget
 
-For hypotheses `101..200`:
+`B = sum_j N_j`,
 
-- only the first 10 execution seeds are used.
+the continuous minimizer of this worst-case bound is
 
-This gives a nested comparison while keeping execution noise independent across latent hypotheses.
+`N_j proportional to alpha_j`.
 
-The exact deterministic seed-allocation function must be frozen in the execution contract before graph simulation.
+For the required integer allocation with `N_j>=1`, use a deterministic greedy marginal rule. Start with one trajectory for every retained hypothesis. Each additional trajectory is assigned to the hypothesis maximizing
 
-## 7. Fixed-budget variance theory
+`Delta_j = alpha_j^2 / [N_j(N_j+1)]`.
 
-For one query `q`, assume the sampled latent hypotheses are iid draws from the frozen weighted latent distribution and graph trajectories are conditionally iid within a latent hypothesis.
+This is the exact marginal reduction in the separable worst-case objective, and generates nested integer allocations as the total budget increases.
 
-Then
+The frozen execution contract is:
 
-`Var[sigma_hat_KN(q)] = Var_theta[p_theta(q)]/K + E_theta[p_theta(q)(1-p_theta(q))]/(K*N)`.
+`phase4/config_phase4_m3_v4_dominant_mass_graph_v1.json`.
 
-Write
+### 6.2 Seed independence
 
-`tau^2(q) = Var_theta[p_theta(q)]`
+Each retained joint hypothesis receives its own disjoint deterministic seed block. This preserves the simple variance decomposition above and avoids covariance terms from common random numbers across latent hypotheses.
 
-and
+The same member ledger is reused for every `rho`, regime, and horizon query, and the `B=1400` prediction uses a prefix of each member's `B=2000` ledger according to the frozen allocation table.
 
-`v(q) = E_theta[p_theta(q)(1-p_theta(q))]`.
+## 7. Error decomposition for M3 dominant-mass quadrature
 
-At fixed graph budget `B=K*N`,
+M3 now has two conceptually separate numerical errors.
 
-`Var[sigma_hat_KN(q)] = tau^2(q)/K + v(q)/B`.
+First, **latent truncation error** from omitting joint hypotheses outside the retained top-mass set:
 
-Therefore the ordinary execution Monte Carlo term `v/B` is identical for 200x10 and 100x20, while the latent-sampling term differs:
+`|sigma_full(q)-sigma_S(q)| <= 1-m`.
 
-- M3-100x20: `tau^2/100`;
-- M3-200x10: `tau^2/200`.
+For the frozen top-14 V3 set,
 
-So whenever inverse ambiguity is compositionally material, `tau^2>0`, the theory predicts lower estimator variance for **200x10** at the same graph cost.
+`1-m approximately 8.26e-4`.
 
-The advantage should be smallest in G0, where M2 already showed little need for ambiguity preservation, and larger in G1/G2, where the M2 ambiguity range expanded substantially.
+Second, **finite graph Monte Carlo error** inside the retained set. Its pointwise variance obeys
 
-This gives the predeclared qualitative prediction:
+`Var[sigma_hat_S(q)] <= (1/4) sum_j alpha_j^2/N_j`.
 
-`G0: 200x10 approximately 100x20`
+The execution runner reports the resulting worst-case variance and standard-error bounds for both `B=1400` and `B=2000` before any graph WB is opened.
 
-`G1/G2: 200x10 should increasingly outperform 100x20 if latent ambiguity dominates`.
+These two errors must not be conflated:
 
-### 7.1 Empirical variance decomposition
+- the truncation bound is deterministic and distribution-free once the latent weights are frozen;
+- the Monte Carlo term is stochastic and comes from finite graph trajectories.
 
-For each frozen query, estimate:
-
-- across-latent variance `tau^2(q)`;
-- mean within-latent Bernoulli variance `v(q)`;
-- the predicted fixed-budget variance for 100x20 and 200x10.
-
-The member-level N is small, so use a bias-corrected/random-effects estimate for `tau^2` rather than the raw variance of noisy per-member means.
-
-The theory comparison is pointwise in q. The many horizons and rho queries are **not independent samples**. Their value is that one simulated ledger yields the complete sigma family essentially for free, not that 37 horizon points multiply the effective trajectory count.
+The many horizon and rho curve points are not independent replications. Their computational value is that one graph ledger supports the full sigma family.
 
 ## 8. Frozen evaluation battery
 
