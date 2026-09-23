@@ -119,6 +119,47 @@ The authoritative V2 contract is:
 
 The V1 beta=100 weighting and its degenerate 200-draw bank remain archived as development evidence and must not be used for graph execution.
 
+## 3.3 M3-v3 public-I1 cross-validation and dominant-mass result
+
+The provisional M3-v2 ESS-threshold rule was **superseded before execution** because choosing `beta=5` from an ESS target would make the concentration parameter a design heuristic rather than a predictive quantity.
+
+M3-v3 instead selected one global Gibbs concentration parameter `lambda` by public-I1-only blocked cross-validation. Complete `(region_rho, query_rho)` horizon curves were held out in five Latin-balanced folds. For each candidate `lambda`,
+
+`w_j(lambda) proportional to exp[-lambda E_j^train]`
+
+was fitted on the training curves and the weighted local mixture was scored on held-out curves using mean Bernoulli KL. No ESS constraint, graph prediction, or graph WB entered selection.
+
+The frozen grid selected
+
+`lambda = 30`
+
+with mean held-out Bernoulli KL `0.1260419`. The neighboring values showed a shallow optimum: approximately `0.127666` at lambda 15, `0.126375` at 20, and `0.129613` at 50.
+
+The resulting full-surface provider ESS values were:
+
+- ProviderA: `2.7127`;
+- ProviderB: `1.0208`;
+- ProviderC: `1.0697`;
+- joint product ESS: `2.9621`.
+
+Thus the concentration is not merely an artifact of the original lambda=100 choice. Public-I1 predictive cross-validation itself prefers a sharply weighted finite latent distribution.
+
+The exact 48^3 joint-mass audit then showed:
+
+- top 3 hypotheses retain `0.956372` mass;
+- top 7 retain `0.993195`;
+- top 8 retain `0.995770`;
+- top 14 retain `0.999174`;
+- top 23 retain `0.999913`.
+
+Therefore the original random-draw breadth/depth experiment (`K=200,N=10` versus `K=100,N=20`) is **superseded before graph execution**. Under the frozen V3 weighting, 100 or 200 categorical draws mostly repeat the same few hypotheses and do not constitute a meaningful latent-breadth comparison.
+
+The current graph target is deterministic **dominant-mass quadrature** over the minimal top-ranked set whose cumulative joint weight reaches at least `0.999`. In the frozen V3 distribution this selects 14 joint hypotheses and gives the deterministic truncation guarantee
+
+`|sigma_full(q) - sigma_top14(q)| <= 0.000826`
+
+for every query `q`, before finite-trajectory Monte Carlo error.
+
 ## 4. Public-I1-only weighting rule
 
 The public I1 surface is estimated from a finite trajectory bank and its points are strongly correlated across horizons and rho. Therefore M3 will **not** claim an exact Bayesian posterior over latent parameters.
@@ -144,13 +185,17 @@ Use Jeffreys smoothing for both finite-simulation probabilities:
 
 `p_theta(q) = (s_theta(q) + 1/2) / (N_local + 1)`.
 
-The provider weight is then
+The original V1 provider weight was
 
 `w_i(theta) proportional to exp[-N_I1 * E_i(theta)]`
 
-with `N_I1=100`, the trajectory count used to estimate the public I1 surface.
+with `N_I1=100`. This trajectory-count scaling is retained only as development history because it produced severe concentration. The graph-execution version uses the V3 cross-validated rule
 
-Why this scaling:
+`w_i(theta) proportional to exp[-lambda * E_i(theta)]`
+
+with the public-I1-selected global `lambda=30`.
+
+The original V1 motivation was:
 
 - for one Bernoulli observation family, likelihood ratios scale asymptotically as `exp[-N*KL]`;
 - using the **mean** over the correlated surface avoids pretending that every horizon/rho point is an independent experiment;
@@ -189,14 +234,9 @@ Assuming provider-local evidence independence under I1, define the finite joint 
 
 This factorization is an M3 modeling assumption. It does not assert physical independence of provider execution; it states that the public provider-card evidence is weighted independently before the known graph mechanics are applied.
 
-Draw one **ordered bank of 200 joint latent hypotheses** from this product distribution using one frozen RNG stream.
+V3 first enumerates the exact finite `48^3` product weights. The graph-execution stage then retains the smallest descending-weight prefix whose cumulative mass is at least `0.999`. For the frozen V3 distribution this is the top 14 joint hypotheses with retained mass approximately `0.999174`.
 
-The ordered bank is immutable once generated:
-
-- M3-100x20 uses entries 1..100;
-- M3-200x10 uses entries 1..200.
-
-A prepare stage must report duplicate frequency and weight concentration before graph simulation. Sampling is with replacement, so duplicate joint hypotheses are valid draws from the finite weighted distribution. They are retained and reported, never silently deduplicated.
+The earlier ordered 100/200-draw banks remain development diagnostics only and are not used for graph execution.
 
 ### 5.1 Dominant-mass truncation bound
 
