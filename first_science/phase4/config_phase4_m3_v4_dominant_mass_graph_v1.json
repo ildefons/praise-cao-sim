@@ -71,5 +71,5 @@
     "M2_change": false,
     "PPG_firewall_preserved": true
   },
-  "next_gate": "After all B=700/1400/2000 M3 predictions are materialized and hash-frozen, define a separate fresh matched-D300 white-box evaluation contract. No graph-WB result may alter the retained set, weights, allocation, or budgets."
+  "next_gate": "After both B=1400 and B=2000 M3 predictions are materialized and hash-frozen, define a separate fresh matched-D300 white-box evaluation contract. No graph-WB result may alter the retained set, weights, allocation, or budgets."
 }
