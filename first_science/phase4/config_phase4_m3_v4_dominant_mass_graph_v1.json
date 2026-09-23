@@ -25,7 +25,7 @@
     "selection_uses_graph_whitebox": false
   },
   "simulation_budget": {
-    "budgets": [700, 1400, 2000],
+    "budgets": [1400, 2000],
     "maximum_total_graph_trajectories": 2000,
     "allocation": "integer minimax allocation for the renormalized retained weights",
     "allocation_objective_upper_bound": "minimize (1/4) * sum_j alpha_j^2 / N_j subject to sum_j N_j=B and N_j>=1",
@@ -50,6 +50,7 @@
     "same_provider_process_family": "latent hypotheses only; no hidden WB parameters read",
     "one_ledger_per_joint_hypothesis_reused_for_all_queries": true
   },
+  "budget_interpretation": "B=1400 is a 48% reduction from M2 graph cost 2700; B=2000 is the original planned M3 budget and a 26% reduction from M2.",
   "required_outputs": [
     "m3_v4_dominant_design.csv",
     "m3_v4_allocation_table.csv",
