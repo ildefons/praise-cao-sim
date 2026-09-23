@@ -10,6 +10,8 @@ import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 import numpy as np
 import pandas as pd
 
@@ -51,10 +53,9 @@ def main() -> None:
 
     fig, axes = plt.subplots(
         len(rhos), len(regimes),
-        figsize=(14, 14),
+        figsize=(15, 14.5),
         sharex=True,
         sharey=True,
-        constrained_layout=True,
     )
     if len(rhos) == 1:
         axes = np.asarray([axes])
@@ -77,19 +78,28 @@ def main() -> None:
                 h,
                 g["sigma_m2_min"].astype(float),
                 g["sigma_m2_max"].astype(float),
-                alpha=0.18,
+                alpha=0.16,
                 label="M2 range",
             )
-            wb, = ax.plot(h, g["sigma_whitebox"].astype(float), lw=2.2, label="WB")
-            m1, = ax.plot(h, g["sigma_m1"].astype(float), lw=1.6, label="M1")
-            m2, = ax.plot(h, g["sigma_m2_mean"].astype(float), lw=1.8, label="M2 mean")
+            wb, = ax.plot(
+                h, g["sigma_whitebox"].astype(float),
+                lw=2.8, ls="-", label="WB"
+            )
+            m1, = ax.plot(
+                h, g["sigma_m1"].astype(float),
+                lw=2.0, ls="-.", label="M1"
+            )
+            m2, = ax.plot(
+                h, g["sigma_m2_mean"].astype(float),
+                lw=2.2, ls="-", label="M2 mean"
+            )
 
             predicted = g["m0_status"].astype(str).eq("PREDICTED")
             if predicted.any():
                 m0, = ax.plot(
                     h[predicted.to_numpy()],
                     g.loc[predicted, "sigma_m0"].astype(float),
-                    lw=1.5,
+                    lw=2.0,
                     ls="--",
                     label="M0",
                 )
@@ -136,19 +146,48 @@ def main() -> None:
             if i == len(rhos) - 1:
                 ax.set_xlabel("Horizon H (s)")
 
-    order = ["WB", "M0", "M1", "M2 mean", "M2 range", "M0 raw diagnostic"]
-    keys = [k for k in order if k in handles]
-    fig.legend(
-        [handles[k] for k in keys],
-        keys,
-        loc="upper center",
-        ncol=len(keys),
-        frameon=False,
+    # Use large proxy handles in a dedicated legend band. This makes the
+    # mapping readable even when the actual curves overlap near sigma=1.
+    legend_handles = [
+        Line2D([0], [0], lw=3.2, ls="-", label="WB  (white-box truth)"),
+        Line2D([0], [0], lw=2.6, ls="--", label="M0  (analytic product)"),
+        Line2D([0], [0], lw=2.6, ls="-.", label="M1  (single surrogate)"),
+        Line2D([0], [0], lw=2.8, ls="-", label="M2  (ensemble mean)"),
+        Patch(alpha=0.20, label="M2  (min-max range)"),
+    ]
+    if args.show_m0_raw:
+        legend_handles.append(
+            Line2D([0], [0], lw=2.2, ls=":", label="M0 raw  (diagnostic only)")
+        )
+
+    fig.suptitle(
+        "Frozen final sigma curves: WB vs M0 / M1 / M2",
+        fontsize=15,
+        y=0.995,
     )
-    fig.suptitle("Frozen final sigma curves: WB vs M0/M1/M2", y=1.015)
+    fig.legend(
+        handles=legend_handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.965),
+        ncol=3,
+        fontsize=11,
+        handlelength=3.6,
+        handletextpad=0.8,
+        columnspacing=2.4,
+        borderpad=0.8,
+        frameon=True,
+    )
+    fig.subplots_adjust(
+        top=0.875,
+        bottom=0.06,
+        left=0.08,
+        right=0.985,
+        hspace=0.22,
+        wspace=0.12,
+    )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(args.output, dpi=160, bbox_inches="tight")
+    fig.savefig(args.output, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
     print(f"saved={args.output}")
