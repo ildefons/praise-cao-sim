@@ -1,0 +1,69 @@
+{
+  "status": "FROZEN_PHASE4_M3_V4_FINAL_EVALUATION_V1",
+  "freeze_date": "2026-09-23",
+  "scientific_stage": "Fresh matched-D300 white-box evaluation of frozen M3 dominant-mass predictions and frozen M0/M1/M2 baselines",
+  "m3_prediction": {
+    "contract": "config_phase4_m3_v4_dominant_mass_graph_v1.json",
+    "manifest": "results/m3_v4_dominant_mass_graph_v1/m3_v4_prediction_manifest.json",
+    "required_manifest_status": "FROZEN_PHASE4_M3_V4_DOMINANT_MASS_GRAPH_PREDICTIONS",
+    "predictions": "results/m3_v4_dominant_mass_graph_v1/m3_v4_blind_predictions.csv",
+    "design": "results/m3_v4_dominant_mass_graph_v1/m3_v4_dominant_design.csv",
+    "allocation": "results/m3_v4_dominant_mass_graph_v1/m3_v4_allocation_table.csv",
+    "ledger_hashes": "results/m3_v4_dominant_mass_graph_v1/m3_v4_ledger_hashes.csv",
+    "budgets": [1400, 2000]
+  },
+  "frozen_baselines": {
+    "m2_final_evaluation_contract": "config_phase4_sigma_regime_final_evaluation_v1.json",
+    "m2_prediction_contract": "config_phase4_sigma_regime_blind_prediction_v1.json",
+    "m2_prediction_manifest": "results/sigma_regime_blind_prediction_v1/sigma_regime_prediction_manifest_v1.json",
+    "m2_predictions": "results/sigma_regime_blind_prediction_v1/sigma_regime_blind_predictions.csv",
+    "m2_member_curves": "results/sigma_regime_blind_prediction_v1/sigma_regime_member_curves.csv",
+    "m2_variant_design": "results/sigma_regime_blind_prediction_v1/sigma_regime_variant_design.csv",
+    "m2_ledger_hashes": "results/sigma_regime_blind_prediction_v1/sigma_regime_ledger_hashes.csv",
+    "rerun_baselines": false
+  },
+  "query_battery": {
+    "selected_regions": "results/sigma_regime_step0_calibration_v2/sigma_regime_v2_selected_regions_frozen.csv",
+    "step0_manifest": "results/sigma_regime_step0_calibration_v2/sigma_regime_v2_calibration_manifest.json",
+    "step0_contract": "config_phase4_sigma_regime_battery_step0_v2.json",
+    "required_n_queries": 15,
+    "require_identical_M2_M3_query_boundaries": true
+  },
+  "fresh_whitebox": {
+    "provider_process": "D300000000_d0.200",
+    "graph": "exact fixed G0 symmetric graph",
+    "seed_start": 38000,
+    "seed_end_inclusive": 38199,
+    "n_trajectories": 200,
+    "one_ledger_reused_for_all_15_queries": true,
+    "generate_only_after_prepare_manifest_hash_verification": true,
+    "seed_bank_not_used_by_M3_prediction_or_M2_final_evaluation": true
+  },
+  "metrics": {
+    "primary_window": "H60..H240",
+    "secondary_window": "full frozen horizon support",
+    "methods": ["M0", "M1", "M2", "M3_B1400", "M3_B2000"],
+    "primary_metrics": ["MAE", "RMSE", "bias", "max_abs_error"],
+    "summaries": ["whole_battery", "per_regime", "per_rho", "per_rho_x_regime"],
+    "M0_rule": "score only status=PREDICTED and report NOT_APPLICABLE query count separately",
+    "M3_report": [
+      "retained_mass",
+      "deterministic_truncation_abs_error_bound",
+      "worst_case_mc_variance_bound",
+      "worst_case_mc_se_bound",
+      "total_graph_trajectories"
+    ]
+  },
+  "firewall": {
+    "M3_lambda_change": false,
+    "M3_weight_change": false,
+    "M3_retained_set_change": false,
+    "M3_allocation_change": false,
+    "M3_budget_change": false,
+    "M2_change": false,
+    "query_change": false,
+    "repair_after_whitebox": false,
+    "PPG_firewall_preserved": true
+  },
+  "close_M3_v4_after_evaluation_regardless_of_outcome": true
+}
