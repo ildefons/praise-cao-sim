@@ -284,6 +284,26 @@ def _rescore_candidates(
     results_path = output_root / "m3_local_rescore_results.csv"
     if results_path.exists():
         existing = pd.read_csv(results_path)
+        required_resume = {
+            "candidate_id",
+            "n_local_trajectories",
+            "local_seed_start",
+            "local_seed_end_inclusive",
+        }
+        missing_resume = sorted(required_resume.difference(existing.columns))
+        if missing_resume:
+            raise RuntimeError(
+                "existing M3 checkpoint lacks provenance fields: "
+                + ", ".join(missing_resume)
+            )
+        if not (
+            (existing["n_local_trajectories"].astype(int) == n_local).all()
+            and (existing["local_seed_start"].astype(int) == seed_start).all()
+            and (existing["local_seed_end_inclusive"].astype(int) == seed_end).all()
+        ):
+            raise RuntimeError(
+                "existing M3 checkpoint was generated with a different local seed/count contract"
+            )
         completed = set(existing["candidate_id"].astype(str))
         print(f"M3 local resume: {len(completed)} candidates already complete", flush=True)
     else:
