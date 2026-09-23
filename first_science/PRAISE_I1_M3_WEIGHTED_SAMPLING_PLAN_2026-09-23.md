@@ -198,6 +198,62 @@ The ordered bank is immutable once generated:
 
 A prepare stage must report duplicate frequency and weight concentration before graph simulation. Sampling is with replacement, so duplicate joint hypotheses are valid draws from the finite weighted distribution. They are retained and reported, never silently deduplicated.
 
+### 5.1 Dominant-mass truncation bound
+
+If the frozen weighted joint distribution becomes strongly concentrated, M3 need not approximate it by repeatedly sampling the same high-mass hypotheses. A deterministic top-mass quadrature can be used instead, with an explicit pointwise error bound.
+
+For any graph query `q`, write the exact weighted M3 prediction as
+
+`sigma_full(q) = sum_j w_j sigma_j(q)`,
+
+where `w_j >= 0`, `sum_j w_j = 1`, and every member survival probability satisfies
+
+`0 <= sigma_j(q) <= 1`.
+
+Let `S` be a retained subset of joint latent hypotheses with total probability mass
+
+`m = sum_{j in S} w_j`.
+
+Define the renormalized truncated prediction
+
+`sigma_S(q) = (1/m) sum_{j in S} w_j sigma_j(q)`.
+
+Let the omitted mass be
+
+`r = 1 - m`.
+
+The full mixture can be decomposed as
+
+`sigma_full(q) = m sigma_S(q) + r sigma_R(q)`,
+
+where `sigma_R(q)` is the corresponding normalized prediction over the omitted hypotheses and therefore also lies in `[0,1]`.
+
+Hence
+
+`|sigma_full(q) - sigma_S(q)| = r |sigma_R(q) - sigma_S(q)| <= r = 1 - m`.
+
+Therefore,
+
+`|sigma_full(q) - sigma_S(q)| <= 1 - m`.
+
+This bound is:
+
+- deterministic;
+- pointwise in every `(A_G,H,rho)` query;
+- independent of the graph simulator details;
+- independent of how different the retained and omitted latent hypotheses are;
+- separate from finite-trajectory Monte Carlo error.
+
+Examples:
+
+- retaining 99% joint weight gives worst-case truncation error at most `0.01`;
+- retaining 99.5% gives at most `0.005`;
+- retaining 99.9% gives at most `0.001`.
+
+This makes cumulative joint mass a principled computational stopping criterion. If a small number of hypotheses contains nearly all frozen M3 weight, deterministic weighted evaluation of those hypotheses can replace repeated categorical draws while providing an explicit approximation guarantee.
+
+For the paper, this should be presented as a general property of weighted survival composition, not as an empirical feature specific to the present benchmark.
+
 ## 6. Graph simulation allocation
 
 Let `Z_jn(q)` be the binary trajectory-level pass indicator for joint latent hypothesis `j`, graph trajectory `n`, and query `q=(A_G,H,rho)`.
