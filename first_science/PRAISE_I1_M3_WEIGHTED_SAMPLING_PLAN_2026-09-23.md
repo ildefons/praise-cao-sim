@@ -430,6 +430,49 @@ The fresh final-evaluation contract is:
 
 It freezes a new matched-D300 WB bank with seeds `38000..38199`, `N_WB=200`, opened only after a prepare-only hash gate verifies the M3 predictions and the earlier frozen M0/M1/M2 prediction artifacts.
 
+### 9.2 Fresh final WB result: M3-v4 closes positive
+
+The fresh matched-D300 final WB evaluation was completed on seeds `38000..38199` with `N_WB=200`, after both M3 predictions and all method choices were hash-frozen.
+
+Headline H60..H240 results:
+
+| Method | Graph trajectories | MAE | RMSE | Bias | Max abs. error |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| M1 | 100 per single latent model | 0.185171 | 0.230736 | +0.185171 | 0.535000 |
+| M2 | 2700 | 0.068153 | 0.094141 | +0.047375 | 0.302593 |
+| M3 B=1400 | 1400 | 0.030368 | 0.035783 | +0.028240 | 0.114088 |
+| M3 B=2000 | 2000 | 0.027547 | 0.033064 | +0.024468 | 0.110645 |
+
+Relative to frozen M2 on the same fresh WB:
+
+- M3 B=1400 reduces whole-battery MAE by approximately **55.4%**, RMSE by **62.0%**, and maximum absolute error by **62.3%**, while using approximately **48% fewer graph trajectories**;
+- M3 B=2000 reduces whole-battery MAE by approximately **59.6%**, RMSE by **64.9%**, and maximum absolute error by **63.4%**, while using approximately **26% fewer graph trajectories**.
+
+The regime-specific MAE pattern is especially important:
+
+| Regime | M2 MAE | M3 B=1400 MAE | M3 B=2000 MAE |
+| --- | ---: | ---: | ---: |
+| G0 | 0.023640 | 0.023632 | 0.020931 |
+| G1 | 0.070548 | 0.035529 | 0.031585 |
+| G2 | 0.110273 | 0.031945 | 0.030127 |
+
+Thus M3 is essentially neutral to modestly better than M2 in G0, while the improvement becomes large as the admissibility query tightens:
+
+- G1 MAE reduction versus M2: approximately **49.6%** at B=1400 and **55.2%** at B=2000;
+- G2 MAE reduction versus M2: approximately **71.0%** at B=1400 and **72.7%** at B=2000.
+
+This is the same qualitative regime dependence that motivated M3 after M2: preserving ambiguity was already sufficient near G0, while relative plausibility becomes increasingly important in G1/G2.
+
+The positive bias is also reduced substantially. In G2 it falls from `+0.100882` for M2 to `+0.026067` for M3 B=1400 and `+0.023176` for M3 B=2000. M3 therefore addresses most of the M2 over-optimism in the difficult regime without changing I1.
+
+The two M3 budgets are close. Whole-battery MAE improves from `0.030368` at B=1400 to `0.027547` at B=2000, about a 9.3% relative change in MAE for 600 additional graph trajectories. This observed difference should be described as an accuracy-cost trade-off, not as a statistically established superiority claim.
+
+The M3-v4 construction is now **closed**. No lambda, provider weight, retained hypothesis, truncation threshold, trajectory allocation, budget, or query region may be modified against this WB.
+
+The final evaluation manifest is:
+
+`phase4/results/m3_v4_final_evaluation_v1/m3_v4_final_evaluation_manifest.json`.
+
 ## 10. Primary and secondary comparisons
 
 ### 10.1 Primary M3 accuracy-cost comparison
