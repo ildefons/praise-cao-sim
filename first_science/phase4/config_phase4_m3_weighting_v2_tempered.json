@@ -1,0 +1,66 @@
+{
+  "status": "FROZEN_PHASE4_M3_WEIGHTING_V2_TEMPERED",
+  "freeze_date": "2026-09-23",
+  "scientific_stage": "M3-v2 tempered public-I1 Gibbs weighting after local-only concentration audit",
+  "supersedes_for_graph_execution": "config_phase4_m3_local_weighting_v1.json",
+  "v1_role": "development result retained as a degenerate weighting construction; no graph simulation was run",
+  "inputs": {
+    "v1_output_root": "results/m3_local_weighting_v1",
+    "v1_local_results": "results/m3_local_weighting_v1/m3_local_rescore_results.csv",
+    "v1_provider_candidate_bank": "results/m3_local_weighting_v1/m3_provider_candidate_bank.csv",
+    "v1_local_surfaces": "results/m3_local_weighting_v1/local_surfaces",
+    "v1_manifest": "results/m3_local_weighting_v1/m3_local_weighting_manifest_v1.json"
+  },
+  "temperature_selection": {
+    "candidate_beta_grid": [0, 1, 2, 5, 10, 20, 50, 100],
+    "criterion": "choose the largest beta such that provider-level ESS >= 3 for every provider",
+    "rationale": "M3 is intended to preserve and weight inverse ambiguity, so its effective provider support should not collapse below the three-representative support already carried by M2. Choosing the largest admissible beta retains the strongest public-I1 discrimination compatible with that minimum effective support.",
+    "selected_beta": 5,
+    "selection_evidence": "public-I1-only local rescoring and concentration audit; no graph simulation and no graph WB were read",
+    "post_graph_temperature_tuning_forbidden": true
+  },
+  "weighting": {
+    "energy_column": "mean_bernoulli_kl",
+    "formula": "w_i(theta) proportional to exp(-beta * E_i(theta))",
+    "beta": 5,
+    "prior_mass": "equal over the existing 48-point non-adaptive LHS support per provider",
+    "interpretation": "tempered generalized-Bayes/Gibbs plausibility weight, not a literal posterior"
+  },
+  "joint_sampling": {
+    "factorization": "P(theta_A,theta_B,theta_C|I1)=w_A*w_B*w_C",
+    "ordered_bank_size": 200,
+    "rng_seed": 2026092305,
+    "sampling": "independent categorical draws with replacement",
+    "duplicates": "retain and report",
+    "M3_100x20": "ordered draws 0..99",
+    "M3_200x10": "ordered draws 0..199"
+  },
+  "expected_local_diagnostics_from_development_audit": {
+    "ProviderA_ESS_at_beta5": 3.145540,
+    "ProviderB_ESS_at_beta5": 3.964495,
+    "ProviderC_ESS_at_beta5": 3.439559,
+    "joint_product_ESS_approx": 42.9
+  },
+  "firewall": {
+    "provider_resimulation": false,
+    "new_candidate_generation": false,
+    "adaptive_parameter_search": false,
+    "graph_simulation": false,
+    "graph_prediction_read": false,
+    "graph_whitebox_read": false,
+    "temperature_change_after_graph_results": false,
+    "M0_change": false,
+    "M1_change": false,
+    "M2_change": false,
+    "PPG_firewall_preserved": true
+  },
+  "required_outputs": [
+    "m3_v2_provider_weights_beta5.csv",
+    "m3_v2_weight_diagnostics_beta5.csv",
+    "m3_v2_weighted_i1_reconstruction.csv",
+    "m3_v2_weighted_i1_reconstruction_summary.csv",
+    "m3_v2_joint_latent_draws_200.csv",
+    "m3_v2_tempered_weighting_manifest.json"
+  ],
+  "next_gate": "After V2 weights and the ordered 200-draw bank are materialized and hash-frozen, define the separate equal-budget graph contract for M3-200x10 versus M3-100x20."
+}
