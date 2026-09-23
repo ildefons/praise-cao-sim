@@ -78,20 +78,21 @@ def main() -> None:
                 h,
                 g["sigma_m2_min"].astype(float),
                 g["sigma_m2_max"].astype(float),
+                color="tab:blue",
                 alpha=0.16,
                 label="M2 range",
             )
             wb, = ax.plot(
                 h, g["sigma_whitebox"].astype(float),
-                lw=2.8, ls="-", label="WB"
+                color="black", lw=2.8, ls="-", label="WB"
             )
             m1, = ax.plot(
                 h, g["sigma_m1"].astype(float),
-                lw=2.0, ls="-.", label="M1"
+                color="tab:green", lw=2.0, ls="-.", label="M1"
             )
             m2, = ax.plot(
                 h, g["sigma_m2_mean"].astype(float),
-                lw=2.2, ls="-", label="M2 mean"
+                color="tab:blue", lw=2.2, ls="-", label="M2 mean"
             )
 
             predicted = g["m0_status"].astype(str).eq("PREDICTED")
@@ -99,6 +100,7 @@ def main() -> None:
                 m0, = ax.plot(
                     h[predicted.to_numpy()],
                     g.loc[predicted, "sigma_m0"].astype(float),
+                    color="tab:orange",
                     lw=2.0,
                     ls="--",
                     label="M0",
@@ -114,6 +116,7 @@ def main() -> None:
                     raw, = ax.plot(
                         h,
                         g["sigma_m0_raw_product"].astype(float),
+                        color="tab:orange",
                         lw=1.2,
                         ls=":",
                         label="M0 raw diagnostic",
@@ -149,15 +152,15 @@ def main() -> None:
     # Use large proxy handles in a dedicated legend band. This makes the
     # mapping readable even when the actual curves overlap near sigma=1.
     legend_handles = [
-        Line2D([0], [0], lw=3.2, ls="-", label="WB  (white-box truth)"),
-        Line2D([0], [0], lw=2.6, ls="--", label="M0  (analytic product)"),
-        Line2D([0], [0], lw=2.6, ls="-.", label="M1  (single surrogate)"),
-        Line2D([0], [0], lw=2.8, ls="-", label="M2  (ensemble mean)"),
-        Patch(alpha=0.20, label="M2  (min-max range)"),
+        Line2D([0], [0], color="black", lw=3.2, ls="-", label="WB  (white-box truth)"),
+        Line2D([0], [0], color="tab:orange", lw=2.6, ls="--", label="M0  (analytic product)"),
+        Line2D([0], [0], color="tab:green", lw=2.6, ls="-.", label="M1  (single surrogate)"),
+        Line2D([0], [0], color="tab:blue", lw=2.8, ls="-", label="M2  (ensemble mean)"),
+        Patch(facecolor="tab:blue", alpha=0.20, label="M2  (min-max range)"),
     ]
     if args.show_m0_raw:
         legend_handles.append(
-            Line2D([0], [0], lw=2.2, ls=":", label="M0 raw  (diagnostic only)")
+            Line2D([0], [0], color="tab:orange", lw=2.2, ls=":", label="M0 raw  (diagnostic only)")
         )
 
     fig.suptitle(
