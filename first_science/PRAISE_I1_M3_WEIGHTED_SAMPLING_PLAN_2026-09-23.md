@@ -82,6 +82,43 @@ provider-local trajectories.
 
 Using N=100 matches the public I1 trajectory count and reduces noise before the exponential weighting step. This is a one-time construction cost and is accounted separately from graph-query cost.
 
+## 3.2 M3-v1 concentration audit and frozen V2 tempering
+
+The first local weighting construction used beta=100, motivated by the public-I1 trajectory count. The local-only concentration audit showed that this scaling is too sharp for the present finite LHS support:
+
+- ProviderA ESS = 1.68;
+- ProviderB ESS approximately 1;
+- ProviderC ESS approximately 1;
+- joint product ESS approximately 1.68;
+- 200 joint draws produced only 3 unique latent combinations.
+
+No graph simulation or graph WB had been opened, so this remains development evidence rather than a contaminated graph result.
+
+The audit evaluated the fixed beta grid `{0,1,2,5,10,20,50,100}`. M3-v2 freezes the following local-only temperature-selection rule:
+
+`choose the largest beta such that ESS_i >= 3 for every provider`.
+
+The threshold 3 is tied to the existing M2 support size: M3 is intended to preserve and weight inverse ambiguity, so its effective provider support should not collapse below the three representative hypotheses already carried by M2.
+
+This rule selects
+
+`beta = 5`.
+
+At beta=5, the observed provider ESS values are approximately:
+
+- ProviderA: 3.15;
+- ProviderB: 3.96;
+- ProviderC: 3.44;
+- joint product ESS: about 42.9.
+
+M3-v2 reuses the already-computed fresh N=100 local rescoring results. No provider simulation is repeated. Only the frozen Gibbs temperature and the resulting provider/joint weights are changed.
+
+The authoritative V2 contract is:
+
+`phase4/config_phase4_m3_weighting_v2_tempered.json`.
+
+The V1 beta=100 weighting and its degenerate 200-draw bank remain archived as development evidence and must not be used for graph execution.
+
 ## 4. Public-I1-only weighting rule
 
 The public I1 surface is estimated from a finite trajectory bank and its points are strongly correlated across horizons and rho. Therefore M3 will **not** claim an exact Bayesian posterior over latent parameters.
