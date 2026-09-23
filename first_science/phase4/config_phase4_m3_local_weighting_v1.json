@@ -1,0 +1,102 @@
+{
+  "status": "FROZEN_PHASE4_M3_LOCAL_WEIGHTING_V1",
+  "freeze_date": "2026-09-23",
+  "scientific_stage": "M3-0/M3-1 public-I1-only provider rescoring, Gibbs weighting, and frozen 200-draw joint latent bank",
+  "information_representation": "I1",
+  "method": "M3 weighted latent sampling",
+  "purpose": "Construct a fixed weighted latent distribution from a non-adaptive provider proposal before any M3 graph simulation. This stage does not read graph predictions or graph white-box outcomes.",
+  "provider_support": {
+    "source_design": "results/m2_a2_nonadaptive_coverage_v1/m2_a2_lhs_design.csv",
+    "source_manifest": "results/m2_a2_nonadaptive_coverage_v1/m2_a2_manifest_v1.json",
+    "required_source_manifest_status": "PHASE4_M2_A2_NONADAPTIVE_COVERAGE_AUDIT_COMPLETE_V1",
+    "sampler": "existing non-adaptive Latin hypercube",
+    "n_candidates_per_provider": 48,
+    "n_candidates_total": 144,
+    "coordinates": [
+      "z_log_mu",
+      "z_log_kappa",
+      "z_cv"
+    ],
+    "prior_mass": "equal 1/48 finite quadrature mass within each provider",
+    "use_a2_loss_or_compatibility_for_selection": false,
+    "use_all_48_candidates_per_provider": true,
+    "reason": "The A2 LHS proposal is non-adaptive and approximately uniform in the declared transformed latent domain. M3 uses continuous public-I1 weights rather than an M2 compatibility cutoff."
+  },
+  "local_rescoring": {
+    "trajectory_seed_start": 35000,
+    "trajectory_seed_end_inclusive": 35099,
+    "n_trajectories_per_candidate": 100,
+    "common_random_numbers_across_candidates": true,
+    "same_seed_numbers_across_providers": true,
+    "fresh_relative_to_historical_M1_M2_local_and_graph_banks": true,
+    "candidate_surface_support": "complete frozen public I1 surface with H>0",
+    "checkpoint_after_each_candidate": true,
+    "reason": "Use a fresh N=100 local bank, matching the public I1 trajectory count, to reduce noise in the exponentially weighted energy."
+  },
+  "weighting": {
+    "family": "trajectory-count-scaled generalized-Bayes/Gibbs weighting",
+    "public_i1_trajectory_count": 100,
+    "candidate_trajectory_count": 100,
+    "probability_smoothing": "Jeffreys: p=(successes+0.5)/(N+1)",
+    "point_discrepancy": "Bernoulli KL D(p_i1 || p_theta)",
+    "energy": "mean Bernoulli KL over every aligned public I1 point with H>0",
+    "log_unnormalized_weight": "-100 * energy",
+    "prior_mass_per_candidate": "equal within provider",
+    "normalization": "provider-wise log-sum-exp",
+    "interpretation": "Gibbs/generalized-Bayes plausibility weight, not a literal posterior because public I1 surface points are correlated",
+    "graph_outcome_may_tune_weighting": false,
+    "temperature_tuning": false
+  },
+  "diagnostics": {
+    "provider_effective_sample_size": "1/sum(w^2)",
+    "provider_entropy": "-sum(w log w)",
+    "provider_perplexity": "exp(entropy)",
+    "provider_max_weight": true,
+    "weighted_parameter_moments": true,
+    "weighted_public_i1_reconstruction": true,
+    "joint_effective_sample_size": "ESS_A * ESS_B * ESS_C",
+    "ess_is_diagnostic_not_selection_gate": true,
+    "reason": "Weight concentration is itself a scientific result. Do not redesign weights simply because the frozen rule is concentrated."
+  },
+  "joint_sampling": {
+    "factorization": "P(theta_A,theta_B,theta_C|I1)=w_A*w_B*w_C",
+    "ordered_bank_size": 200,
+    "rng_seed": 20260923,
+    "sampling": "independent categorical draw for each provider, with replacement",
+    "duplicates": "retain; duplicates are valid draws from the finite weighted distribution and must not be deduplicated",
+    "M3_100x20": "ordered joint draws 0..99",
+    "M3_200x10": "ordered joint draws 0..199",
+    "graph_simulation_in_this_stage": false
+  },
+  "frozen_inputs": {
+    "public_i1_root": "../phase2/results/i1_cards_v2_rho_conditioned/public",
+    "pilot_closure_source": "../phase3/config_phase3_m1_contract_v2.json"
+  },
+  "required_outputs": [
+    "m3_provider_candidate_bank.csv",
+    "m3_0_prepare_manifest_v1.json",
+    "m3_local_rescore_results.csv",
+    "m3_provider_weights.csv",
+    "m3_weight_diagnostics.csv",
+    "m3_weighted_i1_reconstruction.csv",
+    "m3_weighted_i1_reconstruction_summary.csv",
+    "m3_joint_latent_draws_200.csv",
+    "m3_local_weighting_manifest_v1.json"
+  ],
+  "firewall": {
+    "rerun_optuna": false,
+    "adaptive_parameter_search": false,
+    "new_provider_candidate_generation": false,
+    "read_a2_loss_for_weighting_or_selection": false,
+    "graph_simulation": false,
+    "graph_prediction_read": false,
+    "graph_whitebox_read": false,
+    "private_phase2_provider_traces_read": false,
+    "hidden_phase1_provider_parameters_read": false,
+    "M0_change": false,
+    "M1_change": false,
+    "M2_change": false,
+    "PPG_firewall_preserved": true
+  },
+  "next_gate": "After the provider weights and ordered 200-draw joint bank are hash-frozen, define the separate graph-execution contract for the equal-budget M3-200x10 versus M3-100x20 comparison. No graph outcome may alter this local weighting contract."
+}
