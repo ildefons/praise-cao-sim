@@ -177,3 +177,44 @@ Key outputs are:
 The central quantities are the distance of each non-adaptive compatible point to the nearest existing TPE-compatible point, whether it lies outside the existing compatible bounding box, and how much the union of TPE and LHS compatible points expands the maximum pairwise distance and per-coordinate spans. No post-hoc binary definition of `remote` is introduced.
 
 Interpretation is asymmetric. Discovery of remote compatible LHS points is direct evidence that TPE missed consequential parts of the compatible parameter set and motivates graph testing of those points. Failure to discover them in 48 points per provider strengthens the concentration/small-volume explanation but does not prove that no remote compatible region exists.
+
+## M3: weighted latent sampling extension
+
+M2 is closed. The next pilot target keeps I1 and the fixed 15-query sigma-regime battery unchanged, but replaces M2's small equal-weight diversity portfolio by a public-I1-weighted latent distribution.
+
+Authoritative plan:
+
+`../PRAISE_I1_M3_WEIGHTED_SAMPLING_PLAN_2026-09-23.md`
+
+Frozen local weighting contract:
+
+`config_phase4_m3_local_weighting_v1.json`
+
+The M3-0 prepare stage reuses **only the geometry** of the existing non-adaptive M2-A2 48-point LHS bank per provider. It does not read the old A2 losses for selection or weighting. It freezes all 144 provider candidates, fresh local seeds `35000..35099`, and the exact Gibbs weighting rule.
+
+Run the no-simulation audit first:
+
+```bash
+python m3_local_weighting.py --prepare-only
+```
+
+Expected marker:
+
+`M3_0_PREPARE_ONLY_COMPLETE`
+
+Then run the fresh local rescoring and weighting stage:
+
+```bash
+mkdir -p results/m3_local_weighting_v1
+/usr/bin/time -v python m3_local_weighting.py \\
+  2>&1 | tee results/m3_local_weighting_v1/run.log
+```
+
+This evaluates 48 candidates x 3 providers x 100 fresh local trajectories = 14,400 provider-local trajectories. It computes trajectory-count-scaled Bernoulli-KL Gibbs weights, reports ESS/entropy, reconstructs the public I1 surface under the weighted mixture, and freezes one ordered bank of 200 joint latent draws. It performs **no graph simulation** and reads **no graph WB**.
+
+The 200-draw bank is the immutable input for the later equal-budget graph comparison:
+
+- M3-100x20 uses joint draws 0..99 with 20 trajectories each;
+- M3-200x10 uses joint draws 0..199 with 10 trajectories each.
+
+Both graph allocations cost exactly 2000 trajectories. Their separate graph-execution contract is defined only after the local weighted bank is frozen.
