@@ -284,44 +284,59 @@ That provenance mismatch was diagnosed and recorded before the final battery.
 
 The current G0/G1/G2 labels refer exclusively to the **fixed-graph sigma-regime battery** above. They are regime labels, not graph-topology variants.
 
-## 11. Next method: M3 weighted latent sampling
+## 11. M3 result: weighted dominant-mass composition
 
-M2 is now closed.
+M3 is now closed with a positive prospective same-condition replication result.
 
-The next pilot target is **not** dynamic updating. M3 is now defined provisionally as a public-I1-weighted latent sampling method that preserves ambiguity while assigning non-uniform plausibility to latent explanations.
+The original 100x20 versus 200x10 sampling plan was superseded before graph execution after the public-I1-selected weighted distribution was found to be strongly concentrated. The final M3 construction is:
 
-The core target is:
+`public I1 -> blocked-CV Gibbs weighting -> exact joint product weights -> 99.9% dominant-mass truncation -> minimax graph-trajectory allocation`.
 
-`Can a public-I1-weighted latent mixture improve graph-survival prediction, and at a fixed graph budget B=2000 is latent breadth (K=200,N=10) more valuable than execution depth (K=100,N=20)?`
+Public-I1-only blocked cross-validation selected the global concentration parameter
 
-The equal-budget allocations are:
+`lambda = 30`.
 
-- `M3-200x10`: 200 weighted joint latent hypotheses, 10 graph trajectories each;
-- `M3-100x20`: 100 weighted joint latent hypotheses, 20 graph trajectories each.
+The resulting joint distribution is highly concentrated. The minimal set exceeding 99.9% cumulative mass contains 14 joint latent hypotheses with retained mass
 
-Both require exactly 2000 graph trajectories.
+`m = 0.999174197`,
 
-The theoretical motivation is the variance decomposition
+giving the pointwise deterministic bound
 
-`Var[sigma_hat_KN(q)] = tau^2(q)/K + v(q)/(K*N)`
+`|sigma_full(q)-sigma_top14(q)| <= 0.000825803`.
 
-with `tau^2(q)=Var_theta[p_theta(q)]` and `v(q)=E_theta[p_theta(q)(1-p_theta(q))]`.
+Two graph budgets were frozen before the fresh WB:
 
-At fixed `B=K*N`,
+- M3 B=1400;
+- M3 B=2000.
 
-`Var = tau^2/K + v/B`.
+On the fresh matched-D300 WB bank, seeds 38000..38199 and N=200, the H60..240 whole-battery results were:
 
-Thus, whenever inverse ambiguity is compositionally material, the 200x10 allocation should reduce the latent-sampling term relative to 100x20 while leaving the ordinary execution Monte Carlo term unchanged.
+| Method | Graph trajectories | MAE | RMSE | Bias | Max abs. error |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| M1 | reference single latent model | 0.185171 | 0.230736 | +0.185171 | 0.535000 |
+| M2 | 2700 | 0.068153 | 0.094141 | +0.047375 | 0.302593 |
+| M3 B=1400 | 1400 | 0.030368 | 0.035783 | +0.028240 | 0.114088 |
+| M3 B=2000 | 2000 | 0.027547 | 0.033064 | +0.024468 | 0.110645 |
 
-The M3 provider support will begin from the existing non-adaptive 48-point LHS bank per provider, not the diversity-selected 3-member M2 portfolio. Provider candidates will be freshly rescored against public I1 only, assigned trajectory-count-scaled Gibbs weights, and sampled into one frozen ordered bank of 200 joint hypotheses before any graph WB is opened.
+Compared with M2, M3 B=1400 reduces MAE by about 55.4% while using about 48% fewer graph trajectories. M3 B=2000 reduces MAE by about 59.6% while using about 26% fewer graph trajectories.
 
-The same frozen 15-query G0/G1/G2 battery will be reused unchanged. After both M3 predictions are hash-frozen, a fresh previously unused D300 WB bank will be generated for prospective same-condition replication.
+The regime dependence is central:
 
-Detailed design and guardrails:
+- G0: M2 MAE 0.023640, M3 B=1400 0.023632, M3 B=2000 0.020931;
+- G1: M2 0.070548, M3 B=1400 0.035529, M3 B=2000 0.031585;
+- G2: M2 0.110273, M3 B=1400 0.031945, M3 B=2000 0.030127.
+
+Thus M3 adds little in the easiest regime but strongly improves the intermediate and difficult regimes, especially by reducing M2's positive bias in G2.
+
+The current pilot conclusion is:
+
+`With provider disclosure fixed at I1, one latent reconstruction is adequate only in the easiest high-survival regime. Preserving inverse ambiguity improves harder composition queries, and weighting that ambiguity by public-I1 predictive plausibility plus certified dominant-mass quadrature substantially improves accuracy and computational efficiency without additional provider disclosure.`
+
+Detailed M3 design, derivations, guardrails, and final result:
 
 `PRAISE_I1_M3_WEIGHTED_SAMPLING_PLAN_2026-09-23.md`.
 
-Dynamic/incremental integration is deferred to a later method, provisionally M4, so that M3 tests one new mechanism at a time.
+Dynamic/incremental integration remains deferred to a later method, provisionally M4.
 
 ## 12. Pilot guardrails
 
