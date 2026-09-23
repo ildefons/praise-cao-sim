@@ -394,30 +394,34 @@ No M3 weighting or sampling choice may use the previously opened M2 final WB val
 
 ## 9. Prediction freeze and new final WB
 
-The execution order is:
+The current execution order is:
 
-1. freeze M3 provider weights from public I1 only;
-2. freeze the ordered 200 joint latent draws;
-3. run M3-200x10 and M3-100x20 graph prediction;
-4. materialize every predicted sigma curve and theoretical variance diagnostic;
-5. hash-freeze both M3 predictions;
-6. only then generate a new matched-D300 WB bank on previously unused seeds;
-7. evaluate M3 against that fresh WB;
-8. close the M3 weighted-sampling method regardless of outcome.
+1. freeze M3 provider weights from public I1 only using the V3 cross-validated `lambda=30`;
+2. enumerate the exact `48^3` product weights and freeze the minimal top-mass set with cumulative weight at least `0.999`;
+3. freeze the integer minimax trajectory allocations for `B=1400` and `B=2000`;
+4. run blind M3 graph prediction for both budgets from one nested maximum-budget simulation bank;
+5. materialize every predicted sigma curve, truncation bound, and worst-case Monte Carlo variance bound;
+6. hash-freeze both M3 budget predictions;
+7. only then generate a new matched-D300 WB bank on previously unused seeds;
+8. evaluate both M3 budgets and all frozen earlier baselines against that fresh WB;
+9. close this M3 construction regardless of outcome.
 
 Recommended final WB size:
 
-`N_WB=200`
+`N_WB=200`.
 
-because the expected difference between the two equal-budget M3 allocations may be smaller than the large M1/M2 differences previously observed.
-
-The exact new prediction and WB seed ranges must be checked against the repository's complete historical seed ledger and frozen before any M3 scientific run.
+The WB bank is generated only after the M3 prediction manifest is frozen. No WB result may alter lambda, retained hypotheses, weights, query regions, trajectory allocation, or budget.
 
 ## 10. Primary and secondary comparisons
 
-### 10.1 Primary equal-budget comparison
+### 10.1 Primary M3 accuracy-cost comparison
 
-Compare M3-200x10 versus M3-100x20 on identical final WB:
+Evaluate the two predeclared M3 graph budgets on the same fresh WB:
+
+- `B=1400`;
+- `B=2000`.
+
+Report:
 
 - MAE;
 - RMSE;
@@ -426,24 +430,22 @@ Compare M3-200x10 versus M3-100x20 on identical final WB:
 - per-regime and whole-battery summaries;
 - full-horizon and H=60..240 summaries.
 
-The primary scientific question is whether **more latent coverage** improves prediction at fixed graph cost.
+The scientific question is now:
+
+`How much graph-simulation budget is required once the public-I1-weighted latent distribution is compressed to a dominant-mass quadrature with a certified truncation bound?`
 
 ### 10.2 Theory-facing comparison
 
-For each regime, compare:
+For each M3 budget report:
 
-- empirical `tau^2`;
-- empirical `v`;
-- theory-predicted estimator variance;
-- observed difference between the 200x10 and 100x20 predictions.
+- retained mass `m`;
+- deterministic truncation bound `1-m`;
+- integer allocation `N_j`;
+- worst-case Monte Carlo variance bound `(1/4) sum_j alpha_j^2/N_j`;
+- worst-case Monte Carlo standard-error bound;
+- weighted member dispersion across the 14 retained hypotheses.
 
-A particularly informative outcome would be:
-
-- near-equivalence in G0;
-- increasing 200x10 advantage in G1/G2;
-- increasing estimated `tau^2` across the same regimes.
-
-That would connect the empirical allocation result directly to the variance decomposition.
+The empirical WB error should be interpreted against both numerical components: deterministic latent truncation and finite graph Monte Carlo noise.
 
 ### 10.3 Comparison with frozen M2
 
@@ -451,34 +453,37 @@ Evaluate the already-frozen M2 prediction against the new M3 final WB as a repli
 
 Do not rerun or retune M2.
 
-Relevant comparison:
+Relevant graph-simulation costs are:
 
-- M2 graph cost: 27 x 100 = 2700 trajectories;
-- each M3 allocation: 2000 trajectories.
+- M2: `27 x 100 = 2700` trajectories;
+- M3 dominant quadrature, lower budget: `1400` trajectories;
+- M3 dominant quadrature, higher budget: `2000` trajectories.
 
-If M3 matches or improves M2 at lower graph-simulation cost, that is a meaningful accuracy-cost improvement.
+Thus M3 uses approximately 48% or 26% fewer graph trajectories than M2, respectively.
 
-M0 and M1 may also be re-evaluated against the same new WB as frozen reference baselines, with the same M0 applicability rules.
+If M3 matches or improves M2 at either lower cost, that is an accuracy-cost improvement. If M3 is worse, the weighting/compression mechanism remains informative as a negative result.
+
+M0 and M1 may also be re-evaluated against the same fresh WB as frozen reference baselines, with the same M0 applicability rules.
 
 ## 11. Decision outcomes
 
 The experiment has useful outcomes in either direction.
 
-### Outcome A: 200x10 beats 100x20 as predicted
+### Outcome A: B=1400 is already stable and competitive
 
-Interpretation: latent-model sampling variance is important, so under a fixed simulation budget computation should be allocated toward broader latent coverage rather than deeper replication of fewer models.
+Interpretation: once public-I1 plausibility is concentrated and dominant mass is propagated explicitly, M3 can reduce graph cost substantially without losing predictive quality.
 
-### Outcome B: allocations are essentially equivalent
+### Outcome B: B=2000 materially improves on B=1400
 
-Interpretation: the weighted latent distribution has already reduced between-model variation enough that execution Monte Carlo dominates, or K=100 already captures the relevant latent mass.
+Interpretation: latent truncation is already negligible, but graph Monte Carlo precision still matters. The weighted allocation theory correctly separates this execution-noise requirement from latent-support coverage.
 
-### Outcome C: 100x20 is better
+### Outcome C: both M3 budgets outperform or match M2
 
-Interpretation: per-hypothesis execution noise is more important than the simple decomposition suggested, the weighting distribution is too concentrated, or the iid assumptions are inadequate. This is scientifically informative and should trigger analysis, not post-hoc reallocation.
+Interpretation: non-uniform public-I1 weighting plus dominant-mass quadrature provides a more efficient integration mechanism than M2's equal-weight 27-member portfolio on this benchmark.
 
-### Outcome D: both M3 allocations underperform M2
+### Outcome D: both M3 budgets underperform M2
 
-Interpretation: the proposed public-I1 weighting destroys useful diversity or the finite weighted approximation is misspecified. M2 remains the stronger integration method and M3 weighting is closed as a negative result.
+Interpretation: local public-I1 predictive weighting does not preserve the graph-relevant ambiguity needed for accurate composition. M2 remains the stronger method and M3 closes as a negative result.
 
 ## 12. Computational accounting
 
@@ -488,10 +493,13 @@ At minimum record:
 
 - provider-local rescoring trajectories;
 - number of provider candidate points;
-- provider ESS/entropy;
-- number of joint latent draws;
-- duplicate count;
-- graph trajectories;
+- selected lambda and CV score;
+- provider and joint ESS/entropy;
+- retained joint-hypothesis count and mass;
+- deterministic truncation bound;
+- per-hypothesis graph trajectory allocation;
+- total graph trajectories;
+- worst-case Monte Carlo variance/SE bound;
 - number of processed graph requests;
 - wall time;
 - user/system CPU time;
@@ -499,7 +507,7 @@ At minimum record:
 - git revision;
 - seed contract.
 
-The headline comparison is explicitly an **accuracy-versus-allocation at equal graph budget** experiment.
+The headline comparison is an **accuracy-versus-computation** experiment under a certified latent truncation tolerance.
 
 ## 13. Guardrails
 
@@ -507,11 +515,11 @@ The headline comparison is explicitly an **accuracy-versus-allocation at equal g
 - The physical graph and 15 query regions are unchanged.
 - M0, M1 and M2 remain frozen.
 - M3 weights use public I1 only.
-- Do not use graph WB to set or tune weights.
+- Do not use graph WB to set or tune lambda, weights, retained mass, or trajectory allocation.
 - Do not weight the existing 27 M2 representatives directly.
-- Do not enumerate a large Cartesian product.
+- The top-mass threshold is frozen at `0.999` before graph execution.
 - Do not treat curve points as independent replicates.
-- Do not silently change the K/N allocation after graph results.
+- Do not alter `B=1400` or `B=2000` after graph results.
 - Do not modify the weight rule after M3 graph prediction begins.
 - Preserve the PPG firewall.
 - Any redesign after a failed frozen gate gets a new version.
@@ -520,7 +528,7 @@ The headline comparison is explicitly an **accuracy-versus-allocation at equal g
 
 The immediate next scientific target is therefore:
 
-`Can a public-I1-weighted latent mixture improve graph-survival prediction, and at a fixed budget B=2000 is latent breadth (K=200,N=10) more valuable than execution depth (K=100,N=20)?`
+`Can public-I1-weighted dominant-mass quadrature predict graph survival at lower simulation cost than M2 while keeping latent truncation below 10^-3?`
 
 This extends the pilot from
 
@@ -536,4 +544,4 @@ to
 
 to
 
-`M3: public-I1-weighted latent sampling with explicit accuracy-cost allocation theory`.
+`M3: cross-validated public-I1 weighting + certified dominant-mass quadrature + minimax graph-budget allocation`.
