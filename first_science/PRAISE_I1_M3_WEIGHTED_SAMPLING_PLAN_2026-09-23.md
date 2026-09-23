@@ -63,10 +63,11 @@ The LHS geometry is therefore treated as a finite quasi-Monte-Carlo approximatio
 
 Before any M3 graph propagation, rescore all 144 LHS candidates against the frozen public I1 surface on one new provider-local simulation bank.
 
-Provisional target:
+Frozen local target:
 
-- `N_local=50` trajectories per candidate;
-- common local seed bank within a provider so candidate comparisons have low Monte Carlo noise;
+- `N_local=100` trajectories per candidate;
+- exact seed bank `35000..35099`;
+- common random numbers across candidates;
 - provider-local evidence only;
 - no graph simulation;
 - no graph WB read;
@@ -75,11 +76,11 @@ Provisional target:
 
 Total local rescoring cost:
 
-`3 * 48 * 50 = 7200`
+`3 * 48 * 100 = 14400`
 
 provider-local trajectories.
 
-The exact local seed bank must be disjoint from every historical provider/graph bank and frozen in the M3 execution contract before the rescoring run.
+Using N=100 matches the public I1 trajectory count and reduces noise before the exponential weighting step. This is a one-time construction cost and is accounted separately from graph-query cost.
 
 ## 4. Public-I1-only weighting rule
 
@@ -100,7 +101,9 @@ Define the candidate energy as the **mean** divergence over the complete frozen 
 
 `E_i(theta) = mean_q D_Bern(p_i(q) || p_theta(q))`.
 
-Use Jeffreys smoothing for candidate finite-simulation probabilities:
+Use Jeffreys smoothing for both finite-simulation probabilities:
+
+`p_i(q) = (s_i(q) + 1/2) / (N_I1 + 1)`
 
 `p_theta(q) = (s_theta(q) + 1/2) / (N_local + 1)`.
 
@@ -124,21 +127,22 @@ Before any graph simulation, materialize and freeze for each provider:
 
 - normalized weights;
 - effective sample size `ESS = 1 / sum_j w_j^2`;
-- weight entropy;
+- weight entropy and perplexity;
 - maximum single-candidate weight;
 - weighted moments of `log mu`, `log kappa`, and `CV`;
 - weighted local I1 reconstruction curve;
-- unweighted versus weighted public-I1 reconstruction error.
+- unweighted versus weighted public-I1 reconstruction error;
+- joint product ESS, which factorizes as `ESS_A * ESS_B * ESS_C`.
 
 No graph outcome may change the weighting formula, candidate support, or weights.
 
-### 4.2 Concentration guardrail
+### 4.2 Concentration is a result, not a tuning gate
 
-The weighted distribution must retain genuine ambiguity. If the provider-level weight collapses numerically to essentially one candidate, M3 cannot meaningfully test weighted ambiguity sampling.
+There is deliberately **no ESS-based redesign gate** after the frozen weights are observed. If the Gibbs rule concentrates strongly on a small part of the LHS support, that is itself a scientific result about this M3 construction.
 
-The execution contract should therefore predeclare a concentration diagnostic and stop condition before graph propagation. A recommended descriptive diagnostic is provider ESS. The exact stop threshold should be frozen before the local rescoring evidence is opened rather than chosen after seeing the weights.
+Do not change the temperature, add candidates, or weaken the weighting rule simply to force a broader distribution. Numerical failures are implementation defects; statistical concentration is not.
 
-If the stop condition fires, create a separately versioned M3 weighting design. Do not alter the frozen weighting rule in place.
+The M3 graph stage therefore proceeds with the frozen distribution regardless of whether its ESS is high or low.
 
 ## 5. Joint weighted latent distribution
 
@@ -155,7 +159,7 @@ The ordered bank is immutable once generated:
 - M3-100x20 uses entries 1..100;
 - M3-200x10 uses entries 1..200.
 
-A prepare-only stage must report duplicate frequency and weight concentration before graph simulation. If the weighted distribution produces excessive duplicate joint draws, stop and version the sampling design rather than silently deduplicating or changing weights.
+A prepare stage must report duplicate frequency and weight concentration before graph simulation. Sampling is with replacement, so duplicate joint hypotheses are valid draws from the finite weighted distribution. They are retained and reported, never silently deduplicated.
 
 ## 6. Graph simulation allocation
 
