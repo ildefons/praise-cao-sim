@@ -284,25 +284,44 @@ That provenance mismatch was diagnosed and recorded before the final battery.
 
 The current G0/G1/G2 labels refer exclusively to the **fixed-graph sigma-regime battery** above. They are regime labels, not graph-topology variants.
 
-## 11. Next method: M3
+## 11. Next method: M3 weighted latent sampling
 
 M2 is now closed.
 
-M3 should keep the same I1 schema and study **dynamic integration/update**, not enrich provider disclosure merely to improve prediction.
+The next pilot target is **not** dynamic updating. M3 is now defined provisionally as a public-I1-weighted latent sampling method that preserves ambiguity while assigning non-uniform plausibility to latent explanations.
 
-The current provisional M3 question is:
+The core target is:
 
-`Can a compositor update its predictive belief over graph survival efficiently when public provider evidence or workload changes, without rebuilding the full M2 ensemble from scratch?`
+`Can a public-I1-weighted latent mixture improve graph-survival prediction, and at a fixed graph budget B=2000 is latent breadth (K=200,N=10) more valuable than execution depth (K=100,N=20)?`
 
-Candidate M3 dimensions include:
+The equal-budget allocations are:
 
-- incremental update versus full rebuild;
-- adaptation latency after a provider/workload change;
-- predictive quality during transients;
-- update computational cost;
-- whether ambiguity expands or contracts appropriately after new public evidence.
+- `M3-200x10`: 200 weighted joint latent hypotheses, 10 graph trajectories each;
+- `M3-100x20`: 100 weighted joint latent hypotheses, 20 graph trajectories each.
 
-The final M2 result gives M3 a useful baseline: dynamic integration should preserve M2's advantage in difficult regimes without paying the full static 27-member recomposition cost whenever conditions change.
+Both require exactly 2000 graph trajectories.
+
+The theoretical motivation is the variance decomposition
+
+`Var[sigma_hat_KN(q)] = tau^2(q)/K + v(q)/(K*N)`
+
+with `tau^2(q)=Var_theta[p_theta(q)]` and `v(q)=E_theta[p_theta(q)(1-p_theta(q))]`.
+
+At fixed `B=K*N`,
+
+`Var = tau^2/K + v/B`.
+
+Thus, whenever inverse ambiguity is compositionally material, the 200x10 allocation should reduce the latent-sampling term relative to 100x20 while leaving the ordinary execution Monte Carlo term unchanged.
+
+The M3 provider support will begin from the existing non-adaptive 48-point LHS bank per provider, not the diversity-selected 3-member M2 portfolio. Provider candidates will be freshly rescored against public I1 only, assigned trajectory-count-scaled Gibbs weights, and sampled into one frozen ordered bank of 200 joint hypotheses before any graph WB is opened.
+
+The same frozen 15-query G0/G1/G2 battery will be reused unchanged. After both M3 predictions are hash-frozen, a fresh previously unused D300 WB bank will be generated for prospective same-condition replication.
+
+Detailed design and guardrails:
+
+`PRAISE_I1_M3_WEIGHTED_SAMPLING_PLAN_2026-09-23.md`.
+
+Dynamic/incremental integration is deferred to a later method, provisionally M4, so that M3 tests one new mechanism at a time.
 
 ## 12. Pilot guardrails
 
