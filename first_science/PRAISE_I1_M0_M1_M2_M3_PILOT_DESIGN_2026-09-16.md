@@ -1,3 +1,5 @@
+> **SUPERSEDED BY:** `PRAISE_I1_M0_M1_M2_M3_PILOT_DESIGN_2026-09-23.md` is the current design/development source of truth. This 16 September document is retained for provenance.
+
 # PRAISE/CAO: pilot design through I1-M3
 
 **Status:** current pilot-program design source of truth. Phase 1 v2, rho-conditioned I1, M0, M1-v2, and the M2 joint-ensemble method are frozen. G0 is retrospective diagnostic evidence; G1 is retained as a prospective stress test. Final M2 validation is reopened for a Step-0-calibrated G2 condition before M3 begins.  
