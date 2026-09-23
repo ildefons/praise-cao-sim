@@ -1,0 +1,100 @@
+{
+  "status": "FROZEN_PHASE4_M3_LAMBDA_CV_V3",
+  "freeze_date": "2026-09-23",
+  "scientific_stage": "M3 local-only blocked cross-validation of the Gibbs concentration parameter lambda",
+  "purpose": "Determine the M3 Gibbs concentration parameter from public I1 alone, before any M3 graph simulation, instead of fixing lambda from trajectory count or choosing it from an ESS target.",
+  "supersedes_before_graph_execution": "config_phase4_m3_weighting_v2_tempered.json",
+  "historical_notes": {
+    "v1_lambda100": "Executed locally and archived. It collapsed the weighted distribution to joint ESS about 1.68 and only 3 unique combinations in 200 draws. No M3 graph simulation was run.",
+    "v2_lambda5": "Proposed after the concentration audit but superseded before execution because ESS>=3 is a design heuristic rather than a derivation of the weighting concentration."
+  },
+  "inputs": {
+    "v1_output_root": "results/m3_local_weighting_v1",
+    "v1_manifest": "results/m3_local_weighting_v1/m3_local_weighting_manifest_v1.json",
+    "v1_local_results": "results/m3_local_weighting_v1/m3_local_rescore_results.csv",
+    "v1_local_surfaces": "results/m3_local_weighting_v1/local_surfaces",
+    "n_candidates_per_provider": 48,
+    "providers": ["ProviderA", "ProviderB", "ProviderC"]
+  },
+  "cross_validation": {
+    "unit": "complete region_rho x query_rho horizon curve",
+    "n_region_rho": 5,
+    "n_query_rho": 5,
+    "n_curve_cells": 25,
+    "n_folds": 5,
+    "fold_rule": "fold=(region_rho_ordinal + query_rho_ordinal) mod 5",
+    "fold_property": "each fold contains five complete horizon curves and contains each region_rho and each query_rho exactly once",
+    "training_curves_per_fold": 20,
+    "validation_curves_per_fold": 5,
+    "candidate_energy_on_training": "mean Bernoulli KL D(p_I1_Jeffreys || p_theta_Jeffreys) over all training points",
+    "weight_formula": "w_theta(lambda) proportional to exp(-lambda * E_train(theta))",
+    "validation_prediction": "weighted mixture of candidate Jeffreys-smoothed sigma probabilities at held-out points",
+    "validation_score_primary": "mean Bernoulli KL D(p_I1_Jeffreys || p_mix) on held-out points",
+    "validation_score_secondary": "mean squared probability error on held-out points",
+    "provider_aggregation": "equal weight to ProviderA, ProviderB, ProviderC",
+    "fold_aggregation": "equal weight to the five folds within each provider",
+    "independence_caveat": "folds are structural holdouts of the public I1 surface, not independent datasets; CV is used for predictive hyperparameter selection, not confidence-interval inference"
+  },
+  "lambda_grid": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    2.0,
+    3.0,
+    5.0,
+    7.5,
+    10.0,
+    15.0,
+    20.0,
+    30.0,
+    50.0,
+    75.0,
+    100.0,
+    150.0,
+    200.0
+  ],
+  "selection_rule": {
+    "primary": "select lambda with minimum mean held-out Bernoulli KL averaged equally over all provider-fold cells",
+    "tie_breaker": "if primary scores are equal within 1e-12, choose the smaller lambda",
+    "no_ESS_constraint": true,
+    "no_graph_metric_in_selection": true,
+    "boundary_behavior": "if the selected lambda is the largest grid value, report boundary selection explicitly and do not extend the grid after seeing the result; treat this as evidence that the weighted predictor prefers near-selection under the frozen grid"
+  },
+  "post_selection": {
+    "recompute_full_surface_provider_weights": "use selected global lambda on the full 1200-point public-I1 surface per candidate",
+    "report_provider_ESS_entropy_perplexity": true,
+    "report_joint_product_ESS": true,
+    "materialize_weighted_full_surface_reconstruction": true,
+    "joint_bank_size": 200,
+    "joint_sampling_seed": 2026092307,
+    "sampling": "independent categorical draws with replacement from the factorized provider weights",
+    "duplicates": "retain and report",
+    "graph_simulation": false
+  },
+  "required_outputs": [
+    "m3_lambda_cv_fold_assignments.csv",
+    "m3_lambda_cv_scores.csv",
+    "m3_lambda_cv_summary.csv",
+    "m3_lambda_cv_selected.json",
+    "m3_v3_provider_weights.csv",
+    "m3_v3_weight_diagnostics.csv",
+    "m3_v3_weighted_i1_reconstruction.csv",
+    "m3_v3_weighted_i1_reconstruction_summary.csv",
+    "m3_v3_joint_latent_draws_200.csv",
+    "m3_v3_lambda_cv_manifest.json"
+  ],
+  "firewall": {
+    "provider_resimulation": false,
+    "new_candidate_generation": false,
+    "adaptive_parameter_search": false,
+    "graph_simulation": false,
+    "graph_prediction_read": false,
+    "graph_whitebox_read": false,
+    "M0_change": false,
+    "M1_change": false,
+    "M2_change": false,
+    "PPG_firewall_preserved": true
+  },
+  "next_gate": "Only after the selected lambda, full-surface weights, and ordered 200-draw joint bank are materialized and hash-frozen may the equal-budget M3 graph contract be defined."
+}
