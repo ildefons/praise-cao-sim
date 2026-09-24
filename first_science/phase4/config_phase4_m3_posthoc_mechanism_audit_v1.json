@@ -47,12 +47,16 @@
   "ambiguity": {
     "support": "frozen M3 top-14 retained joint hypotheses",
     "weights": "frozen alpha_renormalized",
-    "pointwise_measure": "sum_j alpha_j * (sigma_j - weighted_mean_sigma)^2",
-    "range_measure": "max_j sigma_j - min_j sigma_j",
+    "pointwise_measure_raw": "sum_j alpha_j * (sigma_hat_j - weighted_mean_sigma_hat)^2",
+    "mc_noise_plugin": "sum_j alpha_j*(1-alpha_j)*sigma_hat_j*(1-sigma_hat_j)/N_j",
+    "pointwise_measure_plugin_corrected": "max(0, pointwise_measure_raw - mc_noise_plugin)",
+    "mc_noise_worstcase_expected_contribution": "0.25 * sum_j alpha_j*(1-alpha_j)/N_j",
+    "range_measure": "max_j sigma_hat_j - min_j sigma_hat_j; descriptive only, not an uncertainty interval",
     "correlations": [
-      "ambiguity_mean_vs_M1_MAE",
-      "ambiguity_mean_vs_M1_minus_M3_B2000_MAE",
-      "ambiguity_mean_vs_M2_minus_M3_B2000_MAE"
+      "plugin_corrected_ambiguity_mean_vs_M1_MAE",
+      "plugin_corrected_ambiguity_mean_vs_M1_minus_M3_B2000_MAE",
+      "plugin_corrected_ambiguity_mean_vs_M2_minus_M3_B2000_MAE",
+      "raw_ambiguity_sensitivity_checks"
     ],
     "interpretation": "post-hoc descriptive only"
   },
