@@ -1,0 +1,73 @@
+{
+  "status": "M1_VS_TOP1_PUBLIC_I1_READ_ONLY_AUDIT_COMPLETE_V1",
+  "classification": "posthoc_read_only_mechanism_audit",
+  "provider_simulation": false,
+  "graph_simulation": false,
+  "graph_whitebox_read": false,
+  "new_candidate_generation": false,
+  "public_i1_n": 100,
+  "reconstruction_replay_n": 100,
+  "m3_score": "Jeffreys-smoothed Bernoulli KL, public I1 to reconstruction",
+  "top1_rule": "maximum frozen M3-v3 provider weight independently for each provider",
+  "inputs": {
+    "m1_freeze_manifest": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase3/phase3_i1_m1_v2_freeze_manifest_v1.json",
+      "sha256": "e72665b930efc63a678d71e0a2996d5faebb864a43c1725d984759899ac10853"
+    },
+    "m3_v3_provider_weights": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase4/results/m3_lambda_cv_v3/m3_v3_provider_weights.csv",
+      "sha256": "b8271506cff76e7e387ac148887f2d2efd5584e62ec3e4c0d6a205026673aa80"
+    },
+    "ProviderA_m1_best": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase3/results/m1_provider_lift_v2_full/ProviderA/m1_v2_best.json",
+      "sha256": "b76d1679a630afd5ab9a29511d24cf56307e6c1f4e87f21cfcca0ff5bed3333c"
+    },
+    "ProviderA_m1_replay": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase3/results/m1_provider_lift_v2_full/ProviderA/m1_v2_independent_replay_comparison.csv",
+      "sha256": "dd2f807159962fa9d3e18aaa2e7c22f116bf2d58ebd0e38daa9050eeeddb532c"
+    },
+    "ProviderA_top1_surface": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase4/results/m3_local_weighting_v1/local_surfaces/ProviderA_LHS_026_comparison.csv",
+      "sha256": "b905e330267c25537a147e048c4a66a36beabc0d26c0b7ab37c42b59c833358d"
+    },
+    "ProviderB_m1_best": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase3/results/m1_provider_lift_v2_full/ProviderB/m1_v2_best.json",
+      "sha256": "5c5e18187ee63864b983c8c3afa09f356047128ac34f15a6ed507227536cd925"
+    },
+    "ProviderB_m1_replay": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase3/results/m1_provider_lift_v2_full/ProviderB/m1_v2_independent_replay_comparison.csv",
+      "sha256": "9c47a54d16cb73a2368db4f870d2cfc05487afb9a616cdbc366170742858d01e"
+    },
+    "ProviderB_top1_surface": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase4/results/m3_local_weighting_v1/local_surfaces/ProviderB_LHS_039_comparison.csv",
+      "sha256": "39ae40e99a061f73a973ac23c8384d2eaf4eed9cc3f7e7649d44f4916608afeb"
+    },
+    "ProviderC_m1_best": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase3/results/m1_provider_lift_v2_c_expanded_v1/ProviderC/m1_v2_best.json",
+      "sha256": "8b884163c04357a408721d3ee92e0ef356b0ab31bc52eb9695827bd0136d1876"
+    },
+    "ProviderC_m1_replay": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase3/results/m1_provider_lift_v2_c_expanded_v1/ProviderC/m1_v2_independent_replay_comparison.csv",
+      "sha256": "14f5aee8f7a3b43f5fdd5e20cae2b786b88a6f52de975cfde8bbdcde9dea3044"
+    },
+    "ProviderC_top1_surface": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase4/results/m3_local_weighting_v1/local_surfaces/ProviderC_LHS_038_comparison.csv",
+      "sha256": "ba9251ae9b01111bcbd21a60262bad710f0e6793bd16055a5dd1faa54a82a344"
+    }
+  },
+  "outputs": {
+    "fit": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase4/results/m1_vs_top1_public_i1_audit_v1/m1_vs_top1_public_i1_fit.csv",
+      "sha256": "14b4cb20f0d39504ad6a825ba57b982640943af0a0ea48705aa26d3b4bf5974e"
+    },
+    "parameters": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase4/results/m1_vs_top1_public_i1_audit_v1/m1_vs_top1_parameters.csv",
+      "sha256": "95a80c2a48efec1932cf3df7e8eafd6d3a467f3ee338982cc6a1e1bbe0c43bc0"
+    },
+    "pointwise": {
+      "path": "/home/ildefons/praise/praise-cao-sim/first_science/phase4/results/m1_vs_top1_public_i1_audit_v1/m1_vs_top1_pointwise.csv",
+      "sha256": "b9e2c1483e92dc4945a4d21f181a163f124ada41f6ecc82925829abc839cf776"
+    }
+  },
+  "stop_rule": "Interpret as-is; do not retune M1, Top1, M3, scoring, or support from this audit."
+}
