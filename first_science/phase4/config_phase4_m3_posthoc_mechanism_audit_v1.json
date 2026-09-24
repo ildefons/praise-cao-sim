@@ -1,0 +1,118 @@
+{
+  "status": "FROZEN_PHASE4_M3_POSTHOC_MECHANISM_AUDIT_V1",
+  "freeze_date": "2026-09-24",
+  "classification": "posthoc_explanatory_zero_simulation",
+  "base_scientific_checkpoint": "5283456c434c8316b073dee8bba1bdfd49fa7eb9",
+  "purpose": "Interrogate the already-frozen pilot for direct evidence of interface-induced practical model ambiguity, SLA decision consequences, and whether M3's gain is explainable by a single dominant hypothesis.",
+  "inputs": {
+    "final_comparison": "results/m3_v4_final_evaluation_v1/m3_v4_final_comparison.csv",
+    "m3_member_curves": "results/m3_v4_dominant_mass_graph_v1/m3_v4_member_curves.csv",
+    "m3_dominant_design": "results/m3_v4_dominant_mass_graph_v1/m3_v4_dominant_design.csv",
+    "m3_provider_weights": "results/m3_lambda_cv_v3/m3_v3_provider_weights.csv",
+    "final_manifest": "results/m3_v4_final_evaluation_v1/m3_v4_final_evaluation_manifest.json"
+  },
+  "analysis_window": {
+    "horizon_min": 60.0,
+    "horizon_max": 240.0,
+    "m3_member_budget": 2000,
+    "decision_thresholds_beta": [0.80, 0.90, 0.95],
+    "whitebox_reference_n": 200,
+    "whitebox_interval": "Wilson pointwise 95%"
+  },
+  "regime_labels": {
+    "G0": "R_easy",
+    "G1": "R_mid",
+    "G2": "R_stress"
+  },
+  "hidden_provider_process_retrospective_audit_only": {
+    "provider_process_id": "D300000000_d0.200",
+    "provider_process_sha256": "a4942e4a5cc4ebbe018e854e4e0005b6437c408cde3c1de8366a95e4f57281a8",
+    "ProviderA": {
+      "mean_service_time": 0.12,
+      "cost_rate": 3.0,
+      "service_cv": 0.3
+    },
+    "ProviderB": {
+      "mean_service_time": 0.15,
+      "cost_rate": 3.0,
+      "service_cv": 0.3
+    },
+    "ProviderC": {
+      "mean_service_time": 0.18,
+      "cost_rate": 3.0,
+      "service_cv": 0.3
+    },
+    "use_for_prediction_or_selection": false
+  },
+  "ambiguity": {
+    "support": "frozen M3 top-14 retained joint hypotheses",
+    "weights": "frozen alpha_renormalized",
+    "pointwise_measure": "sum_j alpha_j * (sigma_j - weighted_mean_sigma)^2",
+    "range_measure": "max_j sigma_j - min_j sigma_j",
+    "correlations": [
+      "ambiguity_mean_vs_M1_MAE",
+      "ambiguity_mean_vs_M1_minus_M3_B2000_MAE",
+      "ambiguity_mean_vs_M2_minus_M3_B2000_MAE"
+    ],
+    "interpretation": "post-hoc descriptive only"
+  },
+  "decision_analysis": {
+    "accept_rule": "sigma >= beta",
+    "false_accept": "predicted accept while white-box point estimate rejects",
+    "false_reject": "predicted reject while white-box point estimate accepts",
+    "reference_certain_rule": "Wilson95 interval lies entirely on one side of beta",
+    "methods": [
+      "M0",
+      "M1",
+      "M2",
+      "M3_B1400",
+      "M3_B2000",
+      "M3_TOP1_EXISTING"
+    ]
+  },
+  "top1_existing": {
+    "rank": 1,
+    "budget_member_curves": 2000,
+    "classification": "diagnostic_not_cost_matched",
+    "may_be_used_to_change_M3": false
+  },
+  "nearest_candidate_distance": {
+    "coordinates": [
+      "log(mean_service_time)",
+      "log(cost_rate)",
+      "service_cv"
+    ],
+    "normalization": "divide each coordinate difference by the empirical candidate-bank range for that provider",
+    "exact_match_tolerance": 1e-12
+  },
+  "firewall": {
+    "new_provider_simulation": false,
+    "new_graph_simulation": false,
+    "new_whitebox_simulation": false,
+    "lambda_change": false,
+    "candidate_change": false,
+    "retained_support_change": false,
+    "query_change": false,
+    "M0_change": false,
+    "M1_change": false,
+    "M2_change": false,
+    "M3_change": false,
+    "hidden_parameters_used_for_prediction": false,
+    "PPG_firewall_preserved": true
+  },
+  "required_outputs": [
+    "truth_candidate_audit.csv",
+    "decision_metrics.csv",
+    "ambiguity_pointwise.csv",
+    "ambiguity_query_summary.csv",
+    "ambiguity_correlations.csv",
+    "joint_energy_sigma_points.csv",
+    "joint_energy_sigma_pairs.csv",
+    "top1_existing_diagnostic.csv",
+    "top1_existing_summary.csv",
+    "ambiguity_vs_error.png",
+    "joint_energy_vs_sigma_max_ambiguity.png",
+    "posthoc_mechanism_audit_manifest.json"
+  ],
+  "next_gate": "Inspect Stage-A outputs. Only if mechanism evidence warrants it, freeze a separate cost-matched Top1/Uniform14/Weighted14 graph-ablation contract before any new simulation."
+}
