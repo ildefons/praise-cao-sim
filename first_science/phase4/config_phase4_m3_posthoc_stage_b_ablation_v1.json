@@ -1,0 +1,94 @@
+{
+  "status": "FROZEN_PHASE4_M3_POSTHOC_STAGE_B_COST_MATCHED_ABLATION_V1",
+  "freeze_date": "2026-09-24",
+  "classification": "posthoc_mechanism_ablation",
+  "stage_a_result_commit": "9369030",
+  "purpose": "Disentangle single-best reconstruction, multi-hypothesis retention, public-I1 weighting, and production minimax allocation using the already frozen top-14 M3 support.",
+  "inputs": {
+    "m3_provider_weights": "results/m3_lambda_cv_v3/m3_v3_provider_weights.csv",
+    "m3_dominant_design": "results/m3_v4_dominant_mass_graph_v1/m3_v4_dominant_design.csv",
+    "final_comparison": "results/m3_v4_final_evaluation_v1/m3_v4_final_comparison.csv",
+    "selected_regions": "results/sigma_regime_step0_calibration_v2/sigma_regime_v2_selected_regions_frozen.csv",
+    "m1_contract": "../phase3/config_phase3_m1_contract_v2.json",
+    "m0_contract": "../phase3/config_phase3_m0_contract_v1.json"
+  },
+  "frozen_method_state": {
+    "lambda": 30.0,
+    "retained_hypotheses": 14,
+    "retained_mass": 0.9991741970173574,
+    "support_change": false,
+    "weight_change": false,
+    "query_change": false
+  },
+  "budget": {
+    "total_graph_trajectories_per_method": 1400,
+    "top1_n": 1400,
+    "uniform14_n_per_hypothesis": 100,
+    "weighted14_equal_n_per_hypothesis": 100,
+    "production_reference": "existing frozen M3 B=1400 minimax allocation"
+  },
+  "seed_design": {
+    "seed_base": 4000000,
+    "shared_first_n_across_all_14_hypotheses": 100,
+    "top1_additional_n": 1300,
+    "top1_seed_end_inclusive": 4001399,
+    "common_random_numbers_for_uniform_vs_weighted": true,
+    "reuse_any_previous_graph_seed_bank": false
+  },
+  "analysis_window": {
+    "horizon_min": 60.0,
+    "horizon_max": 240.0,
+    "decision_thresholds_beta": [0.80, 0.90, 0.95],
+    "whitebox_reference_n": 200,
+    "bootstrap_reps": 5000,
+    "bootstrap_seed": 2026092402
+  },
+  "estimators": {
+    "TOP1_1400": "rank-1 retained hypothesis, 1400 trajectories",
+    "UNIFORM14_EQ_1400": "equal weight 1/14 over 14 retained hypotheses, 100 shared-CRN trajectories each",
+    "WEIGHTED14_EQ_1400": "frozen alpha weights over same 14x100 shared-CRN trajectories",
+    "WEIGHTED14_MINIMAX_1400": "existing frozen production M3 B=1400 prediction"
+  },
+  "primary_comparisons": {
+    "retention_effect": "WEIGHTED14_EQ_1400 minus TOP1_1400 in MAE; negative favors weighted multi-hypothesis retention",
+    "weighting_effect": "WEIGHTED14_EQ_1400 minus UNIFORM14_EQ_1400 in MAE; negative favors public-I1 weighting",
+    "allocation_effect_secondary": "WEIGHTED14_MINIMAX_1400 minus WEIGHTED14_EQ_1400 in MAE; descriptive only because seed banks differ"
+  },
+  "bootstrap": {
+    "role": "graph-Monte-Carlo diagnostic with frozen WB point estimates",
+    "uniform_weighted_pairing": "resample the same 100 shared seed units for Uniform14 and Weighted14-EQ",
+    "top1": "resample 1400 top1 seed units",
+    "reported": [
+      "method MAE percentile95",
+      "paired weighting-effect delta MAE percentile95",
+      "retention-effect delta MAE percentile95 using replicate-index coupling only; not a strict paired bootstrap"
+    ],
+    "does_not_include": "white-box reference uncertainty or model-support uncertainty"
+  },
+  "firewall": {
+    "new_provider_simulation": false,
+    "new_graph_simulation": true,
+    "new_whitebox_simulation": false,
+    "lambda_change": false,
+    "candidate_change": false,
+    "retained_support_change": false,
+    "query_change": false,
+    "M0_change": false,
+    "M1_change": false,
+    "M2_change": false,
+    "M3_change": false,
+    "PPG_firewall_preserved": true
+  },
+  "required_outputs": [
+    "stage_b_design.csv",
+    "ledgers/",
+    "stage_b_member_curves.csv",
+    "stage_b_predictions.csv",
+    "stage_b_error_metrics.csv",
+    "stage_b_decision_metrics.csv",
+    "stage_b_bootstrap_mae.csv",
+    "stage_b_bootstrap_summary.csv",
+    "stage_b_manifest.json"
+  ],
+  "stop_rule": "After Stage B, do not tune or add variants. Interpret the frozen ablation as-is and close the pilot mechanism audit."
+}
