@@ -1,0 +1,4 @@
+provider,hidden_process_id,exact_true_tuple_in_48_bank,n_exact_matches,nearest_candidate_id,normalized_truth_distance,true_mean_service_time,candidate_mean_service_time,true_cost_rate,candidate_cost_rate,true_service_cv,candidate_service_cv,candidate_mean_bernoulli_kl,candidate_weight_v3,candidate_energy_rank_of_48,candidate_weight_rank_of_48
+ProviderA,D300000000_d0.200,False,0,ProviderA_LHS_006,0.16785133661261187,0.12,0.1587201879362007,3.0,2.153191468226104,0.3,0.551858559649689,2.4817423647563155,5.189285877071764e-30,28,28
+ProviderB,D300000000_d0.200,False,0,ProviderB_LHS_030,0.06587272229582192,0.15,0.1827198100679586,3.0,3.395147673375517,0.3,0.3476040270845501,3.202905103231306,5.072945904042532e-41,25,25
+ProviderC,D300000000_d0.200,False,0,ProviderC_LHS_022,0.08590465075714643,0.18,0.1212968224910805,3.0,4.043032098493347,0.3,0.2375469310577128,1.3573180711788473,2.79710266003249e-17,11,11

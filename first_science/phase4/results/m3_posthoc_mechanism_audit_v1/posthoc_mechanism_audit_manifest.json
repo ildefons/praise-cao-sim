@@ -1,0 +1,43 @@
+{
+  "status": "PHASE4_M3_POSTHOC_MECHANISM_AUDIT_COMPLETE_V1",
+  "classification": "posthoc_explanatory_zero_simulation",
+  "contract_sha256": "c3097d82bbd0d501c5cfd64e254a354d06fce814e51d3efac7f242461caf70e7",
+  "input_sha256": {
+    "final_comparison": "cb8e182e5f1a0d54de1e54a6d81f1fed5d4487fe771c6e8da70e94b77235661d",
+    "m3_member_curves": "7f0c8eee9c4e5115a0528cc8262c6436cd68d2f32f005a2ef642d0411b1f4ab5",
+    "m3_dominant_design": "28233d516b7afea0b0284feaf7eccc7cefbf54321ce84571241356b3cbe96b57",
+    "m3_provider_weights": "b8271506cff76e7e387ac148887f2d2efd5584e62ec3e4c0d6a205026673aa80",
+    "final_manifest": "5f80d7685627f4f2a27b8c925991dfac714318b34f2e8d8ad0792f15b2081a3e"
+  },
+  "output_sha256": {
+    "truth_candidate_audit.csv": "297d5acb74997ef95ec5dd60f670f7da92595f303f775b8004e9a19426d02734",
+    "decision_metrics.csv": "2a62e3ebbe04097b8710bf35666be613b2dd3d902a6e05e9bfe98a11caea76c5",
+    "ambiguity_pointwise.csv": "a5da327e623e59bf3e03165afaf043514780eb4db9c633987fea57f430041258",
+    "ambiguity_query_summary.csv": "a174fef2a21b48a294f572909e76c90af989e537cfaa7163ca166c0ea2843361",
+    "ambiguity_correlations.csv": "8f61e99ab6aef3beded79b0aa00a405e36f369235006eada560d825787baa3c4",
+    "joint_energy_sigma_points.csv": "dd3ba226258bca7d3173b912e0b616e9fe8264ec17dd828d69ecc973eb1dc005",
+    "joint_energy_sigma_pairs.csv": "6a2f8748befcdf0d6bf041add9d3556dc22cb36480a4ca522c07e57b0c4e8ab3",
+    "top1_existing_diagnostic.csv": "4f4995b1cbaa79c16c5e0c832b01f535ca83d062b885e619a9f76a6ab0e01046",
+    "top1_existing_summary.csv": "41f1389569fa2f89ed9286d0ea360f7d3920af5fe1cd9d70a5484e8d5eb33785",
+    "ambiguity_vs_error.png": "7fda608640344f7e30aad945cadf3a262aa74cc67de1054b470d35fd0cb6272f",
+    "joint_energy_vs_sigma_max_ambiguity.png": "466b2959b3a75e58ed9514dcc2443f426ec77c8aaa356877443051906cb56e4f"
+  },
+  "git_commit": "f601b1b764e7f5b0aa43b7359cca25a71b3dc20e",
+  "new_provider_simulation": false,
+  "new_graph_simulation": false,
+  "new_whitebox_simulation": false,
+  "M3_changed": false,
+  "selected_max_ambiguity_point": {
+    "rho_global": 0.95,
+    "regime": "G2",
+    "horizon": 175.0,
+    "ambiguity_variance_plugin_corrected": 0.0024561814918239665,
+    "ambiguity_weighted_variance_raw": 0.0029652534383435097,
+    "ambiguity_member_range": 1.0,
+    "selection_rule": "maximum plug-in MC-noise-adjusted retained-weight ambiguity variance within H60..240"
+  },
+  "top1_existing_graph_trajectories": 900,
+  "n_query_cells": 15,
+  "n_decision_metric_rows": 36,
+  "next_gate": "Inspect Stage-A outputs. Only if mechanism evidence warrants it, freeze a separate cost-matched Top1/Uniform14/Weighted14 graph-ablation contract before any new simulation."
+}

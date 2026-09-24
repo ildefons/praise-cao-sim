@@ -1,0 +1,37 @@
+beta,method,subset,n_evaluated,n_wb_uncertain_excluded,decision_agreement_rate,decision_disagreement_rate,false_accept_count,false_accept_rate_all,false_accept_rate_given_pred_accept,false_reject_count,false_reject_rate_all,false_reject_rate_given_pred_reject,reference_definition,certainty_filter
+0.8,M0,all_reference_points,333,0,0.0,1.0,0,0.0,,333,1.0,1.0,white-box point estimate,none
+0.8,M0,wb_wilson95_certain_only,240,93,0.0,1.0,0,0.0,,240,1.0,1.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.8,M1,all_reference_points,555,0,0.6576576576576577,0.34234234234234234,190,0.34234234234234234,0.34234234234234234,0,0.0,,white-box point estimate,none
+0.8,M1,wb_wilson95_certain_only,440,115,0.5795454545454546,0.42045454545454547,185,0.42045454545454547,0.42045454545454547,0,0.0,,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.8,M2,all_reference_points,555,0,0.8306306306306306,0.16936936936936936,67,0.12072072072072072,0.1654320987654321,27,0.04864864864864865,0.18,white-box point estimate,none
+0.8,M2,wb_wilson95_certain_only,440,115,0.825,0.175,67,0.15227272727272728,0.21474358974358973,10,0.022727272727272728,0.078125,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.8,M3_B1400,all_reference_points,555,0,0.990990990990991,0.009009009009009009,5,0.009009009009009009,0.013513513513513514,0,0.0,0.0,white-box point estimate,none
+0.8,M3_B1400,wb_wilson95_certain_only,440,115,1.0,0.0,0,0.0,0.0,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.8,M3_B2000,all_reference_points,555,0,0.990990990990991,0.009009009009009009,5,0.009009009009009009,0.013513513513513514,0,0.0,0.0,white-box point estimate,none
+0.8,M3_B2000,wb_wilson95_certain_only,440,115,1.0,0.0,0,0.0,0.0,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.8,M3_TOP1_EXISTING,all_reference_points,555,0,0.990990990990991,0.009009009009009009,5,0.009009009009009009,0.013513513513513514,0,0.0,0.0,white-box point estimate,none
+0.8,M3_TOP1_EXISTING,wb_wilson95_certain_only,440,115,1.0,0.0,0,0.0,0.0,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.9,M0,all_reference_points,333,0,0.44144144144144143,0.5585585585585585,0,0.0,,186,0.5585585585585585,0.5585585585585585,white-box point estimate,none
+0.9,M0,wb_wilson95_certain_only,274,59,0.33941605839416056,0.6605839416058394,0,0.0,,181,0.6605839416058394,0.6605839416058394,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.9,M1,all_reference_points,555,0,0.33693693693693694,0.6630630630630631,368,0.6630630630630631,0.6630630630630631,0,0.0,,white-box point estimate,none
+0.9,M1,wb_wilson95_certain_only,481,74,0.3762993762993763,0.6237006237006237,300,0.6237006237006237,0.6237006237006237,0,0.0,,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.9,M2,all_reference_points,555,0,0.8144144144144144,0.18558558558558558,101,0.18198198198198198,0.3531468531468531,2,0.0036036036036036037,0.007434944237918215,white-box point estimate,none
+0.9,M2,wb_wilson95_certain_only,481,74,0.8607068607068608,0.1392931392931393,67,0.1392931392931393,0.2701612903225806,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.9,M3_B1400,all_reference_points,555,0,0.9315315315315316,0.06846846846846846,37,0.06666666666666667,0.16591928251121077,1,0.0018018018018018018,0.0030120481927710845,white-box point estimate,none
+0.9,M3_B1400,wb_wilson95_certain_only,481,74,0.9646569646569647,0.035343035343035345,17,0.035343035343035345,0.08585858585858586,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.9,M3_B2000,all_reference_points,555,0,0.9369369369369369,0.06306306306306306,33,0.05945945945945946,0.15137614678899083,2,0.0036036036036036037,0.005934718100890208,white-box point estimate,none
+0.9,M3_B2000,wb_wilson95_certain_only,481,74,0.9708939708939709,0.029106029106029108,14,0.029106029106029108,0.07179487179487179,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.9,M3_TOP1_EXISTING,all_reference_points,555,0,0.9477477477477477,0.05225225225225225,27,0.04864864864864865,0.12735849056603774,2,0.0036036036036036037,0.0058309037900874635,white-box point estimate,none
+0.9,M3_TOP1_EXISTING,wb_wilson95_certain_only,481,74,0.972972972972973,0.02702702702702703,13,0.02702702702702703,0.06701030927835051,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.95,M0,all_reference_points,333,0,0.5255255255255256,0.4744744744744745,0,0.0,,158,0.4744744744744745,0.4744744744744745,white-box point estimate,none
+0.95,M0,wb_wilson95_certain_only,148,185,1.0,0.0,0,0.0,,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.95,M1,all_reference_points,555,0,0.2882882882882883,0.7117117117117117,395,0.7117117117117117,0.7142857142857143,0,0.0,0.0,white-box point estimate,none
+0.95,M1,wb_wilson95_certain_only,370,185,0.005405405405405406,0.9945945945945946,368,0.9945945945945946,1.0,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.95,M2,all_reference_points,555,0,0.8558558558558559,0.14414414414414414,51,0.0918918918918919,0.2833333333333333,29,0.05225225225225225,0.07733333333333334,white-box point estimate,none
+0.95,M2,wb_wilson95_certain_only,370,185,0.9027027027027027,0.0972972972972973,36,0.0972972972972973,1.0,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.95,M3_B1400,all_reference_points,555,0,0.9513513513513514,0.04864864864864865,27,0.04864864864864865,0.14594594594594595,0,0.0,0.0,white-box point estimate,none
+0.95,M3_B1400,wb_wilson95_certain_only,370,185,1.0,0.0,0,0.0,,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.95,M3_B2000,all_reference_points,555,0,0.9513513513513514,0.04864864864864865,27,0.04864864864864865,0.14594594594594595,0,0.0,0.0,white-box point estimate,none
+0.95,M3_B2000,wb_wilson95_certain_only,370,185,1.0,0.0,0,0.0,,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta
+0.95,M3_TOP1_EXISTING,all_reference_points,555,0,0.9513513513513514,0.04864864864864865,27,0.04864864864864865,0.14594594594594595,0,0.0,0.0,white-box point estimate,none
+0.95,M3_TOP1_EXISTING,wb_wilson95_certain_only,370,185,1.0,0.0,0,0.0,,0,0.0,0.0,white-box point estimate,N=200 Wilson95 entirely one side of beta

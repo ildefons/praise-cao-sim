@@ -1,0 +1,16 @@
+ambiguity_measure,target,n_query_cells,spearman_rho,interpretation
+ambiguity_variance_corrected_mean,M1_MAE,15,0.7535714285714286,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_variance_corrected_mean,M1_minus_M3_B2000_MAE,15,0.7249999999999999,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_variance_corrected_mean,M2_minus_M3_B2000_MAE,15,0.6535714285714285,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_std_corrected_mean,M1_MAE,15,0.6749999999999999,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_std_corrected_mean,M1_minus_M3_B2000_MAE,15,0.6392857142857141,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_std_corrected_mean,M2_minus_M3_B2000_MAE,15,0.6892857142857142,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_variance_raw_mean,M1_MAE,15,0.8964285714285712,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_variance_raw_mean,M1_minus_M3_B2000_MAE,15,0.8642857142857141,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_variance_raw_mean,M2_minus_M3_B2000_MAE,15,0.7035714285714285,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_std_raw_mean,M1_MAE,15,0.8964285714285712,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_std_raw_mean,M1_minus_M3_B2000_MAE,15,0.8642857142857141,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_std_raw_mean,M2_minus_M3_B2000_MAE,15,0.7035714285714285,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_range_mean,M1_MAE,15,0.8398554297360603,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_range_mean,M1_minus_M3_B2000_MAE,15,0.8313505646248092,posthoc descriptive correlation; no confirmatory p-value
+ambiguity_range_mean,M2_minus_M3_B2000_MAE,15,0.5655735298982077,posthoc descriptive correlation; no confirmatory p-value
