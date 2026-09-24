@@ -358,10 +358,20 @@ def _ambiguity_tables(
         q = q.sort_values("rank")
         w = q["alpha_renormalized"].astype(float).to_numpy()
         x = q["sigma_member"].astype(float).to_numpy()
+        n = q["n_trajectories"].astype(float).to_numpy()
         if not np.isclose(w.sum(), 1.0, atol=1e-10):
             raise RuntimeError(f"{key}: retained M3 weights do not sum to one")
+        if np.any(n <= 0):
+            raise RuntimeError(f"{key}: non-positive member trajectory count")
         mean = float(np.sum(w * x))
-        var = float(np.sum(w * np.square(x - mean)))
+        var_raw = float(np.sum(w * np.square(x - mean)))
+        mc_noise_plugin = float(
+            np.sum(w * (1.0 - w) * x * (1.0 - x) / n)
+        )
+        mc_noise_worst = float(
+            0.25 * np.sum(w * (1.0 - w) / n)
+        )
+        var_corrected = float(max(0.0, var_raw - mc_noise_plugin))
         rows.append(
             {
                 "rho_global": float(key[0]),
@@ -369,14 +379,22 @@ def _ambiguity_tables(
                 "regime_label": regime_map.get(str(key[1]), str(key[1])),
                 "horizon": float(key[2]),
                 "sigma_weighted_member_mean": mean,
-                "ambiguity_weighted_variance": var,
-                "ambiguity_weighted_std": float(math.sqrt(max(0.0, var))),
+                "ambiguity_weighted_variance_raw": var_raw,
+                "ambiguity_weighted_std_raw": float(math.sqrt(max(0.0, var_raw))),
+                "mc_noise_contribution_plugin": mc_noise_plugin,
+                "mc_noise_contribution_worstcase_expected": mc_noise_worst,
+                "ambiguity_variance_plugin_corrected": var_corrected,
+                "ambiguity_std_plugin_corrected": float(math.sqrt(var_corrected)),
                 "ambiguity_member_min": float(np.min(x)),
                 "ambiguity_member_max": float(np.max(x)),
                 "ambiguity_member_range": float(np.max(x) - np.min(x)),
                 "retained_weight_ess": float(1.0 / np.sum(np.square(w))),
                 "n_retained_hypotheses": 14,
-                "interpretation": "posthoc latent-member spread; not MC uncertainty",
+                "interpretation": (
+                    "posthoc retained-member spread; corrected field removes a "
+                    "plug-in estimate of expected member-MC contribution; min-max "
+                    "is descriptive only and is not an uncertainty interval"
+                ),
             }
         )
     point = pd.DataFrame(rows)
@@ -417,9 +435,14 @@ def _ambiguity_tables(
     summary = (
         merged.groupby(["rho_global", "regime", "regime_label"], as_index=False)
         .agg(
-            ambiguity_variance_mean=("ambiguity_weighted_variance", "mean"),
-            ambiguity_variance_max=("ambiguity_weighted_variance", "max"),
-            ambiguity_std_mean=("ambiguity_weighted_std", "mean"),
+            ambiguity_variance_raw_mean=("ambiguity_weighted_variance_raw", "mean"),
+            ambiguity_variance_raw_max=("ambiguity_weighted_variance_raw", "max"),
+            ambiguity_variance_corrected_mean=("ambiguity_variance_plugin_corrected", "mean"),
+            ambiguity_variance_corrected_max=("ambiguity_variance_plugin_corrected", "max"),
+            ambiguity_std_raw_mean=("ambiguity_weighted_std_raw", "mean"),
+            ambiguity_std_corrected_mean=("ambiguity_std_plugin_corrected", "mean"),
+            mc_noise_plugin_mean=("mc_noise_contribution_plugin", "mean"),
+            mc_noise_worstcase_expected_mean=("mc_noise_contribution_worstcase_expected", "mean"),
             ambiguity_range_mean=("ambiguity_member_range", "mean"),
             ambiguity_range_max=("ambiguity_member_range", "max"),
             m1_mae=("abs_error_m1", "mean"),
@@ -443,8 +466,10 @@ def _ambiguity_tables(
         "M2_minus_M3_B2000_MAE": "m2_minus_m3_B2000_mae",
     }
     for ambiguity_name in (
-        "ambiguity_variance_mean",
-        "ambiguity_std_mean",
+        "ambiguity_variance_corrected_mean",
+        "ambiguity_std_corrected_mean",
+        "ambiguity_variance_raw_mean",
+        "ambiguity_std_raw_mean",
         "ambiguity_range_mean",
     ):
         for target_name, target_col in targets.items():
@@ -540,42 +565,66 @@ def _joint_energy_sigma(
                     ),
                     "alpha_a": float(a["alpha_renormalized"]),
                     "alpha_b": float(b["alpha_renormalized"]),
+                    "n_a": int(a["n_trajectories"]),
+                    "n_b": int(b["n_trajectories"]),
+                    "pair_worstcase_mc_se_bound": float(
+                        math.sqrt(
+                            0.25 / float(a["n_trajectories"])
+                            + 0.25 / float(b["n_trajectories"])
+                        )
+                    ),
                 }
             )
-    pairs = pd.DataFrame(pair_rows).sort_values(
+    pairs = pd.DataFrame(pair_rows)
+    pairs["sigma_gap_minus_1p96_worstcase_mc_se"] = (
+        pairs["abs_sigma_difference"].astype(float)
+        - 1.959963984540054 * pairs["pair_worstcase_mc_se_bound"].astype(float)
+    )
+    pairs = pairs.sort_values(
         ["abs_energy_difference", "abs_sigma_difference"],
         ascending=[True, False],
     ).reset_index(drop=True)
 
     maxrow = ambiguity_pointwise.sort_values(
-        ["ambiguity_weighted_variance", "ambiguity_member_range"],
+        ["ambiguity_variance_plugin_corrected", "ambiguity_member_range"],
         ascending=[False, False],
     ).iloc[0]
     selected = {
         "rho_global": float(maxrow["rho_global"]),
         "regime": str(maxrow["regime"]),
         "horizon": float(maxrow["horizon"]),
-        "ambiguity_weighted_variance": float(maxrow["ambiguity_weighted_variance"]),
+        "ambiguity_variance_plugin_corrected": float(
+            maxrow["ambiguity_variance_plugin_corrected"]
+        ),
+        "ambiguity_weighted_variance_raw": float(
+            maxrow["ambiguity_weighted_variance_raw"]
+        ),
         "ambiguity_member_range": float(maxrow["ambiguity_member_range"]),
-        "selection_rule": "maximum retained-weight ambiguity variance within H60..240",
+        "selection_rule": (
+            "maximum plug-in MC-noise-adjusted retained-weight ambiguity "
+            "variance within H60..240"
+        ),
     }
     return points, pairs, selected
 
 
 def _plot_ambiguity_vs_error(summary: pd.DataFrame, path: Path) -> None:
     fig, ax = plt.subplots(figsize=(6.2, 4.4))
-    x = summary["ambiguity_std_mean"].astype(float)
+    x = summary["ambiguity_std_corrected_mean"].astype(float)
     y = summary["m1_minus_m3_B2000_mae"].astype(float)
     ax.scatter(x, y)
     for rec in summary.itertuples(index=False):
         ax.annotate(
             f"{rec.regime_label}, rho={rec.rho_global:.4g}",
-            (float(rec.ambiguity_std_mean), float(rec.m1_minus_m3_B2000_mae)),
+            (
+                float(rec.ambiguity_std_corrected_mean),
+                float(rec.m1_minus_m3_B2000_mae),
+            ),
             fontsize=7,
             xytext=(3, 3),
             textcoords="offset points",
         )
-    ax.set_xlabel("Mean retained-model ambiguity std over H=60..240")
+    ax.set_xlabel("Mean plug-in MC-adjusted retained-model ambiguity std")
     ax.set_ylabel("M1 MAE - M3(B=2000) MAE")
     ax.set_title("Post-hoc ambiguity versus gain from weighted integration")
     fig.tight_layout()
