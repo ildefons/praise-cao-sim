@@ -1,0 +1,23 @@
+{
+  "status": "POSTHOC_M3_V4_WB_REFERENCE_BOOTSTRAP_COMPLETE_V1",
+  "scientific_role": "Robustness audit of finite fresh-WB reference noise; no method fitting, selection, repair, or simulation.",
+  "comparison_sha256": "cb8e182e5f1a0d54de1e54a6d81f1fed5d4487fe771c6e8da70e94b77235661d",
+  "fresh_whitebox_ledger_sha256": "831f1d6bfdedcef81e74b97fbb3b842697194659815ab63ca04851218dba8169",
+  "bootstrap_reps": 10000,
+  "bootstrap_seed": 2026092401,
+  "resampling_unit": "fresh white-box trajectory cluster",
+  "shared_resample_across_all_queries_and_horizons": true,
+  "horizon_window": [
+    60.0,
+    240.0
+  ],
+  "M0_changed": false,
+  "M1_changed": false,
+  "M2_changed": false,
+  "M3_changed": false,
+  "new_graph_simulation": false,
+  "new_whitebox_simulation": false,
+  "output_replicates_sha256": "7cdacfe1d593e7cd2a8a7e5c4b2967850fbb71d3aaa908f8e864d4ac879b163a",
+  "output_summary_sha256": "88556ab9ae5585bac8200924c68be58be190425b0c80a696868bf82f92a99dd0",
+  "python_wall_seconds": 154.5765321709987
+}
