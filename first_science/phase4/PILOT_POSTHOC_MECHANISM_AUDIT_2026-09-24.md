@@ -52,13 +52,19 @@ Also report the same metrics only where the N=200 white-box Wilson interval lies
 
 ### A3. Empirical composition-induced ambiguity
 
-Use the frozen M3 top-14 retained support and the B=2000 member curves. At every frozen query/horizon point compute
+Use the frozen M3 top-14 retained support and the B=2000 member curves. At every frozen query/horizon point compute the observed weighted member variance
 
 ```
-A(q,H) = sum_j alpha_j [sigma_j(q,H) - sigma_bar(q,H)]^2
+A_raw(q,H) = sum_j alpha_j [sigma_hat_j(q,H) - sigma_bar_hat(q,H)]^2.
 ```
 
-plus the empirical member range. Aggregate these quantities over H=60..240 s for each of the 15 frozen query cells.
+Because the retained member estimates use heterogeneous Monte Carlo counts, also report the plug-in expected MC contribution
+
+```
+V_MC = sum_j alpha_j (1-alpha_j) sigma_hat_j(1-sigma_hat_j)/N_j
+```
+
+and the diagnostic noise-adjusted quantity `max(0, A_raw - V_MC)`. Keep the empirical min-max range only as a descriptive finite-support spread, not as an uncertainty interval. Aggregate these quantities over H=60..240 s for each of the 15 frozen query cells.
 
 Relate the ambiguity proxy, exploratorily, to:
 
