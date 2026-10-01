@@ -1,0 +1,30 @@
+{
+  "status": "FROZEN_PHASE4_M3_TOP3_SUPPORT_VALIDATION_V1",
+  "classification": "retrospective_support_size_validation",
+  "purpose": "Evaluate whether the frozen M3 prediction depends materially on retaining one, three, or fourteen highest-weight joint reconstructions, using the full frozen pilot battery and a common B=1400 graph-simulation budget for Top1, Top3, and Top14 where applicable.",
+  "inputs": {
+    "final_comparison": "results/m3_v4_final_evaluation_v1/m3_v4_final_comparison.csv",
+    "stage_b_design": "results/m3_posthoc_stage_b_ablation_v1/stage_b_design.csv",
+    "stage_b_rank1_ledger": "results/m3_posthoc_stage_b_ablation_v1/ledgers/M3ABL_R01.csv",
+    "production_ledger_root": "results/m3_v4_dominant_mass_graph_v1/ledgers",
+    "i1_card_root": "../phase2/results/i1_cards_v2_rho_conditioned/public",
+    "i1_manifest": "../phase2/results/i1_cards_v2_rho_conditioned/public/i1_rho_conditioned_manifest_v1.json"
+  },
+  "support_validation": {
+    "graph_budget": 1400,
+    "top1": "rank-1 frozen joint reconstruction with 1400 Stage-B trajectories",
+    "top3": "ranks 1--3, frozen full-support Gibbs weights renormalized within Top3, integer-minimax allocation at total B=1400",
+    "top14": "existing frozen production M3 at B=1400 and B=2000",
+    "top3_allocation_rule": "same integer minimax variance-bound allocation used by production M3",
+    "new_graph_simulation": false,
+    "reuse_rule": "Top1 uses the frozen Stage-B rank-1 ledger; Top3 uses trajectory prefixes from the existing production M3 B=2000 rank-1..3 ledgers. Abort if the frozen ledgers do not contain enough trajectories."
+  },
+  "evaluation": {
+    "horizon_min": 60.0,
+    "horizon_max": 240.0,
+    "beta": 0.90,
+    "whitebox_n": 200,
+    "reference": "fresh frozen white-box estimate used in the primary evaluation"
+  },
+  "interpretation_guard": "This retrospective support-size validation can show how Top1, Top3 and Top14 behave on the frozen pilot. It cannot establish that one support size is sufficient in general, because the result is specific to this graph, provider interface, candidate bank and query battery. Top1 point accuracy must not be interpreted as a truncation certificate; deterministic omitted-mass bounds remain support-size dependent."
+}
