@@ -1,0 +1,33 @@
+{
+  "status": "PHASE4_M3_TOP3_SUPPORT_VALIDATION_COMPLETE_V1",
+  "classification": "retrospective_support_size_validation",
+  "graph_budget": 1400,
+  "new_graph_simulation": false,
+  "provider_candidates_changed": false,
+  "weights_changed": false,
+  "lambda_changed": false,
+  "queries_changed": false,
+  "whitebox_changed": false,
+  "top3_full_gibbs_mass": 0.9563720626949773,
+  "top3_renormalized_weights": [
+    0.4704245837159052,
+    0.324401444136981,
+    0.20517397214711386
+  ],
+  "top3_allocation": {
+    "1": 659,
+    "2": 454,
+    "3": 287
+  },
+  "top3_worst_case_mc_variance_bound": 0.00017857149414989267,
+  "contract_sha256": "9e0364c79f6437c7c048cb40d3a8adab1617b67e2940cc14c0c23436abd458e7",
+  "predictions_sha256": "1bb7b5a971601bc08e70659c1a0150b93b4a41531f5853d23696791c6fe0be7d",
+  "member_curves_sha256": "e193163c390b8c62e9eb222f1d190c0bd3102dfb328fc1fb57fd565affa0933f",
+  "allocation_sha256": "98d93020bfb7773368a1934671e9ef7c1ef0a5ee591634c24b0d2143b3495dff",
+  "error_metrics_sha256": "c776f595342eb6f8ed40faa62fedbc0da4ba49823633c0c41e85cf28d4bc9e06",
+  "decision_metrics_sha256": "6cf623a0f344716867646fa51faed202e5017a019fcb17a35b9e9f7f3a4d4b64",
+  "mc_width_summary_sha256": "f731ad9925182abf347a5a7667e6faa2ff6c9d6ad1b7c3248f1b672cbb14d65b",
+  "support_mass_summary_sha256": "8d4aeb13f0943e8f61f91c68bf6edbb2d7e2569f3625884df1c724c60f60df6d",
+  "git_commit": "bd4f7043093d5cd4218500bf4c0b81f7fc0fe49d",
+  "python_wall_seconds": 1983.8949211899999
+}

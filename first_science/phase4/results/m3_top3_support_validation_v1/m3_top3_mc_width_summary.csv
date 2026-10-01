@@ -1,0 +1,3 @@
+method,mc_method,mean_pointwise_95pct_mc_width,max_pointwise_95pct_mc_width
+TOP1_1400,Wilson 95% interval,0.03234502326660545,0.0523051991519195
+TOP3_1400,normal 95% band from worst-case weighted variance bound,0.04915597907424481,0.05238225047959033
