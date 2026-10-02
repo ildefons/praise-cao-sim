@@ -7,7 +7,7 @@ This directory contains the **new confirmatory battery**, separate from the comp
 1. `../PRAISE_PROSPECTIVE_RECOVERABILITY_BATTERY_PROTOCOL_2026-10-02.md` — human scientific contract.
 2. `config_phase5_recoverability_battery_v1.json` — exact machine-readable battery constants.
 3. `config_phase5_seed_registry_v1.json` — exact stochastic-evidence banks and algorithmic RNG controls.
-4. `config_phase5_method_instantiation_v1.json` — how M0/M1/M2/M3 are instantiated on new provider worlds without graph-WB tuning.
+4. `config_phase5_method_instantiation_v1.json` — how M0/M1/M2/M3 are instantiated on new provider worlds without graph-WB tuning.\n5. `config_phase5_execution_contract_v1.json` — canonical IDs, stage order, output paths, manifests, and table schemas.
 
 Code should read these files rather than duplicate battery constants in scripts.
 
