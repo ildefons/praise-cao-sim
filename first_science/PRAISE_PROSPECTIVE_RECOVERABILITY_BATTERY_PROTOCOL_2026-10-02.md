@@ -4,7 +4,8 @@
 **Date:** 2 October 2026  
 **Machine-readable source:** `phase5/config_phase5_recoverability_battery_v1.json`  
 **Seed registry:** `phase5/config_phase5_seed_registry_v1.json`  
-**Method-instantiation rules:** `phase5/config_phase5_method_instantiation_v1.json`
+**Method-instantiation rules:** `phase5/config_phase5_method_instantiation_v1.json`  
+**Execution/artifact contract:** `phase5/config_phase5_execution_contract_v1.json`
 
 This document governs the new confirmatory battery. Historical pilot files remain immutable provenance.
 
