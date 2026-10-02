@@ -1,0 +1,306 @@
+{
+  "status": "FROZEN_PHASE5_EXECUTION_AND_ARTIFACT_CONTRACT_V2",
+  "freeze_date": "2026-10-02",
+  "purpose": "Canonical IDs, stage order, directory layout, manifest requirements, and tabular schemas for all Phase-5 scripts.",
+  "source_of_truth": {
+    "battery": "config_phase5_recoverability_battery_v2.json",
+    "seeds": "config_phase5_seed_registry_v2.json",
+    "methods": "config_phase5_method_instantiation_v2.json",
+    "analysis": "config_phase5_analysis_addendum_v2.json",
+    "protocol": "../PRAISE_PROSPECTIVE_RECOVERABILITY_BATTERY_PROTOCOL_V2_2026-10-02.md"
+  },
+  "identifiers": {
+    "provider_world_ids": [
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "graph_ids": [
+      "G_PAR",
+      "G_SEQ",
+      "G_SEQPAR",
+      "G_PARSEQ"
+    ],
+    "regime_ids": [
+      "Easy",
+      "Mid",
+      "Stress"
+    ],
+    "rho": [
+      {
+        "label": "R0950",
+        "value": 0.95
+      },
+      {
+        "label": "R0975",
+        "value": 0.975
+      },
+      {
+        "label": "R098333",
+        "value": 0.9833333333333333
+      },
+      {
+        "label": "R0990",
+        "value": 0.99
+      },
+      {
+        "label": "R0995",
+        "value": 0.995
+      }
+    ],
+    "physical_cell_id": "{provider_world_id}__{graph_id}",
+    "query_id": "{provider_world_id}__{graph_id}__{rho_label}__{regime_id}",
+    "method_ids": [
+      "M0",
+      "M1",
+      "M2",
+      "M3_TOP1",
+      "M3_TOP3",
+      "M3_TOP14"
+    ],
+    "diagnostic_ids": [
+      "LHS_MSE_TOP1_DIAG"
+    ]
+  },
+  "result_root": "results",
+  "stages": [
+    {
+      "order": 1,
+      "id": "I1",
+      "scope": "provider_world",
+      "output_dir": "results/01_i1/{provider_world_id}",
+      "required_outputs": [
+        "public/",
+        "i1_region_evidence_manifest.json",
+        "i1_sigma_evidence_manifest.json",
+        "i1_freeze_manifest.json"
+      ],
+      "gate": "I1 public cards and both evidence manifests hash-frozen before Step-0 for that provider world."
+    },
+    {
+      "order": 2,
+      "id": "STEP0_CALIBRATION",
+      "scope": "physical_cell",
+      "output_dir": "results/02_step0/{physical_cell_id}",
+      "required_outputs": [
+        "step0_calibration_candidates.csv",
+        "step0_selected_queries.csv",
+        "step0_calibration_manifest.json"
+      ],
+      "gate": "Exactly 15 selected queries: 5 rho x 3 regimes."
+    },
+    {
+      "order": 3,
+      "id": "STEP0_CONFIRMATION",
+      "scope": "physical_cell",
+      "output_dir": "results/02_step0/{physical_cell_id}",
+      "required_outputs": [
+        "step0_confirmation.csv",
+        "step0_frozen_queries.csv",
+        "step0_confirmation_manifest.json"
+      ],
+      "gate": "Each physical cell either freezes exactly 15 passing queries or is frozen as GATE_FAILED_STEP0. Failed cells are reported and excluded without repair; other cells continue."
+    },
+    {
+      "order": 4,
+      "id": "RECONSTRUCTION",
+      "scope": "provider_world",
+      "output_dir": "results/03_reconstruction/{provider_world_id}",
+      "required_outputs": [
+        "m1/",
+        "m2/",
+        "m3/",
+        "reconstruction_freeze_manifest.json"
+      ],
+      "gate": "M1/M2/M3 states and all provider-level parameters/member identities/weights frozen before graph prediction."
+    },
+    {
+      "order": 5,
+      "id": "BLIND_PREDICTION",
+      "scope": "physical_cell",
+      "output_dir": "results/04_prediction/{physical_cell_id}",
+      "required_outputs": [
+        "m0_predictions.csv",
+        "m1_predictions.csv",
+        "m2_member_curves.csv",
+        "m2_predictions.csv",
+        "m3_member_curves.csv",
+        "m3_predictions_top1_top3_top14.csv",
+        "lhs_mse_top1_diagnostic.csv",
+        "prediction_ledger_hashes.csv",
+        "prediction_manifest.json"
+      ],
+      "gate": "All prediction artifacts and ledgers for every eligible cell are hash-frozen locally. Final WB remains locked until the battery-level global prediction-freeze manifest is complete."
+    },
+    {
+      "order": 6,
+      "id": "GLOBAL_PREDICTION_FREEZE",
+      "scope": "battery",
+      "output_dir": "results/04_prediction",
+      "required_outputs": [
+        "phase5_global_prediction_freeze_manifest.json"
+      ],
+      "gate": "The manifest enumerates all 16 physical cells as prediction-frozen or GATE_FAILED_STEP0 and hashes every eligible cell prediction manifest. No final WB may be generated or opened before this manifest is frozen."
+    },
+    {
+      "order": 7,
+      "id": "FINAL_WB",
+      "scope": "physical_cell",
+      "output_dir": "results/05_final_wb/{physical_cell_id}",
+      "required_outputs": [
+        "final_wb_ledger.csv",
+        "final_wb_curves.csv",
+        "final_wb_manifest.json"
+      ],
+      "gate": "Run only for eligible cells after GLOBAL_PREDICTION_FREEZE. Use N=1000, seeds 54000..54999."
+    },
+    {
+      "order": 8,
+      "id": "EVALUATION",
+      "scope": "battery",
+      "output_dir": "results/06_evaluation",
+      "required_outputs": [
+        "phase5_final_comparison.csv",
+        "phase5_method_summary.csv",
+        "phase5_decision_summary.csv",
+        "phase5_support_summary.csv",
+        "phase5_cost_summary.csv",
+        "phase5_directional_contrasts.csv",
+        "phase5_recoverability_profile.csv",
+        "phase5_evaluation_manifest.json"
+      ],
+      "gate": "Use the predeclared v2 analysis only; no method or query changes."
+    }
+  ],
+  "manifest_contract": {
+    "required_keys": [
+      "status",
+      "stage_id",
+      "protocol_version",
+      "battery_config_sha256",
+      "seed_registry_sha256",
+      "analysis_contract_sha256",
+      "method_contract_sha256",
+      "execution_contract_sha256",
+      "code_commit",
+      "inputs",
+      "seed_banks",
+      "outputs",
+      "output_hashes_sha256",
+      "started_utc",
+      "completed_utc"
+    ],
+    "output_hash_rule": "Every scientific CSV/JSON ledger or prediction file listed as an output must have a SHA-256 entry.",
+    "code_commit_rule": "Record exact repository commit used for execution.",
+    "frozen_status_prefix": "FROZEN_PHASE5_"
+  },
+  "tables": {
+    "frozen_query_schema": [
+      "query_id",
+      "provider_world_id",
+      "graph_id",
+      "rho_label",
+      "rho",
+      "regime",
+      "scale_s",
+      "l_max",
+      "c_max",
+      "q_min",
+      "calibration_mean_sigma",
+      "confirmation_mean_sigma",
+      "confirmation_pass"
+    ],
+    "prediction_schema_minimum": [
+      "query_id",
+      "provider_world_id",
+      "graph_id",
+      "rho_label",
+      "rho",
+      "regime",
+      "H",
+      "method_id",
+      "status",
+      "sigma_hat"
+    ],
+    "M3_prediction_extra_columns": [
+      "support_size",
+      "retained_mass",
+      "omitted_mass",
+      "truncation_bound",
+      "graph_budget",
+      "mc_var_plugin",
+      "mc_se_plugin",
+      "mc_var_worstcase_bound",
+      "mc_se_bound"
+    ],
+    "final_wb_schema_minimum": [
+      "query_id",
+      "provider_world_id",
+      "graph_id",
+      "rho_label",
+      "rho",
+      "regime",
+      "H",
+      "sigma_wb",
+      "wb_n",
+      "wb_ci_lower",
+      "wb_ci_upper"
+    ],
+    "final_comparison_schema_minimum": [
+      "query_id",
+      "provider_world_id",
+      "graph_id",
+      "rho_label",
+      "rho",
+      "regime",
+      "H",
+      "method_id",
+      "status",
+      "sigma_hat",
+      "sigma_wb",
+      "error",
+      "abs_error",
+      "squared_error"
+    ],
+    "diagnostic_prediction_schema": [
+      "query_id",
+      "provider_world_id",
+      "graph_id",
+      "rho_label",
+      "rho",
+      "regime",
+      "H",
+      "diagnostic_id",
+      "sigma_hat",
+      "graph_n",
+      "matched_kl_sigma_hat_N100"
+    ]
+  },
+  "invariants": {
+    "no_script_may_hardcode_provider_worlds_graphs_rhos_regimes_or_seed_ranges": true,
+    "scripts_must_read_phase5_configs": true,
+    "query_float_identity_uses_rho_label_not_stringified_float": true,
+    "one_physical_ledger_reused_across_15_queries_where_semantically_valid": true,
+    "no_final_wb_before_prediction_freeze": true,
+    "no_post_WB_method_repair": true,
+    "global_prediction_freeze_covers_all_cells_before_any_final_wb": true,
+    "step0_gate_failure_is_cell_level_exclusion": true
+  },
+  "supersedes": "config_phase5_execution_contract_v1.json",
+  "engineering_smoke": {
+    "required_before_scientific_execution": true,
+    "scientific_evidence": false,
+    "output_root": "smoke/",
+    "seed_source": "config_phase5_seed_registry_v2.json::engineering_smoke",
+    "minimum_checks": [
+      "all four graph ASTs construct and execute",
+      "resume and checkpoint path",
+      "manifest and hash production",
+      "M3 nested readouts",
+      "LHS-MSE diagnostic path",
+      "global prediction-freeze logic"
+    ],
+    "note": "Smoke outputs and throwaway seeds are not inputs to scientific stages."
+  }
+}
