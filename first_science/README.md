@@ -11,6 +11,10 @@ The completed I1/M0/M1/M2/M3 work is the **development pilot**. The next scienti
 - seed/evidence registry: `phase5/config_phase5_seed_registry_v1.json`
 - method-instantiation contract: `phase5/config_phase5_method_instantiation_v1.json`
 - execution/artifact contract: `phase5/config_phase5_execution_contract_v1.json`
+- prospective analysis addendum: `phase5/PRAISE_PHASE5_PROSPECTIVE_ANALYSIS_ADDENDUM_2026-10-02.md`
+- machine-readable analysis addendum: `phase5/config_phase5_analysis_addendum_v1.json`
+
+The analysis addendum was frozen before Phase-5 scientific execution. It adds directional-bias and topology-sensitivity analyses only; it does not reopen or change the battery design.
 
 Historical pilot design/source of truth:
 
@@ -31,10 +35,10 @@ Historical M3 weighted-sampling design:
 
 The direction of scientific dependency is one-way:
 
-`pilot provenance -> Phase-5 frozen design -> I1 acquisition -> method-free query calibration -> frozen provider reconstructions -> blind graph prediction -> fresh WB -> analysis -> theory`
+`pilot provenance -> Phase-5 frozen design -> I1 acquisition -> method-free query calibration -> frozen provider reconstructions -> blind graph prediction -> fresh WB -> predeclared analysis -> theory`
 
 A frozen phase is not edited because a later result is inconvenient. Reopen only for a concrete implementation/scientific defect and version the correction explicitly.
 
-Prediction quality, ambiguity diagnostics, applicability, Monte Carlo precision, and computational cost remain first-class outputs.
+Prediction quality, ambiguity diagnostics, applicability, Monte Carlo precision, computational cost, signed bias, and false-accept/false-reject direction remain first-class outputs.
 
 The strict PPG firewall remains in force throughout.
