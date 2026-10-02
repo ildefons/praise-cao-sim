@@ -343,7 +343,8 @@
       "extra_graph_simulation_max_per_physical_cell": 100,
       "local_simulation_added": false,
       "graph_whitebox_may_select_or_tune": false,
-      "headline_method": false
+      "headline_method": false,
+      "production_rank1_prefix_invariant": "M3 production rank 1 must have N1>=100; assert before graph execution."
     }
   },
   "physical_cells": 16,
