@@ -15,9 +15,9 @@ Phase 5 therefore treats error direction as a first-class confirmatory diagnosti
 
 For every method, report signed bias
 
-[
+$$
 \mathrm{Bias}=\frac{1}{n}\sum_q(\hat\sigma_q-\hat\sigma_q^{WB})
-]
+$$
 
 together with MAE/RMSE. Required directional summaries are:
 
