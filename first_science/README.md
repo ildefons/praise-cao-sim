@@ -10,6 +10,7 @@ The completed I1/M0/M1/M2/M3 work is the **development pilot**. The next scienti
 - executable configuration: `phase5/config_phase5_recoverability_battery_v1.json`
 - seed/evidence registry: `phase5/config_phase5_seed_registry_v1.json`
 - method-instantiation contract: `phase5/config_phase5_method_instantiation_v1.json`
+- execution/artifact contract: `phase5/config_phase5_execution_contract_v1.json`
 
 Historical pilot design/source of truth:
 
