@@ -1,0 +1,175 @@
+{
+  "status": "FROZEN_PHASE5_PROSPECTIVE_ANALYSIS_ADDENDUM_V2",
+  "freeze_date": "2026-10-02",
+  "role": "prospective analysis contract for Phase-5 v2; frozen before scientific execution",
+  "core_contracts_unchanged": false,
+  "directional_error": {
+    "signed_bias_definition": "mean(prediction_sigma - final_whitebox_sigma)",
+    "required_scopes": [
+      "ALL",
+      "provider_world",
+      "graph",
+      "regime",
+      "provider_world_x_graph",
+      "graph_x_regime",
+      "provider_world_x_regime",
+      "rho_x_regime"
+    ],
+    "decision_thresholds_beta": [
+      0.9,
+      0.8,
+      0.95
+    ],
+    "decision_outputs": [
+      "false_accept_count",
+      "false_reject_count",
+      "decision_agreement_rate"
+    ],
+    "wb_certain_subset": "same Wilson95 non-crossing subset as frozen core protocol",
+    "wb_reference_bootstrap": {
+      "bootstrap_reps": 10000,
+      "bootstrap_seed": 2026100201,
+      "resampling_unit": "complete final-WB trajectory index",
+      "preserve_within_trajectory_dependence_across_queries_and_horizons": true,
+      "joint_resample_across_physical_cells_when_same_CRN_trajectory_index_is_reused": true,
+      "method_predictions_fixed": true,
+      "interval": "percentile_95",
+      "interpretation": "finite final-WB reference uncertainty only; not a joint method-uncertainty interval",
+      "pass_fail_gate": false,
+      "n_whitebox": 1000
+    }
+  },
+  "topology_sensitivity": {
+    "scientific_role": "prospective directional mechanism hypothesis; no numerical pass/fail threshold",
+    "hypothesis": "If masking of poorly reconstructed non-dominant providers materially explains the pilot, prediction error and/or optimistic bias should become more sensitive when graph structure makes those provider contributions additive or otherwise structurally exposed.",
+    "graph_exposure": {
+      "G_PAR": "max-type exposure of A,B,C latency",
+      "G_SEQ": "additive exposure of A,B,C latency",
+      "G_SEQPAR": "A additive before max(B,C)",
+      "G_PARSEQ": "max(A,B+C)"
+    },
+    "provider_world_strata": {
+      "symmetric": [
+        "P1",
+        "P3"
+      ],
+      "heterogeneous": [
+        "P2",
+        "P4"
+      ]
+    },
+    "required_metrics": [
+      "MAE",
+      "signed_bias",
+      "false_accept_count",
+      "false_reject_count"
+    ],
+    "no_method_feedback": true,
+    "no_pass_fail_ordering": true,
+    "primary_contrasts": {
+      "within_world_seq_minus_par_mae": "Delta_P^M = MAE_M(P,G_SEQ) - MAE_M(P,G_PAR); masking hypothesis predicts Delta_P^M > 0",
+      "heterogeneous_minus_symmetric_delta": "Delta_het^M = mean(Delta_P2^M,Delta_P4^M) - mean(Delta_P1^M,Delta_P3^M); masking/load-concentration hypothesis predicts Delta_het^M > 0",
+      "signed_bias_analogs": "report the corresponding signed-bias contrasts without imposing an additional directional gate"
+    },
+    "mixed_graph_role": "G_SEQPAR and G_PARSEQ provide mechanistic triangulation, not a clean factorial separation of aggregation from workload shift.",
+    "heterogeneity_caveat": "P2/P4 jointly alter provider spread and concentrate utilization toward ProviderC; contrast is not interpreted as pure heterogeneity."
+  },
+  "passive_diagnostics": {
+    "sla_component_violation_flags": {
+      "source": "derive from existing top-level L,C,Q ledger and frozen query thresholds",
+      "labels": [
+        "latency",
+        "cost",
+        "quality",
+        "multiple"
+      ],
+      "method_input": false
+    },
+    "parallel_join_controlling_child": {
+      "role": "optional_nonblocking_passive_trace_diagnostic",
+      "suggested_fields": [
+        "physical_cell_id",
+        "method_id",
+        "trajectory",
+        "request_id",
+        "composition_node_id",
+        "controlling_child_id",
+        "child_completion_times"
+      ],
+      "must_not_change_simulation_semantics": true,
+      "method_input": false,
+      "read_before_prediction_freeze": false,
+      "missing_status": "NOT_AVAILABLE",
+      "missing_invalidates_primary_battery": false
+    },
+    "provider_interarrival_statistics": {
+      "role": "workload-shift diagnostic",
+      "source": "native provider arrival timestamps where available without changing execution",
+      "per_provider_outputs": [
+        "n_arrivals",
+        "mean_interarrival",
+        "std_interarrival",
+        "cv_interarrival",
+        "p10_interarrival",
+        "p50_interarrival",
+        "p90_interarrival"
+      ],
+      "scopes": [
+        "blind graph prediction ledgers where trace support exists",
+        "final white-box ledgers"
+      ],
+      "method_input": false,
+      "read_before_prediction_freeze": false,
+      "missing_status": "NOT_AVAILABLE",
+      "missing_invalidates_primary_battery": false
+    }
+  },
+  "supersedes": "config_phase5_analysis_addendum_v1.json",
+  "common_bank_scoring_diagnostic": {
+    "id": "LHS_MSE_TOP1_DIAG",
+    "primary_comparison": "paired N=100 LHS-MSE Top1 versus LHS-KL Top1 using the same 48-candidate bank, same local rescore evidence, and same graph seeds",
+    "interpretation": "difference is attributed to scoring criterion within the fixed LHS bank; M1 versus LHS-MSE is a broader search-pipeline comparison, not a pure search-only contrast",
+    "headline_method": false
+  },
+  "recoverability_profile": {
+    "binary_threshold": false,
+    "per_cell_outputs": [
+      "MAE",
+      "RMSE",
+      "signed_bias",
+      "max_abs_error",
+      "reference_noise_adjusted_RMSE",
+      "false_accept_rate_on_WB_certain_points",
+      "false_reject_rate_on_WB_certain_points"
+    ],
+    "interpretation": "continuous descriptive profile; no cell is labelled recoverable/non-recoverable by an arbitrary numerical cutoff"
+  },
+  "m3_mc_precision": {
+    "plugin_variance": "sum_j alpha_j^2 * p_hat_j*(1-p_hat_j)/N_j",
+    "conservative_variance_bound": "sum_j alpha_j^2/(4*N_j)",
+    "support_weights_renormalized_within_topK": true,
+    "same_estimator_family_for_top1_top3_top14": true
+  },
+  "prospective_secondary_after_primary_battery": [
+    {
+      "id": "TRUE_THETA_I1_SCORE",
+      "action": "score hidden generating theta on the frozen public I1 and compare its energy/rank with reconstructed candidates",
+      "timing": "only after primary Phase-5 predictions and final-WB evaluation are frozen",
+      "method_feedback": false
+    },
+    {
+      "id": "M3_SUPPORT_DECISION_WARNING",
+      "action": "test whether retained-support ambiguity/envelope diagnostics flag false accepts/rejects",
+      "timing": "only after primary Phase-5 predictions and final-WB evaluation are frozen",
+      "method_feedback": false
+    },
+    {
+      "id": "PUBLIC_SIGMA_CARD_BOOTSTRAP",
+      "action": "resample the N=100 public-sigma acquisition trajectories conditional on the already frozen I1 regions; recompute public sigma surfaces, frozen-candidate energies and weights without new simulation; report Top1 identity frequency and weight variability",
+      "candidate_trajectory_ledgers_fixed": true,
+      "region_geometry_recomputed": false,
+      "timing": "only after primary Phase-5 predictions and final-WB evaluation are frozen",
+      "method_feedback": false
+    }
+  ]
+}
