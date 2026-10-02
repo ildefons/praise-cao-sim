@@ -1,0 +1,43 @@
+{
+  "status": "FROZEN_POSTHOC_PILOT_EVIDENCE_STRENGTHENING_V1",
+  "freeze_date": "2026-10-02",
+  "classification": "read_only_no_new_simulation",
+  "purpose": "Package hidden-theta comparison, signed bias by regime, and WB-reference-noise-adjusted discrepancy from already-frozen pilot outputs.",
+  "inputs": [
+    "config_phase4_sigma_regime_battery_step0_v2.json",
+    "results/m1_vs_top1_public_i1_audit_v1/m1_vs_top1_parameters.csv",
+    "results/m1_vs_top1_public_i1_audit_v1/m1_vs_top1_public_i1_fit.csv",
+    "results/m3_v4_final_evaluation_v1/m3_v4_final_comparison.csv",
+    "results/m3_top3_support_validation_v1/m3_top3_support_predictions.csv",
+    "results/m3_v4_wb_reference_bootstrap_v1/wb_reference_bootstrap_summary.csv"
+  ],
+  "horizon_window": [
+    60,
+    240
+  ],
+  "regime_label_map": {
+    "G0": "Easy",
+    "G1": "Mid",
+    "G2": "Stress"
+  },
+  "hidden_theta": {
+    "mu_truth_rule": "provider_instruction_mean * execution_fraction_x / effective_IPT",
+    "kappa_truth_rule": "hidden white-box cost_rate",
+    "cv_truth_rule": "hidden white-box instruction_cv",
+    "reporting": "componentwise ratios and descriptive fold errors; no identifiability test or scalar ranking"
+  },
+  "WB_noise_adjustment": {
+    "WB_n": 200,
+    "variance_estimator": "sigma_WB*(1-sigma_WB)/(N-1)",
+    "adjusted_mse": "max(0, observed_MSE - mean_estimated_WB_variance)",
+    "adjusted_rmse": "sqrt(adjusted_mse)",
+    "guard": "Reference-noise adjustment only. Method Monte Carlo noise remains; do not call this truth error."
+  },
+  "simulation": {
+    "provider": false,
+    "graph": false,
+    "whitebox": false
+  },
+  "repair_or_retuning": false,
+  "support_size_result_source": "config_phase4_m3_top3_support_validation_v1.json"
+}
