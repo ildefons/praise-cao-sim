@@ -131,7 +131,9 @@
       "n_trajectories": 100,
       "seeds": "first 100 seeds of the M3 rank-1 stream",
       "kl_matched_comparator": "first 100 trajectories of M3 production rank-1 ledger on the identical seeds",
-      "crn_matched": true
+      "crn_matched": true,
+      "production_rank1_minimum_n": 100,
+      "allocation_invariant": "Under the frozen 14-member minimax allocation with B=1400, rank 1 must receive at least 100 trajectories; assert this before graph execution so its first-100 prefix is available for the paired diagnostic."
     },
     "interpretation": {
       "lhs_mse_vs_lhs_kl": "isolates the local scoring rule on a common candidate bank, common local evidence, and paired graph Monte Carlo",
