@@ -1,0 +1,456 @@
+{
+  "status": "FROZEN_PHASE5_PROSPECTIVE_RECOVERABILITY_BATTERY_V2",
+  "freeze_date": "2026-10-02",
+  "scientific_role": "Prospective multi-provider-world, multi-graph recoverability battery after the completed I1/M0/M1/M2/M3 development pilot.",
+  "authority": {
+    "human_protocol": "../PRAISE_PROSPECTIVE_RECOVERABILITY_BATTERY_PROTOCOL_V2_2026-10-02.md",
+    "seed_registry": "config_phase5_seed_registry_v2.json",
+    "method_instantiation": "config_phase5_method_instantiation_v2.json",
+    "historical_pilot_design": "../PRAISE_I1_M0_M1_M2_M3_PILOT_DESIGN_2026-09-23.md",
+    "historical_pilot_is_provenance_not_confirmatory": true,
+    "execution_contract": "config_phase5_execution_contract_v2.json",
+    "analysis_contract": "config_phase5_analysis_addendum_v2.json"
+  },
+  "scientific_target": {
+    "formula": "Sigma_G(A,H;rho)=P(c_G(A,H)>=rho)",
+    "semantics": "cumulative fraction of requests decided by H that satisfy A; unresolved requests excluded; zero-decision compliance=1",
+    "primary_question": "Under limited provider disclosure, when is end-to-end SLA prediction recoverable, and how do provider operating condition, graph structure, query regime, and reconstruction support affect recoverability?",
+    "performance_pass_fail_threshold": null,
+    "result_policy": "Any valid frozen outcome is scientific evidence; analysis precedes theory-building."
+  },
+  "development_condition_excluded": {
+    "id": "P_DEV",
+    "D_instructions": 300000000,
+    "delta": 0.2,
+    "provider_means": {
+      "ProviderA": 240000000,
+      "ProviderB": 300000000,
+      "ProviderC": 360000000
+    },
+    "role": "development pilot only; not a confirmatory battery cell"
+  },
+  "workload": {
+    "id": "W0",
+    "period_seconds": 0.2,
+    "phase_seconds": 0,
+    "semantics": "fixed periodic root invocation workload",
+    "experimental_axis": false
+  },
+  "provider_family": {
+    "n_providers": 3,
+    "providers": [
+      "ProviderA",
+      "ProviderB",
+      "ProviderC"
+    ],
+    "instruction_distribution_family": "gamma",
+    "instruction_cv": 0.3,
+    "effective_IPT": 1000000000,
+    "cost_rate": 3,
+    "execution_fraction_x": 0.5,
+    "quality": 0.5,
+    "module_semantics": "same native one-server FCFS provider family as pilot",
+    "parameterization": {
+      "ProviderA": "D*(1-delta)",
+      "ProviderB": "D",
+      "ProviderC": "D*(1+delta)"
+    }
+  },
+  "provider_worlds": [
+    {
+      "id": "P1",
+      "D_instructions": 330000000,
+      "delta": 0,
+      "provider_means": {
+        "ProviderA": 330000000,
+        "ProviderB": 330000000,
+        "ProviderC": 330000000
+      },
+      "approx_utilization": {
+        "ProviderA": 0.825,
+        "ProviderB": 0.825,
+        "ProviderC": 0.825
+      }
+    },
+    {
+      "id": "P2",
+      "D_instructions": 330000000,
+      "delta": 0.15,
+      "provider_means": {
+        "ProviderA": 280500000,
+        "ProviderB": 330000000,
+        "ProviderC": 379500000
+      },
+      "approx_utilization": {
+        "ProviderA": 0.70125,
+        "ProviderB": 0.825,
+        "ProviderC": 0.94875
+      }
+    },
+    {
+      "id": "P3",
+      "D_instructions": 360000000,
+      "delta": 0,
+      "provider_means": {
+        "ProviderA": 360000000,
+        "ProviderB": 360000000,
+        "ProviderC": 360000000
+      },
+      "approx_utilization": {
+        "ProviderA": 0.9,
+        "ProviderB": 0.9,
+        "ProviderC": 0.9
+      }
+    },
+    {
+      "id": "P4",
+      "D_instructions": 360000000,
+      "delta": 0.1,
+      "provider_means": {
+        "ProviderA": 324000000,
+        "ProviderB": 360000000,
+        "ProviderC": 396000000
+      },
+      "approx_utilization": {
+        "ProviderA": 0.81,
+        "ProviderB": 0.9,
+        "ProviderC": 0.99
+      }
+    }
+  ],
+  "graph_invariants": {
+    "outer_grammar": "Source -> Fpre -> <provider_composition> -> Fpost",
+    "source_physical_contract": "../phase1/config_phase1_discovery_v1.json",
+    "Fpre_instructions": 5000000,
+    "Fpost_instructions": 5000000,
+    "network_bw_mbps": 1000,
+    "network_pr_seconds": 0.001,
+    "request_bytes": 1000,
+    "branch_bytes": 1000,
+    "join_bytes": 1000,
+    "supported_operators": [
+      "sequence",
+      "parallel_all"
+    ],
+    "provider_placement_permutations": false
+  },
+  "graphs": [
+    {
+      "id": "G_PAR",
+      "expression": "ParAll(ProviderA,ProviderB,ProviderC)",
+      "ast": {
+        "op": "parallel_all",
+        "children": [
+          "ProviderA",
+          "ProviderB",
+          "ProviderC"
+        ]
+      }
+    },
+    {
+      "id": "G_SEQ",
+      "expression": "Seq(ProviderA,ProviderB,ProviderC)",
+      "ast": {
+        "op": "sequence",
+        "children": [
+          "ProviderA",
+          "ProviderB",
+          "ProviderC"
+        ]
+      }
+    },
+    {
+      "id": "G_SEQPAR",
+      "expression": "Seq(ProviderA,ParAll(ProviderB,ProviderC))",
+      "ast": {
+        "op": "sequence",
+        "children": [
+          "ProviderA",
+          {
+            "op": "parallel_all",
+            "children": [
+              "ProviderB",
+              "ProviderC"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "G_PARSEQ",
+      "expression": "ParAll(ProviderA,Seq(ProviderB,ProviderC))",
+      "ast": {
+        "op": "parallel_all",
+        "children": [
+          "ProviderA",
+          {
+            "op": "sequence",
+            "children": [
+              "ProviderB",
+              "ProviderC"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "public_I1": {
+    "source_contract": "../phase2/config_phase2_i1_provider_card_v3_rho_conditioned.json",
+    "source_freeze_manifest": "../phase2/phase2_i1_rho_conditioned_freeze_manifest_v1.json",
+    "interface_schema_unchanged": true,
+    "rho_region_values": [
+      0.95,
+      0.975,
+      0.9833333333333333,
+      0.99,
+      0.995
+    ],
+    "rho_query_values": [
+      0.95,
+      0.975,
+      0.9833333333333333,
+      0.99,
+      0.995
+    ],
+    "same_rho_diagonal_primary": true,
+    "region_evidence_n": 100,
+    "sigma_evidence_n": 100,
+    "region_sigma_evidence_disjoint": true,
+    "same_cards_reused_across_graphs_within_provider_world": true
+  },
+  "horizon": {
+    "minimum_seconds": 0,
+    "maximum_seconds": 240,
+    "grid_step_seconds": 5,
+    "primary_evaluation_min_seconds": 60,
+    "primary_evaluation_max_seconds": 240
+  },
+  "step0": {
+    "source_semantics": "../phase4/config_phase4_sigma_regime_battery_step0_v2.json",
+    "method_free": true,
+    "calibration_n": 200,
+    "confirmation_n": 200,
+    "confirmation_disjoint": true,
+    "no_reselection_after_confirmation": true,
+    "query_family": "A_G(s,rho)=(s*l_base,s*c_base,q_base), where base is public-I1 forward composition through exact G",
+    "scale_grid": {
+      "minimum": 0.5,
+      "maximum": 2,
+      "step": 0.01
+    },
+    "regimes": [
+      {
+        "id": "Easy",
+        "mean_sigma_lower": 0.95,
+        "mean_sigma_upper": 1,
+        "target_center": 0.975
+      },
+      {
+        "id": "Mid",
+        "mean_sigma_lower": 0.75,
+        "mean_sigma_upper": 0.9,
+        "target_center": 0.825
+      },
+      {
+        "id": "Stress",
+        "mean_sigma_lower": 0.4,
+        "mean_sigma_upper": 0.75,
+        "target_center": 0.575
+      }
+    ],
+    "regime_statistic": "mean sigma over every frozen H point from 60 through 240 seconds",
+    "minimum_adjacent_mean_sigma_gap": 0.1,
+    "required_scale_order": "s_Stress < s_Mid < s_Easy",
+    "all_15_queries_per_physical_cell_must_pass": true,
+    "failure_policy": "A failed Step-0 confirmation excludes only that physical P x G cell as GATE_FAILED_STEP0. The cell is reported, not repaired/reselected, and receives no blind prediction or final-WB run. Other eligible cells continue."
+  },
+  "methods": {
+    "M0": {
+      "base_contract": "../phase3/config_phase3_m0_contract_v1.json",
+      "role": "analytic topology-aware same-rho product baseline",
+      "not_applicable_semantics": "NOT_APPLICABLE",
+      "score_only_operational_predictions": true
+    },
+    "M1": {
+      "base_contract": "../phase3/config_phase3_m1_contract_v2.json",
+      "phase5_adapter": "config_phase5_method_instantiation_v1.json",
+      "graph_trajectories_per_physical_cell": 100,
+      "graph_whitebox_may_tune": false
+    },
+    "M2": {
+      "semantics_contract": "../phase4/config_phase4_m2_joint_ensemble_semantics_v1.json",
+      "phase5_adapter": "config_phase5_method_instantiation_v1.json",
+      "provider_members": 3,
+      "joint_members": 27,
+      "joint_weight": 0.037037037037037035,
+      "graph_trajectories_per_joint_member": 100,
+      "graph_trajectories_per_physical_cell": 2700,
+      "graph_whitebox_may_select_or_weight_members": false
+    },
+    "M3": {
+      "proposal_candidates_per_provider": 48,
+      "proposal_source": "same nonadaptive normalized LHS bank created during Phase-5 M2 coverage stage",
+      "local_rescore_discrepancy": "mean Bernoulli KL D(p_I1_Jeffreys || p_theta_Jeffreys)",
+      "gibbs_lambda": 30,
+      "lambda_source": "../phase4/config_phase4_m3_lambda_cv_v3.json",
+      "factorized_joint_weights": true,
+      "production_rank_count": 14,
+      "production_graph_budget": 1400,
+      "production_support_rule": "fixed ranks 1..14; do not change K based on retained mass in the new worlds",
+      "nested_readouts": [
+        {
+          "id": "M3_TOP1",
+          "ranks": [
+            1
+          ],
+          "renormalize_within_support": true
+        },
+        {
+          "id": "M3_TOP3",
+          "ranks": [
+            1,
+            2,
+            3
+          ],
+          "renormalize_within_support": true
+        },
+        {
+          "id": "M3_TOP14",
+          "ranks": "1..14",
+          "renormalize_within_support": true
+        }
+      ],
+      "extra_graph_simulation_for_top1_top3": false,
+      "equal_total_budget_ablation_claim": false,
+      "report_retained_and_omitted_mass": true,
+      "truncation_bound_interpretation": "internal finite-support M3 approximation only; never a bound to WB truth",
+      "graph_support": {},
+      "mc_precision": {
+        "primary_estimator": "plug-in weighted Bernoulli Monte Carlo variance sum_j wtilde_j^2 * p_hat_j*(1-p_hat_j)/N_j, with support weights renormalized within the reported TopK",
+        "conservative_estimator": "worst-case bound sum_j wtilde_j^2/(4*N_j)",
+        "same_estimator_family_for_top1_top3_top14": true
+      }
+    },
+    "LHS_MSE_TOP1_DIAG": {
+      "role": "secondary common-bank scoring diagnostic, not a primary method",
+      "provider_candidate_bank": "same 48/provider nonadaptive LHS bank and same fresh N=100 M3 rescore ledgers",
+      "mse_score": "mean squared error between raw public-I1 sigma and raw candidate sigma over the complete public I1 surface with H>0",
+      "provider_selection": "minimum-MSE candidate independently per provider; deterministic tie-break by candidate ID",
+      "joint_model": "Cartesian Top1 formed from the three selected provider candidates",
+      "graph_budget_per_physical_cell": 100,
+      "graph_seeds": "exact first 100 seeds of the M3 rank-1 seed stream for that cell",
+      "matched_KL_comparator": "M3 KL-ranked Top1 recomputed from the first 100 trajectories of its production rank-1 ledger, yielding a paired N=100 CRN scoring comparison",
+      "extra_graph_simulation_max_per_physical_cell": 100,
+      "local_simulation_added": false,
+      "graph_whitebox_may_select_or_tune": false,
+      "headline_method": false
+    }
+  },
+  "physical_cells": 16,
+  "queries_per_physical_cell": 15,
+  "total_query_cells": 240,
+  "final_whitebox": {
+    "n_trajectories_per_physical_cell": 1000,
+    "one_ledger_reused_for_all_15_queries": true,
+    "generate_or_open_only_after_prediction_hash_freeze": true,
+    "uncertainty_must_be_reported": true,
+    "precision_followup_if_needed_is_separate_experiment": true,
+    "global_prediction_freeze_required": true
+  },
+  "metrics": {
+    "primary_window": "H60..H240",
+    "primary": [
+      "MAE",
+      "RMSE",
+      "bias",
+      "max_abs_error",
+      "reference_noise_adjusted_RMSE"
+    ],
+    "summaries": [
+      "whole_battery",
+      "per_provider_world",
+      "per_graph",
+      "per_regime",
+      "per_rho",
+      "provider_world_x_graph",
+      "graph_x_regime",
+      "provider_world_x_regime",
+      "rho_x_regime"
+    ],
+    "M0": [
+      "applicable_query_count",
+      "not_applicable_query_count"
+    ],
+    "M2": [
+      "finite_portfolio_range_width",
+      "WB_coverage_fraction",
+      "distance_outside_range"
+    ],
+    "M3": [
+      "retained_mass",
+      "omitted_mass",
+      "applicable_truncation_bound",
+      "MC_precision",
+      "graph_trajectory_count"
+    ],
+    "computational_cost_first_class": true,
+    "reference_noise_adjusted_RMSE": {
+      "definition": "sqrt(max(0, mean((sigma_hat-sigma_wb)^2 - sigma_wb*(1-sigma_wb)/(N_WB-1))))",
+      "interpretation": "secondary descriptive adjustment for finite WB-reference variance only; not a full uncertainty correction"
+    },
+    "LHS_MSE_TOP1_DIAG": [
+      "paired_N100_MAE_vs_KL_TOP1",
+      "paired_N100_RMSE_vs_KL_TOP1",
+      "paired_N100_signed_bias_vs_KL_TOP1",
+      "provider_candidate_identity_MSE_vs_KL"
+    ]
+  },
+  "decision_analysis": {
+    "primary_beta": 0.9,
+    "secondary_betas": [
+      0.8,
+      0.95
+    ],
+    "accept_rule": "sigma_hat>=beta",
+    "WB_resolvable_rule": "score agreement only when WB uncertainty interval does not cross beta",
+    "pass_fail_threshold": null
+  },
+  "evidence": {
+    "seed_registry": "config_phase5_seed_registry_v1.json",
+    "cross_stage_disjointness_required": true,
+    "common_random_numbers_within_stage_allowed": true,
+    "common_random_numbers_across_physical_cells_allowed": true,
+    "global_prediction_freeze_before_any_final_whitebox": true
+  },
+  "firewalls": {
+    "use_step0_WB_for_method_fit_selection_or_repair": false,
+    "use_final_WB_for_method_fit_selection_or_repair": false,
+    "repair_after_final_WB": false,
+    "change_workload_after_freeze": false,
+    "replace_provider_world_after_outcome": false,
+    "replace_graph_after_outcome": false,
+    "PPG_firewall_preserved": true,
+    "global_prediction_freeze_before_any_final_WB": true
+  },
+  "deferred_axes": [
+    "workload variation",
+    "provider count variation",
+    "service-family misspecification",
+    "CV variation",
+    "cost-rate variation",
+    "quality variation",
+    "provider placement permutations",
+    "overloaded provider worlds",
+    "choice/race/retry/loop operators",
+    "dynamic reconfiguration",
+    "additional provider disclosure levels",
+    "PPG mechanisms"
+  ],
+  "supersedes": "config_phase5_recoverability_battery_v1.json",
+  "supersession_reason": "Pre-execution precision/provenance revision: final WB N=1000, prospective scoring diagnostic, cell-level gate semantics, and strengthened predeclared analysis. No Phase-5 scientific execution had begun.",
+  "scope_limitations": {
+    "provider_family_well_specified": true,
+    "statement": "P1-P4 vary operating scale and load concentration within the same one-server FCFS Gamma provider family used by M1-M3. Robustness to service-family or server-structure misspecification is outside the confirmatory battery and remains a separate follow-up axis.",
+    "heterogeneous_world_contrast": "P2/P4 change both spread across providers and concentration of utilization toward ProviderC; they are not interpreted as pure heterogeneity effects."
+  }
+}
