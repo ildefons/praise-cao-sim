@@ -14,18 +14,21 @@ The battery asks when graph-level SLA-survival prediction is recoverable from li
 
 The authoritative target remains
 
-[
-\Sigma_G(A,H;\rho)=P(c_G(A,H)\ge\rho).
-]
+$$
+Σ_G(A,H;ρ)=P(c_G(A,H)≥ρ).
+$$
 
 The experiment has no numerical performance pass/fail threshold. Its purpose is to produce an interpretable empirical map:
 
-[
-\text{controlled battery}\rightarrow
-\text{empirical regularities}\rightarrow
-\text{mechanistic interpretation}\rightarrow
+$$
+\text{controlled battery}
+\rightarrow
+\text{empirical regularities}
+\rightarrow
+\text{mechanistic interpretation}
+\rightarrow
 \text{candidate theory}.
-]
+$$
 
 Poor prediction in a valid frozen condition is a scientific result, not an experimental failure.
 
@@ -33,9 +36,9 @@ Poor prediction in a valid frozen condition is a scientific result, not an exper
 
 The completed pilot world
 
-[
-P_{\rm dev}=(D=300\text{ M},\delta=0.20)
-]
+$$
+P_{dev}=(D=300\text{ M},δ=0.20)
+$$
 
 is development evidence only and is excluded from the confirmatory battery. The new battery contains four new provider worlds and four graph structures, giving 16 new physical conditions.
 
@@ -45,9 +48,9 @@ No pilot graph-WB result may be used to repair a method after this protocol free
 
 Workload is invariant:
 
-[
-W=W_0,\qquad T_{\rm arrival}=0.2\text{ s}.
-]
+$$
+W=W_0,\qquad T_{arrival}=0.2\text{ s}.
+$$
 
 Workload is not an experimental axis. Graph-induced downstream timing differences are graph consequences, not workload changes.
 
@@ -56,23 +59,21 @@ All provider worlds retain the pilot physical family:
 - three providers A/B/C;
 - one-server FCFS native provider modules;
 - Gamma service/instruction variability;
-- (CV=0.3);
-- effective IPT (=10^9);
-- cost rate (\kappa=3);
-- execution fraction (x=0.5);
-- current degenerate quality (Q=0.5).
+- $CV=0.3$;
+- effective $IPT=10^9$;
+- cost rate $κ=3$;
+- execution fraction $x=0.5$;
+- current degenerate quality $Q=0.5$.
 
 The hidden world family is
 
-[
-\mu_A=D(1-\delta),\quad
-\mu_B=D,\quad
-\mu_C=D(1+\delta).
-]
+$$
+μ_A=D(1-δ),\qquad μ_B=D,\qquad μ_C=D(1+δ).
+$$
 
 ## 4. Frozen provider worlds
 
-| ID | (D) | (\delta) | hidden means A/B/C (M instr.) | approx. utilization A/B/C |
+| ID | $D$ | $δ$ | hidden means A/B/C (M instr.) | approx. utilization A/B/C |
 |---|---:|---:|---:|---:|
 | P1 | 330 M | 0.00 | 330 / 330 / 330 | 0.825 / 0.825 / 0.825 |
 | P2 | 330 M | 0.15 | 280.5 / 330 / 379.5 | 0.701 / 0.825 / 0.949 |
@@ -102,46 +103,48 @@ Each provider world gets newly generated rho-conditioned public I1 cards using t
 
 The public rho support remains
 
-[
-\rho\in\{0.95,0.975,0.9833333333333333,0.99,0.995\}.
-]
+$$
+ρ\in\{0.95,0.975,0.9833333333333333,0.99,0.995\}.
+$$
 
 The same I1 cards for a provider world are reused across all four graphs.
 
-I1 region construction and public-sigma estimation use disjoint (N=100) provider-local evidence banks. They are also disjoint from Step-0, method-simulation, and final-WB evidence.
+I1 region construction and public-sigma estimation use disjoint $N=100$ provider-local evidence banks. They are also disjoint from Step-0, method-simulation, and final-WB evidence.
 
 The strict PPG firewall remains in force.
 
 ## 7. Easy/Mid/Stress query construction
 
-For every ((P,G,\rho)), Step 0 constructs three nondegenerate query regimes using
+For every $(P,G,ρ)$, Step 0 constructs three nondegenerate query regimes using
 
-[
-\bar\sigma_{60:240}
-=\operatorname{mean}_{H\in\{60,65,\ldots,240\}}\Sigma_G(A,H;\rho).
-]
+$$
+\bar{σ}_{60:240}
+=
+\operatorname{mean}_{H\in\{60,65,\ldots,240\}}
+Σ_G(A,H;ρ).
+$$
 
-| Regime | target mean-sigma interval | target center |
+| Regime | target mean-$σ$ interval | target center |
 |---|---:|---:|
 | Easy | [0.95,1.00] | 0.975 |
 | Mid | [0.75,0.90] | 0.825 |
 | Stress | [0.40,0.75] | 0.575 |
 
-Minimum adjacent mean-sigma separation is 0.10.
+Minimum adjacent mean-$σ$ separation is 0.10.
 
-For each ((P,G,\rho)), forward-compose the public I1 provider boundaries to obtain (A_G^{base}), then search
+For each $(P,G,ρ)$, forward-compose the public I1 provider boundaries to obtain $A_G^{base}$, then search
 
-[
-A_G(s,\rho)=(s l_{base},s c_{base},q_{base})
-]
+$$
+A_G(s,ρ)=(s l_{base},s c_{base},q_{base})
+$$
 
-over (s\in[0.5,2.0]) with step 0.01. The inherited V2 selection/tie-breaking rule applies and
+over $s\in[0.5,2.0]$ with step 0.01. The inherited V2 selection/tie-breaking rule applies and
 
-[
+$$
 s_{Stress}<s_{Mid}<s_{Easy}.
-]
+$$
 
-Step-0 calibration uses (N=200) WB trajectories per physical cell. After regions are selected and frozen, fresh disjoint (N=200) WB trajectories confirm only those selected regions. No reselection after confirmation is allowed.
+Step-0 calibration uses $N=200$ WB trajectories per physical cell. After regions are selected and frozen, fresh disjoint $N=200$ WB trajectories confirm only those selected regions. No reselection after confirmation is allowed.
 
 If the frozen confirmation gate fails, that protocol version stops for the affected design. Any redesign must receive a new explicit version.
 
@@ -149,31 +152,31 @@ If the frozen confirmation gate fails, that protocol version stops for the affec
 
 There are
 
-[
+$$
 4P\times4G=16
-]
+$$
 
 new physical conditions and
 
-[
-5\rho\times3Q=15
-]
+$$
+5ρ\times3Q=15
+$$
 
 queries per physical condition, for
 
-[
+$$
 240
-]
+$$
 
-((P,G,\rho,Q)) query cells.
+$(P,G,ρ,Q)$ query cells.
 
 ## 9. Frozen method set
 
 The confirmatory readouts are
 
-[
+$$
 M0,\ M1,\ M2,\ M3\text{-Top1},\ M3\text{-Top3},\ M3\text{-Top14}.
-]
+$$
 
 ### M0
 
@@ -187,17 +190,17 @@ A generic one-round public-I1-only boundary-expansion rule is defined in the Pha
 
 ### M2
 
-Three independently confirmed, deliberately diverse public-I1-compatible surrogates per provider, propagated as the (3^3=27) equal-weight Cartesian portfolio. The finite member range remains a model-ambiguity diagnostic, not a confidence interval.
+Three independently confirmed, deliberately diverse public-I1-compatible surrogates per provider, propagated as the $3^3=27$ equal-weight Cartesian portfolio. The finite member range remains a model-ambiguity diagnostic, not a confidence interval.
 
 ### M3
 
-M3 uses the 48/provider nonadaptive LHS proposal, fresh public-I1-only KL rescoring, factorized Gibbs weights with frozen (\lambda=30), ranked joint support, and weighted graph composition.
+M3 uses the 48/provider nonadaptive LHS proposal, fresh public-I1-only KL rescoring, factorized Gibbs weights with frozen $λ=30$, ranked joint support, and weighted graph composition.
 
 The production run simulates the **fixed first 14 ranked joint reconstructions** with total graph budget
 
-[
+$$
 B=1400.
-]
+$$
 
 Top1, Top3, and Top14 are nested readouts from those same production member ledgers. No extra graph simulation is required for Top1 or Top3.
 
@@ -207,19 +210,19 @@ This is not an equal-total-budget support ablation. Retained and omitted Gibbs m
 
 Final graph-WB precision is frozen to
 
-[
+$$
 N_{WB}=200
-]
+$$
 
-per physical ((P,G)) condition. One physical WB ledger is reused across its 15 queries.
+per physical $(P,G)$ condition. One physical WB ledger is reused across its 15 queries.
 
 Final WB evidence is generated/revealed only after all method predictions are materialized and hash-frozen.
 
-Finite-(N) WB uncertainty is reported explicitly. Differences smaller than WB resolution are not over-interpreted. Any later higher-precision experiment is a separately declared follow-up.
+Finite-$N$ WB uncertainty is reported explicitly. Differences smaller than WB resolution are not over-interpreted. Any later higher-precision experiment is a separately declared follow-up.
 
 ## 11. Evaluation
 
-Primary horizon window: (H=60..240) s on the frozen 5 s grid.
+Primary horizon window: $H=60..240$ s on the frozen 5 s grid.
 
 Primary prediction metrics:
 
@@ -238,13 +241,13 @@ Computational cost remains a first-class method property.
 
 Main SLA decision threshold:
 
-[
-\beta=0.90.
-]
+$$
+β=0.90.
+$$
 
-Accept when (\hat\sigma_G\ge\beta). Decision agreement is evaluated only where the WB uncertainty interval does not cross (\beta).
+Accept when $\hat{σ}_G≥β$. Decision agreement is evaluated only where the WB uncertainty interval does not cross $β$.
 
-(\beta=0.80) and (0.95) may be retained as secondary sensitivity analyses. None is a battery pass/fail threshold.
+$β=0.80$ and $0.95$ may be retained as secondary sensitivity analyses. None is a battery pass/fail threshold.
 
 ## 13. Prospective execution gates
 
@@ -254,7 +257,7 @@ Accept when (\hat\sigma_G\ge\beta). Decision agreement is evaluated only where t
 4. **Step-0 confirmation:** confirm frozen queries on fresh evidence; no reselection.
 5. **Provider reconstruction:** instantiate/freeze M1, M2, M3 from public I1 only.
 6. **Blind graph prediction:** run frozen methods, preserve M3 member ledgers, materialize/hashes.
-7. **Final WB:** only now generate/reveal fresh (N=200) WB.
+7. **Final WB:** only now generate/reveal fresh $N=200$ WB.
 8. **Analysis:** compute predeclared metrics; do not repair, reweight, replace, retune, or omit because of outcome.
 9. **Mechanism/theory:** interpret the full empirical pattern and derive candidate theory after results are open.
 
