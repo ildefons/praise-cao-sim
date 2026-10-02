@@ -1,0 +1,127 @@
+{
+  "status": "FROZEN_PHASE5_SEED_REGISTRY_V1",
+  "freeze_date": "2026-10-02",
+  "purpose": "Stage-disjoint stochastic evidence registry for the prospective recoverability battery.",
+  "policy": {
+    "cross_stage_seed_overlap": false,
+    "same_bank_may_be_reused_across_physical_cells_as_common_random_numbers": true,
+    "same_bank_may_be_reused_across_variants_within_stage_as_common_random_numbers": true,
+    "same_numeric_seed_across_distinct_provider_specific_rng_streams_within_one_stage": true,
+    "no_independence_claim_across_cells_using_common_random_numbers": true
+  },
+  "public_I1": {
+    "P1": {
+      "region": {
+        "start": 50000,
+        "end_inclusive": 50099,
+        "n": 100
+      },
+      "sigma": {
+        "start": 50100,
+        "end_inclusive": 50199,
+        "n": 100
+      }
+    },
+    "P2": {
+      "region": {
+        "start": 50200,
+        "end_inclusive": 50299,
+        "n": 100
+      },
+      "sigma": {
+        "start": 50300,
+        "end_inclusive": 50399,
+        "n": 100
+      }
+    },
+    "P3": {
+      "region": {
+        "start": 50400,
+        "end_inclusive": 50499,
+        "n": 100
+      },
+      "sigma": {
+        "start": 50500,
+        "end_inclusive": 50599,
+        "n": 100
+      }
+    },
+    "P4": {
+      "region": {
+        "start": 50600,
+        "end_inclusive": 50699,
+        "n": 100
+      },
+      "sigma": {
+        "start": 50700,
+        "end_inclusive": 50799,
+        "n": 100
+      }
+    }
+  },
+  "step0": {
+    "calibration_WB": {
+      "start": 51000,
+      "end_inclusive": 51199,
+      "n": 200,
+      "reuse": "same bank across all 16 physical cells as CRN; method outcomes forbidden"
+    },
+    "confirmation_WB": {
+      "start": 51200,
+      "end_inclusive": 51399,
+      "n": 200,
+      "reuse": "same fresh bank across all 16 physical cells as CRN; selected queries fixed before use"
+    }
+  },
+  "provider_reconstruction": {
+    "M1_M2_local_search_CRN": {
+      "start": 52000,
+      "end_inclusive": 52024,
+      "n": 25
+    },
+    "M1_M2_local_confirmation_CRN": {
+      "start": 52100,
+      "end_inclusive": 52199,
+      "n": 100
+    },
+    "M1_M2_local_replay_CRN": {
+      "start": 52200,
+      "end_inclusive": 52299,
+      "n": 100
+    },
+    "M3_fresh_local_rescore_CRN": {
+      "start": 52300,
+      "end_inclusive": 52399,
+      "n": 100
+    }
+  },
+  "graph_prediction": {
+    "M1_M2_common_bank": {
+      "start": 53000,
+      "end_inclusive": 53099,
+      "n": 100,
+      "rule": "reuse across M1 and all 27 M2 joint variants and across physical cells as CRN"
+    },
+    "M3": {
+      "total_budget_per_physical_cell": 1400,
+      "support_ranks": "1..14",
+      "seed_base": 6000000,
+      "seed_block_stride": 10000,
+      "rule": "rank r uses seed_base+(r-1)*stride+k for k=0..N_r-1; rank streams independent; same rank streams may be reused across physical cells as CRN"
+    }
+  },
+  "final_whitebox": {
+    "start": 54000,
+    "end_inclusive": 54199,
+    "n": 200,
+    "reuse": "same bank across all 16 physical cells as CRN; one physical ledger reused across each cell's 15 queries",
+    "embargo": "must not be generated/read before all method predictions are hash-frozen"
+  },
+  "deterministic_algorithm_rng": {
+    "M1_optuna_sampler_seed": 314159,
+    "M2_LHS_seed": 20260917,
+    "M2_GP_random_seed": 20260917,
+    "M2_Sobol_candidate_pool_seed": 424242,
+    "note": "Algorithmic RNG controls are not stochastic evidence banks. They remain fixed to preserve the pilot algorithms."
+  }
+}

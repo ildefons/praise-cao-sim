@@ -1,30 +1,39 @@
 # PRAISE first scientific experiment
 
-This directory contains immutable-by-convention implementation checkpoints for the first PRAISE `tau=(I,M)` **pilot program**. The pilot is intended to learn which information and integration mechanisms deserve to enter the later, broader tau battery. It is not yet the final battery.
+This directory contains immutable-by-convention checkpoints for the first PRAISE `tau=(I,M)` program.
 
-Current design source of truth:
+## Current next-stage source of truth
 
-`PRAISE_I1_M0_M1_M2_M3_PILOT_DESIGN_2026-09-16.md`
+The completed I1/M0/M1/M2/M3 work is the **development pilot**. The next scientific stage is the frozen prospective recoverability battery:
 
-Current development roadmap:
+- human protocol: `PRAISE_PROSPECTIVE_RECOVERABILITY_BATTERY_PROTOCOL_2026-10-02.md`
+- executable configuration: `phase5/config_phase5_recoverability_battery_v1.json`
+- seed/evidence registry: `phase5/config_phase5_seed_registry_v1.json`
+- method-instantiation contract: `phase5/config_phase5_method_instantiation_v1.json`
 
-`PRAISE_I1_M2_M3_PILOT_DEV_PROGRAM_2026-09-16.md`
+Historical pilot design/source of truth:
 
-Current frozen state:
+`PRAISE_I1_M0_M1_M2_M3_PILOT_DESIGN_2026-09-23.md`
 
-- `phase0/`: early mechanics/probe checkpoint retained for provenance.
-- `phase1/`: **frozen white-box pilot benchmark**. Physical benchmark construction, admissibility-region calibration, and untouched N=100 confirmation.
-- `phase2/`: **frozen I1 information representation**. Rho-conditioned provider-local admissibility regions and sigma surfaces built from independent evidence.
-- `phase3/`: **frozen M0 and frozen M1-v2 pilot baselines** over the same public I1. M0 is direct analytic composition. M1-v2 is public-I1-only inverse lifting to one native provider surrogate per provider followed by native graph composition.
-- `M2`: next short-term pilot stage. Preserve inverse ambiguity through an I1-compatible ensemble if the identifiability gate supports it; otherwise test the minimum richer latent process family without changing I1.
-- `M3`: mid-term pilot stage. Dynamic/incremental integration over the same I1 schema, defined only after M2 is understood.
+Historical M3 weighted-sampling design:
 
-The immediate method-axis dependency direction is one-way:
+`PRAISE_I1_M3_WEIGHTED_SAMPLING_PLAN_2026-09-23.md`
 
-`phase1 WB [FROZEN] -> phase2 I1 [FROZEN] -> phase3 M0/M1 [FROZEN] -> I1-M2 -> I1-M3 -> later information-axis experiments`
+## Checkpoints
 
-From M2 onward, every scientific tau run should record prediction quality, admissibility-region quality where applicable, and formal plus empirical computational cost. New timed runs should preferably capture wall time, CPU time, and peak RSS in addition to simulator/evaluation counts.
+- `phase0/`: early mechanics/probe provenance.
+- `phase1/`: frozen white-box pilot benchmark.
+- `phase2/`: frozen I1 information representation and acquisition semantics.
+- `phase3/`: M0/M1 contracts and pilot freeze artifacts.
+- `phase4/`: completed M2/M3 development, fixed-graph sigma-regime experiment, robustness/support audits, and final pilot evidence.
+- `phase5/`: **prospective 4-provider-world x 4-graph recoverability battery**. No final-WB evidence may be opened before blind prediction freeze.
 
-A frozen phase is not edited merely because a later result is inconvenient. Reopen only for a concrete implementation or scientific defect. Later methods may consume stable outputs/utilities from earlier checkpoints without silently redefining them.
+The direction of scientific dependency is one-way:
 
-The strict PPG firewall remains in force throughout the pilot.
+`pilot provenance -> Phase-5 frozen design -> I1 acquisition -> method-free query calibration -> frozen provider reconstructions -> blind graph prediction -> fresh WB -> analysis -> theory`
+
+A frozen phase is not edited because a later result is inconvenient. Reopen only for a concrete implementation/scientific defect and version the correction explicitly.
+
+Prediction quality, ambiguity diagnostics, applicability, Monte Carlo precision, and computational cost remain first-class outputs.
+
+The strict PPG firewall remains in force throughout.
