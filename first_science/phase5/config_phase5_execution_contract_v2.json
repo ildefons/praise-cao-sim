@@ -285,7 +285,8 @@
     "no_final_wb_before_prediction_freeze": true,
     "no_post_WB_method_repair": true,
     "global_prediction_freeze_covers_all_cells_before_any_final_wb": true,
-    "step0_gate_failure_is_cell_level_exclusion": true
+    "step0_gate_failure_is_cell_level_exclusion": true,
+    "m3_rank1_n_at_least_100_for_paired_scoring_diagnostic": true
   },
   "supersedes": "config_phase5_execution_contract_v1.json",
   "engineering_smoke": {
@@ -299,7 +300,8 @@
       "manifest and hash production",
       "M3 nested readouts",
       "LHS-MSE diagnostic path",
-      "global prediction-freeze logic"
+      "global prediction-freeze logic",
+      "M3 rank-1 allocation N1>=100 invariant"
     ],
     "note": "Smoke outputs and throwaway seeds are not inputs to scientific stages."
   }
