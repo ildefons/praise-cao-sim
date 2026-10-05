@@ -127,7 +127,21 @@ def create_phase5_application(
         if float(surrogate.service_cv) <= TOL:
             instruction_demand: object = float(instruction_mean)
         else:
-            provider_seed = int(trajectory_seed) * 100 + provider_ordinal + 1
+            # Preserve the historical provider-specific seed mapping for every
+            # official Phase-5 scientific seed.  The engineering smoke uses a
+            # deliberately distant 99,000,000+ seed range, whose historical
+            # multiplication by 100 would exceed NumPy RandomState's uint32
+            # seed limit.  Only in that out-of-range engineering case do we
+            # wrap deterministically; all scientific Phase-5 seeds remain
+            # bit-for-bit on the original mapping.
+            raw_provider_seed = (
+                int(trajectory_seed) * 100 + provider_ordinal + 1
+            )
+            provider_seed = (
+                raw_provider_seed
+                if raw_provider_seed <= np.iinfo(np.uint32).max
+                else raw_provider_seed % int(np.iinfo(np.uint32).max)
+            )
             instruction_demand = gamma_distribution(
                 mean=float(instruction_mean),
                 cv=float(surrogate.service_cv),
