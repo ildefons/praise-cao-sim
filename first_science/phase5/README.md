@@ -32,6 +32,39 @@ No final-WB trajectory may be generated or opened before the battery-level globa
 - Primary readouts: M0, M1, M2, M3-Top1, M3-Top3, M3-Top14.
 - Secondary scoring diagnostic: LHS-MSE Top1 versus matched N=100 LHS-KL Top1.
 
+## V2 execution implementation
+
+The first execution layer is now present:
+
+- `phase5_runtime_v2.py`: V2 config/status validation, canonical IDs, seed-disjointness checks, SHA-256/provenance helpers, M3 rank-1 diagnostic-prefix assertion, and global prediction-freeze validation.
+- `phase5_graph_ast_v2.py`: pure compiler from the four frozen graph ASTs to native PRAISE branch dependencies.
+- `phase5_graph_simulator_v2.py`: generic native simulator shared by the four graph structures. Sequence is implemented with the existing PRAISE branch-dependency controller; the physical embedding remains the frozen Source/Fpre/provider/Fpost topology.
+- `test_phase5_runtime_v2.py`: pure contract/AST tests.
+- `run_phase5_smoke_v2.py`: mandatory non-scientific smoke using only the 99,000,000+ throwaway seed range and `phase5/smoke/`.
+
+From the repository root, the first commands are:
+
+```bash
+cd first_science/phase5
+pytest -q test_phase5_runtime_v2.py
+python run_phase5_smoke_v2.py --reset
+```
+
+The smoke executes every graph twice on the same throwaway seed and requires deterministic replay equality. It also verifies contract/seed integrity, provider-interarrival extraction when supported by the installed trace schema, output hashing, the M3 rank-1 N>=100 assertion, and battery-level global prediction-freeze bookkeeping.
+
+Smoke outputs are **not scientific evidence** and must never be copied under `results/`.
+
+## Frozen AST-to-controller mapping
+
+The four ASTs are compiled to these native branch dependencies:
+
+- G_PAR: A(), B(), C().
+- G_SEQ: A(), B(A), C(B).
+- G_SEQPAR: A(), B(A), C(A).
+- G_PARSEQ: A(), B(), C(B).
+
+The compiler asserts these exact maps against the frozen graph IDs before execution.
+
 ## Important V2 clarifications
 
 - Step-0 failure is **cell-level exclusion**, never query reselection or repair.
