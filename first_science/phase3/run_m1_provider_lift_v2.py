@@ -14,6 +14,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -282,6 +283,7 @@ def run_joint_lift_for_provider(
     study = optuna.create_study(direction="minimize", sampler=sampler)
 
     best_seen = [float("inf")]
+    search_started = time.perf_counter()
 
     def objective(trial) -> float:
         mu = trial.suggest_float(
@@ -322,6 +324,7 @@ def run_joint_lift_for_provider(
         if trial.value is None:
             return
         value = float(trial.value)
+        completed = int(trial.number) + 1
         if value < best_seen[0] - 1e-15:
             best_seen[0] = value
             print(
@@ -329,6 +332,16 @@ def run_joint_lift_for_provider(
                 f"mse={value:.8g} mu={trial.params['mean_service_time']:.8g} "
                 f"kappa={trial.params['cost_rate']:.8g} "
                 f"cv={trial.params['service_cv']:.8g}",
+                flush=True,
+            )
+        if completed == 1 or completed % 10 == 0 or completed == budget["n_trials"]:
+            elapsed = time.perf_counter() - search_started
+            avg = elapsed / completed
+            eta = avg * (budget["n_trials"] - completed)
+            print(
+                f"{provider} M1-v2 search progress {completed}/{budget['n_trials']} | "
+                f"elapsed={elapsed/60.0:.1f} min | avg={avg:.2f} s/trial | "
+                f"ETA={eta/60.0:.1f} min",
                 flush=True,
             )
 
