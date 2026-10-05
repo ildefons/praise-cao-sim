@@ -211,6 +211,23 @@ def _acquire_corpus(
     seeds: tuple[int, ...],
 ) -> tuple[dict[str, pd.DataFrame], dict[str, Any]]:
     started = time.perf_counter()
+    already_complete = sum(
+        1
+        for seed in seeds
+        if _checkpoint_complete(
+            _trajectory_checkpoint_paths(
+                world_root, role=role, seed=int(seed)
+            )
+        )
+    )
+    newly_run = 0
+    if already_complete:
+        print(
+            f"{world['id']} {role}: resuming with "
+            f"{already_complete}/{len(seeds)} checkpoints already complete",
+            flush=True,
+        )
+
     for ordinal, seed in enumerate(seeds):
         paths = _trajectory_checkpoint_paths(
             world_root,
@@ -230,10 +247,29 @@ def _acquire_corpus(
             trajectory_ordinal=int(ordinal),
             checkpoint_paths=paths,
         )
-        if (ordinal + 1) % 10 == 0 or ordinal == 0:
+        newly_run += 1
+        completed_now = sum(
+            1
+            for candidate_seed in seeds
+            if _checkpoint_complete(
+                _trajectory_checkpoint_paths(
+                    world_root,
+                    role=role,
+                    seed=int(candidate_seed),
+                )
+            )
+        )
+        if completed_now % 10 == 0 or newly_run == 1 or completed_now == len(seeds):
+            elapsed = time.perf_counter() - started
+            sec_per_new = elapsed / max(1, newly_run)
+            remaining = len(seeds) - completed_now
+            eta_seconds = sec_per_new * remaining
             print(
                 f"{world['id']} {role}: "
-                f"{ordinal + 1}/{len(seeds)} trajectories complete",
+                f"{completed_now}/{len(seeds)} trajectories complete | "
+                f"elapsed={elapsed/60.0:.1f} min | "
+                f"avg={sec_per_new:.2f} s/traj | "
+                f"ETA={eta_seconds/60.0:.1f} min",
                 flush=True,
             )
 
@@ -484,6 +520,7 @@ def run_world(
         shutil.rmtree(world_root)
 
     started = utc_now_iso()
+    world_wall_started = time.perf_counter()
     phase1 = read_json(PHASE1_CONFIG)
     _assert_phase1_matches_phase5(phase1, contracts)
 
@@ -570,6 +607,9 @@ def run_world(
         outputs=output_map,
         started_utc=started,
     )
+    manifest["python_wall_seconds"] = float(
+        time.perf_counter() - world_wall_started
+    )
     manifest["provider_public_card_hashes"] = {
         provider: {
             "card_json_sha256": rec["card_json_sha256"],
@@ -583,7 +623,11 @@ def run_world(
     }
     write_json(final_manifest_path, manifest)
 
-    print(f"PHASE5_I1_FROZEN_PASS world={world_id}")
+    world_wall = time.perf_counter() - world_wall_started
+    print(
+        f"PHASE5_I1_FROZEN_PASS world={world_id} | "
+        f"wall={world_wall/60.0:.1f} min"
+    )
     print(f"manifest={final_manifest_path}")
 
 
