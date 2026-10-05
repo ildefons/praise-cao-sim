@@ -2,13 +2,12 @@ from pathlib import Path
 
 import pytest
 
-from m0_analytic_composition import AdmissibilityBoundary
-
 from phase5_runtime_v2 import (
     inclusive_seed_range,
     load_phase5_contracts,
 )
 from run_phase5_step0_v2 import (
+    AdmissibilityBoundary,
     _compose_ast_boundary,
     _diagnostic_horizons,
     _regimes,
