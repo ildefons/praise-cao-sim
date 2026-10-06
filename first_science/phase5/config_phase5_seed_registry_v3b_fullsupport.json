@@ -1,0 +1,49 @@
+{
+  "status": "FROZEN_PHASE5_SEED_REGISTRY_V3B_FULLSUPPORT",
+  "freeze_date": "2026-10-06",
+  "scientific_role": "Graph-prediction seed revision made after the V3b Top14 pre-execution mass audit and before any scientific V3b graph simulation. Provider-reconstruction and final-WB seed banks are unchanged.",
+  "provenance": {
+    "source_seed_registry": "config_phase5_seed_registry_v3.json",
+    "source_graph_contract": "config_phase5_graph_prediction_v3b.json",
+    "reason_for_revision": "Top14 retained mass was 0.551984 for P1, 0.961909 for P3, and 0.866545 for P4, so Top14 was not a uniformly adequate approximation to the full frozen 343-member M3 distribution.",
+    "graph_prediction_used_before_revision": false,
+    "graph_whitebox_used_before_revision": false,
+    "final_whitebox_used_before_revision": false,
+    "provider_reconstruction_changed": false,
+    "provider_weights_changed": false,
+    "joint_ranking_changed": false
+  },
+  "provider_reconstruction": {
+    "source": "config_phase5_seed_registry_v3.json::provider_reconstruction",
+    "unchanged": true
+  },
+  "graph_prediction": {
+    "M1_M2_common_bank": {
+      "start": 56900,
+      "end_inclusive": 56999,
+      "n": 100,
+      "rule": "reuse across M1 and all 27 M2 joint variants and across eligible physical cells as CRN"
+    },
+    "M3": {
+      "total_budget_per_physical_cell": 1400,
+      "support_ranks": "1..343",
+      "support_size": 343,
+      "seed_base": 7000000,
+      "seed_block_stride": 10000,
+      "rule": "rank r uses seed_base+(r-1)*stride+k for k=0..N_r-1; rank streams are disjoint; same rank stream is reused across eligible physical cells as CRN, with provider-world-specific prefix length N_r"
+    }
+  },
+  "final_whitebox": {
+    "source": "config_phase5_seed_registry_v3.json::final_whitebox",
+    "start": 54000,
+    "end_inclusive": 54999,
+    "n": 1000,
+    "note": "Still unread and embargoed. This revision does not alter the final-WB bank."
+  },
+  "engineering_smoke": {
+    "scientific_evidence": false,
+    "output_root": "smoke/v3b_fullsupport_graph_adapter/",
+    "seed_base": 99200000,
+    "rule": "throwaway engineering-only evidence; never read by scientific stages"
+  }
+}
