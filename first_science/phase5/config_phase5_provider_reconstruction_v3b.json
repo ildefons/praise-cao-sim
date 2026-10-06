@@ -1,0 +1,64 @@
+{
+  "status": "FROZEN_PHASE5_PROVIDER_RECONSTRUCTION_V3B",
+  "freeze_date": "2026-10-06",
+  "scientific_role": "Pre-graph-WB method-development selection revision derived from the completed V3 seven-candidate provider banks.",
+  "provenance": {
+    "v3_candidate_generation_remains_frozen": true,
+    "v3_common_N100_rescore_remains_frozen": true,
+    "v3_common_N100_replay_remains_diagnostic_only": true,
+    "no_new_provider_simulation": true,
+    "v3_outputs_are_not_overwritten": true,
+    "not_claimed_prospective_relative_to_V3_local_reconstruction_outcomes": true
+  },
+  "selection_basis": {
+    "candidate_bank_per_provider": 7,
+    "ranking_metric": "rescore_rmse",
+    "evidence_bank": "V3 common fresh N=100 rescore bank",
+    "ordering": "ascending rescore_rmse, deterministic candidate_id tie break",
+    "replay_may_select_or_reorder": false,
+    "behavioral_centroid_may_select_or_reorder": false,
+    "parameter_diversity_may_select_or_reorder": false,
+    "hard_rmse_compatibility_gate": false
+  },
+  "methods": {
+    "M1": {
+      "provider_models": "best one candidate per provider by V3 common-N100 rescore RMSE",
+      "members_per_provider": 1,
+      "joint_models_per_world": 1
+    },
+    "M2": {
+      "provider_models": "best three candidates per provider by V3 common-N100 rescore RMSE",
+      "members_per_provider": 3,
+      "provider_weights": "equal 1/3",
+      "joint_models_per_world": 27,
+      "relationship_to_M1": "M1 provider model is always the rank-1 member of the M2 provider portfolio"
+    },
+    "M3": {
+      "provider_models": "all seven V3 candidates",
+      "provider_weights": "unchanged V3 Jeffreys-KL Gibbs weights",
+      "joint_support_size": 343,
+      "joint_weight": "product of unchanged provider weights",
+      "top_support": "unchanged rank ordering by joint product weight",
+      "nested_readouts": ["Top1", "Top3", "Top14"]
+    },
+    "M0": {
+      "unchanged": true
+    }
+  },
+  "diagnostics_only": [
+    "behavioral centroid distance",
+    "parameter-space spread",
+    "fresh N=100 replay RMSE",
+    "M1-M2 parameter and behavioral diversity",
+    "MSE-vs-KL candidate-rank agreement"
+  ],
+  "firewall": {
+    "graph_prediction_used": false,
+    "graph_whitebox_used": false,
+    "final_whitebox_used": false,
+    "step0_whitebox_values_used": false,
+    "hidden_provider_parameters_used": false,
+    "ppg_mechanism_used": false
+  },
+  "next_gate": "Materialize and audit the V3b provider/world/battery selection freeze before any V3b graph prediction."
+}
