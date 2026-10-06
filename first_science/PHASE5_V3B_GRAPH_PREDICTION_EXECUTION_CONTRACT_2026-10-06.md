@@ -34,19 +34,21 @@ M3 retains all seven candidates per provider and the already frozen Jeffreys-smo
 
 M1 and every M2 joint member use the frozen common seed bank 56900..56999, N=100. The same seed bank is reused across models and eligible physical cells as common random numbers.
 
-M3 has total graph budget B=1400 per eligible physical cell. Let alpha_j be each Top14 joint weight renormalized over ranks 1..14. Freeze the integer allocation before graph execution by initializing N_j=1 for every retained rank and repeatedly assigning the next trajectory to the rank maximizing
+M3 has total graph budget B=1400 per eligible physical cell. For each provider world separately, let alpha_j be that world's Top14 joint weights renormalized over ranks 1..14. Freeze the integer allocation before graph execution by initializing N_j=1 for every retained rank and repeatedly assigning the next trajectory to the rank maximizing
 
 `alpha_j^2 / [N_j (N_j+1)]`.
 
 Ties go to the lower rank. This is the frozen greedy marginal minimizer of the query-independent worst-case Bernoulli variance bound.
 
+The allocation is therefore **provider-world-specific**, because the frozen M3 weights differ by provider world. It is computed once for P1, once for P3, and once for P4, then reused unchanged across the four graph cells within that provider world. P2 has no graph allocation because all P2 cells failed Step-0.
+
 Rank r uses seeds
 
 `7000000 + (r-1)*10000 + k`,  k=0,...,N_r-1.
 
-Rank streams are disjoint. The corresponding rank stream is reused across eligible cells as CRN.
+Rank streams are disjoint. The same rank-r stream is reused across eligible cells as CRN. If two provider worlds allocate different N_r, they use different-length prefixes of that same frozen rank-r stream.
 
-Top1, Top3, and Top14 are nested readouts of this same B=1400 Top14 execution. There is no additional cost-matched Top1 or Top3 simulation:
+Top1, Top3, and Top14 are nested readouts of the same B=1400 Top14 execution within each provider world. There is no additional cost-matched Top1 or Top3 simulation:
 
 - Top1 uses rank 1 only and renormalizes its weight to one.
 - Top3 uses ranks 1..3 and renormalizes their original frozen weights within that subset.
@@ -70,4 +72,4 @@ Graph prediction may consume public I1, public graph mechanics, frozen eligible-
 
 ## 6. Next gate
 
-Before any scientific graph prediction, a real graph-adapter smoke must execute the frozen graph stack with engineering-only seeds and verify the V3b method plumbing, M2 aggregation, M3 allocation/nested readouts, manifests, hashes, and global-freeze logic. Smoke output is non-scientific and cannot become a scientific input.
+Before any scientific graph prediction, a real graph-adapter smoke must execute the frozen graph stack with engineering-only seeds and verify the V3b method plumbing, M2 aggregation, M3 provider-world-specific allocation/nested readouts, manifests, hashes, and global-freeze logic. Smoke output is non-scientific and cannot become a scientific input.
