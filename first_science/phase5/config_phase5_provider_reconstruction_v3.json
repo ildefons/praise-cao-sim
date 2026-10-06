@@ -1,0 +1,97 @@
+{
+  "status": "FROZEN_PHASE5_PROVIDER_RECONSTRUCTION_V3",
+  "freeze_date": "2026-10-06",
+  "scientific_role": "Pre-graph-WB method-development restart of provider reconstruction after observing instability of the V2 local N=25 compatibility gate. This V3 is not claimed prospective relative to V2 local reconstruction outcomes.",
+  "immutability": {
+    "v2_primary_results_remain_frozen": true,
+    "v2_rmse15_secondary_results_remain_frozen": true,
+    "do_not_overwrite_v2_outputs": true
+  },
+  "reused_frozen_inputs": {
+    "public_I1_cards": "results/01_i1/{provider_world_id}/public/",
+    "step0_eligibility": "results/02_step0/phase5_step0_eligibility_freeze.csv",
+    "provider_domain_registry": "results/03_reconstruction/phase5_m1_domain_registry.csv",
+    "provider_domain_note": "The V2 final public-I1-derived provider domains are frozen as the V3 search domains before any graph prediction. No V3 domain adaptation is allowed.",
+    "final_whitebox": "remains embargoed and unread"
+  },
+  "candidate_reconstruction": {
+    "candidate_count_per_provider": 7,
+    "independent_fit_count": 7,
+    "fit_algorithm": "TPE",
+    "trials_per_fit": 25,
+    "startup_trials_per_fit": 5,
+    "fit_sampler_seeds": [410001, 410019, 410041, 410063, 410087, 410111, 410137],
+    "search_evidence": "Each fit uses its own fresh disjoint N=15 local simulation bank from config_phase5_seed_registry_v3.json.",
+    "candidate_from_each_fit": "minimum search-MSE trial within that fit, deterministic candidate-ID tie break",
+    "common_rescore": "All seven fit winners are re-evaluated on the same fresh N=100 bank before any method-specific selection.",
+    "common_replay": "All seven candidates are replayed on a second fresh N=100 bank after method identities/weights are frozen. Replay is diagnostic only and cannot change selection or weights."
+  },
+  "behavioral_centrality": {
+    "surface": "candidate predicted public-I1 sigma vector over the complete public I1 surface with H>0 on the common N=100 rescore bank",
+    "centroid": "pointwise arithmetic mean of the seven candidate sigma vectors",
+    "distance": "mean squared distance between candidate sigma vector and the seven-candidate centroid",
+    "ranking": "ascending centroid distance; tie break by lower N=100 rescore RMSE to public I1, then candidate_id",
+    "parameter_mean_not_used": true,
+    "hard_rmse_compatibility_gate": false
+  },
+  "methods": {
+    "M1": {
+      "provider_model": "rank-1 behavioral-central candidate",
+      "members_per_provider": 1,
+      "joint_models_per_world": 1
+    },
+    "M2": {
+      "provider_models": "behavioral-central ranks 1..3",
+      "members_per_provider": 3,
+      "provider_weights": "equal 1/3",
+      "joint_models_per_world": 27,
+      "hard_compatibility_gate": false,
+      "failure_semantics": "NOT_INSTANTIABLE only for technical/incomplete reconstruction, not because an arbitrary RMSE threshold was missed."
+    },
+    "M3": {
+      "provider_models": "all seven reconstructed candidates",
+      "members_per_provider": 7,
+      "discrepancy": "Jeffreys-smoothed Bernoulli KL averaged over complete public I1 surface with H>0 using the common N=100 rescore evidence",
+      "gibbs_lambda": 30,
+      "prior_mass": "equal 1/7 within each provider before likelihood weighting",
+      "provider_weight": "normalized exp(-lambda * KL_energy)",
+      "joint_support_size": 343,
+      "joint_weight": "product of provider weights",
+      "graph_support": {
+        "rank_count": 14,
+        "rule": "rank all 7^3 joint models by descending product weight and retain fixed ranks 1..14",
+        "production_budget": 1400,
+        "allocation": "same frozen integer minimax variance-bound allocation as Phase-5 V2",
+        "nested_readouts": ["Top1", "Top3", "Top14"]
+      }
+    },
+    "M0": {
+      "unchanged": true,
+      "note": "M0 has no provider reconstruction but its graph predictions are rerun in the V3 prediction namespace for a common blind-prediction freeze."
+    }
+  },
+  "reconstruction_quality_reporting": {
+    "report_for_every_candidate": [
+      "search MSE/RMSE",
+      "common N=100 rescore MSE/RMSE",
+      "behavioral centroid distance",
+      "fresh N=100 replay MSE/RMSE"
+    ],
+    "report_provider_level": [
+      "M1 selected candidate",
+      "M2 selected three candidates",
+      "M3 seven provider weights",
+      "parameter spread",
+      "behavioral spread"
+    ]
+  },
+  "firewall": {
+    "graph_prediction_used_for_reconstruction": false,
+    "graph_whitebox_used_for_reconstruction": false,
+    "final_whitebox_used_for_reconstruction": false,
+    "step0_whitebox_values_used_for_reconstruction": false,
+    "hidden_provider_parameters_used": false,
+    "ppg_mechanism_used": false
+  },
+  "execution_gate": "The registered V3 reconstruction smoke must pass before any V3 scientific reconstruction is executed."
+}
