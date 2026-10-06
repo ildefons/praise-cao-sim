@@ -34,6 +34,9 @@ def test_v3b_graph_contract_methods():
     assert c["methods"]["M3"]["retained_support_size"]==14
     assert c["methods"]["M3"]["graph_budget_per_physical_cell"]==1400
     assert c["methods"]["M3"]["no_extra_simulation_for_top1_or_top3"] is True
+    a=c["methods"]["M3"]["allocation"]
+    assert a["allocation_may_differ_between_provider_worlds"] is True
+    assert "provider world" in a["allocation_scope"]
 
 
 def test_v3b_graph_contract_seeds_queries_and_firewall():
@@ -43,6 +46,7 @@ def test_v3b_graph_contract_seeds_queries_and_firewall():
     assert c["seeds"]["M1_M2"]["n"]==100
     assert c["seeds"]["M3"]["seed_base"]==7000000
     assert c["seeds"]["M3"]["seed_block_stride"]==10000
+    assert "prefix" in c["seeds"]["M3"]["prefix_rule_when_allocations_differ"]
     assert c["seeds"]["final_whitebox"]["may_be_opened_before_global_prediction_freeze"] is False
     assert c["queries"]["queries_per_eligible_cell"]==15
     assert c["horizons"]["prediction_grid_seconds"]=={
