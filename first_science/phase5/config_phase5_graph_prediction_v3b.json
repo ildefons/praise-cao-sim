@@ -1,0 +1,190 @@
+{
+  "status": "FROZEN_PHASE5_GRAPH_PREDICTION_EXECUTION_V3B",
+  "freeze_date": "2026-10-06",
+  "scientific_role": "Blind graph-prediction execution contract after the V3b provider-selection freeze and mechanical audit, before any V3b graph prediction or final graph white-box evaluation.",
+  "authority": {
+    "battery": "config_phase5_recoverability_battery_v2.json",
+    "step0_eligibility": "results/02_step0/phase5_step0_eligibility_manifest.json",
+    "step0_eligibility_table": "results/02_step0/phase5_step0_eligibility.csv",
+    "provider_reconstruction_v3": "config_phase5_provider_reconstruction_v3.json",
+    "provider_selection_v3b": "config_phase5_provider_reconstruction_v3b.json",
+    "provider_selection_v3b_freeze": "results/03_reconstruction_v3b/phase5_v3b_selection_freeze_manifest.json",
+    "provider_selection_v3b_audit": "results/03_reconstruction_v3b/phase5_v3b_selection_audit_manifest.json",
+    "seed_registry": "config_phase5_seed_registry_v3.json",
+    "graph_simulator": "phase5_graph_simulator_v2.py",
+    "graph_ast": "phase5_graph_ast_v2.py",
+    "m0_source_contract": "../phase3/config_phase3_m0_contract_v1.json"
+  },
+  "eligibility": {
+    "source": "frozen Step-0 eligibility only; runner must read the eligibility manifest/table rather than re-evaluate Step-0",
+    "expected_total_physical_cells": 16,
+    "expected_eligible_cells": 12,
+    "expected_gate_failed_step0_cells": 4,
+    "expected_gate_failed_provider_world": "P2",
+    "eligible_provider_worlds": ["P1", "P3", "P4"],
+    "failure_policy": "GATE_FAILED_STEP0 cells receive no graph prediction and are not repaired, recalibrated, or replaced."
+  },
+  "methods": {
+    "method_ids": ["M0", "M1", "M2", "M3_TOP1", "M3_TOP3", "M3_TOP14"],
+    "removed_v2_diagnostic": {
+      "id": "LHS_MSE_TOP1_DIAG",
+      "included": false,
+      "reason": "The old diagnostic is tied to the V2 48-point LHS candidate bank and no longer isolates a meaningful scoring contrast in the seven-candidate V3b reconstruction."
+    },
+    "M0": {
+      "definition": "unchanged frozen analytic topology-aware same-rho product baseline",
+      "new_fit": false,
+      "graph_simulation": false
+    },
+    "M1": {
+      "provider_models": "V3b RMSE rank-1 candidate for each provider",
+      "joint_models": 1,
+      "graph_trajectories_per_joint_model": 100,
+      "seed_bank": "config_phase5_seed_registry_v3.json::graph_prediction.M1_M2_common_bank"
+    },
+    "M2": {
+      "provider_models": "V3b RMSE ranks 1..3 for each provider",
+      "provider_weights": "equal 1/3",
+      "joint_models": 27,
+      "joint_weight": 0.037037037037037035,
+      "graph_trajectories_per_joint_model": 100,
+      "graph_trajectories_per_physical_cell": 2700,
+      "seed_bank": "config_phase5_seed_registry_v3.json::graph_prediction.M1_M2_common_bank",
+      "point_prediction": "equal-weight mean of the 27 joint-model sigma curves",
+      "store_all_member_curves": true,
+      "descriptive_spread": {
+        "minimum": "pointwise minimum across the 27 joint-model sigma curves",
+        "maximum": "pointwise maximum across the 27 joint-model sigma curves",
+        "interpretation": "finite spread among combinations of the three best local provider reconstructions; not a confidence interval, posterior credible interval, or deliberately diversity-maximized range"
+      }
+    },
+    "M3": {
+      "provider_models": "all seven frozen V3 candidates per provider",
+      "provider_weights": "unchanged frozen V3 Jeffreys-smoothed Bernoulli-KL Gibbs weights with lambda=30",
+      "full_joint_support": 343,
+      "joint_weight": "product of frozen provider weights",
+      "rank_rule": "descending full-support joint product weight with deterministic existing V3/V3b rank order",
+      "retained_support_ranks": "1..14",
+      "retained_support_size": 14,
+      "graph_budget_per_physical_cell": 1400,
+      "allocation": {
+        "objective": "minimize the query-independent worst-case Bernoulli Monte-Carlo variance bound (1/4)*sum_j(alpha_j^2/N_j)",
+        "weights": "alpha_j are full-support joint weights renormalized within ranks 1..14",
+        "integer_rule": "initialize N_j=1 for all 14 ranks, then assign each remaining trajectory to the rank maximizing alpha_j^2/[N_j*(N_j+1)]",
+        "tie_break": "lower joint rank",
+        "allocation_frozen_before_graph_execution": true,
+        "same_allocation_across_eligible_cells": true
+      },
+      "nested_readouts": {
+        "Top1": "rank 1 only, weight renormalized to 1, using the rank-1 trajectory count from the frozen Top14 B=1400 allocation",
+        "Top3": "ranks 1..3, original frozen joint weights renormalized within Top3, using each rank's trajectory count from the frozen Top14 B=1400 allocation",
+        "Top14": "ranks 1..14, original frozen joint weights renormalized within Top14, using the full frozen B=1400 allocation"
+      },
+      "no_extra_simulation_for_top1_or_top3": true,
+      "diagnostics": [
+        "retained full-support mass",
+        "omitted full-support mass",
+        "deterministic truncation bound 1-retained_mass for Top1/Top3/Top14",
+        "plugin Monte-Carlo variance and standard error",
+        "worst-case Monte-Carlo variance and standard-error bound"
+      ],
+      "immutability": "No graph result may alter candidate identities, provider weights, joint ranks, retained support, allocation, lambda, or budget."
+    }
+  },
+  "seeds": {
+    "M1_M2": {
+      "start": 56900,
+      "end_inclusive": 56999,
+      "n": 100,
+      "common_random_numbers": "same 100-seed bank reused across M1, every M2 joint model, and every eligible physical cell"
+    },
+    "M3": {
+      "seed_base": 7000000,
+      "seed_block_stride": 10000,
+      "rank_seed_rule": "rank r uses seed_base+(r-1)*seed_block_stride+k for k=0..N_r-1",
+      "rank_streams_disjoint": true,
+      "same_rank_streams_reused_across_eligible_cells_as_CRN": true
+    },
+    "final_whitebox": {
+      "start": 54000,
+      "end_inclusive": 54999,
+      "n": 1000,
+      "status_during_prediction": "EMBARGOED_AND_UNREAD",
+      "may_be_opened_before_global_prediction_freeze": false
+    }
+  },
+  "queries": {
+    "source": "each eligible cell's frozen Step-0 step0_frozen_queries.csv",
+    "queries_per_eligible_cell": 15,
+    "rho_count": 5,
+    "regimes": ["Easy", "Mid", "Stress"],
+    "no_recalibration": true,
+    "no_query_reselection": true
+  },
+  "horizons": {
+    "prediction_grid_seconds": {
+      "start": 0,
+      "end_inclusive": 240,
+      "step": 5
+    },
+    "primary_evaluation_grid_seconds": {
+      "start": 60,
+      "end_inclusive": 240,
+      "step": 5
+    },
+    "no_horizon_reselection": true
+  },
+  "graph_execution": {
+    "graph_ids_source": "config_phase5_recoverability_battery_v2.json",
+    "graph_AST_semantics_unchanged": true,
+    "native_simulator": "phase5_graph_simulator_v2.py",
+    "YAFS_semantics_unchanged": true,
+    "workload_W0_unchanged": true,
+    "one_trajectory_ledger_reused_across_all_15_queries_for_the_same_model_and_cell": true,
+    "graph_whitebox_may_tune": false
+  },
+  "outputs": {
+    "root": "results/04_prediction_v3b",
+    "eligible_cell_dir": "results/04_prediction_v3b/{physical_cell_id}",
+    "required_eligible_cell_outputs": [
+      "m0_predictions.csv",
+      "m1_predictions.csv",
+      "m2_member_curves.csv",
+      "m2_predictions.csv",
+      "m3_allocation.csv",
+      "m3_member_curves.csv",
+      "m3_predictions_top1_top3_top14.csv",
+      "prediction_ledger_hashes.csv",
+      "prediction_manifest.json"
+    ],
+    "battery_outputs": [
+      "phase5_v3b_prediction_status.csv",
+      "phase5_v3b_global_prediction_freeze_manifest.json"
+    ],
+    "previous_prediction_namespaces_are_immutable": true
+  },
+  "global_prediction_freeze": {
+    "required_before_final_whitebox": true,
+    "must_enumerate_all_16_physical_cells": true,
+    "eligible_cells_must_have_hash_frozen_prediction_manifest": true,
+    "gate_failed_cells_must_match_frozen_step0_eligibility": true,
+    "final_whitebox_gate": "No final-WB file may be generated or opened until the global V3b prediction-freeze manifest is successfully frozen."
+  },
+  "firewall": {
+    "graph_prediction_may_read": [
+      "public I1",
+      "public graph mechanics",
+      "frozen Step-0 query definitions for eligible cells",
+      "frozen V3/V3b reconstruction parameters, identities, weights and supports",
+      "frozen graph-prediction seeds"
+    ],
+    "graph_prediction_must_not_read": [
+      "hidden generating provider parameters",
+      "private I1 acquisition traces",
+      "Step-0 white-box calibration/confirmation outcome values other than eligibility and frozen query definitions",
+      "final graph white-box ledgers or curves",
+      "PPG mechanisms, code or data"
+    ]
+  },
+  "execution_gate": "A registered V3b real graph-adapter smoke using engineering-only seeds must pass after this contract is frozen and before any scientific V3b graph prediction is executed."
+}
