@@ -1,0 +1,44 @@
+{
+  "status": "FROZEN_PHASE5_SEED_REGISTRY_V3",
+  "freeze_date": "2026-10-06",
+  "purpose": "Fresh stage-disjoint evidence for the V3 provider-reconstruction restart. V2 local reconstruction evidence is not reused as V3 scientific evidence.",
+  "provider_reconstruction": {
+    "fit_1_search": {"start": 56000, "end_inclusive": 56014, "n": 15},
+    "fit_2_search": {"start": 56100, "end_inclusive": 56114, "n": 15},
+    "fit_3_search": {"start": 56200, "end_inclusive": 56214, "n": 15},
+    "fit_4_search": {"start": 56300, "end_inclusive": 56314, "n": 15},
+    "fit_5_search": {"start": 56400, "end_inclusive": 56414, "n": 15},
+    "fit_6_search": {"start": 56500, "end_inclusive": 56514, "n": 15},
+    "fit_7_search": {"start": 56600, "end_inclusive": 56614, "n": 15},
+    "common_rescore": {"start": 56700, "end_inclusive": 56799, "n": 100},
+    "common_replay": {"start": 56800, "end_inclusive": 56899, "n": 100}
+  },
+  "graph_prediction": {
+    "M1_M2_common_bank": {
+      "start": 56900,
+      "end_inclusive": 56999,
+      "n": 100,
+      "rule": "reuse across M1 and all 27 M2 joint variants and across eligible physical cells as CRN"
+    },
+    "M3": {
+      "total_budget_per_physical_cell": 1400,
+      "support_ranks": "1..14",
+      "seed_base": 7000000,
+      "seed_block_stride": 10000,
+      "rule": "rank r uses seed_base+(r-1)*stride+k for k=0..N_r-1; rank streams independent; same rank streams may be reused across eligible physical cells as CRN"
+    }
+  },
+  "final_whitebox": {
+    "source": "config_phase5_seed_registry_v2.json::final_whitebox",
+    "start": 54000,
+    "end_inclusive": 54999,
+    "n": 1000,
+    "note": "This bank remains unread and embargoed. Reusing the still-unseen final-WB bank does not reuse V2 local reconstruction evidence."
+  },
+  "engineering_smoke": {
+    "scientific_evidence": false,
+    "output_root": "smoke/v3_reconstruction/",
+    "seed_base": 99100000,
+    "rule": "throwaway engineering-only evidence; never read by V3 scientific stages"
+  }
+}
