@@ -1,0 +1,50 @@
+{
+  "status": "FROZEN_PHASE5_M2_RMSE15_SECONDARY_V1",
+  "freeze_date": "2026-10-06",
+  "scientific_role": "Secondary pre-graph-WB method-development variant of M2 using an interpretable local closeness criterion.",
+  "relation_to_primary_M2": {
+    "primary_M2_remains_frozen": true,
+    "primary_search_and_confirmation_mse_ratio": 1.25,
+    "primary_outcomes_are_not_rewritten": true,
+    "secondary_variant_is_not_claimed_prospective": true,
+    "graph_prediction_or_final_WB_used_to_choose_variant": false
+  },
+  "closeness_definition": {
+    "statement": "A candidate is locally close enough when its RMSE is no more than 15 percent above the corresponding M1 reference RMSE.",
+    "rmse_ratio_max": 1.15,
+    "equivalent_mse_ratio_max": 1.3225,
+    "search_reference": "same frozen M1 best local-search MSE reference used by primary Phase-5 M2",
+    "confirmation_reference": "same frozen M1 selected N=100 confirmation MSE reference used by primary Phase-5 M2"
+  },
+  "candidate_generation": {
+    "new_TPE_trials": 0,
+    "new_LHS_points": 0,
+    "new_GP_evaluations": 0,
+    "reuse_exactly": [
+      "existing frozen M1 TPE warm-start candidates",
+      "existing frozen Phase-5 M2 48-point LHS candidates",
+      "existing frozen Phase-5 M2 48 GP level-set acquisitions"
+    ],
+    "search_compatibility_reclassified_only": true
+  },
+  "portfolio_construction": {
+    "provisional_portfolio_size": 5,
+    "selection_rule": "same primary M2 rule: lowest local MSE first, then greedy maximin distance in normalized parameter coordinates with deterministic tie breaks",
+    "confirmation_bank": "config_phase5_seed_registry_v2.json::provider_reconstruction.M1_M2_local_confirmation_CRN",
+    "final_portfolio_size_per_provider": 3,
+    "final_selection": "first three confirmation-compatible candidates in frozen provisional order",
+    "replay_bank": "config_phase5_seed_registry_v2.json::provider_reconstruction.M1_M2_local_replay_CRN",
+    "reuse_existing_exact_candidate_confirmation_and_replay_evidence": true,
+    "simulate_only_missing_exact_candidate_confirmation_or_replay_evidence": true
+  },
+  "firewall": {
+    "graph_prediction_used": false,
+    "graph_whitebox_used": false,
+    "final_whitebox_used": false,
+    "step0_whitebox_values_used": false,
+    "hidden_provider_parameters_used": false,
+    "ppg_mechanism_used": false
+  },
+  "failure_semantics": "If fewer than five search-compatible candidates exist under RMSE15, or fewer than three of the frozen five-member provisional portfolio pass RMSE15 confirmation, mark the secondary variant NOT_INSTANTIABLE for that provider. Do not alter the 15 percent RMSE rule after graph outcomes.",
+  "next_gate": "Run the read-only RMSE15 compatibility audit on all existing candidate observations before any new confirmation simulation."
+}
