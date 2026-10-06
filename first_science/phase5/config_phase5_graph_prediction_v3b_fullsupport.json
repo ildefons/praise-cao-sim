@@ -1,0 +1,164 @@
+{
+  "status": "FROZEN_PHASE5_GRAPH_PREDICTION_V3B_FULLSUPPORT",
+  "freeze_date": "2026-10-06",
+  "scientific_role": "Pre-graph-WB method-development revision of V3b graph execution. The frozen V3b provider reconstruction is unchanged; only M3 graph propagation is revised from a Top14 approximation to the complete 343-member weighted support.",
+  "provenance": {
+    "supersedes_for_graph_execution": "config_phase5_graph_prediction_v3b.json",
+    "source_preexecution_manifest": "results/04_prediction_v3b/_preexecution/phase5_v3b_preexecution_freeze_manifest.json",
+    "trigger": "pre-execution retained-mass diagnostic only",
+    "observed_top14_retained_mass": {
+      "P1": 0.551984,
+      "P3": 0.961909,
+      "P4": 0.866545
+    },
+    "graph_prediction_used_before_revision": false,
+    "graph_whitebox_used_before_revision": false,
+    "final_whitebox_used_before_revision": false,
+    "not_claimed_prospective_relative_to_top14_mass_diagnostic": true,
+    "still_blind_to_end_to_end_graph_accuracy": true
+  },
+  "authority": {
+    "battery": "config_phase5_recoverability_battery_v2.json",
+    "step0_eligibility": "results/02_step0/phase5_step0_eligibility_manifest.json",
+    "step0_eligibility_table": "results/02_step0/phase5_step0_eligibility.csv",
+    "provider_selection_v3b": "config_phase5_provider_reconstruction_v3b.json",
+    "provider_selection_v3b_freeze": "results/03_reconstruction_v3b/phase5_v3b_selection_freeze_manifest.json",
+    "provider_selection_v3b_audit": "results/03_reconstruction_v3b/phase5_v3b_selection_audit_manifest.json",
+    "seed_registry": "config_phase5_seed_registry_v3b_fullsupport.json",
+    "graph_simulator": "phase5_graph_simulator_v2.py",
+    "graph_ast": "phase5_graph_ast_v2.py"
+  },
+  "eligibility": {
+    "expected_total_physical_cells": 16,
+    "expected_eligible_cells": 12,
+    "expected_gate_failed_step0_cells": 4,
+    "eligible_provider_worlds": ["P1", "P3", "P4"],
+    "gate_failed_provider_world": "P2",
+    "failure_policy": "No recovery, repair, replacement, or recalibration of P2."
+  },
+  "methods": {
+    "primary_method_ids": ["M0", "M1", "M2", "M3_FULL343"],
+    "m3_nested_diagnostic_ids": ["M3_TOP1", "M3_TOP3", "M3_TOP14"],
+    "M0": {
+      "unchanged": true
+    },
+    "M1": {
+      "provider_models": "V3b common-N100 RMSE rank-1 candidate per provider",
+      "joint_models": 1,
+      "graph_trajectories_per_joint_model": 100,
+      "seed_bank": "56900..56999"
+    },
+    "M2": {
+      "provider_models": "V3b common-N100 RMSE ranks 1..3 per provider",
+      "provider_weights": "equal 1/3",
+      "joint_models": 27,
+      "joint_weights": "equal 1/27",
+      "graph_trajectories_per_joint_model": 100,
+      "point_prediction": "equal-weight mean of all 27 joint-model curves",
+      "store_all_member_curves": true,
+      "report_pointwise_min_max": true
+    },
+    "M3": {
+      "provider_models": "all seven frozen V3 candidates per provider",
+      "provider_weights": "unchanged V3 Jeffreys-smoothed Bernoulli-KL Gibbs weights with lambda=30",
+      "full_joint_support": 343,
+      "primary_support": "all ranks 1..343",
+      "primary_method_id": "M3_FULL343",
+      "joint_weight": "product of frozen provider weights",
+      "graph_budget_per_physical_cell": 1400,
+      "allocation": {
+        "support": "all 343 joint models",
+        "weights": "full-support joint weights, already normalized to sum 1",
+        "objective": "minimize (1/4)*sum_j(w_j^2/N_j)",
+        "integer_rule": "initialize N_j=1 for all 343 ranks, then assign each remaining trajectory to the rank maximizing w_j^2/[N_j*(N_j+1)]",
+        "tie_break": "lower joint rank",
+        "allocation_scope": "one frozen allocation per eligible provider world, reused across all four graphs in that provider world",
+        "allocation_may_differ_between_provider_worlds": true
+      },
+      "nested_diagnostics": {
+        "Top1": "rank 1 only, renormalized within rank 1, using its trajectory count from the full-support allocation",
+        "Top3": "ranks 1..3, renormalized within ranks 1..3, using their trajectory counts from the full-support allocation",
+        "Top14": "ranks 1..14, renormalized within ranks 1..14, using their trajectory counts from the full-support allocation"
+      },
+      "no_extra_simulation_for_nested_diagnostics": true,
+      "full_support_truncation_bound": 0.0,
+      "diagnostics": [
+        "Top1/Top3/Top14 retained and omitted full-support mass",
+        "Top1/Top3/Top14 deterministic omitted-mass bound",
+        "full-support plugin Monte-Carlo variance and standard error",
+        "full-support worst-case Monte-Carlo variance and standard-error bound"
+      ],
+      "immutability": "No graph result may alter candidate identities, provider weights, joint weights, joint ranks, budget, allocation, or lambda."
+    }
+  },
+  "seeds": {
+    "M1_M2": {
+      "start": 56900,
+      "end_inclusive": 56999,
+      "n": 100
+    },
+    "M3": {
+      "seed_base": 7000000,
+      "seed_block_stride": 10000,
+      "support_ranks": "1..343",
+      "rank_seed_rule": "rank r uses seed_base+(r-1)*seed_block_stride+k for k=0..N_r-1",
+      "rank_streams_disjoint": true,
+      "same_rank_stream_reused_across_eligible_cells_as_CRN": true
+    },
+    "final_whitebox": {
+      "start": 54000,
+      "end_inclusive": 54999,
+      "n": 1000,
+      "status_during_prediction": "EMBARGOED_AND_UNREAD",
+      "may_be_opened_before_global_prediction_freeze": false
+    }
+  },
+  "queries": {
+    "source": "unchanged frozen Step-0 queries for each eligible physical cell",
+    "queries_per_eligible_cell": 15,
+    "rho_count": 5,
+    "regimes": ["Easy", "Mid", "Stress"],
+    "no_reselection": true
+  },
+  "horizons": {
+    "prediction_grid_seconds": {"start": 0, "end_inclusive": 240, "step": 5},
+    "primary_evaluation_grid_seconds": {"start": 60, "end_inclusive": 240, "step": 5}
+  },
+  "outputs": {
+    "root": "results/04_prediction_v3b_fullsupport",
+    "eligible_cell_dir": "results/04_prediction_v3b_fullsupport/{physical_cell_id}",
+    "required_eligible_cell_outputs": [
+      "m0_predictions.csv",
+      "m1_predictions.csv",
+      "m2_member_curves.csv",
+      "m2_predictions.csv",
+      "m3_fullsupport_allocation.csv",
+      "m3_member_curves.csv",
+      "m3_predictions_full343_and_nested.csv",
+      "prediction_ledger_hashes.csv",
+      "prediction_manifest.json"
+    ],
+    "battery_outputs": [
+      "phase5_v3b_fullsupport_prediction_status.csv",
+      "phase5_v3b_fullsupport_global_prediction_freeze_manifest.json"
+    ],
+    "old_top14_preexecution_namespace_is_provenance_only": "results/04_prediction_v3b/",
+    "previous_namespaces_are_immutable": true
+  },
+  "global_prediction_freeze": {
+    "required_before_final_whitebox": true,
+    "must_enumerate_all_16_physical_cells": true,
+    "eligible_cells_must_have_hash_frozen_prediction_manifest": true,
+    "gate_failed_cells_must_match_frozen_step0_eligibility": true
+  },
+  "firewall": {
+    "graph_prediction_must_not_read": [
+      "hidden generating provider parameters",
+      "private I1 acquisition traces",
+      "Step-0 white-box values other than eligibility and frozen query definitions",
+      "final graph white-box ledgers or curves",
+      "PPG mechanisms, code or data"
+    ]
+  },
+  "execution_gate": "A new full-support graph-adapter smoke and a new full-support pre-execution allocation freeze must pass before any scientific graph prediction."
+}
