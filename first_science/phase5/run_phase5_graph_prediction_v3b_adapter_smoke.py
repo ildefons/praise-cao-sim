@@ -154,14 +154,22 @@ def _selected_smoke_query(graph_id:str)->pd.Series:
         raise RuntimeError(f"{graph_id}: expected 15 frozen Step-0 queries")
     # Mechanical smoke choice only: use the largest already-frozen region.  This
     # does not alter or select any scientific query; all 15 remain frozen.
-    return q.sort_values(["scale_s","rho","regime"],ascending=[False,True,True],kind="mergesort").iloc[0]
+    required={"query_id","rho","regime","scale","A_G_l_max","A_G_c_max","A_G_q_min"}
+    missing=sorted(required.difference(q.columns))
+    if missing:
+        raise RuntimeError(f"{graph_id}: frozen Step-0 query schema missing {missing}")
+    return q.sort_values(
+        ["scale","rho","regime"],
+        ascending=[False,True,True],
+        kind="mergesort",
+    ).iloc[0]
 
 
 def _curve(ledger:pd.DataFrame,query:pd.Series,column:str)->pd.DataFrame:
     b=AdmissibilityBoundary(
-        l_max=float(query["l_max"]),
-        c_max=float(query["c_max"]),
-        q_min=float(query["q_min"]),
+        l_max=float(query["A_G_l_max"]),
+        c_max=float(query["A_G_c_max"]),
+        q_min=float(query["A_G_q_min"]),
     )
     return build_empirical_graph_sigma_curve(
         ledger,
@@ -233,9 +241,9 @@ def _m0_probe(contracts,graph_id:str,query:pd.Series,cards,surfaces)->pd.DataFra
     rho=float(query["rho"])
     induced=_base_boundary(contracts,graph_id=graph_id,cards=cards,rho=rho)
     requested=AdmissibilityBoundary(
-        l_max=float(query["l_max"]),
-        c_max=float(query["c_max"]),
-        q_min=float(query["q_min"]),
+        l_max=float(query["A_G_l_max"]),
+        c_max=float(query["A_G_c_max"]),
+        q_min=float(query["A_G_q_min"]),
     )
     applicable=boundary_is_sufficient_for_query(induced,requested)
     product=build_same_rho_conditioned_m0_curve(
