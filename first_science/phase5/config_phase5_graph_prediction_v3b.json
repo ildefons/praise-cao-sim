@@ -69,16 +69,17 @@
       "graph_budget_per_physical_cell": 1400,
       "allocation": {
         "objective": "minimize the query-independent worst-case Bernoulli Monte-Carlo variance bound (1/4)*sum_j(alpha_j^2/N_j)",
-        "weights": "alpha_j are full-support joint weights renormalized within ranks 1..14",
+        "weights": "alpha_j are the provider-world-specific full-support joint weights renormalized within ranks 1..14",
         "integer_rule": "initialize N_j=1 for all 14 ranks, then assign each remaining trajectory to the rank maximizing alpha_j^2/[N_j*(N_j+1)]",
         "tie_break": "lower joint rank",
         "allocation_frozen_before_graph_execution": true,
-        "same_allocation_across_eligible_cells": true
+        "allocation_scope": "computed once per provider world from that world's frozen Top14 weights and then reused unchanged across all eligible graph cells in that provider world",
+        "allocation_may_differ_between_provider_worlds": true
       },
       "nested_readouts": {
-        "Top1": "rank 1 only, weight renormalized to 1, using the rank-1 trajectory count from the frozen Top14 B=1400 allocation",
-        "Top3": "ranks 1..3, original frozen joint weights renormalized within Top3, using each rank's trajectory count from the frozen Top14 B=1400 allocation",
-        "Top14": "ranks 1..14, original frozen joint weights renormalized within Top14, using the full frozen B=1400 allocation"
+        "Top1": "rank 1 only, weight renormalized to 1, using the rank-1 trajectory count from that provider world's frozen Top14 B=1400 allocation",
+        "Top3": "ranks 1..3, original frozen joint weights renormalized within Top3, using each rank's trajectory count from that provider world's frozen Top14 B=1400 allocation",
+        "Top14": "ranks 1..14, original frozen joint weights renormalized within Top14, using that provider world's full frozen B=1400 allocation"
       },
       "no_extra_simulation_for_top1_or_top3": true,
       "diagnostics": [
@@ -103,7 +104,8 @@
       "seed_block_stride": 10000,
       "rank_seed_rule": "rank r uses seed_base+(r-1)*seed_block_stride+k for k=0..N_r-1",
       "rank_streams_disjoint": true,
-      "same_rank_streams_reused_across_eligible_cells_as_CRN": true
+      "same_rank_streams_reused_across_eligible_cells_as_CRN": true,
+      "prefix_rule_when_allocations_differ": "if provider-world allocations give different N_r, each cell uses the prefix of the same rank-r stream required by its frozen provider-world allocation"
     },
     "final_whitebox": {
       "start": 54000,
