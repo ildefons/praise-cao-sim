@@ -1,0 +1,79 @@
+{
+  "status": "FROZEN_PHASE5_FINAL_WB_EXECUTION_V3B_FULLSUPPORT",
+  "freeze_date": "2026-10-07",
+  "scientific_role": "Final untouched graph-level white-box reference execution after the complete V3b FULL343 global prediction freeze.",
+  "authority": {
+    "battery": "config_phase5_recoverability_battery_v2.json",
+    "seed_registry": "config_phase5_seed_registry_v3b_fullsupport.json",
+    "graph_prediction_contract": "config_phase5_graph_prediction_v3b_fullsupport.json",
+    "global_prediction_freeze": "results/04_prediction_v3b_fullsupport/phase5_v3b_fullsupport_global_prediction_freeze_manifest.json",
+    "step0_eligibility": "results/02_step0/phase5_step0_eligibility.csv",
+    "graph_simulator": "phase5_graph_simulator_v2.py"
+  },
+  "unlock_condition": {
+    "required_global_prediction_status": "FROZEN_PHASE5_V3B_FULLSUPPORT_GLOBAL_PREDICTION_FREEZE",
+    "required_prediction_frozen_cells": 12,
+    "required_gate_failed_step0_cells": 4,
+    "final_WB_read_before_unlock": false
+  },
+  "scope": {
+    "eligible_provider_worlds": ["P1", "P3", "P4"],
+    "eligible_physical_cells": 12,
+    "gate_failed_provider_world": "P2",
+    "gate_failed_physical_cells": 4,
+    "queries_per_eligible_cell": 15,
+    "horizons": {
+      "start_seconds": 0,
+      "end_inclusive_seconds": 240,
+      "step_seconds": 5
+    },
+    "one_physical_ledger_reused_for_all_15_queries": true
+  },
+  "whitebox_generation": {
+    "source": "hidden generating provider world from the frozen Phase-5 battery",
+    "provider_family": "frozen gamma one-server FCFS family",
+    "graph_ast": "same frozen public graph AST used for blind prediction",
+    "n_trajectories_per_eligible_physical_cell": 1000,
+    "seeds": {
+      "start": 54000,
+      "end_inclusive": 54999,
+      "n": 1000,
+      "reuse_same_seed_bank_across_eligible_cells_as_CRN": true
+    },
+    "simulation_stop_seconds": 240,
+    "accounting_origin_seconds": 0
+  },
+  "reference_estimation": {
+    "sigma": "For each frozen query and H, empirical fraction of the 1000 trajectories whose cumulative graph SLA compliance c_G(A,H) is at least rho.",
+    "uncertainty": "Wilson 95% binomial interval over the 1000 trajectory-level Bernoulli outcomes.",
+    "n_reference": 1000,
+    "no_query_reselection": true,
+    "no_method_change_after_WB": true,
+    "no_precision_extension_in_this_stage": true,
+    "precision_followup_if_needed": "must be a separately declared experiment"
+  },
+  "outputs": {
+    "root": "results/05_final_wb_v3b_fullsupport",
+    "eligible_cell_dir": "results/05_final_wb_v3b_fullsupport/{physical_cell_id}",
+    "required_eligible_cell_outputs": [
+      "final_wb_ledger.csv",
+      "final_wb_curves.csv",
+      "final_wb_manifest.json"
+    ],
+    "battery_outputs": [
+      "phase5_v3b_fullsupport_final_wb_status.csv",
+      "phase5_v3b_fullsupport_final_wb_freeze_manifest.json"
+    ],
+    "previous_namespaces_are_immutable": true
+  },
+  "firewall_after_opening": {
+    "provider_reconstruction_may_change": false,
+    "M1_selection_may_change": false,
+    "M2_selection_or_weights_may_change": false,
+    "M3_candidates_weights_or_allocation_may_change": false,
+    "Step0_queries_may_change": false,
+    "graph_set_may_change": false,
+    "provider_world_set_may_change": false
+  },
+  "evaluation_unlock": "Evaluation may begin only after all 12 eligible final-WB cell manifests are frozen and the battery-level final-WB freeze manifest is complete."
+}
