@@ -53,6 +53,9 @@ RHO_POOL=(
 )
 PREDECLARED_GRIDS={
     "I1_ORIGINAL":(0.95,0.975,0.9833333333333333,0.99,0.995),
+    "ROBUST_R5":(0.80,0.85,0.90,0.925,0.95),
+    "ROBUST_R7":(0.80,0.85,0.90,0.925,0.95,0.97,0.99),
+    "ROBUST_R8":(0.80,0.85,0.90,0.925,0.95,0.97,0.99,0.995),
     "BROAD_5":(0.80,0.90,0.95,0.97,0.99),
     "BROAD_HIGH_5":(0.85,0.90,0.95,0.98,0.995),
     "MIDTAIL_5":(0.90,0.925,0.95,0.975,0.995),
@@ -308,9 +311,13 @@ def run(workers:int)->Path:
     # This ranking is explicitly diagnostic and truth-opened. Higher correlation
     # is desirable; then prefer truth closer to rank 1 and physically closer
     # best candidates. It is NOT a frozen method-selection rule.
+    # Robustness-first ordering: a grid is only as convincing as its weakest
+    # provider.  Prefer positive worst-provider alignment before rewarding the
+    # average.  This avoids a grid that looks good on A/B but fails on C.
     agg=agg.sort_values(
-        ["mean_spearman","max_truth_rank","mean_best_candidate_parameter_distance","rho_grid"],
-        ascending=[False,True,True,True],kind="mergesort"
+        ["min_spearman","mean_spearman","max_truth_rank",
+         "mean_best_candidate_parameter_distance","rho_grid"],
+        ascending=[False,False,True,True,True],kind="mergesort"
     ).reset_index(drop=True)
     agg.insert(0,"diagnostic_rank",np.arange(1,len(agg)+1,dtype=int))
 
@@ -332,9 +339,10 @@ def run(workers:int)->Path:
     print(top.to_string(index=False))
 
     # Per-provider details for the user's proposed broad grid.
-    proposed=summary[summary["grid_name"]=="BROAD_5"].copy()
-    print("\nBROAD_5 PROVIDER DETAILS")
-    print(proposed.to_string(index=False))
+    for name in ("ROBUST_R5","ROBUST_R7","ROBUST_R8","I1_ORIGINAL"):
+        proposed=summary[summary["grid_name"]==name].copy()
+        print(f"\n{name} PROVIDER DETAILS")
+        print(proposed.to_string(index=False))
 
     manifest=OUT/"p4_five_rho_grid_audit_manifest.json"
     outputs={
