@@ -264,13 +264,16 @@ def run(workers:int)->Path:
             ranked_all=t.sort_values(["grid_rmse","row_id"],kind="mergesort").reset_index(drop=True)
             truth_rank=int(ranked_all.index[ranked_all["source_family"]=="TRUE"][0])+1
             closest=nontruth.sort_values(["parameter_distance","row_id"],kind="mergesort").iloc[0]
-            closest_rank=int(
-                nontruth.sort_values(["grid_rmse","row_id"],kind="mergesort")
-                .reset_index(drop=True).index[
-                    lambda idx: nontruth.sort_values(["grid_rmse","row_id"],kind="mergesort")
-                    .reset_index(drop=True).loc[idx,"row_id"].eq(str(closest["row_id"]))
-                ][0]
-            )+1
+            ranked_nontruth=nontruth.sort_values(
+                ["grid_rmse","row_id"],kind="mergesort"
+            ).reset_index(drop=True)
+            matches=np.flatnonzero(
+                ranked_nontruth["row_id"].astype(str).to_numpy()
+                == str(closest["row_id"])
+            )
+            if len(matches)!=1:
+                raise RuntimeError("closest-candidate rank lookup failed")
+            closest_rank=int(matches[0])+1
             best=nontruth.sort_values(["grid_rmse","row_id"],kind="mergesort").iloc[0]
             summary_rows.append({
                 "grid_name":grid_name,
