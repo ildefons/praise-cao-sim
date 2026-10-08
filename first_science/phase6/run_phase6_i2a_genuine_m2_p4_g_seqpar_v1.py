@@ -36,10 +36,16 @@ EXPECTED="FROZEN_PHASE6_GENUINE_I2A_M2_P4_G_SEQPAR_V1"
 
 
 def _surrogate(row)->GraphProviderSurrogate:
+    """Build a graph surrogate from either a pandas row or itertuples record."""
+    def value(name:str):
+        if hasattr(row,name):
+            return getattr(row,name)
+        return row[name]
+
     return GraphProviderSurrogate(
-        mean_service_time=float(row["mean_service_time"]),
-        cost_rate=float(row["cost_rate"]),
-        service_cv=float(row["service_cv"]),
+        mean_service_time=float(value("mean_service_time")),
+        cost_rate=float(value("cost_rate")),
+        service_cv=float(value("service_cv")),
     )
 
 
