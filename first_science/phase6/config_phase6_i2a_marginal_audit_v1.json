@@ -1,0 +1,70 @@
+{
+  "status": "FROZEN_PHASE6_I2A_MARGINAL_AUDIT_V1",
+  "freeze_date": "2026-10-08",
+  "scientific_role": "Provider-only information-axis development audit. No graph prediction and no graph-WB access.",
+  "source_information_interface": "I1",
+  "target_information_interface": "I2a-full",
+  "provider_worlds": ["P1", "P2", "P3", "P4"],
+  "providers": ["ProviderA", "ProviderB", "ProviderC"],
+  "target_evidence": {
+    "source": "../phase5/results/01_i1/{provider_world_id}/private/sigma/{provider_id}/provider_request_ledgers.csv",
+    "reuse_same_phase5_i1_sigma_corpus": true,
+    "n_trajectories": 100,
+    "new_provider_world_simulation": false
+  },
+  "regions": {
+    "source": "../phase5/results/01_i1/{provider_world_id}/public/{provider_id}/card.json",
+    "reuse_frozen_i1_regions": true,
+    "expected_region_count": 5
+  },
+  "horizons": {
+    "reuse_frozen_i1_horizons": true,
+    "exclude_H0_from_score": true,
+    "expected_positive_horizon_count": 48
+  },
+  "public_i2a_representation": {
+    "object": "empirical marginal CDF of cumulative provider-local compliance fraction c_i(A_i,H)",
+    "materialization": "sorted N=100 compliance values independently within every (region_id,H)",
+    "trajectory_identity_public": false,
+    "cross_horizon_trajectory_linkage_public": false,
+    "temporal_dependence_exposed": false
+  },
+  "candidate_family": {
+    "source": "../phase5/results/03_reconstruction_v3b/{provider_world_id}/{provider_id}/m3_provider_models.csv",
+    "candidate_count_per_provider": 7,
+    "reuse_parameters_without_refit": true,
+    "simulation_seed_source": "../phase5/config_phase5_seed_registry_v3.json",
+    "simulation_seed_bank": "provider_reconstruction.common_rescore",
+    "n_trajectories_per_candidate": 100
+  },
+  "discrepancy": {
+    "metric": "empirical_1d_wasserstein_1",
+    "equal_sample_formula": "mean_absolute_difference_between_sorted_samples",
+    "aggregate": "unweighted_mean_over_all_frozen_regions_and_H_gt_0",
+    "score_range": [0.0, 1.0],
+    "tie_break": "candidate_id"
+  },
+  "baseline_comparison": {
+    "i1_ranking_source": "../phase5/results/03_reconstruction_v3b/{provider_world_id}/{provider_id}/v3b_candidate_quality_ranking.csv",
+    "compare_top3_overlap": true,
+    "compare_rank_spearman": true
+  },
+  "firewall": {
+    "graph_prediction_read": false,
+    "step0_wb_values_read": false,
+    "graph_wb_read": false,
+    "final_wb_read": false,
+    "hidden_provider_parameters_read": false,
+    "ppg_mechanism_used": false
+  },
+  "outputs": {
+    "root": "results/01_i2a_marginal_audit",
+    "public_i2a_filename": "i2a_public_empirical_cdf.csv",
+    "candidate_scores_filename": "i2a_candidate_scores.csv",
+    "group_scores_filename": "i2a_candidate_group_scores.csv",
+    "top3_filename": "i2a_top3_preview.csv",
+    "provider_manifest_filename": "i2a_provider_audit_manifest.json",
+    "battery_summary_filename": "phase6_i2a_provider_audit_summary.csv",
+    "battery_manifest_filename": "phase6_i2a_provider_audit_manifest.json"
+  }
+}
