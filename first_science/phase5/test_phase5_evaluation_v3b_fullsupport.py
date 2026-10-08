@@ -46,7 +46,11 @@ def test_m0_not_applicable_is_not_scored():
 def test_decision_scoring_excludes_wb_crossing_points():
     t=_tiny("M1")
     out=ev._decision_table(t,[0.9])
-    allrow=out[(out["scope"]=="ALL")&(out["scope_value"]=="ALL")].iloc[0]
+    allrow=out[
+        (out["method_id"]=="M1")
+        & (out["scope"]=="ALL")
+        & (out["scope_value"]=="ALL")
+    ].iloc[0]
     # At beta=.9: point1 certain reject, points2/3 Wilson interval crosses beta.
     assert int(allrow["wb_certain_point_count"])==1
     assert int(allrow["false_accept_count"])==0
