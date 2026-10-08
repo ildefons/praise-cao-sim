@@ -1,0 +1,48 @@
+{
+  "status": "FROZEN_PHASE5_V3B_FULLSUPPORT_SIGMA_PLOT_CONTRACT",
+  "freeze_date": "2026-10-08",
+  "scientific_role": "Deterministic post-evaluation visualization of frozen sigma predictions and the frozen N=1000 white-box reference. No simulation, prediction recomputation, method tuning, or outcome-based panel selection is permitted.",
+  "inputs": {
+    "evaluation_manifest": "results/06_evaluation_v3b_fullsupport/phase5_v3b_fullsupport_deterministic_evaluation_manifest.json",
+    "pointwise_primary": "results/06_evaluation_v3b_fullsupport/pointwise_primary_joined.csv",
+    "step0_eligibility": "results/02_step0/phase5_step0_eligibility.csv",
+    "step0_queries": "results/02_step0/{physical_cell_id}/step0_frozen_queries.csv"
+  },
+  "provider_worlds": ["P1", "P3", "P4"],
+  "graph_ids": ["G_PAR", "G_SEQ", "G_SEQPAR", "G_PARSEQ"],
+  "regimes": ["Easy", "Mid", "Stress"],
+  "methods": ["WB", "M0", "M1", "M2", "M3_FULL343"],
+  "representative_query": {
+    "rule": "median_rho_stable_lower_median_if_even",
+    "selection_inputs": ["provider_world_id", "graph_id", "regime", "rho", "query_id"],
+    "sort": ["rho", "query_id"],
+    "outcome_columns_may_not_select_query": true,
+    "expected_queries_per_panel_before_selection": 5,
+    "expected_selected_queries": 36
+  },
+  "plot": {
+    "rows": ["P1", "P3", "P4"],
+    "columns": ["Easy", "Mid", "Stress"],
+    "figure_count": 4,
+    "panels_per_figure": 9,
+    "total_panels": 36,
+    "H_min_seconds": 60,
+    "H_max_seconds": 240,
+    "sigma_min": 0.0,
+    "sigma_max": 1.0,
+    "include_wb_wilson95_band": true,
+    "shared_legend": true,
+    "show_selected_rho_in_panel_title": true,
+    "m0_not_applicable_policy": "omit_curve_and_annotate_M0_NA",
+    "formats": ["png", "pdf"],
+    "png_dpi": 220
+  },
+  "output_namespace": "results/06_evaluation_v3b_fullsupport/sigma_plots",
+  "output_files": {
+    "representative_queries": "selected_representative_queries.csv",
+    "plot_data": "sigma_plot_data_long.csv",
+    "manifest": "phase5_sigma_plots_manifest.json",
+    "figure_pattern": "phase5_sigma_{graph_id}.{format}"
+  },
+  "no_method_feedback": true
+}
