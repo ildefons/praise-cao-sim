@@ -9,6 +9,7 @@ before the frozen analysis contract is applied.
 from __future__ import annotations
 
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +23,9 @@ BATTERY_MANIFEST=ROOT/"phase5_v3b_fullsupport_final_wb_freeze_manifest.json"
 GLOBAL_PRED=PRED/"phase5_v3b_fullsupport_global_prediction_freeze_manifest.json"
 CFG=HERE/"config_phase5_final_wb_v3b_fullsupport.json"
 SEEDS=HERE/"config_phase5_seed_registry_v3b_fullsupport.json"
+PHASE2=HERE.parent/"phase2"
+if str(PHASE2) not in sys.path:
+    sys.path.insert(0,str(PHASE2))
 
 from phase5_runtime_v2 import read_json, sha256_file, utc_now_iso, write_json
 from i1_provider_card import wilson_binomial_interval
