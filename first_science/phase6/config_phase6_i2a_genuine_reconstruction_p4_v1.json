@@ -1,0 +1,52 @@
+{
+  "status": "FROZEN_PHASE6_GENUINE_I2A_RECONSTRUCTION_P4_V1",
+  "freeze_date": "2026-10-08",
+  "scientific_role": "Post-I1 development experiment: regenerate the provider candidate bank with I2a-full as the inverse reconstruction objective before M2 selection.",
+  "provider_world_id": "P4",
+  "providers": ["ProviderA", "ProviderB", "ProviderC"],
+  "public_information": {
+    "i2a_target": "results/01_i2a_marginal_audit/P4/{provider_id}/i2a_public_empirical_cdf.csv",
+    "card_metadata": "../phase5/results/01_i1/P4/public/{provider_id}/card.json",
+    "private_i1_ledger_read": false,
+    "hidden_provider_parameters_read": false
+  },
+  "parameter_domain": {
+    "source": "../phase5/results/03_reconstruction/phase5_m1_domain_registry.csv",
+    "note": "The domain was derived from public I1 information. I2a-full subsumes the I1 tail information; the domain is reused unchanged to isolate the information objective."
+  },
+  "candidate_generation": {
+    "independent_fit_count": 7,
+    "fit_algorithm": "TPE",
+    "trials_per_fit": 25,
+    "startup_trials_per_fit": 5,
+    "fit_sampler_seeds": [410001, 410019, 410041, 410063, 410087, 410111, 410137],
+    "search_seed_registry": "../phase5/config_phase5_seed_registry_v3.json",
+    "search_banks": ["fit_1_search", "fit_2_search", "fit_3_search", "fit_4_search", "fit_5_search", "fit_6_search", "fit_7_search"],
+    "search_n_per_trial": 15,
+    "objective": "mean empirical 1D Wasserstein-1 over all frozen regions and H>0",
+    "unequal_n_allowed": true
+  },
+  "common_rescore": {
+    "seed_bank": "provider_reconstruction.common_rescore",
+    "n": 100,
+    "selection_metric": "rescore_mean_w1",
+    "ordering": "ascending rescore_mean_w1, then candidate_id"
+  },
+  "M2": {
+    "members_per_provider": 3,
+    "provider_weights": "equal 1/3",
+    "joint_models": 27,
+    "joint_weights": "equal 1/27"
+  },
+  "firewall": {
+    "graph_prediction_used_for_reconstruction": false,
+    "graph_wb_used_for_reconstruction": false,
+    "final_wb_used_for_reconstruction": false,
+    "step0_wb_values_used_for_reconstruction": false,
+    "private_i1_ledger_used": false,
+    "hidden_provider_parameters_used": false
+  },
+  "outputs": {
+    "root": "results/04_i2a_genuine_reconstruction_p4"
+  }
+}
