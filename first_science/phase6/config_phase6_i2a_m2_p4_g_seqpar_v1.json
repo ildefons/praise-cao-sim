@@ -1,0 +1,43 @@
+{
+  "status": "FROZEN_PHASE6_I2A_M2_P4_G_SEQPAR_DEVELOPMENT_V1",
+  "freeze_date": "2026-10-08",
+  "scientific_role": "Single-cell development visualization to test whether the I2a-induced M2 support change in P4 improves graph-level sigma prediction.",
+  "provider_world_id": "P4",
+  "graph_id": "G_SEQPAR",
+  "method_id": "I2A_M2",
+  "provider_selection": {
+    "source": "results/01_i2a_marginal_audit/P4/{provider_id}/i2a_top3_preview.csv",
+    "members_per_provider": 3,
+    "joint_models": 27,
+    "provider_weights": "equal_1_over_3",
+    "joint_weights": "equal_1_over_27"
+  },
+  "graph_prediction": {
+    "query_source": "../phase5/results/02_step0/P4__G_SEQPAR/step0_frozen_queries.csv",
+    "horizons_seconds": {"start": 0, "end_inclusive": 240, "step": 5},
+    "trajectory_seed_source": "../phase5/config_phase5_seed_registry_v3b_fullsupport.json",
+    "trajectory_seed_bank": "graph_prediction.M1_M2_common_bank",
+    "n_trajectories_per_joint_model": 100,
+    "workers_default": 4
+  },
+  "firewall": {
+    "provider_selection_uses_graph_wb": false,
+    "graph_prediction_reads_graph_wb": false,
+    "graph_prediction_reads_hidden_provider_parameters": false,
+    "phase5_outputs_are_read_only": true
+  },
+  "outputs": {
+    "root": "results/02_i2a_m2_p4_g_seqpar",
+    "m2_member_curves": "i2a_m2_member_curves.csv",
+    "m2_predictions": "i2a_m2_predictions.csv",
+    "manifest": "i2a_m2_prediction_manifest.json"
+  },
+  "plot": {
+    "comparison": ["WB", "I1_M2", "I2A_M2"],
+    "representative_query_rule": "median_rho_per_regime_same_as_phase5_sigma_figures",
+    "regimes": ["Easy", "Mid", "Stress"],
+    "H_min": 60,
+    "H_max": 240,
+    "formats": ["png", "pdf"]
+  }
+}
