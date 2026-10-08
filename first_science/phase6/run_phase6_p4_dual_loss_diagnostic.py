@@ -11,6 +11,8 @@ fit, rank, or modify a reconstruction method.
 """
 from __future__ import annotations
 
+import argparse
+import concurrent.futures
 import math
 import sys
 from pathlib import Path
@@ -197,101 +199,122 @@ def _plot_provider(provider:str,table:pd.DataFrame)->Path:
     return path
 
 
-def run()->Path:
-    OUT.mkdir(parents=True,exist_ok=True)
+def _run_provider(provider:str)->tuple[pd.DataFrame,dict,Path]:
     seed_cfg=read_json(SEEDS)
     seeds=_seed_tuple(seed_cfg["provider_reconstruction"]["common_rescore"])
     if len(seeds)!=100:
         raise RuntimeError("common rescore bank is not N=100")
 
     truths=_truth()
-    all_rows=[]
-    plots=[]
-    summary_rows=[]
-    for provider in PROVIDERS:
-        metadata,public_surface,_=_load_public_card(WORLD,provider)
-        _,_,i2a_target=_load_i2a_target(provider)
-        domain=_domain_row(WORLD,provider)
-        truth=truths[provider]
+    metadata,public_surface,_=_load_public_card(WORLD,provider)
+    _,_,i2a_target=_load_i2a_target(provider)
+    domain=_domain_row(WORLD,provider)
+    truth=truths[provider]
 
-        rows=[_eval_one(
+    rows=[_eval_one(
+        provider=provider,
+        candidate_id="HIDDEN_GENERATOR",
+        source_family="TRUE",
+        theta=truth,
+        metadata=metadata,
+        public_surface=public_surface,
+        i2a_target=i2a_target,
+        seeds=seeds,
+        truth=truth,
+        domain=domain,
+    )]
+    bank=_candidate_bank(provider)
+    for rec in bank.itertuples(index=False):
+        theta={
+            "mean_service_time":float(rec.mean_service_time),
+            "cost_rate":float(rec.cost_rate),
+            "service_cv":float(rec.service_cv),
+        }
+        rows.append(_eval_one(
             provider=provider,
-            candidate_id="HIDDEN_GENERATOR",
-            source_family="TRUE",
-            theta=truth,
+            candidate_id=str(rec.candidate_id),
+            source_family=str(rec.source_family),
+            theta=theta,
             metadata=metadata,
             public_surface=public_surface,
             i2a_target=i2a_target,
             seeds=seeds,
             truth=truth,
             domain=domain,
-        )]
-        bank=_candidate_bank(provider)
-        for rec in bank.itertuples(index=False):
-            theta={
-                "mean_service_time":float(rec.mean_service_time),
-                "cost_rate":float(rec.cost_rate),
-                "service_cv":float(rec.service_cv),
-            }
-            rows.append(_eval_one(
-                provider=provider,
-                candidate_id=str(rec.candidate_id),
-                source_family=str(rec.source_family),
-                theta=theta,
-                metadata=metadata,
-                public_surface=public_surface,
-                i2a_target=i2a_target,
-                seeds=seeds,
-                truth=truth,
-                domain=domain,
-            ))
+        ))
 
-        table=pd.DataFrame(rows)
-        all_rows.append(table)
-        plots.append(_plot_provider(provider,table))
+    table=pd.DataFrame(rows)
+    plot=_plot_provider(provider,table)
+    t=table[table["source_family"]=="TRUE"].iloc[0]
+    summary_rows=[]
+    for family in ("I1_GENERATED","I2A_GENERATED"):
+        g=table[table["source_family"]==family].copy()
+        best_i1=g.sort_values(["i1_rmse","candidate_id"],kind="mergesort").iloc[0]
+        best_i2=g.sort_values(["i2a_mean_w1","candidate_id"],kind="mergesort").iloc[0]
+        closest=g.sort_values(["normalized_parameter_distance","candidate_id"],kind="mergesort").iloc[0]
+        summary_rows.append({
+            "provider_id":provider,
+            "source_family":family,
+            "truth_i1_rmse":float(t["i1_rmse"]),
+            "truth_i2a_mean_w1":float(t["i2a_mean_w1"]),
+            "best_i1_candidate_id":str(best_i1["candidate_id"]),
+            "best_i1_rmse":float(best_i1["i1_rmse"]),
+            "best_i1_candidate_i2a_w1":float(best_i1["i2a_mean_w1"]),
+            "best_i1_parameter_distance":float(best_i1["normalized_parameter_distance"]),
+            "best_i2a_candidate_id":str(best_i2["candidate_id"]),
+            "best_i2a_mean_w1":float(best_i2["i2a_mean_w1"]),
+            "best_i2a_candidate_i1_rmse":float(best_i2["i1_rmse"]),
+            "best_i2a_parameter_distance":float(best_i2["normalized_parameter_distance"]),
+            "closest_parameter_candidate_id":str(closest["candidate_id"]),
+            "closest_parameter_distance":float(closest["normalized_parameter_distance"]),
+            "closest_parameter_i1_rmse":float(closest["i1_rmse"]),
+            "closest_parameter_i2a_w1":float(closest["i2a_mean_w1"]),
+        })
+    return table,{"rows":summary_rows,"seed_start":int(seeds[0]),"seed_end":int(seeds[-1]),"seed_n":len(seeds)},plot
 
-        t=table[table["source_family"]=="TRUE"].iloc[0]
-        for family in ("I1_GENERATED","I2A_GENERATED"):
-            g=table[table["source_family"]==family].copy()
-            best_i1=g.sort_values(["i1_rmse","candidate_id"],kind="mergesort").iloc[0]
-            best_i2=g.sort_values(["i2a_mean_w1","candidate_id"],kind="mergesort").iloc[0]
-            closest=g.sort_values(["normalized_parameter_distance","candidate_id"],kind="mergesort").iloc[0]
-            summary_rows.append({
-                "provider_id":provider,
-                "source_family":family,
-                "truth_i1_rmse":float(t["i1_rmse"]),
-                "truth_i2a_mean_w1":float(t["i2a_mean_w1"]),
-                "best_i1_candidate_id":str(best_i1["candidate_id"]),
-                "best_i1_rmse":float(best_i1["i1_rmse"]),
-                "best_i1_candidate_i2a_w1":float(best_i1["i2a_mean_w1"]),
-                "best_i1_parameter_distance":float(best_i1["normalized_parameter_distance"]),
-                "best_i2a_candidate_id":str(best_i2["candidate_id"]),
-                "best_i2a_mean_w1":float(best_i2["i2a_mean_w1"]),
-                "best_i2a_candidate_i1_rmse":float(best_i2["i1_rmse"]),
-                "best_i2a_parameter_distance":float(best_i2["normalized_parameter_distance"]),
-                "closest_parameter_candidate_id":str(closest["candidate_id"]),
-                "closest_parameter_distance":float(closest["normalized_parameter_distance"]),
-                "closest_parameter_i1_rmse":float(closest["i1_rmse"]),
-                "closest_parameter_i2a_w1":float(closest["i2a_mean_w1"]),
-            })
 
-    all_table=pd.concat(all_rows,ignore_index=True).sort_values(
+def run(workers:int)->Path:
+    if workers<1:
+        raise ValueError("--workers must be >=1")
+    OUT.mkdir(parents=True,exist_ok=True)
+
+    results=[]
+    if workers==1:
+        for provider in PROVIDERS:
+            results.append(_run_provider(provider))
+    else:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=min(workers,3)) as pool:
+            futures={pool.submit(_run_provider,p):p for p in PROVIDERS}
+            for fut in concurrent.futures.as_completed(futures):
+                provider=futures[fut]
+                try:
+                    results.append(fut.result())
+                except Exception as exc:
+                    for other in futures:
+                        other.cancel()
+                    raise RuntimeError(f"dual-loss diagnostic failed for {provider}") from exc
+
+    all_table=pd.concat([x[0] for x in results],ignore_index=True).sort_values(
         ["provider_id","source_family","candidate_id"],kind="mergesort"
     ).reset_index(drop=True)
     all_path=OUT/"p4_dual_loss_all_candidates.csv"
     all_table.to_csv(all_path,index=False)
 
+    summary_rows=[]
+    for _,meta,_ in results:
+        summary_rows.extend(meta["rows"])
     summary=pd.DataFrame(summary_rows).sort_values(
         ["provider_id","source_family"],kind="mergesort"
     ).reset_index(drop=True)
     summary_path=OUT/"p4_dual_loss_summary.csv"
     summary.to_csv(summary_path,index=False)
 
-    # Also expose a compact truth-vs-best table for terminal inspection.
+    plots=sorted([x[2] for x in results])
+    seed_meta=results[0][1]
     print("PHASE6_P4_DUAL_LOSS_DIAGNOSTIC_PASS")
-    print("\\nTRUTH VS BEST CANDIDATES UNDER EACH LOSS")
+    print("\nTRUTH VS BEST CANDIDATES UNDER EACH LOSS")
     print(summary.to_string(index=False))
-    print("\\nALL CANDIDATES",all_path)
+    print("\nALL CANDIDATES",all_path)
     for p in plots:
         print("plot",p)
 
@@ -307,11 +330,12 @@ def run()->Path:
         "posthoc_diagnostic":True,
         "hidden_truth_opened":True,
         "hidden_truth_used_for_method_selection":False,
-        "common_rescore_seed_start":int(seeds[0]),
-        "common_rescore_seed_end_inclusive":int(seeds[-1]),
-        "common_rescore_n":len(seeds),
+        "common_rescore_seed_start":seed_meta["seed_start"],
+        "common_rescore_seed_end_inclusive":seed_meta["seed_end"],
+        "common_rescore_n":seed_meta["seed_n"],
         "candidate_families":["I1_GENERATED","I2A_GENERATED"],
         "losses":["I1 sigma-surface RMSE","I2a full-marginal mean empirical W1"],
+        "workers":int(workers),
         "outputs":outputs,
         "output_hashes_sha256":{k:sha256_file(Path(v)) for k,v in outputs.items()},
         "completed_utc":utc_now_iso(),
@@ -320,5 +344,12 @@ def run()->Path:
     return manifest
 
 
+def main():
+    p=argparse.ArgumentParser()
+    p.add_argument("--workers",type=int,default=3)
+    args=p.parse_args()
+    run(args.workers)
+
+
 if __name__=="__main__":
-    run()
+    main()
