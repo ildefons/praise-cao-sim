@@ -1,0 +1,177 @@
+{
+  "phase": 5,
+  "name": "v3b_fullsupport_blind_recoverability_battery",
+  "status": "RESULTS_FROZEN_INTERPRETATION_CHECKPOINT_2026-10-08",
+  "branch": "caise-posthoc-mechanism-audit",
+  "scientific_target": "Assess whether limited provider information can support end-to-end SLA-survival prediction, and whether propagating ambiguity over compatible provider reconstructions improves prediction relative to committing to one reconstruction.",
+  "frozen_evidence": {
+    "global_prediction_freeze": "results/04_prediction_v3b_fullsupport/phase5_v3b_fullsupport_global_prediction_freeze_manifest.json",
+    "final_whitebox_freeze": "results/05_final_wb_v3b_fullsupport/phase5_v3b_fullsupport_final_wb_freeze_manifest.json",
+    "final_whitebox_mechanical_audit": "results/05_final_wb_v3b_fullsupport/phase5_v3b_fullsupport_final_wb_mechanical_audit_manifest.json",
+    "deterministic_evaluation": "results/06_evaluation_v3b_fullsupport/phase5_v3b_fullsupport_deterministic_evaluation_manifest.json",
+    "reference_bootstrap": "results/06_evaluation_v3b_fullsupport/bootstrap_reference/phase5_v3b_fullsupport_wb_reference_bootstrap_manifest.json",
+    "sigma_plot_contract": "config_phase5_sigma_plots_v3b_fullsupport.json",
+    "sigma_plot_outputs": "results/06_evaluation_v3b_fullsupport/sigma_plots/"
+  },
+  "battery_scope": {
+    "eligible_physical_cells": 12,
+    "eligible_provider_worlds": ["P1", "P3", "P4"],
+    "graphs": ["G_PAR", "G_SEQ", "G_SEQPAR", "G_PARSEQ"],
+    "gate_failed_step0_cells": 4,
+    "gate_failed_provider_world": "P2",
+    "primary_horizon_window": "H60..H240",
+    "final_whitebox_n_per_cell": 1000
+  },
+  "aggregate_primary_results": {
+    "M0": {
+      "MAE": 0.418736,
+      "RMSE": 0.453918,
+      "signed_bias": -0.418079,
+      "reference_bootstrap_MAE_95": [0.410957, 0.426669],
+      "reference_bootstrap_RMSE_95": [0.448140, 0.459941],
+      "reference_bootstrap_bias_95": [-0.426333, -0.409689],
+      "primary_points_scored": 1776
+    },
+    "M1": {
+      "MAE": 0.157015,
+      "RMSE": 0.225884,
+      "signed_bias": 0.149679,
+      "reference_bootstrap_MAE_95": [0.148973, 0.165681],
+      "reference_bootstrap_RMSE_95": [0.216402, 0.235863],
+      "reference_bootstrap_bias_95": [0.139385, 0.159829],
+      "primary_points_scored": 6660
+    },
+    "M2": {
+      "MAE": 0.133951,
+      "RMSE": 0.190453,
+      "signed_bias": 0.100937,
+      "reference_bootstrap_MAE_95": [0.127486, 0.141208],
+      "reference_bootstrap_RMSE_95": [0.182068, 0.199593],
+      "reference_bootstrap_bias_95": [0.090644, 0.111088],
+      "primary_points_scored": 6660
+    },
+    "M3_FULL343": {
+      "MAE": 0.121890,
+      "RMSE": 0.180806,
+      "signed_bias": 0.065105,
+      "reference_bootstrap_MAE_95": [0.116994, 0.127896],
+      "reference_bootstrap_RMSE_95": [0.174559, 0.188054],
+      "reference_bootstrap_bias_95": [0.054812, 0.075256],
+      "primary_points_scored": 6660
+    }
+  },
+  "decision_results_beta_0_9": {
+    "M0": {
+      "wb_certain_points": 1776,
+      "false_accept_count": 0,
+      "false_reject_count": 1073,
+      "decision_agreement_rate": 0.395833
+    },
+    "M1": {
+      "wb_certain_points": 6526,
+      "false_accept_count": 2846,
+      "false_reject_count": 0,
+      "decision_agreement_rate": 0.563898
+    },
+    "M2": {
+      "wb_certain_points": 6526,
+      "false_accept_count": 1692,
+      "false_reject_count": 68,
+      "decision_agreement_rate": 0.730310
+    },
+    "M3_FULL343": {
+      "wb_certain_points": 6526,
+      "false_accept_count": 1173,
+      "false_reject_count": 168,
+      "decision_agreement_rate": 0.794514
+    }
+  },
+  "m3_support_diagnostic": {
+    "M3_TOP1_MAE": 0.153426,
+    "M3_TOP3_MAE": 0.132140,
+    "M3_TOP14_MAE": 0.124289,
+    "M3_FULL343_MAE": 0.121890,
+    "interpretation": "Accuracy improves as more of the frozen reconstruction distribution is propagated, but the FULL343 gain over Top14 is modest. FULL343 remains preferred because it removes arbitrary support truncation and has zero finite-support truncation error."
+  },
+  "frozen_conclusions": [
+    {
+      "id": "C1",
+      "conclusion": "Propagating reconstruction ambiguity improves aggregate prediction.",
+      "evidence": "Across the complete eligible battery, MAE decreases M1 -> M2 -> M3_FULL343: 0.1570 -> 0.1340 -> 0.1219; RMSE decreases 0.2259 -> 0.1905 -> 0.1808."
+    },
+    {
+      "id": "C2",
+      "conclusion": "Propagating ambiguity reduces the strong optimistic bias of a single reconstructed model.",
+      "evidence": "Signed bias decreases from +0.1497 for M1 to +0.1009 for M2 and +0.0651 for M3_FULL343. At beta=0.9, false accepts fall from 2846 to 1692 to 1173."
+    },
+    {
+      "id": "C3",
+      "conclusion": "M3_FULL343 is the best aggregate method in this battery, but it is not uniformly the closest method in individual cells or panels.",
+      "evidence": "The sigma-curve figures contain panels where M1 or M2 is closer to WB than M3, especially in G_PAR. Aggregate superiority must not be described as pointwise dominance."
+    },
+    {
+      "id": "C4",
+      "conclusion": "The current interface/reconstruction pipeline does not accurately recover the WB sigma curve in many nontrivial Mid and Stress conditions.",
+      "evidence": "The frozen median-rho sigma plots show persistent, visually large gaps between WB and all of M1/M2/M3 in multiple P1/P3/P4 Mid/Stress panels, especially for sequence-containing graphs. Errors of order 0.2-0.3 in sigma occur in some representative panels."
+    },
+    {
+      "id": "C5",
+      "conclusion": "Easy/saturated regions can make aggregate accuracy look stronger than the scientifically informative Mid/Stress regimes warrant.",
+      "evidence": "Many Easy panels have WB and reconstructed methods near sigma=1, whereas larger separation appears once the regime moves away from saturation."
+    },
+    {
+      "id": "C6",
+      "conclusion": "The strongest supported paper claim is improvement under ambiguity propagation, not accurate hidden-model or end-to-end sigma recovery.",
+      "recommended_wording": "Limited provider information constrains the end-to-end prediction problem enough that propagating ambiguity over compatible provider reconstructions improves prediction error, bias, and SLA decision quality, but substantial residual prediction error remains in nontrivial operating regimes."
+    },
+    {
+      "id": "C7",
+      "conclusion": "Do not claim that the inverse problem is solved or that M3 accurately reconstructs the true hidden provider/world dynamics.",
+      "reason": "The WB sigma-curve mismatch remains substantial in several Mid/Stress panels despite aggregate improvement."
+    },
+    {
+      "id": "C8",
+      "conclusion": "M0 is a weak and restrictive baseline rather than a target for M1-M3.",
+      "evidence": "M0 has MAE 0.4187, signed bias -0.4181, and is operationally scored on only 1776 of 6660 primary points. The target is WB, not M0."
+    },
+    {
+      "id": "C9",
+      "conclusion": "The registered simple topology hypothesis is not universal.",
+      "evidence": "For M3_FULL343, Delta_P=MAE(G_SEQ)-MAE(G_PAR) is negative in P1 (-0.0448, bootstrap 95% [-0.0683,-0.0221]) but positive in P3 (+0.0563 [0.0333,0.0774]) and P4 (+0.0196 [0.0152,0.0232]). M1 is also mixed; M2 is positive in all estimable worlds."
+    },
+    {
+      "id": "C10",
+      "conclusion": "The registered heterogeneous-minus-symmetric topology contrast remains not estimable.",
+      "evidence": "All four P2 cells failed the prospective Step-0 gate. Delta_het must be reported as NOT_ESTIMABLE_UNDER_PROSPECTIVE_STEP0_GATE; no P4-only substitution is allowed."
+    },
+    {
+      "id": "C11",
+      "conclusion": "The WB-reference bootstrap confirms that finite N=1000 WB noise does not explain the main aggregate ordering.",
+      "evidence": "Reference-bootstrap intervals remain centered on the same M1 > M2 > M3 error ordering. These are marginal reference-uncertainty intervals and are not by themselves paired significance intervals for M3-vs-M2."
+    }
+  ],
+  "interpretation_guardrails": {
+    "supported": [
+      "M3_FULL343 has the best aggregate error and beta=0.9 decision agreement in the frozen battery.",
+      "Propagating multiple compatible reconstructions improves aggregate error and reduces optimistic bias relative to committing to one reconstruction.",
+      "Residual end-to-end error remains substantial in several Mid/Stress regimes.",
+      "Topology sensitivity depends on provider world and method."
+    ],
+    "not_supported": [
+      "M3 accurately recovers WB sigma in general.",
+      "M3 is closest to WB in every cell or panel.",
+      "The inverse problem is solved.",
+      "The hidden generating provider parameters are recovered.",
+      "Sequence is universally harder than parallel.",
+      "A heterogeneous-minus-symmetric topology effect is established."
+    ]
+  },
+  "next_analysis_priority": [
+    "Quantify how much nontrivial WB variation is captured by M1/M2/M3, not only average absolute error.",
+    "Compute paired joint-bootstrap distributions for M1-vs-M2, M2-vs-M3_FULL343, and M1-vs-M3_FULL343 differences in MAE/RMSE/bias using the already frozen joint WB resamples.",
+    "Report performance stratified by Easy/Mid/Stress so saturated Easy points do not dominate interpretation.",
+    "Consider correlation, R^2/calibration, and comparison against a trivial regime-level predictor to determine how much WB structure is genuinely recovered.",
+    "Use sigma-curve figures as qualitative evidence of both successful approximation and substantial residual failure; do not cherry-pick only favorable panels."
+  ],
+  "provenance_note": "This checkpoint records interpretation after the deterministic evaluation, the registered 10,000-replicate WB-reference bootstrap, and inspection of the frozen median-rho sigma-approximation figures. It does not alter any frozen scientific method, prediction, query, provider world, graph, or reference evidence."
+}
