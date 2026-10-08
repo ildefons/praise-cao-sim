@@ -1,0 +1,129 @@
+{
+  "status": "FROZEN_PHASE5_V3B_FULLSUPPORT_EVALUATION_CONTRACT",
+  "freeze_date": "2026-10-08",
+  "scientific_role": "Deterministic frozen evaluation adapter for the completed V3b FULL343 prediction battery against the frozen N=1000 final white-box reference.",
+  "provenance": {
+    "prospective_base": "config_phase5_analysis_addendum_v2.json",
+    "battery": "config_phase5_recoverability_battery_v2.json",
+    "graph_prediction_contract": "config_phase5_graph_prediction_v3b_fullsupport.json",
+    "final_wb_contract": "config_phase5_final_wb_v3b_fullsupport.json",
+    "final_wb_mechanical_audit": "results/05_final_wb_v3b_fullsupport/phase5_v3b_fullsupport_final_wb_mechanical_audit_manifest.json",
+    "adaptation_reason": "Map the frozen V2 analysis semantics to the pre-WB V3b method-development restart and the pre-graph-WB FULL343 revision. No performance result is used to define this adapter.",
+    "prediction_curves_read_before_freeze": false,
+    "method_performance_computed_before_freeze": false,
+    "final_wb_mechanical_audit_is_reference_integrity_only": true
+  },
+  "primary_methods": [
+    "M0",
+    "M1",
+    "M2",
+    "M3_FULL343"
+  ],
+  "secondary_diagnostics": [
+    "M3_TOP1",
+    "M3_TOP3",
+    "M3_TOP14"
+  ],
+  "primary_window": {
+    "H_min_seconds": 60,
+    "H_max_seconds": 240,
+    "step_seconds": 5,
+    "horizon_count_per_query": 37
+  },
+  "pointwise_join": {
+    "key": [
+      "physical_cell_id",
+      "query_id",
+      "H"
+    ],
+    "whitebox_column": "sigma_wb",
+    "prediction_column": "sigma_hat",
+    "M0_policy": "Score only rows with status=PREDICTED; retain NOT_APPLICABLE rows for applicability accounting."
+  },
+  "primary_metrics": {
+    "MAE": "mean(abs(sigma_hat-sigma_wb))",
+    "RMSE": "sqrt(mean((sigma_hat-sigma_wb)^2))",
+    "signed_bias": "mean(sigma_hat-sigma_wb)",
+    "max_abs_error": "max(abs(sigma_hat-sigma_wb))",
+    "reference_noise_adjusted_RMSE": "sqrt(max(0, mean((sigma_hat-sigma_wb)^2 - sigma_wb*(1-sigma_wb)/(N_WB-1))))",
+    "N_WB": 1000
+  },
+  "summary_scopes": [
+    "ALL",
+    "provider_world",
+    "graph",
+    "regime",
+    "rho",
+    "provider_world_x_graph",
+    "graph_x_regime",
+    "provider_world_x_regime",
+    "rho_x_regime"
+  ],
+  "M0": {
+    "report_applicable_query_count": true,
+    "report_not_applicable_query_count": true,
+    "report_pointwise_operational_coverage": true,
+    "do_not_impute_not_applicable_predictions": true
+  },
+  "M2": {
+    "portfolio_range_source": [
+      "sigma_min",
+      "sigma_max"
+    ],
+    "report_mean_range_width": true,
+    "report_WB_coverage_fraction": true,
+    "report_mean_distance_outside_range": true,
+    "range_is_descriptive_finite_portfolio_spread_not_CI": true
+  },
+  "M3": {
+    "primary": "M3_FULL343",
+    "full_support_truncation_bound": 0.0,
+    "report_plugin_MC_SE": true,
+    "report_conservative_MC_SE_bound": true,
+    "secondary_topK_are_diagnostics_only": true
+  },
+  "decision_analysis": {
+    "betas": [
+      0.9,
+      0.8,
+      0.95
+    ],
+    "primary_beta": 0.9,
+    "accept_rule": "sigma_hat>=beta",
+    "WB_certain_accept": "wb_ci_lower>=beta",
+    "WB_certain_reject": "wb_ci_upper<beta",
+    "WB_crossing_points_excluded_from_decision_score": true,
+    "outputs": [
+      "wb_certain_point_count",
+      "false_accept_count",
+      "false_reject_count",
+      "decision_agreement_rate",
+      "false_accept_rate",
+      "false_reject_rate"
+    ]
+  },
+  "topology_sensitivity": {
+    "within_world_contrast": "Delta_P^M = MAE_M(P,G_SEQ)-MAE_M(P,G_PAR)",
+    "estimable_worlds_after_Step0": [
+      "P1",
+      "P3",
+      "P4"
+    ],
+    "registered_heterogeneous_minus_symmetric_contrast": "Delta_het^M = mean(Delta_P2^M,Delta_P4^M)-mean(Delta_P1^M,Delta_P3^M)",
+    "registered_Delta_het_status": "NOT_ESTIMABLE_UNDER_PROSPECTIVE_STEP0_GATE",
+    "reason": "All four P2 physical cells failed the prospective Step-0 confirmation gate.",
+    "no_P4_only_substitution": true
+  },
+  "bootstrap_reference_uncertainty": {
+    "stage": "separate_after_deterministic_evaluation_freeze",
+    "bootstrap_reps": 10000,
+    "bootstrap_seed": 2026100201,
+    "resampling_unit": "complete final-WB trajectory index",
+    "joint_resample_across_physical_cells": true,
+    "method_predictions_fixed": true,
+    "interval": "percentile_95",
+    "interpretation": "finite final-WB reference uncertainty only"
+  },
+  "output_namespace": "results/06_evaluation_v3b_fullsupport",
+  "no_method_feedback": true
+}
