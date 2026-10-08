@@ -1,0 +1,53 @@
+{
+  "status": "FROZEN_PHASE5_V3B_FULLSUPPORT_WB_REFERENCE_BOOTSTRAP",
+  "freeze_date": "2026-10-08",
+  "scientific_role": "Implementation freeze for the prospectively registered finite-final-WB-reference bootstrap after deterministic evaluation was frozen.",
+  "inherits_from": "config_phase5_analysis_addendum_v2.json::directional_error::wb_reference_bootstrap",
+  "evaluation_contract": "config_phase5_evaluation_v3b_fullsupport.json",
+  "deterministic_evaluation_manifest": "results/06_evaluation_v3b_fullsupport/phase5_v3b_fullsupport_deterministic_evaluation_manifest.json",
+  "bootstrap": {
+    "reps": 10000,
+    "seed": 2026100201,
+    "rng": "numpy.random.Generator(PCG64(seed))",
+    "resampling_unit": "complete final-WB trajectory index",
+    "n_reference_trajectories": 1000,
+    "joint_resample_across_physical_cells": true,
+    "joint_resample_semantics": "One multinomial count vector over trajectory indices 0..999 is drawn per bootstrap replicate and applied unchanged to all 12 eligible physical cells. This is exactly equivalent to drawing 1000 trajectory indices iid with replacement and preserves CRN-index dependence across cells.",
+    "method_predictions_fixed": true,
+    "interval": "percentile_95",
+    "percentiles": [2.5, 97.5]
+  },
+  "primary_window": "H60..H240",
+  "primary_methods": ["M0", "M1", "M2", "M3_FULL343"],
+  "continuous_metrics": [
+    "MAE",
+    "RMSE",
+    "signed_bias",
+    "max_abs_error",
+    "reference_noise_adjusted_RMSE"
+  ],
+  "summary_scopes": [
+    "ALL",
+    "provider_world",
+    "graph",
+    "regime",
+    "rho",
+    "provider_world_x_graph",
+    "graph_x_regime",
+    "provider_world_x_regime",
+    "rho_x_regime"
+  ],
+  "M0_policy": "Keep the frozen operational-applicability mask fixed; bootstrap only reference trajectories.",
+  "topology_contrast": {
+    "bootstrap_Delta_P": true,
+    "Delta_P": "MAE(P,G_SEQ)-MAE(P,G_PAR)",
+    "estimable_worlds": ["P1", "P3", "P4"],
+    "Delta_het": "NOT_ESTIMABLE_UNDER_PROSPECTIVE_STEP0_GATE"
+  },
+  "decision_metrics": {
+    "status": "NOT_PART_OF_THIS_REFERENCE_BOOTSTRAP_STAGE",
+    "reason": "The prospective bootstrap clause specifies WB-trajectory resampling for finite-reference uncertainty. The deterministic Wilson-resolved decision analysis remains frozen separately; no post-outcome rule for re-defining the WB-certain subset is introduced here."
+  },
+  "output_namespace": "results/06_evaluation_v3b_fullsupport/bootstrap_reference",
+  "no_method_feedback": true
+}
