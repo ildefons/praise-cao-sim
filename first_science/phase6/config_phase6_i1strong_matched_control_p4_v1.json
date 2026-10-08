@@ -1,0 +1,81 @@
+{
+  "status": "FROZEN_PHASE6_I1_STRONG_MATCHED_CONTROL_P4_V1",
+  "freeze_date": "2026-10-08",
+  "scientific_role": "Matched provider-reconstruction control for I2AFS: same search architecture/budgets/seeds/domain, original public-I1 full sigma-surface loss.",
+  "provider_world_id": "P4",
+  "providers": [
+    "ProviderA",
+    "ProviderB",
+    "ProviderC"
+  ],
+  "objective": {
+    "information": "public I1 sigma surface",
+    "loss": "mean squared error over complete public I1 sigma surface with H>0",
+    "implementation": "phase3/run_m1_provider_lift_v2.py::_simulate_and_score -> calculate_full_surface_loss",
+    "i2a_read": false
+  },
+  "public_information": {
+    "card_metadata": "../phase5/results/01_i1/P4/public/{provider_id}/card.json",
+    "sigma_surface": "../phase5/results/01_i1/P4/public/{provider_id}/sigma_surface.csv",
+    "parameter_domain": "../phase5/results/03_reconstruction/phase5_m1_domain_registry.csv",
+    "private_i1_ledger_read": false,
+    "hidden_provider_parameters_read": false
+  },
+  "matched_to_i2afs": {
+    "config": "config_phase6_i2a_fullspectrum_reconstruction_p4_v1.json",
+    "same_parameter_domain": true,
+    "same_total_trials": true,
+    "same_sobol_design": true,
+    "same_tpe_sampler_seeds": true,
+    "same_search_crn_bank": true,
+    "same_rescore_shortlist_count": true,
+    "same_rescore_crn_bank": true,
+    "same_top3_support_size": true
+  },
+  "search": {
+    "total_trials": 256,
+    "sobol_initial_trials": 64,
+    "tpe_adaptive_trials": 192,
+    "sobol_seed": 420001,
+    "tpe_sampler_seeds": {
+      "ProviderA": 420101,
+      "ProviderB": 420103,
+      "ProviderC": 420107
+    },
+    "parameter_sampling": {
+      "mean_service_time": "log within frozen public-derived domain",
+      "cost_rate": "log within frozen public-derived domain",
+      "service_cv": "linear within frozen public-derived domain"
+    },
+    "search_seed_start": 60000,
+    "search_seed_end_inclusive": 60024,
+    "search_n": 25,
+    "common_random_numbers_within_provider": true,
+    "rescore_shortlist_count": 24
+  },
+  "common_rescore": {
+    "seed_start": 60100,
+    "seed_end_inclusive": 60199,
+    "n": 100,
+    "selection_metric": "i1_full_surface_mse",
+    "ordering": "ascending i1_full_surface_mse, then trial_number"
+  },
+  "M2": {
+    "members_per_provider": 3,
+    "provider_weights": "equal 1/3",
+    "joint_models": 27,
+    "joint_weights": "equal 1/27"
+  },
+  "firewall": {
+    "i2a_read": false,
+    "graph_prediction_used_for_reconstruction": false,
+    "graph_wb_used_for_reconstruction": false,
+    "final_wb_used_for_reconstruction": false,
+    "step0_wb_values_used_for_reconstruction": false,
+    "private_i1_ledger_used": false,
+    "hidden_provider_parameters_used": false
+  },
+  "outputs": {
+    "root": "results/18_i1strong_reconstruction_p4"
+  }
+}
