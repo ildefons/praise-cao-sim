@@ -1,0 +1,13 @@
+{
+  "phase": 6,
+  "name": "minimal_information_augmentation_i2a",
+  "status": "I2A_PROVIDER_AUDIT_PROTOCOL_FROZEN_READY_TO_RUN",
+  "parent_phase": 5,
+  "information_axis": "I1 -> I2a-full",
+  "method_baselines_reserved_for_later_graph_stage": ["M2", "M3_FULL343"],
+  "current_stage": "provider_only_ambiguity_audit",
+  "current_stage_reads_graph_wb": false,
+  "current_stage_runs_graph_prediction": false,
+  "i2a_definition": "Empirical marginal distribution of cumulative provider-local compliance c_i(A_i,H), independently sorted at each frozen region and horizon so no temporal identity is disclosed.",
+  "next_decision": "Inspect whether I2a materially discriminates the seven frozen provider reconstructions before opening any graph experiment."
+}
