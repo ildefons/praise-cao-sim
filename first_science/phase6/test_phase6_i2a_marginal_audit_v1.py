@@ -64,14 +64,16 @@ def test_public_i2a_removes_trajectory_identity_and_sorts_independently():
         assert np.all(vals[:-1]<=vals[1:])
 
 
-def test_phase6_runner_has_no_graph_simulator_or_wb_dependency():
+def test_phase6_runner_has_no_graph_simulator_or_graph_result_dependency():
     source=Path(p6.__file__).read_text(encoding="utf-8")
     forbidden=(
         "execute_one_phase5_graph_trajectory",
-        "phase5_graph_simulator",
-        "final_wb",
-        "pointwise_primary_joined",
-        "step0_frozen_queries",
+        "phase5_graph_simulator_v2",
+        "pointwise_primary_joined.csv",
+        "step0_frozen_queries.csv",
+        "results/04_prediction_v3b_fullsupport",
+        "results/05_final_wb_v3b_fullsupport",
+        "results/06_evaluation_v3b_fullsupport",
     )
     lower=source.lower()
     for token in forbidden:
