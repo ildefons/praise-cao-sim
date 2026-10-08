@@ -16,6 +16,7 @@ WB, and performs no graph simulation.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import contextlib
 import os
 import sys
@@ -259,6 +260,26 @@ def run_provider(world:str,provider:str,seeds:tuple[int,...])->dict[str,Any]:
     out=ROOT/world/provider
     out.mkdir(parents=True,exist_ok=True)
 
+    manifest_path=out/"i2a_provider_audit_manifest.json"
+    if manifest_path.is_file():
+        manifest=read_json(manifest_path)
+        if manifest.get("status")!="PHASE6_I2A_PROVIDER_AUDIT_COMPLETE":
+            raise RuntimeError(f"{world}/{provider}: unexpected existing Phase-6 manifest status")
+        d=manifest["diagnostics"]
+        print(f"PHASE6 I2A {world}/{provider} reuse completed provider audit",flush=True)
+        return {
+            "provider_world_id":world,
+            "provider_id":provider,
+            "best_candidate_id":str(d["i2a_best_candidate_id"]),
+            "best_mean_w1":float(d["i2a_best_mean_w1"]),
+            "best_second_gap":float(d["i2a_best_second_gap"]),
+            "best_worst_range":float(d["i2a_best_worst_range"]),
+            "rank_spearman":float(d["i1_i2a_rank_spearman"]),
+            "top3_overlap":int(d["i1_i2a_top3_overlap_count"]),
+            "wall_seconds":0.0,
+            "provider_manifest_sha256":sha256_file(manifest_path),
+        }
+
     card_path=P5_I1/world/"public"/provider/"card.json"
     target_ledger_path=P5_I1/world/"private"/"sigma"/provider/"provider_request_ledgers.csv"
     candidates_path=P5_V3B/world/provider/"m3_provider_models.csv"
@@ -293,8 +314,31 @@ def run_provider(world:str,provider:str,seeds:tuple[int,...])->dict[str,Any]:
     group_frames=[]
     wall=time.perf_counter()
     ordered=candidates.sort_values("candidate_id",kind="mergesort").reset_index(drop=True)
+    checkpoint_root=out/"checkpoints"
+    checkpoint_root.mkdir(parents=True,exist_ok=True)
     for index,rec in enumerate(ordered.itertuples(index=False),start=1):
         cid=str(rec.candidate_id)
+        safe_cid=cid.replace("/","_")
+        score_cp=checkpoint_root/f"{safe_cid}_score.csv"
+        groups_cp=checkpoint_root/f"{safe_cid}_groups.csv"
+        if score_cp.is_file() and groups_cp.is_file():
+            one=pd.read_csv(score_cp)
+            groups=pd.read_csv(groups_cp)
+            if len(one)!=1 or str(one.iloc[0]["candidate_id"])!=cid:
+                raise RuntimeError(f"{world}/{provider}/{cid}: invalid candidate checkpoint")
+            expected_groups=5*48
+            if len(groups)!=expected_groups or set(groups["candidate_id"].astype(str))!={cid}:
+                raise RuntimeError(f"{world}/{provider}/{cid}: invalid group checkpoint")
+            row=one.iloc[0].to_dict()
+            score_rows.append(row)
+            group_frames.append(groups)
+            print(
+                f"PHASE6 I2A {world}/{provider} candidate {index}/7 "
+                f"{cid} mean_W1={float(row['mean_w1']):.6f} [cached]",
+                flush=True,
+            )
+            continue
+
         cand_samples=_simulate_candidate_samples(
             metadata=metadata,
             mean_service_time=float(rec.mean_service_time),
@@ -304,8 +348,7 @@ def run_provider(world:str,provider:str,seeds:tuple[int,...])->dict[str,Any]:
         )
         mean_w1,groups=_score_candidate(public_i2a,cand_samples)
         groups.insert(0,"candidate_id",cid)
-        group_frames.append(groups)
-        score_rows.append({
+        row={
             "candidate_id":cid,
             "mean_w1":mean_w1,
             "median_group_w1":float(groups["w1"].median()),
@@ -313,7 +356,11 @@ def run_provider(world:str,provider:str,seeds:tuple[int,...])->dict[str,Any]:
             "mean_service_time":float(rec.mean_service_time),
             "cost_rate":float(rec.cost_rate),
             "service_cv":float(rec.service_cv),
-        })
+        }
+        pd.DataFrame([row]).to_csv(score_cp,index=False)
+        groups.to_csv(groups_cp,index=False)
+        score_rows.append(row)
+        group_frames.append(groups)
         print(
             f"PHASE6 I2A {world}/{provider} candidate {index}/7 "
             f"{cid} mean_W1={mean_w1:.6f}",
@@ -414,6 +461,11 @@ def run_provider(world:str,provider:str,seeds:tuple[int,...])->dict[str,Any]:
     }
     manifest_path=out/"i2a_provider_audit_manifest.json"
     write_json(manifest_path,manifest)
+    # Candidate checkpoints are deterministic resumability artifacts only.
+    # Remove them after the provider audit is frozen.
+    if checkpoint_root.exists():
+        import shutil
+        shutil.rmtree(checkpoint_root)
     return {
         "provider_world_id":world,
         "provider_id":provider,
@@ -428,7 +480,9 @@ def run_provider(world:str,provider:str,seeds:tuple[int,...])->dict[str,Any]:
     }
 
 
-def run_all()->Path:
+def run_all(workers:int)->Path:
+    if workers<1:
+        raise ValueError("--workers must be >=1")
     cfg=read_json(CFG)
     if cfg.get("status")!=EXPECTED_CFG:
         raise RuntimeError("unexpected Phase-6 I2a contract status")
@@ -441,10 +495,27 @@ def run_all()->Path:
 
     ROOT.mkdir(parents=True,exist_ok=True)
     started=time.perf_counter()
+    tasks=[(world,provider) for world in WORLDS for provider in PROVIDERS]
     rows=[]
-    for world in WORLDS:
-        for provider in PROVIDERS:
+    if workers==1:
+        for world,provider in tasks:
             rows.append(run_provider(world,provider,seeds))
+    else:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as pool:
+            futures={
+                pool.submit(run_provider,world,provider,seeds):(world,provider)
+                for world,provider in tasks
+            }
+            for future in concurrent.futures.as_completed(futures):
+                world,provider=futures[future]
+                try:
+                    rows.append(future.result())
+                except Exception as exc:
+                    for other in futures:
+                        other.cancel()
+                    raise RuntimeError(
+                        f"Phase-6 I2a worker failed for {world}/{provider}"
+                    ) from exc
 
     summary=pd.DataFrame(rows).sort_values(
         ["provider_world_id","provider_id"],kind="mergesort"
@@ -474,6 +545,7 @@ def run_all()->Path:
         },
         "completed_utc":utc_now_iso(),
         "wall_seconds":float(time.perf_counter()-started),
+        "workers":int(workers),
     }
     path=ROOT/"phase6_i2a_provider_audit_manifest.json"
     write_json(path,manifest)
@@ -488,8 +560,9 @@ def run_all()->Path:
 
 def main()->None:
     p=argparse.ArgumentParser(description="Phase-6 I2a provider-only ambiguity audit")
-    p.parse_args()
-    run_all()
+    p.add_argument("--workers",type=int,default=4)
+    args=p.parse_args()
+    run_all(args.workers)
 
 
 if __name__=="__main__":
