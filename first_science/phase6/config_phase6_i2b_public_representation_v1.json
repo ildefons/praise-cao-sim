@@ -1,0 +1,63 @@
+{
+  "status": "FROZEN_PHASE6_I2B_PUBLIC_REPRESENTATION_V1",
+  "freeze_date": "2026-10-09",
+  "scientific_role": "Self-contained public I2b-v1 representation: I2a marginals plus anonymous within-window temporal pairs.",
+  "authority": {
+    "temporal_sampling": "config_phase6_i2b_temporal_sampling_v1.json",
+    "temporal_sampling_status": "FROZEN_PHASE6_I2B_TEMPORAL_SAMPLING_V1",
+    "protocol": "PHASE6_I2B_PUBLIC_REPRESENTATION_PROTOCOL_2026-10-09.md"
+  },
+  "source": {
+    "provider_worlds": [
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "providers": [
+      "ProviderA",
+      "ProviderB",
+      "ProviderC"
+    ],
+    "phase5_public_card": "../phase5/results/01_i1/{world}/public/{provider}/card.json",
+    "phase5_private_sigma_ledger": "../phase5/results/01_i1/{world}/private/sigma/{provider}/provider_request_ledgers.csv",
+    "new_provider_world_simulation": false
+  },
+  "public_i2b": {
+    "includes_i2a_marginals": true,
+    "marginal_publicization": "independently sorted empirical compliance values per (region,H), no trajectory identity",
+    "temporal_pair_publicization": "same-trajectory raw compliance pair within each frozen temporal window, then lexicographically sorted and stripped of trajectory identity",
+    "sample_mass_per_pair": 0.01,
+    "stable_cross_window_sample_identifier": false,
+    "formal_privacy_claim": false,
+    "expected_marginal_rows_per_provider": 24000,
+    "expected_temporal_windows_per_region": 126,
+    "expected_temporal_windows_per_provider": 630,
+    "expected_temporal_pair_rows_per_provider": 63000,
+    "expected_temporal_pair_rows_total": 756000,
+    "expected_window_counts_per_region_by_lag_s": {
+      "20": 22,
+      "30": 21,
+      "40": 20,
+      "50": 19,
+      "75": 17,
+      "100": 14,
+      "150": 9,
+      "200": 4
+    }
+  },
+  "firewall": {
+    "graph_prediction_read": false,
+    "graph_wb_read": false,
+    "final_wb_read": false,
+    "hidden_provider_parameters_read": false
+  },
+  "outputs": {
+    "root": "results/22_i2b_public_representation",
+    "marginal_file": "{world}/{provider}/i2b_public_marginals.csv",
+    "temporal_pairs_file": "{world}/{provider}/i2b_public_temporal_pairs.csv",
+    "provider_manifest": "{world}/{provider}/i2b_public_representation_manifest.json",
+    "summary": "i2b_public_representation_summary.csv",
+    "battery_manifest": "i2b_public_representation_battery_manifest.json"
+  }
+}
