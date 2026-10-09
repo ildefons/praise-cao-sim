@@ -1,0 +1,60 @@
+{
+  "status": "FROZEN_PHASE6_I2B_VARIABILITY_WEIGHT_AUDIT_V1",
+  "freeze_date": "2026-10-09",
+  "scientific_role": "Provider-only public-information audit of data-derived temporal-window weighting before any I2b-v2 reconstruction.",
+  "authority": {
+    "temporal_sampling": "config_phase6_i2b_temporal_sampling_v1.json",
+    "public_representation": "config_phase6_i2b_public_representation_v1.json",
+    "energy_loss": "i2b_energy_loss_v1.py",
+    "protocol": "PHASE6_I2B_VARIABILITY_WEIGHT_AUDIT_PROTOCOL_2026-10-09.md"
+  },
+  "public_root": "results/22_i2b_public_representation",
+  "output_root": "results/27_i2b_variability_weight_audit",
+  "worlds": [
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+  ],
+  "providers": [
+    "ProviderA",
+    "ProviderB",
+    "ProviderC"
+  ],
+  "weighting": {
+    "displacement": "delta = compliance_end - compliance_start",
+    "window_variation_energy": "mean(delta^2)",
+    "normalization": "within provider over all 630 frozen windows",
+    "weight_formula": "omega_w = V_w / sum(V)",
+    "graph_or_reconstruction_outcomes_used": false
+  },
+  "shuffle_sanity": {
+    "repetitions": 3,
+    "base_seed": 620001,
+    "compare_original_equal_lag_energy": true,
+    "compute_variability_weighted_energy": true
+  },
+  "concentration_diagnostics": [
+    "max_window_weight",
+    "top10_mass",
+    "top25_mass",
+    "top50_mass",
+    "effective_window_count",
+    "effective_window_fraction",
+    "windows_for_50pct_mass",
+    "windows_for_80pct_mass",
+    "windows_for_90pct_mass",
+    "lag_weight_mass",
+    "region_weight_mass",
+    "deterioration_vs_improvement_energy"
+  ],
+  "firewall": {
+    "new_provider_simulation": false,
+    "provider_reconstruction_run": false,
+    "graph_prediction_read": false,
+    "graph_wb_read": false,
+    "final_wb_read": false,
+    "hidden_provider_parameters_read": false
+  },
+  "upload_bundle": "i2b_variability_weight_audit_bundle.zip"
+}
