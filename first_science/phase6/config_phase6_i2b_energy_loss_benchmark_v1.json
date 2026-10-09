@@ -1,0 +1,57 @@
+{
+  "status": "FROZEN_PHASE6_I2B_ENERGY_LOSS_BENCHMARK_V1",
+  "freeze_date": "2026-10-09",
+  "scientific_role": "Provider-only public-interface benchmark for a candidate bivariate energy loss before I2b reconstruction.",
+  "authority": {
+    "public_representation_config": "config_phase6_i2b_public_representation_v1.json",
+    "temporal_sampling_config": "config_phase6_i2b_temporal_sampling_v1.json",
+    "loss_implementation": "i2b_energy_loss_v1.py",
+    "protocol": "PHASE6_I2B_ENERGY_LOSS_BENCHMARK_PROTOCOL_2026-10-09.md"
+  },
+  "public_root": "results/22_i2b_public_representation",
+  "output_root": "results/23_i2b_energy_loss_benchmark",
+  "worlds": [
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+  ],
+  "providers": [
+    "ProviderA",
+    "ProviderB",
+    "ProviderC"
+  ],
+  "energy_loss": {
+    "point_space": [
+      "compliance_start",
+      "compliance_end"
+    ],
+    "point_metric": "euclidean",
+    "empirical_estimator": "V-statistic",
+    "formula": "2*mean||X-Y|| - mean||X-X'|| - mean||Y-Y'||",
+    "target_self_term_precomputed": true,
+    "lag_weighting": "equal",
+    "within_lag_window_weighting": "equal"
+  },
+  "shuffle_diagnostic": {
+    "repetitions": 3,
+    "base_seed": 620001,
+    "preserves_marginals_exactly_at_n100": true,
+    "destroys_within_window_pairing": true
+  },
+  "runtime_benchmark": {
+    "search_candidate_n": 25,
+    "rescore_candidate_n": 100,
+    "planned_search_trials": 256,
+    "planned_rescore_candidates": 24
+  },
+  "firewall": {
+    "new_provider_simulation": false,
+    "provider_reconstruction_run": false,
+    "graph_prediction_read": false,
+    "graph_wb_read": false,
+    "final_wb_read": false,
+    "hidden_provider_parameters_read": false
+  },
+  "upload_bundle": "i2b_energy_loss_benchmark_bundle.zip"
+}
