@@ -1,0 +1,24 @@
+{
+  "status": "FROZEN_PHASE6_I2BHIER_M2_P4_G_SEQPAR_V1",
+  "freeze_date": "2026-10-09",
+  "scientific_role": "Single-cell matched development propagation of the frozen I2b-v3 hierarchical variability-weighted M2 support.",
+  "provider_world_id": "P4",
+  "graph_id": "G_SEQPAR",
+  "provider_support": "results/32_i2b_hierarchical_reconstruction_p4/m2_joint_support_27.csv",
+  "graph_seed_bank": "../phase5/config_phase5_seed_registry_v3b_fullsupport.json::graph_prediction.M1_M2_common_bank",
+  "n_trajectories_per_joint_model": 100,
+  "joint_models": 27,
+  "joint_weights": "equal 1/27",
+  "matched_comparators": {
+    "i1strong": "results/19_i1strong_m2_p4_g_seqpar",
+    "i2afs": "results/15_i2afs_m2_p4_g_seqpar",
+    "i2b_equalweight": "results/25_i2b_m2_p4_g_seqpar"
+  },
+  "outputs": {
+    "root": "results/33_i2b_hierarchical_matched_evaluation"
+  },
+  "firewall": {
+    "graph_wb_read": false,
+    "hidden_provider_parameters_read": false
+  }
+}
