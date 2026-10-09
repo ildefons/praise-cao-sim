@@ -1,0 +1,67 @@
+{
+  "status": "FROZEN_PHASE6_I2B_HIERARCHICAL_WEIGHT_AUDIT_V1",
+  "freeze_date": "2026-10-09",
+  "scientific_role": "Public-provider-information audit of hierarchical temporal variability weighting before any I2b-v3 reconstruction.",
+  "development_note": "Weighting design is informed by P4/G_SEQPAR I2b-v1/v2 failure analysis. P4/G_SEQPAR is development-only for any subsequent I2b-v3 evaluation.",
+  "authority": {
+    "temporal_sampling": "config_phase6_i2b_temporal_sampling_v1.json",
+    "public_representation": "config_phase6_i2b_public_representation_v1.json",
+    "energy_loss": "i2b_energy_loss_v1.py",
+    "protocol": "PHASE6_I2B_HIERARCHICAL_WEIGHT_AUDIT_PROTOCOL_2026-10-09.md"
+  },
+  "public_root": "results/22_i2b_public_representation",
+  "output_root": "results/31_i2b_hierarchical_weight_audit",
+  "worlds": [
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+  ],
+  "providers": [
+    "ProviderA",
+    "ProviderB",
+    "ProviderC"
+  ],
+  "weighting": {
+    "displacement": "delta = compliance_end - compliance_start",
+    "window_variation_energy": "mean(delta^2)",
+    "outer_region_weight": "equal 1/5",
+    "outer_lag_weight": "equal 1/8",
+    "inner_normalization": "within fixed (region_id, lag_s) across valid start_H",
+    "formula": "omega_(A,H,Delta)=(1/5)*(1/8)*V_(A,H,Delta)/sum_H' V_(A,H',Delta)",
+    "zero_variation_block_fallback": "equal across valid start horizons in that block",
+    "graph_or_reconstruction_outcomes_used": false
+  },
+  "shuffle_sanity": {
+    "repetitions": 3,
+    "base_seed": 620001,
+    "compare_equal_lag_energy": true,
+    "compare_global_variability_weighted_energy": true,
+    "compute_hierarchical_variability_weighted_energy": true
+  },
+  "concentration_diagnostics": [
+    "max_window_weight",
+    "top10_mass",
+    "top25_mass",
+    "top50_mass",
+    "effective_window_count",
+    "effective_window_fraction",
+    "windows_for_50pct_mass",
+    "windows_for_80pct_mass",
+    "windows_for_90pct_mass",
+    "min_block_effective_start_count",
+    "max_block_effective_start_count",
+    "region_mass_exactness",
+    "lag_mass_exactness",
+    "deterioration_vs_improvement_energy"
+  ],
+  "firewall": {
+    "new_provider_simulation": false,
+    "provider_reconstruction_run": false,
+    "graph_prediction_read": false,
+    "graph_wb_read": false,
+    "final_wb_read": false,
+    "hidden_provider_parameters_read": false
+  },
+  "upload_bundle": "i2b_hierarchical_weight_audit_bundle.zip"
+}
