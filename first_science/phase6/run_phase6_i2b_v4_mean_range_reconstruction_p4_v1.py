@@ -88,6 +88,9 @@ def _target_weights(target,provider:str)->dict[tuple[str,float,float,float],floa
     audit=read_json(HIER_AUDIT)
     if audit.get("status")!="PHASE6_I2B_V4_MEAN_RANGE_FEASIBILITY_COMPLETE":
         raise RuntimeError("I2b-v4 aggregate publicization audit incomplete")
+    expected_hash=audit.get("output_sha256",{}).get("weights")
+    if not expected_hash or sha256_file(V4_WINDOWS)!=expected_hash:
+        raise RuntimeError("I2b-v4 aggregate weight file fails audit hash check")
     df=pd.read_csv(V4_WINDOWS)
     df=df[(df["provider_world_id"]==WORLD)&(df["provider_id"]==provider)].copy()
     if len(df)!=630 or df["region_id"].nunique()!=5:
@@ -351,6 +354,10 @@ def run_provider(provider:str)->dict[str,Any]:
     started=time.perf_counter()
     metadata,target,pair_path=_load_i2b_target(provider)
     weights=_target_weights(target,provider)
+    audit=read_json(HIER_AUDIT)
+    expected_pairs=audit.get("input_hashes",{}).get(f"{WORLD}/{provider}",{}).get("public_pairs")
+    if expected_pairs!=sha256_file(pair_path):
+        raise RuntimeError("I2b-v4 weight audit public pairs do not match reconstruction public pairs")
     vals=np.asarray(list(weights.values()),dtype=float)
     neff=1.0/float(np.sum(vals*vals))
     bounds=_bounds(_domain_row(WORLD,provider))
