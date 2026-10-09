@@ -16,6 +16,7 @@ import concurrent.futures
 import math
 import sys
 import time
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -491,7 +492,22 @@ def _freeze_world(provider_rows):
     path=ROOT/"p4_i2b_hierarchical_reconstruction_manifest.json"
     write_json(path,manifest)
 
-    print("\nPHASE6_I2B_VARWEIGHT_P4_RECONSTRUCTION_PASS")
+    bundle=ROOT/"i2b_hierarchical_reconstruction_bundle.zip"
+    with zipfile.ZipFile(bundle,"w",compression=zipfile.ZIP_DEFLATED) as z:
+        z.write(summary_path,arcname=summary_path.name)
+        z.write(support_path,arcname=support_path.name)
+        z.write(path,arcname=path.name)
+        for provider in PROVIDERS:
+            for name in (
+                "i2bhier_m2_provider_models.csv",
+                "rescore_top24.csv",
+                "rescore_top24_by_lag.csv",
+                "provider_reconstruction_manifest.json",
+            ):
+                p=ROOT/provider/name
+                z.write(p,arcname=f"{provider}/{name}")
+
+    print("\nPHASE6_I2B_HIERARCHICAL_P4_RECONSTRUCTION_PASS")
     print(summary.to_string(index=False))
     for p in PROVIDERS:
         print(f"\n{p} TOP3")
@@ -503,6 +519,7 @@ def _freeze_world(provider_rows):
         )
     print("\njoint_models 27")
     print("manifest",path)
+    print("UPLOAD BUNDLE",bundle)
     return path
 
 
