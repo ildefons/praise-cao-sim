@@ -1,0 +1,55 @@
+{
+  "status": "FROZEN_PHASE6_I2B_TEMPORAL_SAMPLING_V1",
+  "freeze_date": "2026-10-09",
+  "scientific_role": "Frozen temporal sampling for first I2b reconstruction.",
+  "provenance": {
+    "source_audit": "results/21_i2b_lag_stride_audit",
+    "source_runner": "run_phase6_i2b_lag_stride_audit_v1.py",
+    "post_i1_i2a_method_development": true,
+    "graph_prediction_read": false,
+    "graph_wb_read": false,
+    "final_wb_read": false,
+    "hidden_provider_parameters_read": false
+  },
+  "horizon_grid_s": {
+    "start": 5,
+    "end_inclusive": 240,
+    "step": 5
+  },
+  "temporal_sampling": {
+    "stride_s": 10,
+    "canonical_start_phase_s": 5,
+    "start_rule": "H = 5 + 10*k for integer k>=0, restricted by H+lag<=240",
+    "lags_s": [
+      20,
+      30,
+      40,
+      50,
+      75,
+      100,
+      150,
+      200
+    ],
+    "lag_weighting": "equal_across_selected_lags",
+    "within_lag_window_weighting": "equal_across_valid_start_windows",
+    "trajectory_pairing": "same trajectory j within each (region,H,H+lag) window",
+    "cross_window_trajectory_linkage_public": false
+  },
+  "audit_basis": {
+    "stride10_cost_ratio_vs_stride5": 0.510638,
+    "stride10_persistence_curve_mae_vs_stride5": 0.008326,
+    "stride10_persistence_curve_max_abs_dev_vs_stride5": 0.030821,
+    "reference_mean_spearman_at_20s": 0.855019,
+    "reference_mean_spearman_at_50s": 0.723191,
+    "reference_mean_spearman_at_100s": 0.55329,
+    "reference_mean_spearman_at_150s": 0.402106,
+    "reference_mean_spearman_at_200s": 0.250832
+  },
+  "immutability": {
+    "freeze_before_i2b_loss_definition": true,
+    "no_reselection_from_provider_fit": true,
+    "no_reselection_from_graph_prediction": true,
+    "no_reselection_from_admission_results": true,
+    "no_reselection_from_whitebox": true
+  }
+}
