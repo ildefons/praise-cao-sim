@@ -1,0 +1,57 @@
+{
+  "status": "FROZEN_PHASE6_I2B_LAG_STRIDE_AUDIT_V1",
+  "freeze_date": "2026-10-09",
+  "scientific_role": "Provider-only temporal-dependence information/cost audit before defining I2b reconstruction.",
+  "provider_worlds": [
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+  ],
+  "providers": [
+    "ProviderA",
+    "ProviderB",
+    "ProviderC"
+  ],
+  "source": {
+    "phase5_private_provider_ledgers": "../phase5/results/01_i1/{world}/private/sigma/{provider}/provider_request_ledgers.csv",
+    "phase5_public_cards": "../phase5/results/01_i1/{world}/public/{provider}/card.json",
+    "new_provider_world_simulation": false,
+    "graph_prediction_read": false,
+    "graph_wb_read": false,
+    "final_wb_read": false,
+    "hidden_provider_parameters_read": false
+  },
+  "temporal_representation": {
+    "positive_horizons_s": "5..240 step 5",
+    "lag_values_s": "5..235 step 5",
+    "rank_transform": "tie-aware empirical midrank u=(rank-0.5)/N",
+    "reference_stride_s": 5,
+    "stride_values_s": [
+      5,
+      10,
+      15,
+      20,
+      25,
+      30,
+      40,
+      50
+    ],
+    "window_metrics": [
+      "spearman_rank_persistence_when_both_endpoints_nondegenerate",
+      "mean_abs_rank_displacement",
+      "mean_abs_compliance_displacement",
+      "fraction_raw_compliance_changed",
+      "endpoint_nondegenerate"
+    ]
+  },
+  "cost": {
+    "unit": "paired trajectory observations",
+    "n_trajectories_per_provider": 100,
+    "compare_each_stride_to_reference_stride_s": 5,
+    "no_scalar_information_cost_utility": true
+  },
+  "outputs": {
+    "root": "results/21_i2b_lag_stride_audit"
+  }
+}
