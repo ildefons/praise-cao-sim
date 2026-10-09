@@ -57,7 +57,7 @@ def run(workers:int)->Path:
     if cfg.get("status")!=EXPECTED:
         raise RuntimeError("unexpected I2b-v3 M2 graph contract")
 
-    recon_manifest=RECON/"p4_i2b_varweight_reconstruction_manifest.json"
+    recon_manifest=RECON/"p4_i2b_hierarchical_reconstruction_manifest.json"
     if not recon_manifest.is_file():
         raise FileNotFoundError("run I2b-v3 reconstruction first")
     rm=read_json(recon_manifest)
