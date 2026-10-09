@@ -62,9 +62,9 @@ def provider(world,provider):
     df=pd.DataFrame(rows)
     if len(df)!=630:
         raise RuntimeError("expected 630 windows")
-    public=(pairs.groupby(["region_id","lag_s","start_H","end_H"],sort=True)
-      .apply(lambda x:float(np.mean(np.square(x["compliance_end"].to_numpy()-x["compliance_start"].to_numpy()))),include_groups=False)
-      .rename("v3_endpoint_variation").reset_index())
+    tmp=pairs.assign(_endpoint_sq=(pairs["compliance_end"]-pairs["compliance_start"])**2)
+    public=(tmp.groupby(["region_id","lag_s","start_H","end_H"],as_index=False,sort=True)
+      .agg(v3_endpoint_variation=("_endpoint_sq","mean")))
     df=df.merge(public,on=["region_id","lag_s","start_H","end_H"],validate="one_to_one")
     if not np.allclose(df.mean_squared_endpoint_change_private,df.v3_endpoint_variation,atol=1e-12,rtol=0):
         raise RuntimeError("private/public endpoint values disagree")
