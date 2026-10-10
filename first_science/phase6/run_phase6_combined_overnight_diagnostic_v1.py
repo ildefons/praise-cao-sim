@@ -4,8 +4,12 @@ Diagnostic only, frozen candidates, no fitting or selection using WB.
 Outputs separately distinguish same-reference PUBLIC FIT from held-out truth.
 """
 from __future__ import annotations
-import argparse,concurrent.futures,json,time,zipfile
+import argparse,concurrent.futures,json,time,zipfile,sys
 from pathlib import Path
+_IMPORT_HERE=Path(__file__).resolve().parent
+for _import_dir in (_IMPORT_HERE.parent/'phase5',_IMPORT_HERE.parent/'phase3'):
+    if str(_import_dir) not in sys.path:
+        sys.path.insert(0,str(_import_dir))
 import numpy as np
 import pandas as pd
 from phase5_runtime_v2 import read_json,sha256_file,write_json,utc_now_iso,git_head
