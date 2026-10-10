@@ -1,6 +1,8 @@
 """Compare frozen true-parameter oracle scores to archived original search/rescore candidates."""
 from pathlib import Path
-import pandas as pd,zipfile
+import pandas as pd,zipfile,sys
+P5=Path(__file__).resolve().parent.parent/'phase5'
+if str(P5) not in sys.path:sys.path.insert(0,str(P5))
 from phase5_runtime_v2 import write_json
 H=Path(__file__).resolve().parent
 R=H/"results"/"44_true_parameter_oracle"
