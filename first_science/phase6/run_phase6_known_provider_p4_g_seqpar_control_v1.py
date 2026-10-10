@@ -18,7 +18,7 @@ from phase5_runtime_v2 import (load_phase5_contracts,graph_record,physical_cell_
 from run_phase5_step0_v2 import _hidden_surrogates
 from run_phase5_graph_prediction_v3b_fullsupport import (
     _simulation_payload,_execute_payloads,_validate_complete_ledger,_member_curves,
-    _m2_predictions,_horizons,_query_definitions)
+    _horizons,_query_definitions)
 from run_phase6_i2bv4_six_way_matched_evaluation import _reference,_qmeta,_metrics,_decision
 ROOT=HERE/"results"/"39_known_provider_p4_g_seqpar_control"
 CFG=P5/"config_phase5_graph_prediction_v3b_fullsupport.json"
@@ -52,7 +52,13 @@ def main():
         horizons=_horizons(read_json(CFG)),method_id="KNOWN_PROVIDER_MEMBER",
         rank=1,graph_n=100,joint_weight=1.0,
         candidate_ids={p:"GENERATING_PROVIDER" for p in ("ProviderA","ProviderB","ProviderC")})
-    pred=_m2_predictions(member)
+    # One-member control: do not call the 27-member M2 aggregator.
+    required={"query_id","H","sigma_hat"}
+    if not required.issubset(member.columns):
+        raise RuntimeError(f"known-provider curves missing {required-set(member.columns)}")
+    pred=member[["query_id","H","sigma_hat"]].copy()
+    if pred.duplicated(["query_id","H"]).any():
+        raise RuntimeError("duplicate known-provider query/horizon prediction")
     pred["method_id"]="KNOWN_PROVIDER"
     pred.to_csv(ROOT/"known_provider_predictions.csv",index=False)
     ref=_reference()
