@@ -201,7 +201,7 @@ if __name__=="__main__":
     ap=argparse.ArgumentParser()
     ap.add_argument("--seeds",type=int,default=3)
     ap.add_argument("--seed-base",type=int,default=99001000)
-    ap.add_argument("--rho",type=float,default=0.9)
+    ap.add_argument("--rho",type=float,default=0.95)
     args=ap.parse_args()
     if args.seeds<1 or not 0<args.rho<=1:raise ValueError("Invalid seeds/rho")
     run(args)
