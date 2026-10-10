@@ -27,6 +27,24 @@ MEMBER_FILES={
 "I2B_V4":("37_i2b_v4_m2_p4_g_seqpar","i2bv4_m2_member_curves.csv")}
 PS=("ProviderA","ProviderB","ProviderC")
 PARAMS=("mean_service_time","cost_rate","service_cv")
+RECON_ROOTS={
+"I1STRONG":"18_i1strong_reconstruction_p4",
+"I2AFS":"14_i2a_fullspectrum_reconstruction_p4",
+"I2B_V1":"24_i2b_energy_reconstruction_p4",
+"I2B_V2":"28_i2b_varweight_reconstruction_p4",
+"I2B_V3":"32_i2b_hierarchical_reconstruction_p4",
+"I2B_V4":"36_i2b_v4_mean_range_reconstruction_p4"}
+def parameters_for(method,provider,candidate_id):
+    folder=H/"results"/RECON_ROOTS[method]/provider
+    files=list(folder.glob("*m2_provider_models.csv"))
+    if len(files)!=1:
+        raise RuntimeError(f"{method}/{provider}: expected one frozen support CSV, got {len(files)}")
+    support=pd.read_csv(files[0])
+    hits=support[support.candidate_id.astype(str)==str(candidate_id)]
+    if len(hits)!=1:
+        raise RuntimeError(f"{method}/{provider}/{candidate_id}: no unique frozen parameter record")
+    return [float(hits.iloc[0][k]) for k in PARAMS]
+
 def main():
     R.mkdir(parents=True,exist_ok=True)
     common=pd.read_csv(C)
@@ -50,7 +68,7 @@ def main():
                 cand=m[m[provider+"_candidate_id"].astype(str)==str(c.candidate_id)]
                 if len(cand)!=9*555:raise RuntimeError(f"{method}/{provider}/rank{c.rank} ID mismatch")
                 true=truth[provider]
-                vals=[float(getattr(c,k)) for k in PARAMS]
+                vals=parameters_for(method,provider,c.candidate_id)
                 target=[float(getattr(true,k)) for k in PARAMS]
                 # Relative Euclidean distance, positive-valued dimensions; physical units made comparable.
                 rel=float(np.linalg.norm([(x-y)/y for x,y in zip(vals,target)]))
