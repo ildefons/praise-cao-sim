@@ -53,11 +53,14 @@ def reconstruct_local(native,root,ast,invariants,stop,seed):
         deps=plan.dependencies[p]
         keys=deps if deps else ("Fpre",)
         if not all(rid in maps[q] for q in keys):return None
-        return max(float(maps[q][rid].time_out) for q in keys)
+        completions=[float(maps[q][rid].time_out) for q in keys]
+        if any(t>stop+TOL for t in completions):return None
+        return max(completions)
     lags={}
     for p in PROVIDERS:
         pairs=[(float(row.time_reception)-release(rid,p))
-            for rid,row in maps[p].items() if release(rid,p) is not None]
+            for rid,row in maps[p].items()
+            if release(rid,p) is not None and float(row.time_reception)<=stop+TOL]
         if len(pairs)==0:raise RuntimeError(f"No native reception lag calibrator for {p}")
         low,high=min(pairs),max(pairs)
         # Distinct lags imply unknown controller/network scheduling.
@@ -82,14 +85,20 @@ def reconstruct_local(native,root,ast,invariants,stop,seed):
                 arrival=float(native_row.time_reception)
                 if abs(arrival-predicted_arrival)>TOL:
                     raise RuntimeError(f"{p}/{rid}: native arrival mismatch")
-                completed=float(native_row.time_out)
-                if completed>stop+TOL:raise RuntimeError("Native completion past stop")
-                service=float(native_row.service)
-                if service<0:raise RuntimeError("negative native service")
-                cost=float(invariants["provider_cost_rates"][p])*service
-                quality=float(native_row.qos)
-                if not np.isfinite(quality):raise RuntimeError("invalid quality")
-                status="completed"
+                candidate_completion=float(native_row.time_out)
+                if candidate_completion<=stop+TOL:
+                    completed=candidate_completion
+                    service=float(native_row.service)
+                    if service<0:raise RuntimeError("negative native service")
+                    cost=float(invariants["provider_cost_rates"][p])*service
+                    quality=float(native_row.qos)
+                    if not np.isfinite(quality):raise RuntimeError("invalid quality")
+                    status="completed"
+                else:
+                    # Mirror frozen graph ledger: post-stop native executions
+                    # cannot be observed as completed at the accounting cutoff.
+                    completed=cost=quality=None
+                    status="native_completion_after_stop"
             else:
                 arrival=predicted_arrival
                 completed=cost=quality=None
