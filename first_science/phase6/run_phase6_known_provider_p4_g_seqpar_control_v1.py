@@ -53,10 +53,10 @@ def main():
         rank=1,graph_n=100,joint_weight=1.0,
         candidate_ids={p:"GENERATING_PROVIDER" for p in ("ProviderA","ProviderB","ProviderC")})
     # One-member control: do not call the 27-member M2 aggregator.
-    required={"query_id","H","sigma_hat"}
+    required={"query_id","H","sigma_member"}
     if not required.issubset(member.columns):
         raise RuntimeError(f"known-provider curves missing {required-set(member.columns)}")
-    pred=member[["query_id","H","sigma_hat"]].copy()
+    pred=member[["query_id","H","sigma_member"]].rename(columns={"sigma_member":"sigma_hat"}).copy()
     if pred.duplicated(["query_id","H"]).any():
         raise RuntimeError("duplicate known-provider query/horizon prediction")
     pred["method_id"]="KNOWN_PROVIDER"
