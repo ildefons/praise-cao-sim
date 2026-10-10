@@ -373,6 +373,7 @@ def execute_one_phase5_graph_trajectory(
     canonical_ipt: float,
     execution_fraction: float,
     return_provider_rows: bool = False,
+    return_native_rows: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame] | tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Run graph; optionally return native provider rows for diagnostics only."""
     period = float(workload_period)
@@ -438,14 +439,19 @@ def execute_one_phase5_graph_trajectory(
         diagnostics = provider_interarrival_statistics_from_native_trace(
             trace_base
         )
-        if return_provider_rows:
+        if return_provider_rows or return_native_rows:
             native = Stats(defaultPath=trace_base).df.copy()
-            provider_rows = native.loc[native["module"].isin(PROVIDERS)].copy()
+            if return_provider_rows:
+                provider_rows = native.loc[native["module"].isin(PROVIDERS)].copy()
 
     ledger.insert(0, "graph_id", str(graph_id))
     ledger.insert(0, "seed", int(trajectory_seed))
     diagnostics.insert(0, "graph_id", str(graph_id))
     diagnostics.insert(0, "seed", int(trajectory_seed))
+    if return_native_rows:
+        if return_provider_rows:
+            return ledger, diagnostics, provider_rows, native
+        return ledger, diagnostics, native
     if return_provider_rows:
         return ledger, diagnostics, provider_rows
     return ledger, diagnostics
