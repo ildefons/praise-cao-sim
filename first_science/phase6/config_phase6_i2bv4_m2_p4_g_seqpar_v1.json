@@ -1,0 +1,24 @@
+{
+  "status": "FROZEN_PHASE6_I2BV4_M2_P4_G_SEQPAR_V1",
+  "freeze_date": "2026-10-10",
+  "scientific_role": "P4/G_SEQPAR development-only matched propagation of I2b-v4 mean-range M2 support",
+  "provider_world_id": "P4",
+  "graph_id": "G_SEQPAR",
+  "provider_support": "results/36_i2b_v4_mean_range_reconstruction_p4/m2_joint_support_27.csv",
+  "graph_seed_bank": "../phase5/config_phase5_seed_registry_v3b_fullsupport.json::graph_prediction.M1_M2_common_bank",
+  "n_trajectories_per_joint_model": 100,
+  "joint_models": 27,
+  "joint_weights": "equal 1/27",
+  "matched_comparators": {
+    "i1strong": "results/19_i1strong_m2_p4_g_seqpar",
+    "i2afs": "results/15_i2afs_m2_p4_g_seqpar",
+    "i2b_equalweight": "results/25_i2b_m2_p4_g_seqpar"
+  },
+  "outputs": {
+    "root": "results/37_i2b_v4_m2_p4_g_seqpar"
+  },
+  "firewall": {
+    "graph_wb_read": false,
+    "hidden_provider_parameters_read": false
+  }
+}
