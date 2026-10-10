@@ -30,6 +30,7 @@ def simultaneous_lower(k,n,alpha_per):
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--calibration-only",action="store_true")
+    ap.add_argument("--allow-weak-information",action="store_true",help="Reuse calibrated nonzero bounds even if heuristic informativeness gate fails")
     ap.add_argument("--trials",type=int,default=8,help="Additional study trials")
     ap.add_argument("--seeds-per-trial",type=int,default=100)
     ap.add_argument("--calibration-seeds",type=int,default=200)
@@ -85,12 +86,17 @@ def main():
     print("CALIBRATION_BOUNDS")
     print(table.to_string(index=False),flush=True)
     weak=table[table.lower_bound<args.min_provider_bound]
-    if len(weak):
+    if len(weak) and not args.allow_weak_information:
         print("CALIBRATION_GATE_FAILED_DEGENERATE_PROVIDER_DISCLOSURES",flush=True)
         print(weak.to_string(index=False))
         print("NO_OPTIMIZATION_PERFORMED; redesign provider SLA regions under the same graph context.")
         print("OUTPUT",root)
         return
+    if len(weak):
+        if (table.lower_bound<=0).any():
+            raise RuntimeError("Vacuous zero lower bound: stop instead of optimizing")
+        print("WEAK_INFORMATION_OVERRIDE_NONZERO_BOUNDS",flush=True)
+        print(weak.to_string(index=False),flush=True)
     if args.calibration_only:
         print("CALIBRATION_GATE_PASSED_NO_OPTIMIZATION",flush=True)
         return
@@ -123,6 +129,7 @@ def main():
                 trial.set_constraint(f"{p}@{h}",float(disclosure[p][str(h)]-response[p][i]))
         trial.set_user_attr("response",response)
         trial.set_user_attr("N",args.seeds_per_trial)
+        trial.set_user_attr("weak_information_override",bool(args.allow_weak_information))
         trial.set_user_attr("first_seed",start)
         graph_survival=float(response["G"][-1])
         print("SCIENTIFIC_TRIAL",trial.number,"N",args.seeds_per_trial,
