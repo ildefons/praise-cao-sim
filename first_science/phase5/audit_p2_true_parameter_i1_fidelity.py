@@ -12,7 +12,7 @@ import pandas as pd
 from phase5_runtime_v2 import load_phase5_contracts, sha256_file
 from run_phase5_provider_reconstruction_v3 import (
     _load_public_card, _domain_row, _bounds, _evaluate_candidate,
-    _seed_tuple, SEEDS, PROVIDERS, V3_ROOT
+    _seed_tuple, SEEDS, PROVIDERS
 )
 from phase5_runtime_v2 import read_json
 
