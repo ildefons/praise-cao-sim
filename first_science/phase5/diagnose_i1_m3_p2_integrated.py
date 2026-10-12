@@ -32,6 +32,13 @@ def compute(queries: pd.DataFrame, wb: pd.DataFrame, members: pd.DataFrame):
         raise RuntimeError("incomplete 343-member support")
     rows = []
     member_rows = []
+    # Read each expensive native graph ledger exactly once.
+    member_ledgers = {}
+    for rank in range(1, 344):
+        source = ROOT / "ledgers" / f"M3_R{rank:03d}.csv"
+        if not source.is_file():
+            raise FileNotFoundError(source)
+        member_ledgers[rank] = pd.read_csv(source)
     for query in queries.itertuples(index=False):
         region_rho = float(query.rho)
         boundary = AdmissibilityBoundary(
@@ -53,10 +60,7 @@ def compute(queries: pd.DataFrame, wb: pd.DataFrame, members: pd.DataFrame):
 
             # All member ledgers use their original frozen seed allocations.
             for rank in range(1, 344):
-                source = ROOT / "ledgers" / f"M3_R{rank:03d}.csv"
-                if not source.is_file():
-                    raise FileNotFoundError(source)
-                ledger = pd.read_csv(source)
+                ledger = member_ledgers[rank]
                 curve = build_empirical_graph_sigma_curve(
                     ledger, boundary=boundary, rho_global=query_rho,
                     horizons=HORIZONS, stop_time=240.0, accounting_origin=0.0,
