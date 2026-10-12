@@ -23,7 +23,7 @@ The target mapping is
 \boxed{(I_1,G)\longmapsto (\widehat A_G,\widehat\sigma_G).}
 \]
 
-A predictor that is *given* \(A_G\) and outputs only \(\sigma_G(A_G,H)\) does **not** by itself fulfill this goal. The previously frozen Phase-5 M3 graph-prediction procedure is of that latter form. The missing graph-region inference component must be stated and tested explicitly, not presumed already implemented.
+The method must construct \(A_G\) from public I1 provider regions and public graph topology, rather than take an arbitrary query boundary as its sole input. Existing M1/M2 forward-composition rules supply that step; M3 predicts survival on the same induced region.
 
 ## Entrepreneur/information boundary
 
@@ -32,38 +32,43 @@ A predictor that is *given* \(A_G\) and outputs only \(\sigma_G(A_G,H)\) does **
 - Do not impose equality or artificial constraints among reconstructed provider parameters. Heterogeneous, reasonable existing generating worlds are preferred for the initial development demonstration.
 - Preserve the exact disclosed I1 survival estimand; do not replace historical cumulative-compliance I1 with first-violation survival without explicitly creating and labeling a separate interface.
 
-## Rho-conditioned graph admissibility: reference and prediction
+## Rho-conditioned graph admissibility: inherited M1/M2 semantics
 
-In the established PRAISE I1 methodology, admissibility regions are indexed by a **region-content level** `rho_region`. The existing provider-region implementation in `phase2/i1_rho_conditioned_region.py` fits a GMM to completed (log L, log C) samples, draws a joint L/C sample, and extracts nested minimum-area, origin-anchored L/C rectangles containing at least the requested mass. In the current benchmark Q is constant.
-
-Apply the **same explicitly specified rho-conditioned region-extraction semantics**, adapted to completed **graph-level** performance observations, to obtain
+**Clarification 2026-10-12:** Preserve the established I1-M1 and I1-M2 forward-composition workflow. Provider regions `A_p(rho_region)` are constructed by the existing I1 provider-card procedure and disclosed externally. The graph entrepreneur composes these public regions through `G` using the existing topology-aware boundary algebra, including public fixed-stage terms, to obtain **one public, induced graph region**:
 
 \[
-A_G^{WB}(\rho_{region})=R_{\rho_{region}}(T_G^{WB}),\qquad
-\widehat A_G^{M3}(\rho_{region})=R_{\rho_{region}}(\widehat T_G^{M3}).
+A_G^{I1}(\rho_{region})=\operatorname{Compose}_G(\{A_p(\rho_{region})\}).
 \]
 
-Thus the graph region is **not an arbitrary externally fixed target or an entrepreneur-imposed admission threshold**. The parameter `rho_region` identifies the intended coverage level; the frozen extraction rule and performance evidence determine the numerical boundaries. Rho alone does not supply numerical latency/cost thresholds without the performance distribution and extraction convention.
+For supported operators the latency, cost and quality boundaries follow the established `sequence` (sum L, sum C, min Q) and `parallel_all` (max L, sum C, min Q) rules, plus explicitly modeled fixed terms.
 
-The predicted graph-region extractor must consume only I1-compatible reconstructed-model graph evidence, never hidden parameter values or white-box graph evidence. The reference extractor may use only isolated white-box graph evidence. Freeze the common extraction procedure, rho grid, trajectory handling (including completed/unresolved semantics), and evidence separation before the final test.
+This is the graph admissibility region for the pilot, shared by M1, M2, M3 and white-box evaluation. **Do not reconstruct a separate graph region from graph-level simulated observations** or imply that a differently estimated white-box region must be compared with the public induced region.
 
-Keep `rho_region` distinct from `rho_query`: the first specifies the admissibility-region content, while the second is the compliance-fraction threshold for the survival query, e.g. \(\sigma_G(A_G(\rho_{region}),H;\rho_{query})=P(c_G(A_G,H)\ge\rho_{query})\). Do not silently replace that cumulative-compliance estimand by first-violation survival.
+Predict graph survival on that exact region, with the existing cumulative-compliance estimand:
 
-The old frozen Phase-5 Step-0 graph query battery is a different procedure, using white-box calibration to choose **evaluation query regions** from a scaled provider-derived family. It is not itself a reconstruction of \(A_G^{WB}(\rho_{region})\), and the new goal must not retroactively relabel it as such.
+\[
+\widehat\sigma_G^{M3}(A_G^{I1}(\rho_{region}),H;\rho_{query})
+\quad\text{vs}\quad
+\sigma_G^{WB}(A_G^{I1}(\rho_{region}),H;\rho_{query}).
+\]
 
-## Evaluation targets (both mandatory)
+Keep `rho_region` (public provider-region construction) separate from `rho_query` (compliance fraction in survival). The historic experiments use the same-rho diagonal when specified.
 
-1. **Region recovery:** compare \(\widehat A_G\) against \(A_G^{WB}\) using appropriately specified overlap and boundary-discrepancy measures on a frozen common domain.
-2. **Survival recovery:** compare \(\widehat\sigma_G\) against white-box \(\sigma_G^{WB}\) using RMSE as the primary scalar error, with MAE and signed bias as secondary diagnostics, on a frozen set of matched, meaningful graph-region/horizon queries.
+The phrase `A_G^WB` should **not** be used here to imply a new graph-level white-box GMM extraction step. The graph-level white-box evidence supplies the reference survival *on the shared public region*. The graph region is a public I1-derived composition, not a separately estimated latent target. This corrects the provisional implementation plan while preserving the broader frozen target of graph-level region and survival from I1.
 
-Since the predicted and reference admissibility regions may differ, specify **before testing** how survival curves are evaluated on a common domain. A low RMSE evaluated only on one region is not evidence of successful joint region recovery.
+The former Phase-5 Step-0 scale-calibrated graph-query battery is an additional experimental design; it is not the direct same-rho induced-region pilot.
 
-A weakly identified or unrecoverable result is still a valid scientific outcome; there is no predetermined minimum performance score or entrepreneur-imposed admission threshold.
+## Evaluation targets
+
+1. **Graph-region construction:** verify that `A_G^{I1}(rho_region)` is computed correctly and consistently from public provider offerings and public graph topology, using the same implementation/rules for all methods. This is a deterministic contract test, **not region-recovery accuracy against a different WB target**.
+2. **Graph-survival prediction:** compare M3 against graph white box and, where appropriate, M1/M2 under the **identical induced graph region**, common `rho_query` and horizons. RMSE is primary; MAE and bias secondary.
+
+A poor result is still valid scientific evidence. Do not change the region or method after viewing reference survival to improve agreement.
 
 ## M3 and experiment discipline
 
 - Consolidate/reuse the already developed I1 provider-reconstruction and M3 graph-propagation machinery where scientifically valid.
-- The region-recovery step is additional and needs an explicit formulation; it cannot be hidden in the existing fixed-\(A_G\) graph simulator.
+- Reuse the existing public-I1 forward boundary composition for \(A_G(\rho)\), as in M1/M2. Do not use the experimental graph-ledger GMM extractor for this primary pilot.
 - Reuse reasonable existing provider-world configurations as development sources without disclosing their hidden parameters to the method; use independent evidence and keep holdout white-box results inaccessible until predictions are frozen.
 - Distinguish development/regression demonstrations from independent generalization evidence.
 - Maintain the PRAISE PPG firewall: do not import the unpublished GP+DVI mechanism, readiness score, datasets, or previous QR/YOLO/Lidar setup.
@@ -71,5 +76,5 @@ A weakly identified or unrecoverable result is still a valid scientific outcome;
 
 ## Next two stages
 
-1. **Consolidation:** specify and implement the complete \((I_1,G)\to(\widehat A_G,\widehat\sigma_G)\) pipeline, including the reference-region construction rule and its information firewall.
-2. **Testing:** evaluate both region recovery and graph-survival recovery on controlled, reasonable heterogeneous provider worlds; then assess generalization on independent cases.
+1. **Consolidation:** specify and implement the M1/M2-compatible \((I_1,G)\to(A_G^{I1},\widehat\sigma_G)\) pipeline and its information firewall.
+2. **Testing:** verify induced-region construction and evaluate graph-survival recovery on controlled, reasonable heterogeneous provider worlds; then assess generalization on independent cases.
