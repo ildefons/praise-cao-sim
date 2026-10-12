@@ -7,12 +7,17 @@ Results are explanatory and cannot tune the already evaluated P2 model.
 from __future__ import annotations
 import argparse
 import json
+import sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
 from phase5_runtime_v2 import load_phase5_contracts, sha256_file
 from run_i1_m123_p2_native_comparison import ROOT, OUT, QUERIES, M3FREEZE
 from evaluate_i1_m3_p2_pilot import REF
+PHASE1=Path(__file__).resolve().parent.parent/"phase1"
+if str(PHASE1) not in sys.path:
+    sys.path.insert(0,str(PHASE1))
+from sla_compliance_analysis import build_request_sla_decision_table, EVENT_TOLERANCE
 
 V3B=Path(__file__).resolve().parent/"results"/"03_reconstruction_v3b"
 DEST=OUT/"attribution_diagnostic"
@@ -79,15 +84,35 @@ def _ledger_summary(ledger,method,member,query):
         raise RuntimeError(f"{method}/{member}: ledger columns missing: {necessary-set(ledger.columns)}")
     rho=float(query.rho)
     rows=[]
+    decisions=[]
+    for trajectory, group in ledger.groupby("trajectory",sort=True):
+        d=build_request_sla_decision_table(
+            group,
+            latency_threshold=float(query.A_G_l_max),
+            cost_threshold=float(query.A_G_c_max),
+            quality_threshold=float(query.A_G_q_min),
+            stop_time=240.0,
+        )
+        d["trajectory"]=trajectory
+        decisions.append(d)
+    decisions=pd.concat(decisions,ignore_index=True)
+    all_trajectories=pd.Index(sorted(ledger.trajectory.unique()),name="trajectory")
     for horizon in HORIZONS:
-        # Match the existing decided-request and SLA convention. Completion
-        # before/equal H contributes, unresolved is excluded.
-        decided=ledger[ledger.completion.notna() & (ledger.completion.astype(float)<=horizon)].copy()
-        ok=(decided.L<=float(query.A_G_l_max)+1e-12)&(decided.C<=float(query.A_G_c_max)+1e-12)&(decided.Q>=float(query.A_G_q_min)-1e-12)
-        decided["ok"]=ok.astype(int)
-        all_trajectories=pd.Index(sorted(ledger.trajectory.unique()),name="trajectory")
-        counts=decided.groupby("trajectory").agg(decided=("ok","size"),satisfied=("ok","sum")).reindex(all_trajectories,fill_value=0)
-        counts["fraction"]=np.where(counts.decided>0,counts.satisfied/np.maximum(counts.decided,1),1.)
+        decided=decisions.loc[
+            decisions.decision_time.notna()
+            & (decisions.decision_time.astype(float)<=horizon+EVENT_TOLERANCE)
+        ].copy()
+        decided["ok"]=decided.compliant.fillna(False).astype(int)
+        counts=decided.groupby("trajectory").agg(
+            decided=("ok","size"),satisfied=("ok","sum")
+        ).reindex(all_trajectories,fill_value=0)
+        counts["fraction"]=np.where(
+            counts.decided>0,counts.satisfied/np.maximum(counts.decided,1),1.
+        )
+        completed=decided.loc[
+            decided.completion.notna()
+            & (decided.completion<=decided.decision_time+EVENT_TOLERANCE)
+        ]
         rows.append({
             "method":method,"member":member,"rho":rho,"H":horizon,
             "n_trajectories":len(all_trajectories),
@@ -98,10 +123,13 @@ def _ledger_summary(ledger,method,member,query):
             "compliance_q10":float(counts.fraction.quantile(.1)),
             "compliance_q50":float(counts.fraction.quantile(.5)),
             "compliance_q90":float(counts.fraction.quantile(.9)),
-            "sigma_empirical":float((counts.fraction>=rho-1e-12).mean()),
-            "completed_latency_mean":float(decided.L.mean()) if len(decided) else np.nan,
-            "completed_cost_mean":float(decided.C.mean()) if len(decided) else np.nan,
-            "completed_request_pass_fraction":float(ok.mean()) if len(ok) else np.nan,
+            "sigma_empirical":float((counts.fraction+EVENT_TOLERANCE>=rho).mean()),
+            "completed_latency_mean":float(completed.L.mean()) if len(completed) else np.nan,
+            "completed_cost_mean":float(completed.C.mean()) if len(completed) else np.nan,
+            "completed_request_pass_fraction":float(completed.ok.mean()) if len(completed) else np.nan,
+            "deadline_failure_fraction":float(
+                (decided.failure_cause=="latency").mean()
+            ) if len(decided) else np.nan,
         })
     return rows
 
