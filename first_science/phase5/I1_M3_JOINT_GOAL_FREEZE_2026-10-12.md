@@ -32,13 +32,24 @@ A predictor that is *given* \(A_G\) and outputs only \(\sigma_G(A_G,H)\) does **
 - Do not impose equality or artificial constraints among reconstructed provider parameters. Heterogeneous, reasonable existing generating worlds are preferred for the initial development demonstration.
 - Preserve the exact disclosed I1 survival estimand; do not replace historical cumulative-compliance I1 with first-violation survival without explicitly creating and labeling a separate interface.
 
-## Reference truth and identifiability of A_G
+## Rho-conditioned graph admissibility: reference and prediction
 
-The generating provider parameters and graph simulator alone do **not** uniquely define a canonical \(A_G^{WB}\). An explicit, common graph-region-construction/selection rule \(R_G\), with a declared query domain and any necessary operating objectives, is required.
+In the established PRAISE I1 methodology, admissibility regions are indexed by a **region-content level** `rho_region`. The existing provider-region implementation in `phase2/i1_rho_conditioned_region.py` fits a GMM to completed (log L, log C) samples, draws a joint L/C sample, and extracts nested minimum-area, origin-anchored L/C rectangles containing at least the requested mass. In the current benchmark Q is constant.
 
-Before evaluation, define and freeze \(R_G\) and apply it consistently to obtain the reference \(A_G^{WB}\) from permitted white-box evidence and a predicted \(\widehat A_G\) from disclosed I1/reconstructed-model evidence. Any calibration/development evidence used to design \(R_G\) must be separate from the held-out final evaluation. Do not define or repair the rule based on observed final errors.
+Apply the **same explicitly specified rho-conditioned region-extraction semantics**, adapted to completed **graph-level** performance observations, to obtain
 
-This requirement is **open for methodology design**, not a claim that an existing Phase-5 Step-0-selected graph query battery is itself a recovered graph region.
+\[
+A_G^{WB}(\rho_{region})=R_{\rho_{region}}(T_G^{WB}),\qquad
+\widehat A_G^{M3}(\rho_{region})=R_{\rho_{region}}(\widehat T_G^{M3}).
+\]
+
+Thus the graph region is **not an arbitrary externally fixed target or an entrepreneur-imposed admission threshold**. The parameter `rho_region` identifies the intended coverage level; the frozen extraction rule and performance evidence determine the numerical boundaries. Rho alone does not supply numerical latency/cost thresholds without the performance distribution and extraction convention.
+
+The predicted graph-region extractor must consume only I1-compatible reconstructed-model graph evidence, never hidden parameter values or white-box graph evidence. The reference extractor may use only isolated white-box graph evidence. Freeze the common extraction procedure, rho grid, trajectory handling (including completed/unresolved semantics), and evidence separation before the final test.
+
+Keep `rho_region` distinct from `rho_query`: the first specifies the admissibility-region content, while the second is the compliance-fraction threshold for the survival query, e.g. \(\sigma_G(A_G(\rho_{region}),H;\rho_{query})=P(c_G(A_G,H)\ge\rho_{query})\). Do not silently replace that cumulative-compliance estimand by first-violation survival.
+
+The old frozen Phase-5 Step-0 graph query battery is a different procedure, using white-box calibration to choose **evaluation query regions** from a scaled provider-derived family. It is not itself a reconstruction of \(A_G^{WB}(\rho_{region})\), and the new goal must not retroactively relabel it as such.
 
 ## Evaluation targets (both mandatory)
 
