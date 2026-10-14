@@ -11,11 +11,8 @@ import json
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from audit_p2_true_parameter_i1_fidelity import HERE, OUT as TRUTH_OUT
-from run_phase5_provider_reconstruction_v3 import (
-    PROVIDERS, _load_public_card, _domain_row, _bounds,
-    _evaluate_candidate, _seed_tuple, SEEDS
-)
+HERE=Path(__file__).resolve().parent
+PROVIDERS=("ProviderA","ProviderB","ProviderC")
 from phase5_runtime_v2 import load_phase5_contracts, read_json, sha256_file
 
 V3=HERE/"results"/"03_reconstruction_v3"/"P2"
@@ -38,7 +35,7 @@ def audit(contracts):
     rows=[]
     for provider in PROVIDERS:
         truth=truth_parameters(contracts,provider)
-        domain=_bounds(_domain_row("P2",provider))
+        domain=read_json(HERE/"results"/"p2_true_parameter_i1_fidelity_audit"/"manifest.json")["provider_inputs"][provider]["domain_bounds"]
         cand=pd.read_csv(V3/provider/"v3_candidates_rescore.csv")
         replay=pd.read_csv(V3/provider/"v3_candidates_replay.csv")
         candidates=cand.merge(replay[["candidate_id","replay_rmse"]],
@@ -54,7 +51,7 @@ def audit(contracts):
         if len(t)!=175:
             raise RuntimeError(f"{provider}: expected 7x25 trials, found {len(t)}")
         for k in PARAMS:
-            lo=float(getattr(domain,k+"_lower"));hi=float(getattr(domain,k+"_upper"))
+            lo,hi=map(float,domain[k])
             if not lo<=truth[k]<=hi:raise RuntimeError(f"{provider}: truth outside {k} search bounds")
         for c in (candidates,t):
             for k in PARAMS:
@@ -76,6 +73,7 @@ def audit(contracts):
 
 
 def probe(contracts):
+    from run_phase5_provider_reconstruction_v3 import (_load_public_card, _domain_row, _bounds, _evaluate_candidate, _seed_tuple, SEEDS)
     registry=read_json(SEEDS)
     banks={name:_seed_tuple(registry["provider_reconstruction"][key]) for name,key in
            [("rescore","common_rescore"),("replay","common_replay")]}
