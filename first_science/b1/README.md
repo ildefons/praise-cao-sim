@@ -186,3 +186,20 @@ The user-run [frozen method-support audit](METHOD_SUPPORT_VERIFICATION_REVIEW_20
 ## Substep 2.3c closed: uncertainty mathematics
 
 The [uncertainty-mathematics audit](UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md) identifies which results are exact (finite-mixture truncation, MC variance algebra, expectation-based noise decompositions), which are conditional/approximate (Wilson, paired bootstrap, normal intervals, budget scaling), and which are merely exploratory (model spread to truth error, deployment admission). **No new simulations or manuscript changes.** The main pending work is **Step 2.4, numerical tables and figures**, followed by simulator/provenance Step 2.5.
+
+## Substep 2.4: all manuscript tables and figures audited (2026-10-16)
+
+The complete [table/figure audit](TABLES_FIGURES_AUDIT_2026-10-16.md) inspects **Tables 1–4 and Figures 1–3** in the historical 26-page PDF. The main pilot saved metrics are previously verified. Important corrections: Table2 mixed prospective and retrospective stages, M0/other-method reference denominators differ, Fig1 matched-B Top1/Top3 are not Table2's operational B100/B300 readouts, Fig2's nondominated set excludes an internally reported dominating Top1 point, Fig3 is a numerical-width extrapolation not accuracy, and Appendix A cites a nonexistent Table2 MC-width column.
+
+**Remaining numerical-signoff boundary:** complete ancillary local CSV checks (Table2 operational Top1/Top3, all per-regime and decisions, Table4 parameters/public-I1 fits, numerical width/source tables) before claiming every historical display value independently verified. The new [read-only collector](collect_display_sources_v0_1.py) packages just existing small source artifacts; it does not rerun scientific experiments.
+
+Run on the original research laptop, from repository root:
+
+```bash
+git pull
+python first_science/b1/collect_display_sources_v0_1.py
+```
+
+Upload `first_science/b1/local_audit/display_sources_v0_1/praise_b1_display_source_evidence_v0_1.zip`. The bundle has an included/missing/skipped manifest so gaps remain visible. No scientific evidence file is altered.
+
+Next after this ancillary check: **Step 2.5, simulator extensions and research provenance**, followed by Step 2.6 report reuse blueprint.
