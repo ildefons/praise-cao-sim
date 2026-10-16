@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="395" viewBox="0 0 900 395" role="img" aria-label="Phase-5 aggregate prediction error">
+<title>Phase-5 aggregate prediction error</title><desc>12 eligible cells, 6,660 correlated H-query points per method. Different graph budgets: M1 100, M2 2,700, M3 1,400. M0 omitted (different applicability).</desc>
+<rect width="100%" height="100%" fill="white"/>
+<text x="42" y="44" font-family="DejaVu Sans,Arial,sans-serif" font-size="22" font-weight="700" fill="#162334">Phase-5 aggregate prediction error</text>
+<text x="42" y="72" font-family="DejaVu Sans,Arial,sans-serif" font-size="13" fill="#425568">12 eligible cells, 6,660 correlated H-query points per method</text>
+<line x1="270" y1="107" x2="270" y2="282" stroke="#dce5ea" stroke-width="1"/>
+<text x="270" y="300" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#566575" text-anchor="middle">0.00</text>
+<line x1="398.75" y1="107" x2="398.75" y2="282" stroke="#dce5ea" stroke-width="1"/>
+<text x="398.75" y="300" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#566575" text-anchor="middle">0.05</text>
+<line x1="527.5" y1="107" x2="527.5" y2="282" stroke="#dce5ea" stroke-width="1"/>
+<text x="527.5" y="300" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#566575" text-anchor="middle">0.10</text>
+<line x1="656.25" y1="107" x2="656.25" y2="282" stroke="#dce5ea" stroke-width="1"/>
+<text x="656.25" y="300" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#566575" text-anchor="middle">0.15</text>
+<line x1="785" y1="107" x2="785" y2="282" stroke="#dce5ea" stroke-width="1"/>
+<text x="785" y="300" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#566575" text-anchor="middle">0.20</text>
+<text x="42" y="134" font-family="DejaVu Sans,Arial,sans-serif" font-size="15" fill="#172839">M1, single model</text>
+<rect x="270" y="114" rx="5" ry="5" width="404.31443612499993" height="27" fill="#6b8ca7"/>
+<text x="684.3144361249999" y="133" font-family="DejaVu Sans Mono,monospace" font-size="15" fill="#172839">0.15702</text>
+<text x="42" y="192" font-family="DejaVu Sans,Arial,sans-serif" font-size="15" fill="#172839">M2, 27 members</text>
+<rect x="270" y="172" rx="5" ry="5" width="344.92378379999997" height="27" fill="#476e99"/>
+<text x="624.9237837999999" y="191" font-family="DejaVu Sans Mono,monospace" font-size="15" fill="#172839">0.13395</text>
+<text x="42" y="250" font-family="DejaVu Sans,Arial,sans-serif" font-size="15" fill="#172839">M3, FULL343</text>
+<rect x="270" y="230" rx="5" ry="5" width="313.86647704999996" height="27" fill="#1e507d"/>
+<text x="593.86647705" y="249" font-family="DejaVu Sans Mono,monospace" font-size="15" fill="#172839">0.12189</text>
+<text x="270" y="328" font-family="DejaVu Sans,Arial,sans-serif" font-size="13" font-weight="600" fill="#26394b">Mean absolute error (lower is better)</text>
+<text x="42" y="362" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#586b7e">Different graph budgets: M1 100, M2 2,700, M3 1,400. M0 omitted (different applicability).</text>
+</svg>
