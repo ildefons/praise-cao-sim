@@ -109,3 +109,7 @@ The simulator chapter should preserve:
 Suggested neutral wording: **“The testbed implements native deadline-aware request composition with completion-scoped branch dependencies. Four fixed logical graph forms were evaluated against separate final white-box reference trajectories after freezing public provider disclosures and graph predictions. The experiment records subsequent method changes and an engineering-smoke sequencing deviation, and does not yet establish byte-for-byte reproducibility of the external YAFS/AICon runtime.”**
 
 **Step 2.5 verdict:** source/contract audit complete. Historical runtime provenance and exact manifest chronology are *not certified* until the new local read-only snapshot is inspected; these are reproducibility limits, not grounds to reject correctly reconciled saved numerical tables.
+
+### Originality and upstream-diff boundary
+
+This audit verified the presence and operation design of PRAISE-specific APIs in the separate AICon/YAFS source, **not** a line-by-line upstream YAFS versus modified AICon diff, contribution history, patent novelty, or independent authorship. Those require separate git-baseline comparison and are not needed to report the benchmark's implemented features. Naming a capability in B1 should not implicitly claim it was invented in this project.
