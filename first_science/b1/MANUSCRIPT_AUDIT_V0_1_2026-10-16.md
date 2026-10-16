@@ -4,7 +4,7 @@
 
 - Historical source: `praise_caise_workshop_note_v11_45(1).pdf`, 26 pp., generated on 2026-10-02 (UTC), SHA-256 `e2734dc446fe9cc4991dc04800cd5e828af8784269a1dbc274036be3b7f46ada`.
 - Authoritative B1 source: [`evidence_registry_v1_0.json`](evidence_registry_v1_0.json) and [`METHOD_VERSION_CHRONOLOGY_2026-10-16.md`](METHOD_VERSION_CHRONOLOGY_2026-10-16.md).
-- Individual issue/action ledger: [`MANUSCRIPT_CLAIM_AUDIT_V0_1.csv`](MANUSCRIPT_CLAIM_AUDIT_V0_1.csv) with **59 page-anchored entries** after the 2.4 extension: 26 P0, 30 P1, 3 P2 (initial pass had 45). Priority P0 means mandatory correction before reporting, *not* 26 proven mathematical errors.
+- Individual issue/action ledger: [`MANUSCRIPT_CLAIM_AUDIT_V0_1.csv`](MANUSCRIPT_CLAIM_AUDIT_V0_1.csv) with **68 page-anchored entries** after the 2.5 extension: 29 P0, 36 P1, 3 P2 (initial pass had 45). Priority P0 means mandatory correction before reporting, *not* 29 proven mathematical errors.
 
 ## Step-2 substeps and current status
 
@@ -14,7 +14,7 @@
 | **2.2 Claim inventory and chronology** | What does each section assert; are results pilot, prospective, development or post-hoc? | **Initial pass done** | 45-entry claim ledger; chronologically separated M3 variants |
 | **2.3 Definitions and mathematical semantics** | Is each SLA, I1, M0/M1/M2/M3, uncertainty and cost definition valid under its implementation? | **2.3a SLA, 2.3b method source/selections, and 2.3c uncertainty mathematics complete; I1 region and selected appendix checks remain** | [SLA audit](SLA_SEMANTICS_SOURCE_AUDIT_2026-10-16.md), [method-definition audit](METHOD_DEFINITION_SOURCE_AUDIT_2026-10-16.md), [uncertainty mathematics audit](UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md) |
 | **2.4 Tables and figures** | Are each number, reference cohort, budget and claimed ranking consistent? | **All 4 tables / 3 figures reviewed; source-archive reconciliation complete except two limited ancillary checks** | [display audit](TABLES_FIGURES_AUDIT_2026-10-16.md) and [read-only evidence collector](collect_display_sources_v0_1.py) |
-| **2.5 Engineering/reproducibility** | What YAFS/AICon changes, provenance and processing gates can be documented? | **Pending** | Inventory actual code changes and frozen manifests, no new experiments |
+| **2.5 Engineering/reproducibility** | What YAFS/AICon changes, provenance and processing gates can be documented? | **Source/code/contract audited; local external-runtime and historical manifest chain pending** | [simulator provenance audit](SIMULATOR_PROVENANCE_AUDIT_2026-10-16.md), [local read-only checker](audit_runtime_provenance_v0_1.py) |
 | **2.6 Preservation and reuse plan** | Which prose/formulas survive in B1 and which must be moved or rewritten? | **First-pass map below** | Approved section-by-section reuse plan |
 | **2.7 Audit sign-off** | Can report drafting begin without importing misleading claims? | **Not yet** | All critical P0 definitions and quantitative inconsistencies addressed or explicitly flagged as unresolved |
 
@@ -114,7 +114,7 @@ Keep rich technical material as appendices, but all formulas and graphs carry a 
 - **2.3b (closed at frozen source/selection level)** M0–M3 variants, provider-selection rules, weighting and finite-support propagation are documented in the [method-definition audit](METHOD_DEFINITION_SOURCE_AUDIT_2026-10-16.md); **132 archived V3b support/allocation checks passed, zero failed**, reviewed in [verification report](METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md). No Optuna or simulator replay was performed.
 - **2.3c (complete: mathematical and source-level)** Audit finite-mixture support bound, pointwise Monte Carlo variance/CI approximations, CRN dependence, WB reference uncertainty, numerical decision resolution and optional stopping. See [uncertainty mathematics audit](UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md). Explicit P0 wording corrections remain open for report drafting.
 - **2.4 (PDF source-level audit complete, ancillary numbers pending)** All 4 tables and 3 figures reviewed in [display audit](TABLES_FIGURES_AUDIT_2026-10-16.md). Figure2's unqualified Pareto frontier is incorrect against the Table2 operational Top1; Appendix A's MC-width-to-Table2 reference is broken. Frozen main pilot metrics verified; [existing-display source collector](collect_display_sources_v0_1.py) will permit the outstanding table-cell checks with no simulation.
-- **2.5** Inventory simulator extensions and chronology in concrete code terms (not claims of generic simulator novelty).
+- **2.5 (source/contract audit complete, historical runtime attestation pending)** Inventory native AICon/YAFS composition API and controller, Phase5 AST, fixed physical graph runner, engineering-smoke protocol deviation, method revisions, prediction-to-WB freeze locks and gaps in external YAFS version pinning. See [simulator provenance audit](SIMULATOR_PROVENANCE_AUDIT_2026-10-16.md).
 - **2.6** Agree final retain/update/rewrite plan. Only then begin editing the historical manuscript source or opening a fresh B1 report branch.
 
 **No additional scientific simulations are required for these audits.**
@@ -130,3 +130,7 @@ All **four tables and three figures** were visually reviewed against the October
 ### Display-source verification update
 
 The uploaded [22-file numerical source archive](TABLES_FIGURES_SOURCE_RECONCILIATION_2026-10-16.md) now independently substantiates Table2's M0 baseline error and beta=.9 decision denominators, Table3's matched-B Top3 regime rows, all Table4 hidden coordinates and public-I1 losses, Figure2 bootstrap-bar endpoint tables and Figure3 M1/M3 width anchors (with endpoint clipping). **Two ancillary source-level gaps** remain: Table2 operational Top1 B100 / Top3 B300 and the M2 paired-bootstrap width in Figure3. These are explicitly unverified, not contradicted; 2.5 can proceed.
+
+## Substep 2.5: simulator/provenance audit status
+
+The [source and contract audit](SIMULATOR_PROVENANCE_AUDIT_2026-10-16.md) is **complete at repository implementation level**. It confirms Phase5 AST execution as four logical dependency graphs on one fixed physical embedding, an external modified AICon/YAFS controller, explicit smoke designs and the predictor-to-final-WB freeze code. It records the registered non-scientific mandatory smoke *sequencing deviation*, the V2→V3→V3b FULL343 method changes, and later optional-trace code commits. It also limits claims about nested controller generality, QoS/energy stress, active runtime agents and exact external dependency reproduction. The [read-only local provenance snapshot](audit_runtime_provenance_v0_1.py) still needs inspection before certifying archived runtime identity and end-to-end manifest chronology. Nine precise issues were added to the claim ledger.
