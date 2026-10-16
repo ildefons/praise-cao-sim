@@ -133,10 +133,10 @@ def main():
                 locations = []
                 if name in outputs and isinstance(outputs[name], str):
                     locations.append(Path(outputs[name]))
-                locations.extend([manifest.parent / name, FIRST / name, FIRST / "phase5" / name, FIRST / "phase6" / name])
+                locations.extend([manifest.parent / name, FIRST / name, FIRST.parent / name, FIRST / "phase5" / name, FIRST / "phase6" / name])
                 chosen = None
                 for loc in locations:
-                    candidates = [loc] if loc.is_absolute() else [FIRST / loc, manifest.parent / loc]
+                    candidates = [loc] if loc.is_absolute() else [FIRST.parent / loc, FIRST / loc, manifest.parent / loc]
                     for p in candidates:
                         if p.is_file() and p.resolve().is_relative_to(FIRST.resolve()):
                             chosen = p
