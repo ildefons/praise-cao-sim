@@ -226,3 +226,7 @@ zip -r ~/praise_b1_runtime_provenance_v0_1.zip runtime_provenance_v0_1
 ```
 
 Upload that ZIP. It does not run any YAFS simulation, and fingerprints the currently installed modified YAFS sources without claiming they match the historic Oct6–8 runtime automatically. The source audit is complete; archived environment/timestamp provenance remains provisional until review. Next is **Substep 2.6, preservation and B1 rewrite blueprint**.
+
+## Runtime provenance local verification closed (2026-10-16)
+
+The uploaded [runtime provenance review](RUNTIME_PROVENANCE_VERIFICATION_REVIEW_2026-10-16.md) records **94 PASS, zero FAIL or WARN, five INFO**. All 12 archived prediction-cell manifest hashes match the globally frozen prediction manifest; each of the 12 WB cell manifests references this freeze; all 4 P2 Step0 exclusions remain documented; prediction freeze was recorded at **2026-10-07 19:26:06 UTC**, before earliest final-WB start at **19:51:50 UTC**. Four archived engineering smoke PASS manifests were found, all non-scientific. **The original smoke ordering deviation still exists.** Current installed patched YAFS resolves to AICon HEAD `6eabfa7` (Sep2) and four source files are SHA256 fingerprinted, but the checker did not attest historical Oct7 environment or clean Git working tree. Therefore Step **2.5 closes at documented source and manifest-provenance level**, not exact bitwise replay; continue to **2.6 manuscript preservation/rewrite blueprint**.
