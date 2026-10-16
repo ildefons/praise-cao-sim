@@ -4,7 +4,7 @@
 
 - Historical source: `praise_caise_workshop_note_v11_45(1).pdf`, 26 pp., generated on 2026-10-02 (UTC), SHA-256 `e2734dc446fe9cc4991dc04800cd5e828af8784269a1dbc274036be3b7f46ada`.
 - Authoritative B1 source: [`evidence_registry_v1_0.json`](evidence_registry_v1_0.json) and [`METHOD_VERSION_CHRONOLOGY_2026-10-16.md`](METHOD_VERSION_CHRONOLOGY_2026-10-16.md).
-- Individual issue/action ledger: [`MANUSCRIPT_CLAIM_AUDIT_V0_1.csv`](MANUSCRIPT_CLAIM_AUDIT_V0_1.csv) with **45 page-anchored entries**: 21 P0, 21 P1, 3 P2. Priority P0 means mandatory correction before reporting, *not* 21 proven mathematical errors.
+- Individual issue/action ledger: [`MANUSCRIPT_CLAIM_AUDIT_V0_1.csv`](MANUSCRIPT_CLAIM_AUDIT_V0_1.csv) with **50 page-anchored entries** after the 2.3c extension: 23 P0, 24 P1, 3 P2 (the original first-pass ledger had 45). Priority P0 means mandatory correction before reporting, *not* 23 proven mathematical errors.
 
 ## Step-2 substeps and current status
 
