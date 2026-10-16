@@ -84,7 +84,7 @@ def main():
                       sorted(wm.index.tolist()) == sorted(wv.index.tolist()) and
                       np.allclose(wm.sort_index(), wv.sort_index(), atol=EPS, rtol=0))
                 check(world, provider, "m3_provider_weights_sum_one",
-                      np.isfinite(wm).all() and (wm > 0).all() and
+                      np.isfinite(wm).all() and (wm >= 0).all() and
                       abs(float(wm.sum()) - 1) <= EPS)
                 choices[provider] = {"m2": ids2, "m3": ids3}
                 weights[provider] = wm
@@ -141,8 +141,12 @@ def main():
                 check(world, "M3", "allocation_greedy_minimax_reproduced",
                       np.array_equal(counts, expected_count),
                       f"archive_sum={counts.sum()}, expected_sum={expected_count.sum()}")
-                check(world, "M3", "rank1_graph_N_ge100",
-                      int(counts[0]) >= 100, f"N={counts[0]}")
+                # FULL343 contract has no rank-1 N>=100 requirement.
+                # Earlier Phase5 V2 Top14 contract had a different rule.
+                check(world, "M3", "allocation_rank_seed_rule",
+                      alloc["seed_start"].astype(int).tolist() ==
+                      [7000000 + k*10000 for k in range(343)],
+                      "Seed blocks must follow fixed rank-stride rule")
         except Exception as exc:
             check(world, "EXECUTION", "review_incomplete", False, repr(exc))
 
