@@ -15,6 +15,18 @@ Working B1 title:
 
 This intentionally avoids the original title's unqualified “dependable”/“non-identifiability” promise. It does not preclude using those terms *when rigorously defined* in the body.
 
+### Publication-quality drafting standard
+
+**Keep the existing B1 scope, chapter architecture, and evidence classifications unchanged.** Although developed first as an internal technical report, draft B1 to **academic publication standards from the outset**, so it can later be considered as a standalone arXiv technical reference for a more focused methodological paper.
+
+- **Mathematical definitions:** fully specified estimands, assumptions, method versions, derivations and decision/uncertainty limitations; consistent symbols and equation references.
+- **Reproducibility:** exact experimental populations, contracts, versioned code and artifact paths, seed banks, validation gates, method changes and known provenance limitations.
+- **Figures and tables:** based only on archived verified data, with clear methods, denominators, budgets, reference uncertainty, experimental role, reproducible sources and accurate captions.
+- **Limitations and negative evidence:** preserve the incomplete/failed results, exploratory status and confounds prominently rather than selecting only favorable outcomes.
+- **References:** complete and properly checked bibliography, plus a traceable distinction between prior work, implemented methods and observed findings.
+
+**Public release is a later decision**, subject to scientific completeness, coauthor agreement and any relevant venue/preprint policies. An eventual methodological paper should present a distinct focused contribution and may cite B1 for expanded methods, experiments and reproducibility, without assuming such a citation or public release is already approved.
+
 ### Immutable scientific guardrails
 
 1. Canonical estimand:
