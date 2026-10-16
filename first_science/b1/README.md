@@ -177,3 +177,7 @@ zip -r ~/praise_b1_method_support_v0_1.zip method_support_v0_1
 ```
 
 Upload the ZIP for review. The check includes all P1–P4 provider selection banks, 27/343 joint weight supports, and P1/P3/P4 full-support B1400 allocation. It writes only under `b1/local_audit`. **The source-level audit is complete; the local identity checks are not yet verified by this reviewer.** No frozen experiment is changed.
+
+### Completed V3b method-support evidence audit (2026-10-16)
+
+The user-run [frozen method-support audit](METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md) reports **132 PASS, 0 FAIL**, checking all P1–P4 provider selections, the M2 27-member and M3 343-member product supports and eligible P1/P3/P4 M3 B1400 greedy allocations. This closes Step **2.3b at saved-selection/contract consistency level**. It does not rerun search or simulation; latent model adequacy remains unknown. Next: **Step 2.3c, uncertainty mathematics**.
