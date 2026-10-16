@@ -113,3 +113,7 @@ Suggested neutral wording: **“The testbed implements native deadline-aware req
 ### Originality and upstream-diff boundary
 
 This audit verified the presence and operation design of PRAISE-specific APIs in the separate AICon/YAFS source, **not** a line-by-line upstream YAFS versus modified AICon diff, contribution history, patent novelty, or independent authorship. Those require separate git-baseline comparison and are not needed to report the benchmark's implemented features. Naming a capability in B1 should not implicitly claim it was invented in this project.
+
+## Follow-up: archived runtime verification completed (2026-10-16)
+
+See [local runtime provenance verification review](RUNTIME_PROVENANCE_VERIFICATION_REVIEW_2026-10-16.md): **94 PASS, 0 FAIL, 0 WARN, 5 INFO** from the user's archived local source/manifest audit. Twelve of twelve prediction hashes and final-WB cell backlinks matched, while the recorded complete prediction freeze at **2026-10-07 19:26:06 UTC** preceded earliest final-WB run at **19:51:50 UTC**. All four smoke manifests were present and flagged non-scientific. Current YAFS parent Git HEAD `6eabfa7` matches currently public AICon main; working tree cleanliness and historical scientific-run environment are not proven. The original engineering-smoke sequencing deviation remains. **2.5 is now closed at the stated evidence level**, not a formal code/runtime/exact-bitwise replay certification.
