@@ -14,7 +14,7 @@ linkcolor: "blue"
 urlcolor: "blue"
 toc: true
 toc-depth: 2
-numbersections: true
+numbersections: false
 header-includes:
   - \usepackage{booktabs}
   - \usepackage{longtable}
@@ -430,6 +430,8 @@ The Phase-5 evaluation used V3b-selected candidate banks: **M1 = one joint model
 | M2 | 6,660 | 2,700 | 0.13395 | 0.19045 | +0.10094 |
 | **M3 FULL343** | **6,660** | **1,400** | **0.12189** | **0.18081** | **+0.06511** |
 
+![Phase-5 aggregate MAE from verified frozen V3b pointwise results. The full 12-cell eligible battery contains 6,660 correlated horizon-query points per model. Different graph budgets apply: M1 100, M2 2,700 and M3 1,400 trajectories per cell. M0 is omitted because its applicable subset is different.](figures/phase5_aggregate_mae_v0_1.svg){width=95%}
+
 These are aggregate scores over the **12 eligible physical cells only**, not a population-generalization estimate. No method dominates all conditions. The remaining MAEs, even for M3, are substantial relative to probabilities bounded by one. The positive aggregate biases for reconstructed methods indicate a systematic tendency towards overprediction within this eligible design, though their magnitude varies with the condition.
 
 Because M0 is defined on a smaller and selected applicable set, its aggregate MAE cannot be directly compared to the all-query rows. Moreover M1/M2/M3 have sharply different graph simulation budgets, so the aggregate ranking does not isolate simulation efficiency at equal cost, nor does the pre-WB change from Top14 to FULL343 permit a direct unchanged-algorithm replication of the September pilot.
@@ -466,6 +468,8 @@ After Phase 5, the I1 strong-control and I2 experiments focused on **P4/G_SEQPAR
 | I2BHIER_M2 | 0.09429 | 0.11695 | I2b hierarchical loss |
 | I2BV4_M2 | 0.10854 | 0.15354 | I2b later weighting variant |
 | I2BVAR_M2 | 0.15731 | 0.22086 | I2b variation-weighted loss |
+
+![Phase-6 P4/G_SEQPAR matched-budget development comparison. All six rows use 555 related H-query points and 27-member M2 graph propagation at B=2,700; disclosed information and fitting losses vary together.](figures/phase6_matched_mae_v0_1.svg){width=95%}
 
 The stronger I1 control performs best or near-best among these **joint information–loss pipeline** variants in this cell. Richer information is not a monotone improvement *under the tested objectives*. This does not show that I2 information is useless, that an ideal I2 estimator cannot improve on I1, or that the comparisons are independent held-out validation: the P4/G_SEQPAR cell had already informed iterative I2 development.
 
