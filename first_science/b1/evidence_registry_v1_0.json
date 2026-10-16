@@ -1,0 +1,606 @@
+{
+  "schema_id": "PRAISE_B1_EVIDENCE_REGISTRY_V1_0",
+  "created_date": "2026-10-16",
+  "source_branch": "praise-identifiability-feasibility",
+  "scope": "Audited registry of 12 major PRAISE research/evidence episodes, including historical pilot, registered Phase-5 battery, Phase-6 matched information-interface development and selected recent retrospective diagnostics. Not an exhaustive catalog of all experimental scripts.",
+  "evaluation_semantics": "sigma_G(A,H;rho) = Pr(c_G(A,H)>=rho), c_G is fraction of SLA-compliant decided requests by H. Late deadline failures count as decided noncompliance; zero decisions compliant. Not first-violation survival.",
+  "verification_levels": {
+    "repository_checkpoint": "Claim transcribed from versioned repository checkpoint, not independently recomputed here",
+    "repository_protocol": "Design or implementation contract, not proof of executed output",
+    "uploaded_manuscript": "Pilot result reported in user supplied v11_45 PDF",
+    "user_terminal": "Observed local execution output provided by user; CSV not accessible to this registry builder",
+    "mixed": "Multiple listed sources; must open local manifests for full verification"
+  },
+  "results_storage_notice": "phase5/results and phase6/results are generally local/untracked; GitHub code and checkpoint summaries alone do not establish integrity of those local primary artifacts.",
+  "entries": [
+    {
+      "id": "E01",
+      "name": "White-box benchmark and I1 acquisition",
+      "period": "Aug–Sep 2026",
+      "category": "foundation",
+      "status": "historical_frozen_protocols",
+      "scope": "Initial provider process, local admissibility-region and public I1 evidence acquisition",
+      "methods": [
+        "I1",
+        "white-box"
+      ],
+      "study_role": "Experimental foundation; not a broad method comparison",
+      "primary_results": {},
+      "reference_n": null,
+      "evidence_basis": "repository_design_and_freeze_manifests",
+      "source_paths": [
+        "phase1/phase1_v2_ar_freeze_manifest_v1.json",
+        "phase1/phase1_v2_confirmation_freeze_manifest_v1.json",
+        "phase2/phase2_i1_rho_conditioned_freeze_manifest_v1.json",
+        "phase2/config_phase2_i1_provider_card_v3_rho_conditioned.json"
+      ],
+      "local_artifact_paths": [
+        "phase1/results/",
+        "phase2/results/"
+      ],
+      "limitations": [
+        "Historical definitions were superseded; verify the frozen rho-conditioned I1 contract before reusing early descriptions."
+      ],
+      "verification_status": "DESIGN_AND_FROZEN_SOURCE_EXISTENCE_CHECKED_NO_NUMERICAL_CLAIM",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E02",
+      "name": "Original fixed-graph development pilot",
+      "period": "Sep 2026",
+      "category": "pilot",
+      "status": "reported_frozen",
+      "scope": "One physical three-provider parallel graph; 15 rho-by-regime queries; H=60..240, 555 points per fully applicable method; WB N=200",
+      "methods": [
+        "M0",
+        "M1",
+        "M2",
+        "M3_TOP14_PRODUCTION"
+      ],
+      "study_role": "Single-graph pilot and feasibility evidence, not cross-topology external validation",
+      "primary_results": {
+        "M1": {
+          "mae": 0.18517117117117118,
+          "rmse": 0.23073579914917627,
+          "bias": 0.18517117117117118,
+          "points": 555
+        },
+        "M2": {
+          "mae": 0.0681534868201535,
+          "rmse": 0.09414055343913438,
+          "bias": 0.04737470804137472,
+          "points": 555
+        },
+        "M3_TOP14_PRODUCTION_B1400": {
+          "mae": 0.030368445209561265,
+          "rmse": 0.03578288032993379,
+          "bias": 0.028240347291067357,
+          "points": 555
+        },
+        "M3_TOP14_PRODUCTION_B2000": {
+          "mae": 0.02754733262575936,
+          "rmse": 0.033063740933317244,
+          "bias": 0.024468395504830806,
+          "points": 555
+        }
+      },
+      "reference_n": 200,
+      "evidence_basis": "uploaded_v11_45_manuscript_and_phase4_closure",
+      "source_paths": [
+        "phase4/M3_POSTHOC_MECHANISM_AUDIT_CLOSURE_2026-09-24.md",
+        "PRAISE_I1_M0_M1_M2_M3_PILOT_DESIGN_2026-09-23.md",
+        "phase4/m3_v4_final_evaluation.py"
+      ],
+      "local_artifact_paths": [
+        "phase4/results/sigma_regime_final_evaluation_v1/",
+        "phase4/results/",
+        "phase4/results/m3_v4_final_evaluation_v1/"
+      ],
+      "limitations": [
+        "Pilot uses one provider condition and one logical topology.",
+        "M3 method postdates some inspected M2 development evidence; prospective same-condition replication is not external validation.",
+        "Production M3 allocation differs from equal-per-member nested support readouts.",
+        "Earlier manuscript M0 result not independently recomputed by Phase-4 pilot v0.1 audit; report M0 only with explicit source until validated."
+      ],
+      "verification_status": "SAVED_METRICS_AND_SELECTED_HASHES_VERIFIED_60_PASS_PILOT_AND_ABLATION",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E03",
+      "name": "Pilot M3 support, weighting and numerical-cost audits",
+      "period": "Sep 24–Oct 1 2026",
+      "category": "retrospective",
+      "status": "closed_retrospective",
+      "scope": "Frozen pilot M3 support; Top1, Top3, Top14; B=1400 matched comparisons",
+      "methods": [
+        "TOP1_1400",
+        "UNIFORM14_EQ_1400",
+        "WEIGHTED14_EQ_1400",
+        "M3_PRODUCTION_1400"
+      ],
+      "study_role": "Post-hoc mechanism and sensitivity audit, not independently prospective evidence",
+      "primary_results": {
+        "TOP1_1400": {
+          "mae": 0.028783783783783802,
+          "rmse": 0.034060270709674746,
+          "bias": 0.024981981981982,
+          "points": 555
+        },
+        "UNIFORM14_EQ_1400": {
+          "mae": 0.05490347490347495,
+          "rmse": 0.06569843410178894,
+          "bias": 0.053619047619047656,
+          "points": 555
+        },
+        "WEIGHTED14_EQ_1400": {
+          "mae": 0.04222093763245066,
+          "rmse": 0.05015896900929128,
+          "bias": 0.040661499198683275,
+          "points": 555
+        },
+        "M3_PRODUCTION_1400": {
+          "mae": 0.030368445209561265,
+          "rmse": 0.03578288032993379,
+          "bias": 0.028240347291067357,
+          "points": 555
+        }
+      },
+      "reference_n": 200,
+      "evidence_basis": "frozen_phase4_audit_closure",
+      "source_paths": [
+        "phase4/M3_POSTHOC_MECHANISM_AUDIT_CLOSURE_2026-09-24.md",
+        "phase4/M1_TOP1_PUBLIC_I1_AUDIT_CLOSURE_2026-09-24.md",
+        "phase4/m3_posthoc_stage_b_ablation.py"
+      ],
+      "local_artifact_paths": [
+        "phase4/results/",
+        "phase4/results/m3_posthoc_stage_b_ablation_v1/"
+      ],
+      "limitations": [
+        "The best cost-matched point estimate is the rank-1 model in this pilot.",
+        "Represented Gibbs mass is not a bound on prediction error relative to white-box truth.",
+        "Do not infer that retaining more models improves point accuracy in general."
+      ],
+      "verification_status": "SAVED_METRICS_AND_SELECTED_HASHES_VERIFIED_60_PASS_PILOT_AND_ABLATION",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E04",
+      "name": "Prospective Phase-5 multi-world, multi-graph design V2",
+      "period": "Oct 2 2026",
+      "category": "design",
+      "status": "protocol_frozen_then_versioned",
+      "scope": "4 provider worlds x 4 graphs = 16 planned physical cells, each with 5 rho x 3 regimes; Step-0 gate",
+      "methods": [
+        "M0",
+        "M1",
+        "M2",
+        "M3_TOP1",
+        "M3_TOP3",
+        "M3_TOP14"
+      ],
+      "study_role": "Registered prospective experimental design, not the final executed M3 support definition",
+      "primary_results": {
+        "planned_cells": 16,
+        "planned_query_conditions": 240
+      },
+      "reference_n": 1000,
+      "evidence_basis": "frozen_V2_contracts",
+      "source_paths": [
+        "PRAISE_PROSPECTIVE_RECOVERABILITY_BATTERY_PROTOCOL_V2_2026-10-02.md",
+        "phase5/config_phase5_recoverability_battery_v2.json",
+        "phase5/config_phase5_method_instantiation_v2.json",
+        "phase5/config_phase5_execution_contract_v2.json",
+        "phase5/config_phase5_analysis_addendum_v2.json"
+      ],
+      "local_artifact_paths": [
+        "phase5/results/01_i1/",
+        "phase5/results/02_step0/"
+      ],
+      "limitations": [
+        "The actual executed primary M3 later changed to V3b FULL343 under a documented pre-graph-WB revision.",
+        "An engineering-smoke ordering deviation was documented rather than retroactively erased."
+      ],
+      "verification_status": "DESIGN_AND_FROZEN_SOURCE_EXISTENCE_CHECKED_NO_NUMERICAL_CLAIM",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E05",
+      "name": "Phase-5 Step-0 eligibility outcome",
+      "period": "Oct 2026",
+      "category": "gate",
+      "status": "frozen_exclusion",
+      "scope": "16 planned physical cells; 12 eligible in worlds P1/P3/P4 and 4 gate failures in P2",
+      "methods": [
+        "STEP0"
+      ],
+      "study_role": "Prospective selection/eligibility outcome; no post-hoc repair",
+      "primary_results": {
+        "eligible_cells": 12,
+        "failed_cells": 4,
+        "failed_world": "P2"
+      },
+      "reference_n": null,
+      "evidence_basis": "phase5_frozen_checkpoint",
+      "source_paths": [
+        "phase5/checkpoint.json",
+        "phase5/config_phase5_recoverability_battery_v2.json"
+      ],
+      "local_artifact_paths": [
+        "phase5/results/02_step0/"
+      ],
+      "limitations": [
+        "Results of other P2 studies must not be inserted as replacements into this excluded prospective population.",
+        "Heterogeneous-minus-symmetric primary contrast was not estimable under the registered gate."
+      ],
+      "verification_status": "CHECKPOINT_ELIGIBILITY_RECONCILED_WITH_EVALUATED_12_CELL_SET",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E06",
+      "name": "Phase-5 V3b FULL343 cross-world/cross-graph evaluation",
+      "period": "Oct 8 2026",
+      "category": "confirmatory_with_versioned_development",
+      "status": "results_frozen_checkpoint",
+      "scope": "12 eligible cells (P1/P3/P4 x four graphs); 15 queries/cell; 37 horizons H60..240; 6660 M1/M2/M3 points; independent WB N=1000/cell",
+      "methods": [
+        "M0",
+        "M1",
+        "M2",
+        "M3_FULL343",
+        "M3_TOP1_DIAG",
+        "M3_TOP3_DIAG",
+        "M3_TOP14_DIAG"
+      ],
+      "study_role": "Main broad evaluation, with documented pre-WB V3b development and pre-graph-WB full-support change",
+      "primary_results": {
+        "M0": {
+          "mae": 0.418736,
+          "rmse": 0.453918,
+          "bias": -0.418079,
+          "points": 1776
+        },
+        "M1": {
+          "mae": 0.157015,
+          "rmse": 0.225884,
+          "bias": 0.149679,
+          "points": 6660
+        },
+        "M2": {
+          "mae": 0.133951,
+          "rmse": 0.190453,
+          "bias": 0.100937,
+          "points": 6660
+        },
+        "M3_FULL343": {
+          "mae": 0.12189,
+          "rmse": 0.180806,
+          "bias": 0.065105,
+          "points": 6660
+        }
+      },
+      "reference_n": 1000,
+      "evidence_basis": "phase5_results_frozen_checkpoint; primary CSV/manifests on research laptop not verified in this session",
+      "source_paths": [
+        "phase5/checkpoint.json",
+        "PHASE5_V3B_FULL_SUPPORT_GRAPH_REVISION_2026-10-06.md",
+        "phase5/config_phase5_evaluation_v3b_fullsupport.json",
+        "phase5/config_phase5_graph_prediction_v3b_fullsupport.json",
+        "phase5/PHASE5_ENGINEERING_SMOKE_COMPLETION_AND_SEQUENCING_DEVIATION_2026-10-06.md"
+      ],
+      "local_artifact_paths": [
+        "phase5/results/04_prediction_v3b_fullsupport/",
+        "phase5/results/05_final_wb_v3b_fullsupport/",
+        "phase5/results/06_evaluation_v3b_fullsupport/"
+      ],
+      "limitations": [
+        "Aggregate ranking M1 > M2 > M3 in error is not pointwise dominance or generally accurate graph survival.",
+        "Mid/Stress deviations remain large in several panels.",
+        "M0 coverage differs, so its aggregate errors are not directly comparable.",
+        "Reference bootstrap addresses finite-WB noise, not all method-selection uncertainty.",
+        "Phase5/checkpoint.json summarizes results but is not a substitute for rehashing local primary files."
+      ],
+      "verification_status": "SAVED_POINTWISE_SUMMARIES_VERIFIED_V03",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E07",
+      "name": "Phase-6 matched provider-information study, P4/G_SEQPAR",
+      "period": "Oct 8–13 2026",
+      "category": "development",
+      "status": "development_results_reported",
+      "scope": "P4/G_SEQPAR, 15 frozen SLA queries x 37 horizons = 555 points per method; same 27-member M2 propagation; I1STRONG/I2AFS/I2b versions",
+      "methods": [
+        "I1STRONG_M2",
+        "I2AFS_M2",
+        "I2B_M2",
+        "I2BVAR_M2",
+        "I2BHIER_M2",
+        "I2BV4_M2"
+      ],
+      "study_role": "Post-Phase5 development comparison, not confirmatory generalization over unseen worlds",
+      "primary_results": {
+        "I1STRONG_M2": {
+          "mae": 0.091781,
+          "rmse": 0.113898
+        },
+        "I2AFS_M2": {
+          "mae": 0.094754,
+          "rmse": 0.118257
+        },
+        "I2B_M2": {
+          "mae": 0.102096,
+          "rmse": 0.136175
+        },
+        "I2BVAR_M2": {
+          "mae": 0.157305
+        },
+        "I2BHIER_M2": {
+          "mae": 0.094294
+        },
+        "I2BV4_M2": {
+          "mae": 0.108539
+        }
+      },
+      "reference_n": 1000,
+      "evidence_basis": "user terminal matched comparison and repository identifiability research-plan summary; six-way primary manifest not verified",
+      "source_paths": [
+        "phase6/PHASE6_I1_STRONG_MATCHED_CONTROL_PROTOCOL_2026-10-08.md",
+        "phase6/PHASE6_I2A_FULL_SPECTRUM_RECONSTRUCTION_PROTOCOL_2026-10-08.md",
+        "phase6/PHASE6_I2B_HIERARCHICAL_LOSS_FREEZE_2026-10-09.md",
+        "phase6/run_phase6_i2bv4_six_way_matched_evaluation.py",
+        "IDENTIFIABILITY_RESEARCH_PLAN.md"
+      ],
+      "local_artifact_paths": [
+        "phase6/results/19_i1strong_m2_p4_g_seqpar/",
+        "phase6/results/38_i2b_v4_six_way_evaluation/"
+      ],
+      "limitations": [
+        "The development cell P4/G_SEQPAR was used to refine some I2 variants; do not call later contrasts independently prospective.",
+        "Equal method family M2 but different information and fit loss; do not equate with Phase5 M3.",
+        "For I2b-v2/v3/v4, full precision/metrics need local evaluation artifacts."
+      ],
+      "verification_status": "SAVED_SIX_WAY_POINTWISE_AND_METRICS_VERIFIED_V03",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E08",
+      "name": "Phase-6 privileged control and mechanism diagnostics",
+      "period": "Oct 2026",
+      "category": "retrospective",
+      "status": "reported_secondary",
+      "scope": "P4/G_SEQPAR provider substitutions, known-provider control, hidden-parameter oracle audits",
+      "methods": [
+        "KNOWN_PROVIDER_CONTROL",
+        "PROVIDER_FACTORIAL",
+        "TRUE_PARAMETER_ORACLE"
+      ],
+      "study_role": "Retrospective explanatory evidence, not deployable method",
+      "primary_results": {
+        "KNOWN_PROVIDER_CONTROL": {
+          "mae": 0.027281
+        }
+      },
+      "reference_n": null,
+      "evidence_basis": "repository identifiability research plan; local manifests not independently inspected",
+      "source_paths": [
+        "IDENTIFIABILITY_RESEARCH_PLAN.md",
+        "phase6/run_phase6_known_provider_p4_g_seqpar_control_v1.py",
+        "phase6/run_phase6_provider_factorial_p4_g_seqpar_v1.py",
+        "phase6/run_phase6_true_parameter_oracle_v1.py"
+      ],
+      "local_artifact_paths": [
+        "phase6/results/"
+      ],
+      "limitations": [
+        "Privileged true parameters may never be described as an allowable public interface.",
+        "Mechanism attribution cannot automatically be generalized across worlds."
+      ],
+      "verification_status": "RESULTS_REPORTED_IN_RESEARCH_PLAN_NOT_SEPARATELY_RECOMPUTED",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E09",
+      "name": "P2/G_PAR public-induced-region M1/M2/M3 comparison",
+      "period": "Oct 12–13 2026",
+      "category": "development",
+      "status": "predictions_and_evaluation_frozen_user_log",
+      "scope": "P2, G_PAR, public-I1 induced A_G, five same-rho queries and H60..240 = 185 evaluation points/method",
+      "methods": [
+        "M1_V3B",
+        "M2_V3B",
+        "M3_FULL343_V3B"
+      ],
+      "study_role": "New development experiment, explicitly separate from excluded P2 Phase-5 Step-0 cases",
+      "primary_results": {
+        "M1_V3B": {
+          "mae": 0.132,
+          "rmse": 0.153320438,
+          "bias": 0.041491892,
+          "points": 185,
+          "graph_trajectories": 100
+        },
+        "M2_V3B": {
+          "mae": 0.140583784,
+          "rmse": 0.163709849,
+          "bias": 0.137906306,
+          "points": 185,
+          "graph_trajectories": 2700
+        },
+        "M3_FULL343_V3B": {
+          "mae": 0.127867436,
+          "rmse": 0.148527911,
+          "bias": 0.042632208,
+          "points": 185,
+          "graph_trajectories": 1400
+        }
+      },
+      "reference_n": 1000,
+      "evidence_basis": "user terminal freeze/evaluation logs",
+      "source_paths": [
+        "phase5/I1_M3_JOINT_GOAL_FREEZE_2026-10-12.md",
+        "phase5/I1_M3_METHOD_SPEC_AND_RECOVERY_2026-10-12.md",
+        "phase5/evaluate_i1_m123_p2_native_comparison.py"
+      ],
+      "local_artifact_paths": [
+        "phase5/results/i1_m3_p2_induced_pilot/P2__G_PAR/"
+      ],
+      "limitations": [
+        "The common induced A_G is held fixed for M1/M2/M3; no method-specific region accuracy comparison.",
+        "Graph trajectory counts are native, not cost-matched.",
+        "Region-content rho and cumulative-compliance rho may be equal in the evaluated diagonal but have separate meanings."
+      ],
+      "verification_status": "SAVED_P2_POINTWISE_AND_METRICS_VERIFIED_V03",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E10",
+      "name": "P2 graph and provider retrospective attribution",
+      "period": "Oct 13–14 2026",
+      "category": "retrospective",
+      "status": "executed_user_log",
+      "scope": "Frozen WB/M1/M2/M3 P2/G_PAR ledgers and reconstructed provider parameter comparison",
+      "methods": [
+        "WB",
+        "M1",
+        "M2",
+        "M3"
+      ],
+      "study_role": "Post-hoc diagnostic; does not update model selection",
+      "primary_results": {
+        "WB_compliance_sd_rho095_h240": 0.0451,
+        "M1_compliance_sd_rho095_h240": 0.0084
+      },
+      "reference_n": 1000,
+      "evidence_basis": "user diagnostic execution and previous inspection; exact source CSV on laptop",
+      "source_paths": [
+        "phase5/diagnose_i1_m123_p2_provider_graph.py"
+      ],
+      "local_artifact_paths": [
+        "phase5/results/i1_m3_p2_induced_pilot/P2__G_PAR/m1_m2_native_comparison/attribution_diagnostic/"
+      ],
+      "limitations": [
+        "Substantial predicted-versus-WB behavior discrepancy but not a causal decomposition.",
+        "The first diagnostic attempt mis-specified missed deadlines; the corrected canonical decision logic passed frozen sigma regression."
+      ],
+      "verification_status": "RETROSPECTIVE_DIAGNOSTIC_EXECUTION_REPORTED_NOT_SEPARATELY_RECOMPUTED",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E11",
+      "name": "P2 true-parameter I1 fidelity and frozen trial-history audit",
+      "period": "Oct 13–14 2026",
+      "category": "retrospective",
+      "status": "executed_user_log",
+      "scope": "Three P2 providers; true theta versus selected seven-model banks, N100 rescore and N100 replay; original 7x25 trials/provider",
+      "methods": [
+        "TRUE_PARAMETER_DIAG",
+        "V3B_RECONSTRUCTION"
+      ],
+      "study_role": "Privileged retrospective test of reconstruction search; not a deployable public-only method",
+      "primary_results": {
+        "ProviderA": {
+          "truth_rmse_rescore": 0.034427,
+          "best_selected_rmse_rescore": 0.109614,
+          "truth_rmse_replay": 0.031511,
+          "best_selected_rmse_replay": 0.12247
+        },
+        "ProviderB": {
+          "truth_rmse_rescore": 0.053371,
+          "best_selected_rmse_rescore": 0.177803,
+          "truth_rmse_replay": 0.081778,
+          "best_selected_rmse_replay": 0.183443
+        },
+        "ProviderC": {
+          "truth_rmse_rescore": 0.061102,
+          "best_selected_rmse_rescore": 0.130989,
+          "truth_rmse_replay": 0.084365,
+          "best_selected_rmse_replay": 0.121055
+        },
+        "frozen_search_trials": 525,
+        "truth_inside_bounds": true
+      },
+      "reference_n": 100,
+      "evidence_basis": "user terminal output; source scripts GitHub",
+      "source_paths": [
+        "phase5/audit_p2_true_parameter_i1_fidelity.py",
+        "phase5/diagnose_p2_bounded_reconstruction.py"
+      ],
+      "local_artifact_paths": [
+        "phase5/results/p2_true_parameter_i1_fidelity_audit/",
+        "phase5/results/p2_bounded_reconstruction_diagnostic/"
+      ],
+      "limitations": [
+        "True parameter RMSE superiority identifies a reconstruction search gap, not information-theoretic identifiability.",
+        "Trial nearest in one coordinate is not nearest in three-dimensional parameter space."
+      ],
+      "verification_status": "SAVED_PROVIDER_BANK_SUMMARIES_VERIFIED_V03",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    },
+    {
+      "id": "E12",
+      "name": "P2 local objective-sensitivity probe around hidden truth",
+      "period": "Oct 14 2026",
+      "category": "retrospective",
+      "status": "executed_user_log",
+      "scope": "3 providers x 7 parameter configurations x 2 independent N100 simulation banks = 42 evaluations; ±20% one-at-a-time changes",
+      "methods": [
+        "LOCAL_SENSITIVITY"
+      ],
+      "study_role": "Privileged finite perturbation check of I1 reconstruction objective geometry",
+      "primary_results": {
+        "ProviderA": {
+          "true_rescore_rmse": 0.03443,
+          "mu_x08_rescore_rmse": 0.50013,
+          "mu_x12_rescore_rmse": 0.72087,
+          "cv_x08_rescore_rmse": 0.39141,
+          "cv_x12_rescore_rmse": 0.41288,
+          "cost_x08_rescore_rmse": 0.03469,
+          "cost_x12_rescore_rmse": 0.53043
+        }
+      },
+      "reference_n": 100,
+      "evidence_basis": "user printed 42-row two-bank pivot; full CSV on laptop",
+      "source_paths": [
+        "phase5/diagnose_p2_bounded_reconstruction.py"
+      ],
+      "local_artifact_paths": [
+        "phase5/results/p2_bounded_reconstruction_diagnostic/truth_neighborhood_sensitivity.csv"
+      ],
+      "limitations": [
+        "±20% one-at-a-time perturbations do not determine local curvature, identifiability, or optimizer convergence.",
+        "Two seed banks support repeatability of the observed sensitivity pattern only."
+      ],
+      "verification_status": "SAVED_42_CONFIGURATION_COUNT_AND_IDENTITY_VERIFIED_V03",
+      "evidence_claim_scope": "Only observations/claims within the recorded study conditions. Not automatic generalization to arbitrary composed services."
+    }
+  ],
+  "release_date": "2026-10-16",
+  "status": "B1_CORE_EVIDENCE_REGISTRY_V1_0_VERIFIED_FROM_SAVED_TABLES_WITH_EXPLICIT_LIMITS",
+  "verification_level": "Saved numerical joins, selected immutable file hashes, frozen status and local evidence inventory. No raw-ledger replay, simulator-code equivalence certification, exhaustive result-hash traversal or real-world external validation.",
+  "reviewed_verification_artifacts": [
+    {
+      "review": "Initial local inventory",
+      "outcome": "12 registered episodes, 31 source files, 17 local roots present; 233 manifests fingerprinted",
+      "doc": "b1/INVENTORY_REVIEW_2026-10-16.md"
+    },
+    {
+      "review": "v0.3 primary result reconciliation",
+      "outcome": "399 PASS, 0 FAIL; 233 fingerprint snapshots unchanged, 30 selected output hashes; Phase5, Phase6, P2 truth and induced comparison archived tables",
+      "doc": "b1/VERIFICATION_REVIEW_V0_3_2026-10-16.md"
+    },
+    {
+      "review": "Phase4 pilot plus post-hoc StageB",
+      "outcome": "60 PASS, 0 FAIL; 555 rows per method matched archived summaries and selected manifest hashes",
+      "doc": "b1/PHASE4_VERIFICATION_REVIEW_2026-10-16.md"
+    }
+  ],
+  "version_chronology": "b1/METHOD_VERSION_CHRONOLOGY_2026-10-16.md",
+  "not_yet_fully_inventoried": [
+    "Phase-3 raw reconstruction history and complete method fit provenance beyond directory presence",
+    "Other exploratory/ancillary Phase-5 graph-conditioned or first-violation experiments",
+    "Raw YAFS event-ledger reconstruction and all simulator-extension commits",
+    "Any separately completed joint graph-parameter optimizer not yet tied to a verified path/manifest",
+    "Complete audit of all baseline figures/numbers of historical manuscript v11_45"
+  ]
+}
