@@ -151,3 +151,29 @@ The major pilot-to-battery evidence audit is now closed **at the saved-results v
 **B1 core registry v1.0 is a reviewed evidence index, not an exhaustive simulator integrity certificate.** Raw ledgers, ancillary experimental branches, all simulation extensions, full manifest transitive-hash coverage and the latest graph-conditioned/joint-parameter tracks still require dedicated inventory before being described as fully verified. Report missing or incomplete evidence honestly; no further simulator experiments are needed to start the manuscript claim audit.
 
 **Next task:** audit the old pilot-oriented manuscript `praise_caise_workshop_note_v11_45(1).pdf` section-by-section against the verified core registry. Preserve scientific definitions and mathematical sections after implementation-level consistency checks; explicitly update the abstract, interpretation, limitations and summary to reflect the completed Phase5 battery and subsequent diagnostics.
+
+## Manuscript audit 2.3b: implementation-level M0–M3 definitions
+
+[Method-definition source audit](METHOD_DEFINITION_SOURCE_AUDIT_2026-10-16.md) is complete at the **contract/code inspection level**, including historical Phase4 M2/M3, registered Phase5 V2, executed Phase5 V3b FULL343, P2 induced-region and matched Phase6 M2-family designs.
+
+Main caveats recorded:
+
+- M0 same-rho product is a restrictive *predictor*, not an SLA certificate.
+- Phase4 M2 portfolio explicitly excludes the M1 anchor; Phase5 V3b M2 includes M1's per-provider RMSE-rank-1 models.
+- V3b ranks candidates by I1 fit without a hard I1 compatibility gate. Do not describe all selected candidates as proven “compatible”.
+- M3 pilot Top14 from a 48/provider candidate bank differs from Phase5 V3b FULL343 from seven fits/provider; Phase5 M3_TOP1 is not definitionally equivalent to M1.
+- Gibbs/model support, Monte Carlo numerical error, and model-to-truth accuracy must remain separate.
+- Phase6 I1strong-vs-I2 variations change provider information **and** reconstruction loss, even where search and graph simulation budgets are matched.
+
+To check the V3b *actual local frozen selections* against the method rules without new simulations:
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull
+conda activate praise-cao
+python first_science/b1/verify_method_support_v0_1.py
+cd first_science/b1/local_audit
+zip -r ~/praise_b1_method_support_v0_1.zip method_support_v0_1
+```
+
+Upload the ZIP for review. The check includes all P1–P4 provider selection banks, 27/343 joint weight supports, and P1/P3/P4 full-support B1400 allocation. It writes only under `b1/local_audit`. **The source-level audit is complete; the local identity checks are not yet verified by this reviewer.** No frozen experiment is changed.
