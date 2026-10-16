@@ -5,7 +5,7 @@
 - [Main manuscript](B1_TECHNICAL_REPORT_DRAFT_V0_1.md), approximately 9,000 words across twelve chapters, executive synthesis and three technical/provenance/reference appendices.
 - [Figure 1, Phase5 aggregate MAE](figures/phase5_aggregate_mae_v0_1.svg), built directly from independently audited V3b saved-result metrics.
 - [Figure 2, Phase6 matched information–method MAE](figures/phase6_matched_mae_v0_1.svg), built from audited P4/G_SEQPAR six-way evaluation metrics.
-- [Final drafting sign-off](../FINAL_AUDIT_SIGNOFF_2026-10-16.md) and [original-to-B1 migration matrix](../MANUSCRIPT_MIGRATION_MATRIX_V0_1.csv).
+- [Final drafting sign-off](../FINAL_AUDIT_SIGNOFF_2026-10-16.md), [original-to-B1 migration matrix](../MANUSCRIPT_MIGRATION_MATRIX_V0_1.csv), [68-item claim-to-draft crosswalk](CLAIM_TO_DRAFT_TRACEABILITY_V0_1.csv) and [draft QA report](REPORT_DRAFT_QA_V0_1_2026-10-16.md).
 
 **Source PDF caution:** The source manuscript \`praise_caise_workshop_note_v11_45(1).pdf\` was *not* overwritten or rebranded. Tables and formulas carried into the new report are scoped by provenance and historical method version; the two charts are new visualizations of verified data, not new experiments.
 
