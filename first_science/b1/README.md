@@ -104,3 +104,20 @@ zip -r ~/praise_b1_verification_v0_2.zip verification_v0_2
 ```
 
 **No scientific data or predictions are modified.** A PASS means the indicated persisted artifact or metric agrees under the audit definition. SKIP means the item was not independently checked, not that it passed. The B1 registry is not yet v1.0 until all reported mismatches and coverage gaps are reviewed.
+
+### v0.2 verification review (2026-10-16)
+
+Review of the user-uploaded verification archive found **375 passes, 1 audit label-mapping failure, 9 informational statuses and no skips**. All registered manifest snapshots and the selected output hashes matched. The Phase-5 and Phase-6 results were independently recomputed from saved pointwise joins and matched the frozen evaluation tables. The P2 evaluation was **not** checked because the v0.2 verifier filtered the method column using versioned registry IDs (`M1_V3B`) rather than the CSV method IDs (`M1`). See [verification review](VERIFICATION_REVIEW_2026-10-16.md).
+
+The corrected next pass is a new script, preserving v0.2 intact:
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull
+conda activate praise-cao
+python first_science/b1/verify_local_evidence_v0_3.py
+cd first_science/b1/local_audit
+zip -r ~/praise_b1_verification_v0_3.zip verification_v0_3
+```
+
+Do not claim B1 v1.0 evidence validation until v0.3 and the outstanding historical pilot/provenance reconciliation are reviewed.
