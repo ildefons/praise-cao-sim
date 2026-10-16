@@ -12,7 +12,7 @@
 |---|---|---|---|
 | **2.1 Baseline and scope** | Which manuscript, scientific era and evidence are being reviewed? | **Done** | Exact 26-page PDF and SHA; v1 evidence registry |
 | **2.2 Claim inventory and chronology** | What does each section assert; are results pilot, prospective, development or post-hoc? | **Initial pass done** | 45-entry claim ledger; chronologically separated M3 variants |
-| **2.3 Definitions and mathematical semantics** | Is each SLA, I1, M0/M1/M2/M3, uncertainty and cost definition valid under its implementation? | **2.3a SLA and 2.3b method source and archived-selection audits complete; uncertainty mathematics pending** | [SLA audit](SLA_SEMANTICS_SOURCE_AUDIT_2026-10-16.md), [method-definition audit](METHOD_DEFINITION_SOURCE_AUDIT_2026-10-16.md) |
+| **2.3 Definitions and mathematical semantics** | Is each SLA, I1, M0/M1/M2/M3, uncertainty and cost definition valid under its implementation? | **2.3a SLA, 2.3b method source/selections, and 2.3c uncertainty mathematics complete; I1 region and selected appendix checks remain** | [SLA audit](SLA_SEMANTICS_SOURCE_AUDIT_2026-10-16.md), [method-definition audit](METHOD_DEFINITION_SOURCE_AUDIT_2026-10-16.md), [uncertainty mathematics audit](UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md) |
 | **2.4 Tables and figures** | Are each number, reference cohort, budget and claimed ranking consistent? | **Main saved-result metrics verified; figure/appendix internal consistency issues identified** | Review original figures and appendices, compare with verified tables |
 | **2.5 Engineering/reproducibility** | What YAFS/AICon changes, provenance and processing gates can be documented? | **Pending** | Inventory actual code changes and frozen manifests, no new experiments |
 | **2.6 Preservation and reuse plan** | Which prose/formulas survive in B1 and which must be moved or rewritten? | **First-pass map below** | Approved section-by-section reuse plan |
@@ -112,9 +112,13 @@ Keep rich technical material as appendices, but all formulas and graphs carry a 
 
 - **2.3a (done at static-source level)** The canonical cumulative-SLA decision extraction and zero-decided convention were checked against Phase1/Phase3/Phase5 code. See [source-level SLA semantics audit](SLA_SEMANTICS_SOURCE_AUDIT_2026-10-16.md). The separate I1 public-region/query construction and raw-ledger replay are still unverified.
 - **2.3b (closed at frozen source/selection level)** M0–M3 variants, provider-selection rules, weighting and finite-support propagation are documented in the [method-definition audit](METHOD_DEFINITION_SOURCE_AUDIT_2026-10-16.md); **132 archived V3b support/allocation checks passed, zero failed**, reviewed in [verification report](METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md). No Optuna or simulator replay was performed.
-- **2.3c** Audit `sigma_G` vs first-violation labels and the statistical interpretation of the confidence/Monte Carlo bands.
+- **2.3c (complete: mathematical and source-level)** Audit finite-mixture support bound, pointwise Monte Carlo variance/CI approximations, CRN dependence, WB reference uncertainty, numerical decision resolution and optional stopping. See [uncertainty mathematics audit](UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md). Explicit P0 wording corrections remain open for report drafting.
 - **2.4** Resolve the Fig2 frontier inconsistency and missing MC-width reference, plus compare all manuscript tables against exact frozen experiment identities; don't mix local estimation and graph simulation budgets.
 - **2.5** Inventory simulator extensions and chronology in concrete code terms (not claims of generic simulator novelty).
 - **2.6** Agree final retain/update/rewrite plan. Only then begin editing the historical manuscript source or opening a fresh B1 report branch.
 
 **No additional scientific simulations are required for these audits.**
+
+## Step 2.3c completed, with open manuscript corrections
+
+The [uncertainty mathematics audit](UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md) verified exact identities (support truncation; variance covariance; noise-spread and WB-error expectation decompositions) and qualified approximate or conditional procedures (Wilson; paired percentile bootstrap; M3 variance-bound normal 95% band; budget extrapolation). **No numerical confidence band here is a certificate of hidden-system SLA compliance**. M3 FULL343 zero within-bank truncation error does not mean zero white-box prediction error. Method-subset min/max is not a calibrated interval. Numerical threshold resolution is not a time-uniform sequential policy. Historical manuscript source remains unchanged.
