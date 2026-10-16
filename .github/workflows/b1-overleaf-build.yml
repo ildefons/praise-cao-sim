@@ -1,12 +1,12 @@
-name: Build B1 Overleaf project and PDF
+name: Build B1 Overleaf project and rendered PDF
 
 on:
   push:
     branches: [praise-identifiability-feasibility]
     paths:
       - .github/workflows/b1-overleaf-build.yml
-      - first_science/b1/report/B1_TECHNICAL_REPORT_DRAFT_V0_1.md
-      - first_science/b1/report/figures/**
+      - first_science/b1/report/overleaf/main.tex
+      - first_science/b1/report/overleaf/figures/**
   workflow_dispatch:
 
 permissions:
@@ -15,81 +15,51 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
-      - name: Checkout source
+      - name: Checkout B1 report branch
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
-      - name: Install Pandoc, XeLaTeX, and SVG converter
+      - name: Install XeLaTeX toolchain
         run: |
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended \
-            texlive-plain-generic librsvg2-bin zip
+            texlive-xetex texlive-latex-extra texlive-pictures \
+            texlive-fonts-recommended texlive-plain-generic \
+            latexmk zip poppler-utils
 
-      - name: Convert full manuscript to Overleaf-compatible LaTeX
+      - name: Compile existing LaTeX Overleaf source
         shell: bash
         run: |
           set -euo pipefail
-          cd first_science/b1/report
-          mkdir -p overleaf/figures
-          cp B1_TECHNICAL_REPORT_DRAFT_V0_1.md overleaf/B1_SOURCE_SNAPSHOT.md
-          for figure in figures/*.svg; do
-            output="overleaf/figures/$(basename "${figure%.svg}.pdf")"
-            rsvg-convert -f pdf -o "$output" "$figure"
-          done
-          sed -e 's/phase5_aggregate_mae_v0_1\.svg/phase5_aggregate_mae_v0_1.pdf/g' \
-              -e 's/phase6_matched_mae_v0_1\.svg/phase6_matched_mae_v0_1.pdf/g' \
-              B1_TECHNICAL_REPORT_DRAFT_V0_1.md > overleaf/_pandoc_input.md
-          pandoc overleaf/_pandoc_input.md \
-             --from=markdown+tex_math_dollars+raw_tex \
-             --to=latex --standalone --output=overleaf/main.tex
-          rm overleaf/_pandoc_input.md
-          cat > overleaf/README.md <<'EOF'
-          # B1 Overleaf manuscript
-
-          Upload this folder as an Overleaf ZIP, or upload main.tex and figures/*.pdf.
-          The main document is **main.tex**, compiler **XeLaTeX**.
-          Figures are embedded as PDF vectors, requiring no shell escape.
-          B1_SOURCE_SNAPSHOT.md is the exact Pandoc source snapshot used to compile.
-          No YAFS simulation was run to make this manuscript.
-          EOF
-          cd overleaf
-          xelatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex > build-pass1.log
-          xelatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex > build-pass2.log
+          cd first_science/b1/report/overleaf
+          latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
           test -s main.pdf
-          if grep -E "LaTeX Error:|Undefined control sequence|Fatal error" build-pass2.log; then
-            exit 1
-          fi
+          pdfinfo main.pdf | grep -E 'Pages:|Page size:'
+          mkdir -p ../
           cp main.pdf ../B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
-          zip -9 -r ../B1_OVERLEAF_PROJECT_V0_1.zip main.tex README.md B1_SOURCE_SNAPSHOT.md figures
-          echo "PDF page count:" && pdfinfo main.pdf | grep Pages
+          zip -9 -r ../B1_OVERLEAF_PROJECT_V0_1.zip main.tex README.md figures
+          test -s ../B1_OVERLEAF_PROJECT_V0_1.zip
 
-      - name: Upload PDF and Overleaf ZIP
+      - name: Upload completed PDF and Overleaf ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: B1-Overleaf-PDF-v0.1
+          name: B1-Overleaf-and-rendered-PDF
           path: |
-            first_science/b1/report/B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
             first_science/b1/report/B1_OVERLEAF_PROJECT_V0_1.zip
+            first_science/b1/report/B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
           if-no-files-found: error
           retention-days: 90
 
-      - name: Publish generated Overleaf source and PDF on branch
+      - name: Keep compiled deliverables with project source
         shell: bash
         run: |
           set -euo pipefail
+          cd first_science/b1/report
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          cd first_science/b1/report
-          # Do not version TeX build logs or temporary aux files
-          rm -f overleaf/*.aux overleaf/*.log overleaf/*.out overleaf/*.toc
-          git add overleaf/main.tex overleaf/README.md overleaf/B1_SOURCE_SNAPSHOT.md \
-            overleaf/figures/*.pdf B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf \
-            B1_OVERLEAF_PROJECT_V0_1.zip
+          git add B1_OVERLEAF_PROJECT_V0_1.zip B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
           if ! git diff --staged --quiet; then
-            git commit -m "Build B1 full manuscript as Overleaf LaTeX project and rendered PDF"
+            git commit -m "Publish compiled B1 Overleaf ZIP and report PDF"
             git push
           fi
