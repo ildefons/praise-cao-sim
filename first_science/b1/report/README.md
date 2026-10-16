@@ -2,25 +2,31 @@
 
 **Status:** Internal author/coauthor working draft (v0.1), 16 October 2026. **Not published, and not yet publication-cleared.**
 
-- [GitHub-readable manuscript with repaired display equations](B1_TECHNICAL_REPORT_GITHUB_VIEW_V0_1.md), using 26 native GitHub `math` blocks. This is the preferred browser reading copy.\n- [Complete Pandoc/LaTeX source Markdown](B1_TECHNICAL_REPORT_DRAFT_V0_1.md), approximately 9,000 words across twelve chapters, executive synthesis and three technical/provenance/reference appendices.
+- [GitHub-readable manuscript with repaired display equations](B1_TECHNICAL_REPORT_GITHUB_VIEW_V0_1.md), using 26 native GitHub `math` blocks. This is the preferred browser reading copy.
+- [Complete Pandoc/LaTeX source Markdown](B1_TECHNICAL_REPORT_DRAFT_V0_1.md), approximately 9,000 words across twelve chapters, executive synthesis and three technical/provenance/reference appendices.
 - [Figure 1, Phase5 aggregate MAE](figures/phase5_aggregate_mae_v0_1.svg), built directly from independently audited V3b saved-result metrics.
 - [Figure 2, Phase6 matched information–method MAE](figures/phase6_matched_mae_v0_1.svg), built from audited P4/G_SEQPAR six-way evaluation metrics.
 - [Final drafting sign-off](../FINAL_AUDIT_SIGNOFF_2026-10-16.md), [original-to-B1 migration matrix](../MANUSCRIPT_MIGRATION_MATRIX_V0_1.csv), [68-item claim-to-draft crosswalk](CLAIM_TO_DRAFT_TRACEABILITY_V0_1.csv) and [draft QA report](REPORT_DRAFT_QA_V0_1_2026-10-16.md).
 
 **Source PDF caution:** The source manuscript \`praise_caise_workshop_note_v11_45(1).pdf\` was *not* overwritten or rebranded. Tables and formulas carried into the new report are scoped by provenance and historical method version; the two charts are new visualizations of verified data, not new experiments.
 
-## Build PDF on the original repository checkout
+## Overleaf source and compiled deliverables
 
-Requires Pandoc 3.x, XeLaTeX and a working converter for SVG images (for example Inkscape). Run:
+**Build status: SUCCESS**. The [GitHub Actions XeLaTeX run](https://github.com/ildefons/praise-cao-sim/actions/runs/38920807623) compiled the complete report. Its outputs are now tracked on this branch.
 
-\`\`\`bash
-cd ~/praise/praise-cao-sim
-git pull
-cd first_science/b1/report
-bash build_pdf.sh
-\`\`\`
+- [Rendered **22-page PDF**](B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf)
+- [Overleaf **import ZIP**](B1_OVERLEAF_PROJECT_V0_1.zip)
+- [Full LaTeX source directory](overleaf/), containing `main.tex` and two PGFPlots figure files.
+- [GitHub-readable Markdown with 26 math fences](B1_TECHNICAL_REPORT_GITHUB_VIEW_V0_1.md)
 
-The result is \`B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf\`. This command **does not** perform a scientific experiment. Build output is not an authority for source results; the Markdown, figures and evidence registry are.
+To import: **Overleaf → New Project → Upload Project → choose the ZIP**. Set main file `main.tex` and compiler **XeLaTeX**. For local PDF rebuilding, run:
+
+```bash
+cd first_science/b1/report/overleaf
+latexmk -xelatex -interaction=nonstopmode -halt-on-error main.tex
+```
+
+The PDF was rendered, its 22 pages were inspected, and mathematical formulas and charts were checked for visible rendering errors. The LaTeX project is the editable authoritative manuscript format; the Markdown view is intended only for reading on GitHub.
 
 ## Academic-quality and release gates
 
@@ -39,11 +45,3 @@ The B1 report is intended as an **eventually citable technical record**, potenti
 
 Do not import unpublished PPG GP+DVI, readiness scores or old private experimental scenarios. Do not modify frozen simulator contracts, seed banks, scientific runs, archived manifests or historical results. The report can be revised independently.
 
-## Overleaf import and rendered PDF
-
-The [full-document build workflow](../../../.github/workflows/b1-overleaf-build.yml) is designed to compile **the full** `B1_TECHNICAL_REPORT_DRAFT_V0_1.md` using Pandoc/XeLaTeX, convert both SVG charts to PDF vectors and package an `overleaf/main.tex` source project. Its intended outputs are:
-
-- `B1_OVERLEAF_PROJECT_V0_1.zip` (import via Overleaf **New Project > Upload Project**)
-- `B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf` (rendered report)
-
-Only use these links once the GitHub Actions workflow has **actually completed successfully**; workflow source alone is not a produced PDF. The workflow also provides an explicitly dispatched build on the repo's Actions page where available. The original GitHub source remains available independently of build status.
