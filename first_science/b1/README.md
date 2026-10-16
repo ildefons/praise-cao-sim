@@ -121,3 +121,20 @@ zip -r ~/praise_b1_verification_v0_3.zip verification_v0_3
 ```
 
 Do not claim B1 v1.0 evidence validation until v0.3 and the outstanding historical pilot/provenance reconciliation are reviewed.
+
+### v0.3 local verification closed (2026-10-16)
+
+The uploaded v0.3 report has **399 PASS, 0 FAIL, 9 INFO, 0 SKIP**. The formerly unverified P2 induced-region results now match the saved numerical tables and the registry. The result is documented in [v0.3 verification review](VERIFICATION_REVIEW_V0_3_2026-10-16.md). The Phase-5 battery and Phase-6 six-way saved metrics were also confirmed.
+
+**Next, reconcile the historical pilot**, not a new scientific simulation. On the PRAISE laptop:
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull
+conda activate praise-cao
+python first_science/b1/verify_phase4_pilot_v0_1.py
+cd first_science/b1/local_audit
+zip -r ~/praise_b1_phase4_pilot_verification.zip verification_phase4_v0_1
+```
+
+The script independently scores the pilot and the Stage-B M3 mechanism ablation from archived CSVs, checks their saved metrics and manifest hashes, and writes only to the local B1 audit directory. Keep the v0.1 registry provisional until this check and method chronology are reconciled.
