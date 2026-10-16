@@ -98,3 +98,7 @@ These are *existing-data* integrity checks, not new experiments. If a source is 
 Preserve all four original tables and all three figures as **historical pilot** assets, with corrections. The primary B1 results need separate Phase5, Phase6 and P2 displays, each explicitly tagged with its population, method version, horizon/reference bank, evidence role and simulation cost.
 
 **2.4 verdict:** closed at visual, mathematical and source-provenance audit level. Do not sign off full row-by-row numerical accuracy of ancillary displays until the targeted archived-data check. No manuscript changes were made.
+
+## Subsequent numerical-source check (same date)
+
+The user supplied the read-only 22-file display evidence bundle after this visual audit. Its [source reconciliation report](TABLES_FIGURES_SOURCE_RECONCILIATION_2026-10-16.md) verifies Table2 M0 denominator and reference-certain decision percentages, all Table3 per-regime matched-B Top3 values, all Table4 truth/M1/Top1 parameters and public-I1 KL/MSE cells, the N200 white-box bootstrap figures in Figure2, and the M1/M3 clipped-width anchors in Figure3. Twenty-two collector hashes and thirteen selected original-manifest output hashes matched. **Only Table2 operational B100/B300 Top1/3 and Figure3 M2 paired-bootstrap width remain unverified at primary-row level**. The previously recorded cost/frontier and uncertainty-language corrections remain mandatory.
