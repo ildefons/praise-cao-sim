@@ -2,7 +2,7 @@
 
 **Status:** Internal author/coauthor working draft (v0.1), 16 October 2026. **Not published, and not yet publication-cleared.**
 
-- [Main manuscript](B1_TECHNICAL_REPORT_DRAFT_V0_1.md), approximately 9,000 words across twelve chapters, executive synthesis and three technical/provenance/reference appendices.
+- [GitHub-readable manuscript with repaired display equations](B1_TECHNICAL_REPORT_GITHUB_VIEW_V0_1.md), using 26 native GitHub `math` blocks. This is the preferred browser reading copy.\n- [Complete Pandoc/LaTeX source Markdown](B1_TECHNICAL_REPORT_DRAFT_V0_1.md), approximately 9,000 words across twelve chapters, executive synthesis and three technical/provenance/reference appendices.
 - [Figure 1, Phase5 aggregate MAE](figures/phase5_aggregate_mae_v0_1.svg), built directly from independently audited V3b saved-result metrics.
 - [Figure 2, Phase6 matched information–method MAE](figures/phase6_matched_mae_v0_1.svg), built from audited P4/G_SEQPAR six-way evaluation metrics.
 - [Final drafting sign-off](../FINAL_AUDIT_SIGNOFF_2026-10-16.md), [original-to-B1 migration matrix](../MANUSCRIPT_MIGRATION_MATRIX_V0_1.csv), [68-item claim-to-draft crosswalk](CLAIM_TO_DRAFT_TRACEABILITY_V0_1.csv) and [draft QA report](REPORT_DRAFT_QA_V0_1_2026-10-16.md).
@@ -38,3 +38,12 @@ The B1 report is intended as an **eventually citable technical record**, potenti
 ## Development constraints
 
 Do not import unpublished PPG GP+DVI, readiness scores or old private experimental scenarios. Do not modify frozen simulator contracts, seed banks, scientific runs, archived manifests or historical results. The report can be revised independently.
+
+## Overleaf import and rendered PDF
+
+The [full-document build workflow](../../../.github/workflows/b1-overleaf-build.yml) is designed to compile **the full** `B1_TECHNICAL_REPORT_DRAFT_V0_1.md` using Pandoc/XeLaTeX, convert both SVG charts to PDF vectors and package an `overleaf/main.tex` source project. Its intended outputs are:
+
+- `B1_OVERLEAF_PROJECT_V0_1.zip` (import via Overleaf **New Project > Upload Project**)
+- `B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf` (rendered report)
+
+Only use these links once the GitHub Actions workflow has **actually completed successfully**; workflow source alone is not a produced PDF. The workflow also provides an explicitly dispatched build on the repo's Actions page where available. The original GitHub source remains available independently of build status.
