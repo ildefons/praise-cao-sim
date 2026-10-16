@@ -114,7 +114,24 @@ def main():
             record("MANIFEST", key, "FAIL", "Missing")
             continue
         data = json.loads(manifest.read_text())
-        record("MANIFEST_STATUS", key, "INFO", data.get("status", "UNSPECIFIED"))
+        status = data.get("status", "UNSPECIFIED")
+        record("MANIFEST_STATUS", key, "INFO", status)
+        expected_status = {
+            "phase5_v3b_fullsupport_global_prediction_freeze_manifest.json":
+                "FROZEN_PHASE5_V3B_FULLSUPPORT_GLOBAL_PREDICTION_FREEZE",
+            "phase5_v3b_fullsupport_final_wb_freeze_manifest.json":
+                "FROZEN_PHASE5_V3B_FULLSUPPORT_FINAL_WB_BATTERY",
+            "phase5_v3b_fullsupport_deterministic_evaluation_manifest.json":
+                "FROZEN_PHASE5_V3B_FULLSUPPORT_DETERMINISTIC_EVALUATION",
+            "phase5_v3b_fullsupport_wb_reference_bootstrap_manifest.json":
+                "FROZEN_PHASE5_V3B_FULLSUPPORT_WB_REFERENCE_BOOTSTRAP",
+            "evaluation_manifest.json":
+                "PHASE6_I2BV4_SIX_WAY_MATCHED_EVALUATION_COMPLETE",
+            "comparison_manifest.json":
+                "RETROSPECTIVE_P2_G_PAR_M1_M2_M3_NATIVE_BUDGET_COMPARISON_COMPLETE"
+        }.get(manifest.name)
+        if expected_status is not None:
+            require(status == expected_status, "MANIFEST_STATUS", key + ":expected", status)
         outputs = data.get("outputs") if isinstance(data.get("outputs"), dict) else {}
         mappings = [
             ("output_hashes_sha256", data.get("output_hashes_sha256")),
@@ -150,6 +167,14 @@ def main():
                     record("OUTPUT_HASH", label, "SKIP", f"Size cap {args.max_output_mb:g} MB")
                 else:
                     require(digest(chosen) == expected, "OUTPUT_HASH", label, chosen.relative_to(FIRST))
+
+    # Reconstruction evidence is essential but omitted from the initial 17
+    # registered result roots. Record presence explicitly rather than
+    # incorrectly treating initial directory coverage as exhaustive.
+    for rel in ("phase3/results", "phase5/results/03_reconstruction_v3/P2",
+                "phase5/results/03_reconstruction_v3b/P2"):
+        path = FIRST / rel
+        require(path.is_dir(), "REGISTRY_COVERAGE", rel, "Additional source root required for full B1 provenance")
 
     # Phase 5. Recompute each metric from the actual frozen pointwise join,
     # without using methods or outcomes during calculation.
