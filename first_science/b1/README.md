@@ -181,3 +181,8 @@ Upload the ZIP for review. The check includes all P1–P4 provider selection ban
 ### Completed V3b method-support evidence audit (2026-10-16)
 
 The user-run [frozen method-support audit](METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md) reports **132 PASS, 0 FAIL**, checking all P1–P4 provider selections, the M2 27-member and M3 343-member product supports and eligible P1/P3/P4 M3 B1400 greedy allocations. This closes Step **2.3b at saved-selection/contract consistency level**. It does not rerun search or simulation; latent model adequacy remains unknown. Next: **Step 2.3c, uncertainty mathematics**.
+
+
+## Substep 2.3c closed: uncertainty mathematics
+
+The [uncertainty-mathematics audit](UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md) identifies which results are exact (finite-mixture truncation, MC variance algebra, expectation-based noise decompositions), which are conditional/approximate (Wilson, paired bootstrap, normal intervals, budget scaling), and which are merely exploratory (model spread to truth error, deployment admission). **No new simulations or manuscript changes.** The main pending work is **Step 2.4, numerical tables and figures**, followed by simulator/provenance Step 2.5.
