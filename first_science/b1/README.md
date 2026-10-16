@@ -73,3 +73,34 @@ This is an inventory **only**. It does not prove that every SHA recorded *inside
 ## Immediate scope of Step 1
 
 This registry is **v0.1, not yet fully locally verified**. Completion of Step 1 requires importing local manifest hashes, checking the actual Phase-5/Phase-6 output row counts, recording missing evidence without replacement, and freezing the reviewed registry as v1.0. Only then should the old manuscript be edited.
+
+## Audit progression (2026-10-16)
+
+The user-run v0.1 inventory was received and reviewed:
+
+- 12/12 registry entries had all their registered source/result paths.
+- 31/31 registered source files and 17/17 registered result roots were present.
+- 233 JSON manifest files were SHA256-fingerprinted, with no skipped hash and no missing registered path.
+- Inventory by phase: Phase1 1, Phase2 5, Phase4 50, Phase5 88, Phase6 89.
+- Phase5 manifest-name coverage includes 16 Step-0 confirmations, 12 eligible graph prediction manifests, 12 white-box cell manifests, final freeze, deterministic evaluation and bootstrap.
+- **Caution:** This is not exhaustive result coverage. The initial 17 registered roots omit some reconstruction provenance, particularly Phase3 results and Phase5 `03_reconstruction_v3` and `03_reconstruction_v3b`. These are explicitly checked in the next verification pass and must be added to the final registry. The old `phase6/checkpoint.json` is a stale snapshot.
+- **Caution:** Hashing a manifest does not check any hashes declared *inside* it, nor does it verify CSV row counts, mean errors or WB/prediction joins.
+
+Run the next, still non-simulation audit from the repository root:
+
+```bash
+git pull
+conda activate praise-cao
+python first_science/b1/verify_local_evidence_v0_2.py
+```
+
+It checks the original 233 manifest snapshot hashes, selected manifest-output hash links (size capped at 32 MB per file), current freeze statuses, reconstruction provenance directories, and independently recomputes the saved Phase5/Phase6/P2 prediction metrics from joined CSVs. It also checks the P2 true-parameter and sensitivity tables. It writes only to `first_science/b1/local_audit/verification_v0_2/`.
+
+Bundle the verification output for review:
+
+```bash
+cd first_science/b1/local_audit
+zip -r ~/praise_b1_verification_v0_2.zip verification_v0_2
+```
+
+**No scientific data or predictions are modified.** A PASS means the indicated persisted artifact or metric agrees under the audit definition. SKIP means the item was not independently checked, not that it passed. The B1 registry is not yet v1.0 until all reported mismatches and coverage gaps are reviewed.
