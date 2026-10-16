@@ -209,3 +209,20 @@ Next after this ancillary check: **Step 2.5, simulator extensions and research p
 Reviewed [the uploaded 22-source archive](TABLES_FIGURES_SOURCE_RECONCILIATION_2026-10-16.md): **22/22 collector hashes matched; 13/13 selected source-manifest output hashes matched**. Original M0–M3 errors, Wilson reference-certain decision percentages (481/555 and M0 274), all Table3 matched-B Top3 per-regime curves, and Table4 parameter/I1 loss values reproduced. Figure2 N200 WB-bootstrap ranges match; Figure3 M1 Wilson width and **clipped** M3 normal bands reproduce manuscript width anchors.
 
 Narrow residual archival gaps: operational Top1 B100/Top3 B300 actual first-100 member estimates and M2 B2700 shared-seed MC width have not been independently recomputed because the requested collector omitted their source-level arrays. Keep these as **not independently checked**, not as numerical contradictions. The 2.4 display/source audit is sufficiently complete to begin **Step 2.5, simulator infrastructure and provenance**. No new simulations are needed.
+
+## Substep 2.5: Simulator extensions and experimental provenance (2026-10-16)
+
+The [source/contract audit](SIMULATOR_PROVENANCE_AUDIT_2026-10-16.md) separates the modified AICon/YAFS composition runtime, Phase5 three-provider AST-to-dependency compiler, fixed physical graph executor, native LCQ ledger accounting, engineering-smoke tests, global prediction/WB freeze protocol, and remaining external-dependency reproducibility risk. The checked Phase5 graphs change logical dependencies on one fixed physical embedding; genuine nested runtime examples exist separately. No active control agents or energy-stress results were established by the core battery. The registered Oct6 mandatory-smoke sequencing deviation remains explicitly disclosed. Oct10 optional trace additions also mean current graph-simulator source need not be byte-identical to frozen run code.
+
+**Remaining independent check:** run the new [read-only installed-runtime and manifest-chain audit](audit_runtime_provenance_v0_1.py) on the original laptop:
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull
+conda activate praise-cao
+python first_science/b1/audit_runtime_provenance_v0_1.py
+cd first_science/b1/local_audit
+zip -r ~/praise_b1_runtime_provenance_v0_1.zip runtime_provenance_v0_1
+```
+
+Upload that ZIP. It does not run any YAFS simulation, and fingerprints the currently installed modified YAFS sources without claiming they match the historic Oct6–8 runtime automatically. The source audit is complete; archived environment/timestamp provenance remains provisional until review. Next is **Substep 2.6, preservation and B1 rewrite blueprint**.
