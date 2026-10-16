@@ -138,3 +138,16 @@ zip -r ~/praise_b1_phase4_pilot_verification.zip verification_phase4_v0_1
 ```
 
 The script independently scores the pilot and the Stage-B M3 mechanism ablation from archived CSVs, checks their saved metrics and manifest hashes, and writes only to the local B1 audit directory. Keep the v0.1 registry provisional until this check and method chronology are reconciled.
+
+## Core evidence registry v1.0 (2026-10-16)
+
+The major pilot-to-battery evidence audit is now closed **at the saved-results verification level**. The original chronological registry v0.1 remains immutable; the reviewed successor is [`evidence_registry_v1_0.json`](evidence_registry_v1_0.json).
+
+- Initial source/result presence: 31/31 source files, 17/17 data roots; 233 manifest fingerprints.
+- v0.3 current evidence checks: **399 PASS, 0 FAIL** (Phase5 broad results, Phase6 six-way comparisons, P2 induced-region and provider truth/sensitivity).
+- Phase4 pilot + post-hoc Stage-B: **60 PASS, 0 FAIL**, independently recomputed from archived pointwise comparison tables and checked manifest-file hashes; see [Phase4 review](PHASE4_VERIFICATION_REVIEW_2026-10-16.md).
+- The [method and evidence chronology](METHOD_VERSION_CHRONOLOGY_2026-10-16.md) distinguishes M2-G1/G2, M3-v4 Top14 pilot, Phase5 V2->V3b FULL343, Phase6 I2 development and the independent P2 induced-region study.
+
+**B1 core registry v1.0 is a reviewed evidence index, not an exhaustive simulator integrity certificate.** Raw ledgers, ancillary experimental branches, all simulation extensions, full manifest transitive-hash coverage and the latest graph-conditioned/joint-parameter tracks still require dedicated inventory before being described as fully verified. Report missing or incomplete evidence honestly; no further simulator experiments are needed to start the manuscript claim audit.
+
+**Next task:** audit the old pilot-oriented manuscript `praise_caise_workshop_note_v11_45(1).pdf` section-by-section against the verified core registry. Preserve scientific definitions and mathematical sections after implementation-level consistency checks; explicitly update the abstract, interpretation, limitations and summary to reflect the completed Phase5 battery and subsequent diagnostics.
