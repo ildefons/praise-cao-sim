@@ -26,7 +26,7 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             texlive-xetex texlive-latex-extra texlive-pictures \
             texlive-fonts-recommended texlive-plain-generic \
-            latexmk zip poppler-utils
+            latexmk zip poppler-utils fonts-dejavu-core
 
       - name: Compile existing LaTeX Overleaf source
         shell: bash
