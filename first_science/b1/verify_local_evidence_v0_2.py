@@ -124,7 +124,7 @@ def main():
             "phase5_v3b_fullsupport_deterministic_evaluation_manifest.json":
                 "FROZEN_PHASE5_V3B_FULLSUPPORT_DETERMINISTIC_EVALUATION",
             "phase5_v3b_fullsupport_wb_reference_bootstrap_manifest.json":
-                "FROZEN_PHASE5_V3B_FULLSUPPORT_WB_REFERENCE_BOOTSTRAP",
+                "FROZEN_PHASE5_V3B_FULLSUPPORT_WB_REFERENCE_BOOTSTRAP_COMPLETE",
             "evaluation_manifest.json":
                 "PHASE6_I2BV4_SIX_WAY_MATCHED_EVALUATION_COMPLETE",
             "comparison_manifest.json":
