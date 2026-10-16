@@ -116,3 +116,7 @@ The two axes of \(\tau=(I,M)\) have distinct roles:
 A targeted **read-only local model-support checker** (script \`verify_method_support_v0_1.py\`) can validate identities, weights, support sizes and allocation on existing V3b archives without any scientific simulation. Its outcome must be reviewed separately before marking the provenance fully reconciled.
 
 **Final assessment:** The manuscript's method-family framework stands. The unsafe part is using one unqualified \`M1/M2/M3\` name or one common “I1-compatible” set across historically different operational definitions, followed by generality/certification claims not supported by the evidence.
+
+## Archived frozen V3b support verification completed
+
+The local [model-support verification review](METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md) records **132 PASS, 0 FAIL** (P1/P2/P3/P4 selection, M2 and M3 supports, P1/P3/P4 M3 B1400 allocations). Phase5 V3b source-defined method identities and finite-support arithmetic are thus **reconciled with the archived selections**. This does not certify reconstruction fit quality, event ledgers, real-world generalization, or recalculation of KL weights from raw I1 points. Substep **2.3b closed at the specified evidence level**.
