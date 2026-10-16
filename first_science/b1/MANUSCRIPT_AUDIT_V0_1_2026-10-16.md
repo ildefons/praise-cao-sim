@@ -12,7 +12,7 @@
 |---|---|---|---|
 | **2.1 Baseline and scope** | Which manuscript, scientific era and evidence are being reviewed? | **Done** | Exact 26-page PDF and SHA; v1 evidence registry |
 | **2.2 Claim inventory and chronology** | What does each section assert; are results pilot, prospective, development or post-hoc? | **Initial pass done** | 45-entry claim ledger; chronologically separated M3 variants |
-| **2.3 Definitions and mathematical semantics** | Is each SLA, I1, M0/M1/M2/M3, uncertainty and cost definition valid under its implementation? | **Flagged, implementation verification pending** | Audit source contracts and code at named points; do not quietly redefine sigma |
+| **2.3 Definitions and mathematical semantics** | Is each SLA, I1, M0/M1/M2/M3, uncertainty and cost definition valid under its implementation? | **SLA source inspection complete; remainder pending** | See [SLA semantics audit](SLA_SEMANTICS_SOURCE_AUDIT_2026-10-16.md); audit other source contracts |
 | **2.4 Tables and figures** | Are each number, reference cohort, budget and claimed ranking consistent? | **Main saved-result metrics verified; figure/appendix internal consistency issues identified** | Review original figures and appendices, compare with verified tables |
 | **2.5 Engineering/reproducibility** | What YAFS/AICon changes, provenance and processing gates can be documented? | **Pending** | Inventory actual code changes and frozen manifests, no new experiments |
 | **2.6 Preservation and reuse plan** | Which prose/formulas survive in B1 and which must be moved or rewritten? | **First-pass map below** | Approved section-by-section reuse plan |
@@ -110,7 +110,7 @@ Keep rich technical material as appendices, but all formulas and graphs carry a 
 
 ## Sign-off and next limited checks before any rewrite
 
-- **2.3a** Trace SLA decision extraction and conventions against implemented code, especially late-deadline/undecided handling, query region construction and the zero-decisions convention.
+- **2.3a (done at static-source level)** The canonical cumulative-SLA decision extraction and zero-decided convention were checked against Phase1/Phase3/Phase5 code. See [source-level SLA semantics audit](SLA_SEMANTICS_SOURCE_AUDIT_2026-10-16.md). The separate I1 public-region/query construction and raw-ledger replay are still unverified.
 - **2.3b** Audit M0 product interpretation and M1/M2/M3 provider selection/weighting at each significant version, using authoritative contracts and functions rather than manuscript prose.
 - **2.3c** Audit `sigma_G` vs first-violation labels and the statistical interpretation of the confidence/Monte Carlo bands.
 - **2.4** Resolve the Fig2 frontier inconsistency and missing MC-width reference, plus compare all manuscript tables against exact frozen experiment identities; don't mix local estimation and graph simulation budgets.
