@@ -203,3 +203,9 @@ python first_science/b1/collect_display_sources_v0_1.py
 Upload `first_science/b1/local_audit/display_sources_v0_1/praise_b1_display_source_evidence_v0_1.zip`. The bundle has an included/missing/skipped manifest so gaps remain visible. No scientific evidence file is altered.
 
 Next after this ancillary check: **Step 2.5, simulator extensions and research provenance**, followed by Step 2.6 report reuse blueprint.
+
+## Substep 2.4 local display archive reconciled (2026-10-16)
+
+Reviewed [the uploaded 22-source archive](TABLES_FIGURES_SOURCE_RECONCILIATION_2026-10-16.md): **22/22 collector hashes matched; 13/13 selected source-manifest output hashes matched**. Original M0–M3 errors, Wilson reference-certain decision percentages (481/555 and M0 274), all Table3 matched-B Top3 per-regime curves, and Table4 parameter/I1 loss values reproduced. Figure2 N200 WB-bootstrap ranges match; Figure3 M1 Wilson width and **clipped** M3 normal bands reproduce manuscript width anchors.
+
+Narrow residual archival gaps: operational Top1 B100/Top3 B300 actual first-100 member estimates and M2 B2700 shared-seed MC width have not been independently recomputed because the requested collector omitted their source-level arrays. Keep these as **not independently checked**, not as numerical contradictions. The 2.4 display/source audit is sufficiently complete to begin **Step 2.5, simulator infrastructure and provenance**. No new simulations are needed.
