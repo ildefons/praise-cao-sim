@@ -505,6 +505,13 @@ def evaluate(cfg):
         stats.append({"scope": "all_12_cells", "method": method, "cell": "ALL",
                       "n_points": len(e), "mae": np.mean(np.abs(e)),
                       "rmse": np.sqrt(np.mean(e*e)), "bias": np.mean(e)})
+    for scope, column in (("provider_configuration", "provider_world_id"),
+                          ("composition_graph", "graph_id")):
+        for (method, value), group in result.groupby(["method", column]):
+            e = group["error"].to_numpy()
+            stats.append({"scope": scope, "method": method, "cell": str(value),
+                          "n_points": len(e), "mae": np.mean(np.abs(e)),
+                          "rmse": np.sqrt(np.mean(e*e)), "bias": np.mean(e)})
     dest = OUT/"evaluation"
     dest.mkdir(parents=True, exist_ok=True)
     result.to_csv(dest/"pointwise_retrospective.csv", index=False)
