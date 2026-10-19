@@ -1,0 +1,39 @@
+{
+  "status": "B1_RETROSPECTIVE_M3_V1_DESIGN_FROZEN",
+  "scientific_role": "Retrospective generalization check for original-style Phase-4/Phase-5-V2 I1-M3, conducted after Phase-5 full-support outcome inspection; never describe as blind confirmatory evidence.",
+  "n_candidates_per_provider": 48,
+  "candidate_origin": "Frozen Phase-5 V2 48-point LHS using reconstructed provider domain; re-evaluate against public I1 only",
+  "lhs_seed": 20260917,
+  "local_rescore_start": 52300,
+  "local_rescore_n": 100,
+  "lambda": 30,
+  "top_k": 14,
+  "graph_budget": 1400,
+  "include_matched_top1": true,
+  "top14_seed_base": 8100000,
+  "top1_seed_base": 8400000,
+  "seed_stride": 10000,
+  "eligible_worlds": [
+    "P1",
+    "P3",
+    "P4"
+  ],
+  "graphs": [
+    "G_PAR",
+    "G_SEQ",
+    "G_SEQPAR",
+    "G_PARSEQ"
+  ],
+  "evaluation_window_seconds": [
+    60,
+    240
+  ],
+  "firewall": {
+    "candidate_creation_and_prediction_cannot_read_whitebox": true,
+    "final_wb_open_only_after_12_cell_freeze": true,
+    "no_hidden_provider_parameters": true,
+    "no_P2_replacement": true,
+    "ppg_firewall": true
+  },
+  "not_bit_exact_pilot": true
+}

@@ -1,0 +1,32 @@
+name: Validate B1 retrospective M3 source
+
+on:
+  push:
+    branches: [praise-identifiability-feasibility]
+    paths:
+      - first_science/b1/retrospective_m3/**
+      - .github/workflows/b1-m3-retrospective-static.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Python syntax and JSON
+        run: |
+          python -m py_compile first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py
+          python -m json.tool first_science/b1/retrospective_m3/config_pilot_m3_generalization_v1.json > /dev/null
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          p=Path("first_science/b1/retrospective_m3/config_pilot_m3_generalization_v1.json")
+          c=json.loads(p.read_text())
+          assert c["top_k"]==14 and c["graph_budget"]==1400 and c["n_candidates_per_provider"]==48
+          assert c["eligible_worlds"]==["P1","P3","P4"]
+          assert len(c["graphs"])==4
+          print("B1_RETROSPECTIVE_STATIC_CHECK_PASS")
+          PY
