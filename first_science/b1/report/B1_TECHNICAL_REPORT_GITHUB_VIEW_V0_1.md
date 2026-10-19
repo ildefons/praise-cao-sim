@@ -1,9 +1,5 @@
 <!-- GitHub-optimized reading copy. The exact scientific source is B1_TECHNICAL_REPORT_DRAFT_V0_1.md; math is fenced for GitHub's math renderer. -->
 
-**Status:** Internal technical report, first complete scientific draft (v0.1). **Not submitted or approved for public release.** Author attribution follows the historical manuscript and remains subject to coauthor review. The bibliography is inherited from that manuscript and requires external verification before a public preprint. Numeric statements are based on the evidence registry and independently reviewed archived source tables unless explicitly qualified.
-
-**Companion artifacts:** [Evidence registry](../evidence_registry_v1_0.json), [method chronology](../METHOD_VERSION_CHRONOLOGY_2026-10-16.md), [final audit sign-off](../FINAL_AUDIT_SIGNOFF_2026-10-16.md), [preservation blueprint](../MANUSCRIPT_PRESERVATION_BLUEPRINT_V0_1_2026-10-16.md), and [source-to-report matrix](../MANUSCRIPT_MIGRATION_MATRIX_V0_1.csv).
-
 # Executive synthesis 
 
 Composed cloud-edge services can expose little more than provider-local workload and SLA evidence while keeping their stochastic execution models private. The methodological challenge is to predict an end-to-end, horizon-dependent SLA-satisfaction probability from these disclosures without silently assuming access to hidden process parameters. We report the development, implementation, and evaluation of a family of methods indexed by provider information representation $I$ and integration procedure $M$, together with the native discrete-event composition testbed and a complete account of observed limitations.
