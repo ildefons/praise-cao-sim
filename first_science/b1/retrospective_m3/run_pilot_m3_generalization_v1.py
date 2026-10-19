@@ -18,6 +18,7 @@ import math
 import os
 import sys
 import time
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -75,7 +76,10 @@ from run_phase5_m2_reconstruction_v2 import _load_public_card, _domain_row, _bou
 from run_phase5_graph_prediction_v3b_fullsupport import (
     _execute_payloads, _horizons, _member_curves, _query_definitions,
     _simulation_payload, _surrogate, _validate_complete_ledger,
+    _variant_checkpoint,
 )
+from phase5_graph_simulator_v2 import execute_one_phase5_graph_trajectory
+from m1_graph_simulator_v2 import GraphProviderSurrogate
 from run_m1_provider_lift_v2 import _simulate_and_score
 
 CONFIG = HERE / "config_pilot_m3_generalization_v1.json"
@@ -550,6 +554,173 @@ def _execute_balanced_graph_jobs(payloads, workers, label):
               f"from {len(children)} parallel blocks", flush=True)
 
 
+
+
+def _graph_benchmark_worker(task):
+    """Reusably checkpoint one real full-grid graph trajectory."""
+    payload, seed, ordinal = task
+    cp = _variant_checkpoint(
+        Path(payload["cell_root"]), str(payload["variant_id"]), int(seed)
+    )
+    if cp.is_file():
+        stored = pd.read_csv(cp)
+        if set(stored["trajectory_seed"].astype(int)) != {int(seed)}:
+            raise RuntimeError(f"Wrong cached graph seed: {cp}")
+        if set(stored["trajectory"].astype(int)) != {int(ordinal)}:
+            raise RuntimeError(f"Wrong cached graph trajectory index: {cp}")
+        return {"new": False, "seconds": 0.0, "label": str(payload["variant_id"])}
+    surrogates = {
+        p: GraphProviderSurrogate(
+            mean_service_time=float(values["mean_service_time"]),
+            cost_rate=float(values["cost_rate"]),
+            service_cv=float(values["service_cv"]),
+        )
+        for p, values in payload["surrogates"].items()
+    }
+    start = time.perf_counter()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", FutureWarning)
+        one, _ = execute_one_phase5_graph_trajectory(
+            graph_id=str(payload["graph_id"]),
+            graph_ast=payload["graph_ast"],
+            provider_surrogates=surrogates,
+            graph_invariants=payload["graph_invariants"],
+            workload_period=float(payload["workload_period"]),
+            stop_time=float(payload["stop_time"]),
+            trajectory_seed=int(seed),
+            canonical_ipt=float(payload["canonical_ipt"]),
+            execution_fraction=float(payload["execution_fraction"]),
+        )
+    one.insert(0, "trajectory", int(ordinal))
+    one.insert(1, "trajectory_seed", int(seed))
+    cp.parent.mkdir(parents=True, exist_ok=True)
+    tmp = cp.with_suffix(f".{os.getpid()}.tmp")
+    try:
+        one.to_csv(tmp, index=False)
+        tmp.replace(cp)
+    finally:
+        tmp.unlink(missing_ok=True)
+    return {"new": True, "seconds": time.perf_counter() - start,
+            "label": str(payload["variant_id"])}
+
+
+def _first_graph_block(payload, workers):
+    """Identical first-block scheduling to _execute_balanced_graph_jobs."""
+    seeds = list(map(int, payload["seeds"]))
+    if workers <= 1 or len(seeds) < max(256, 64 * workers):
+        return payload, seeds
+    size = max(64, math.ceil(len(seeds) / workers))
+    child = dict(payload)
+    child["variant_id"] = str(payload["variant_id"]) + "_BLOCK000"
+    child["seeds"] = seeds[:size]
+    ledger = Path(payload["ledger_path"])
+    child["ledger_path"] = str(
+        ledger.parent / "blocks" / (child["variant_id"] + ".csv")
+    )
+    return child, list(map(int, child["seeds"]))
+
+
+def benchmark_graph(cfg, contracts, cell, workers, n_per_method=12):
+    """Small graph benchmark, checkpoints reused by the exact full run.
+
+    Reads frozen candidate weights, public AST and public Step-0 query definition;
+    never reads white-box reference or produces scored accuracy.
+    """
+    allowed = {physical_cell_id(w, g) for w in cfg["eligible_worlds"]
+               for g in cfg["graphs"]}
+    if cell not in allowed:
+        raise RuntimeError(f"Graph benchmark requires eligible cell: {cell}")
+    world, graph_id = cell.split("__", 1)
+    root = OUT / "predictions" / cell
+    if (root / "prediction_manifest.json").is_file():
+        raise RuntimeError(f"{cell}: prediction already frozen; no graph benchmark needed")
+    graph = graph_record(contracts, graph_id)
+    support_file = OUT / "candidate_support" / world / "top14_support.csv"
+    support_manifest = OUT / "candidate_support" / world / "support_manifest.json"
+    if not support_file.is_file() or not support_manifest.is_file():
+        raise RuntimeError(f"{world} has not completed candidate preparation")
+    manifest = read_json(support_manifest)
+    if sha256_file(support_file) != manifest["top14_support_sha256"]:
+        raise RuntimeError("Frozen Top14 support hash mismatch")
+    if manifest["config_sha256"] != sha256_file(CONFIG):
+        raise RuntimeError("Frozen support was built under another configuration")
+    top = pd.read_csv(support_file)
+    if len(top) != 14 or int(top["n_trajectories"].sum()) != 1400:
+        raise RuntimeError("Top14 support / simulation budget changed")
+    lookups = {}
+    for provider in PROVIDERS:
+        weights_file = OUT / "candidates" / world / provider / "provider_weights.csv"
+        if sha256_file(weights_file) != manifest["provider_weights_sha256"][provider]:
+            raise RuntimeError(f"Frozen {provider} model bank changed")
+        weights = pd.read_csv(weights_file)
+        lookups[provider] = {
+            str(r.candidate_id): _surrogate(pd.Series({
+                "mean_service_time": r.mean_service_time,
+                "cost_rate": r.cost_rate,
+                "service_cv": r.service_cv,
+            })) for r in weights.itertuples(index=False)
+        }
+    def payload_for(rankrow, variant, seeds):
+        ids = {p: str(rankrow[f"{p}_candidate_id"]) for p in PROVIDERS}
+        return _simulation_payload(
+            cell_root=root, graph_id=graph_id, graph_ast=graph["ast"],
+            variant_id=variant,
+            surrogates={p: lookups[p][ids[p]] for p in PROVIDERS},
+            seeds=seeds, ledger_path=root/"ledgers"/(variant+".csv"),
+            contracts=contracts,
+        )
+
+    tasks = []
+    target = n_per_method
+    # Sample up to three trajectories per highest-weight joint model.
+    # Use exactly the frozen seed prefixes for every sampled rank.
+    for row in top.to_dict("records"):
+        if target <= 0:
+            break
+        rank = int(row["joint_rank"])
+        seeds = list(range(int(row["seed_start"]), int(row["seed_end_inclusive"]) + 1))
+        original = payload_for(row, f"ORIGINAL_TOP14_R{rank:02d}", seeds)
+        child, first_block = _first_graph_block(original, workers)
+        take = min(target, 3, len(first_block))
+        tasks.extend((child, seed, j) for j, seed in enumerate(first_block[:take]))
+        target -= take
+    if target:
+        raise RuntimeError("Top14 benchmark could not allocate requested seed sample")
+
+    row = top.iloc[0].to_dict()
+    top1seeds = list(range(cfg["top1_seed_base"],
+                           cfg["top1_seed_base"] + cfg["graph_budget"]))
+    original = payload_for(row, "ORIGINAL_TOP1_B1400", top1seeds)
+    child, first_block = _first_graph_block(original, workers)
+    if len(first_block) < n_per_method:
+        raise RuntimeError("Graph sample exceeds first Top1 split block")
+    tasks.extend((child, seed, j) for j, seed in enumerate(first_block[:n_per_method]))
+    print(f"GRAPH BENCHMARK {cell}: {len(tasks)} trajectories, "
+          f"{workers} workers; all checkpoints reusable; no white-box access",
+          flush=True)
+    start = time.perf_counter()
+    if workers == 1:
+        results = [_graph_benchmark_worker(t) for t in tasks]
+    else:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as pool:
+            results = list(pool.map(_graph_benchmark_worker, tasks))
+    wall = time.perf_counter() - start
+    new = sum(int(r["new"]) for r in results)
+    cpu = sum(r["seconds"] for r in results)
+    print(f"GRAPH BENCHMARK COMPLETE: new={new}, cached={len(tasks)-new}, "
+          f"wall={wall/60:.2f}min, sum-trajectory-compute={cpu/60:.2f}min")
+    if new:
+        throughput = new / max(wall, 1e-9)
+        projected = (2 * cfg["graph_budget"] - len(tasks)) / throughput
+        print(
+            f"GRAPH BENCHMARK PROJECTION: ~{projected/60:.1f} min for remaining "
+            "trajectories if sample throughput holds. This is only a rough "
+            "estimate; graph models and long-job memory/thermal effects vary.",
+            flush=True,
+        )
+    print("No scored graph accuracy or white-box reference was computed")
+
+
 def predict_cell(cfg, contracts, cell, workers):
     world, graph_id = cell.split("__", 1)
     root = OUT / "predictions" / cell
@@ -769,7 +940,7 @@ def evaluate(cfg):
 
 def main():
     a = argparse.ArgumentParser(description="Original-style M3 retrospective generalization battery")
-    a.add_argument("--stage", required=True, choices=["preflight", "benchmark", "prepare", "predict", "freeze", "evaluate"])
+    a.add_argument("--stage", required=True, choices=["preflight", "benchmark", "prepare", "graph-benchmark", "predict", "freeze", "evaluate"])
     a.add_argument("--world", choices=["P1", "P3", "P4"])
     a.add_argument("--cell", help="e.g. P1__G_PAR")
     a.add_argument("--workers", type=int, default=1)
@@ -791,6 +962,10 @@ def main():
             prepare_world(cfg, w, workers=args.workers,
                           limit_candidates=(args.benchmark_candidates
                                             if args.stage == "benchmark" else 0))
+    elif args.stage == "graph-benchmark":
+        if not args.cell:
+            raise ValueError("Specify --cell, e.g. P1__G_PAR")
+        benchmark_graph(cfg, contracts, args.cell, args.workers)
     elif args.stage == "predict":
         allowed = {physical_cell_id(w, g) for w in cfg["eligible_worlds"] for g in cfg["graphs"]}
         if args.cell and args.cell not in allowed:

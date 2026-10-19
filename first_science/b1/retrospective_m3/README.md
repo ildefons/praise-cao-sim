@@ -36,7 +36,13 @@ The benchmark prints mean measured seconds per candidate and a rough full-provid
 
 Preparation streams progress after each 4 newly completed candidates and prints a measured remaining-time estimate. This depends on CPU scheduling and thermal behavior. 3 workers are recommended initially; 4 may improve speed if CPU and memory permit. Parallelization does not guarantee a 3× speedup. The output root is locked per world to prevent another new-style preparation process from using the same directory simultaneously; do not run older runner revisions concurrently either.
 
-Then one graph (Top14 and budget-matched Top1, each using 1,400 native graph trajectories):
+Before the first graph run, use a **bounded native graph benchmark**, which executes just 24 real graph trajectories (12 across Top14 members and 12 Top1 trajectories). All sample seeds are the exact frozen seeds, and the individual trajectory checkpoints are reused by the subsequent full run when the same worker count is used. Expected time is unknown until measured, and the small sample may not represent the slowest member:
+
+    time python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage graph-benchmark --cell P1__G_PAR --workers 4
+
+The runner reports actual elapsed time and an explicitly approximate projection for the remaining graph trajectories. **Retain `--workers 4` for the full P1 graph run** so the checkpoint locations and block scheduling match.
+
+Then run the full graph (Top14 and budget-matched Top1, each using 1,400 native graph trajectories):
 
 Large dominant-rank jobs and the Top1 control are **also subdivided into independent seed blocks** when `--workers 3` is provided. This avoids a single-core tail even though Top1 contains just one joint provider model. The complete canonical ledger is reassembled with original seed IDs and trajectory ordinals, checked for duplicates, and frozen exactly as in serial execution. Each block has its own resumable simulation ledger; do not launch two runners on the same cell at once. The first run performs 2,800 native graph trajectories per cell; over 12 cells that is 33,600 trajectories. **Runtime is not yet calibrated:** use the first P1/G_PAR cell and its progress messages before scheduling the other 11.
 
