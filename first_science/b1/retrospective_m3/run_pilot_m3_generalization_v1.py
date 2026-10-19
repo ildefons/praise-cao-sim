@@ -479,6 +479,77 @@ def predictions(members, method, support_size, retained_mass, budget):
     return out
 
 
+
+def _execute_balanced_graph_jobs(payloads, workers, label):
+    """Split large native-graph jobs into disjoint deterministic seed blocks.
+
+    The canonical finished ledger retains exactly the original seed set and
+    trajectory ordinals. Chunking affects scheduling, never simulated inputs.
+    """
+    jobs = []
+    split = []
+    for payload in payloads:
+        seeds = list(map(int, payload["seeds"]))
+        canonical = Path(payload["ledger_path"])
+        if canonical.is_file():
+            _validate_complete_ledger(canonical, seeds)
+            continue
+        # Small models already parallelize naturally across independent ranks.
+        # Splitting a large dominant rank or Top1 removes long serial tails.
+        if workers <= 1 or len(seeds) < max(256, 64 * workers):
+            jobs.append(payload)
+            continue
+        block_size = max(64, math.ceil(len(seeds) / workers))
+        children = []
+        for block_idx, offset in enumerate(range(0, len(seeds), block_size)):
+            block_seeds = seeds[offset:offset + block_size]
+            child = dict(payload)
+            child["variant_id"] = f"{payload['variant_id']}_BLOCK{block_idx:03d}"
+            child["seeds"] = block_seeds
+            child["ledger_path"] = str(
+                canonical.parent / "blocks" / (child["variant_id"] + ".csv")
+            )
+            children.append((offset, child))
+            jobs.append(child)
+        split.append((canonical, seeds, children))
+    if jobs:
+        _execute_payloads(jobs, workers=workers, label=label)
+    else:
+        print(f"{label}: all canonical graph ledgers already cached", flush=True)
+
+    for canonical, seeds, children in split:
+        if canonical.is_file():
+            _validate_complete_ledger(canonical, seeds)
+            continue
+        frames = []
+        for offset, child in children:
+            block_seeds = list(map(int, child["seeds"]))
+            frame = _validate_complete_ledger(Path(child["ledger_path"]), block_seeds)
+            ordinals = {seed: offset + i for i, seed in enumerate(block_seeds)}
+            frame["trajectory"] = frame["trajectory_seed"].astype(int).map(ordinals)
+            if frame["trajectory"].isna().any():
+                raise RuntimeError(f"Graph block seed/ordinal mismatch: {child['variant_id']}")
+            frame["trajectory"] = frame["trajectory"].astype(int)
+            frames.append(frame)
+        merged = pd.concat(frames, ignore_index=True)
+        if merged[["trajectory", "request_id"]].duplicated().any():
+            raise RuntimeError(f"Duplicate request in reconstructed ledger {canonical}")
+        expected = list(range(len(seeds)))
+        actual = sorted(merged["trajectory"].astype(int).unique())
+        if actual != expected:
+            raise RuntimeError(f"Missing or repeated trajectory ordinal in {canonical}")
+        canonical.parent.mkdir(parents=True, exist_ok=True)
+        tmp = canonical.with_suffix(f".{os.getpid()}.tmp")
+        try:
+            merged.to_csv(tmp, index=False)
+            tmp.replace(canonical)
+        finally:
+            tmp.unlink(missing_ok=True)
+        _validate_complete_ledger(canonical, seeds)
+        print(f"MERGED {canonical.name}: {len(seeds)} trajectories "
+              f"from {len(children)} parallel blocks", flush=True)
+
+
 def predict_cell(cfg, contracts, cell, workers):
     world, graph_id = cell.split("__", 1)
     root = OUT / "predictions" / cell
@@ -538,7 +609,7 @@ def predict_cell(cfg, contracts, cell, workers):
             ledger_path=ledger, contracts=contracts
         ))
         specs.append((rank, ids, seeds, ledger, float(r.alpha), float(r.joint_weight)))
-    _execute_payloads(payloads, workers=workers, label=f"{cell} ORIGINAL_TOP14")
+    _execute_balanced_graph_jobs(payloads, workers=workers, label=f"{cell} ORIGINAL_TOP14")
     curves = []
     for rank, ids, seeds, ledger, alpha, weight in specs:
         piece = _member_curves(
@@ -570,7 +641,7 @@ def predict_cell(cfg, contracts, cell, workers):
             surrogates={p: lookups[p][ids[p]] for p in PROVIDERS},
             seeds=seeds, ledger_path=ledger, contracts=contracts
         )
-        _execute_payloads([payload], workers=workers, label=f"{cell} ORIGINAL_TOP1")
+        _execute_balanced_graph_jobs([payload], workers=workers, label=f"{cell} ORIGINAL_TOP1")
         t1 = _member_curves(
             ledger=_validate_complete_ledger(ledger, seeds),
             queries=queries, horizons=horizons, method_id="ORIGINAL_TOP1",
@@ -702,7 +773,7 @@ def main():
     a.add_argument("--world", choices=["P1", "P3", "P4"])
     a.add_argument("--cell", help="e.g. P1__G_PAR")
     a.add_argument("--workers", type=int, default=1)
-    a.add_argument("--benchmark-candidates", type=int, default=2,
+    a.add_argument("--benchmark-candidates", type=int, default=3,
                    help="Candidates per provider for --stage benchmark (1..47); reusable checkpoints")
     args = a.parse_args()
     cfg, contracts = configuration()

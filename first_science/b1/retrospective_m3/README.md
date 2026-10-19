@@ -26,7 +26,7 @@ In the existing praise-cao Python environment from the repository root:
 
 The original Phase-5 reconstruction stage used `ProcessPoolExecutor` with `--workers 3` or `4`. This runner now parallelizes independent candidate evaluations the same way, using one persistent pool per provider. Each candidate writes its own atomic CSV checkpoint, and all parallel processes use the **same frozen public I1 input, exact candidate parameters and seed bank** as sequential execution. Workers cannot access hidden graph reference data.
 
-**First run a short, resumable benchmark** (2 candidates per provider, 6 total × 100 local simulations). This is the same scientific computation as full preparation, and every valid resulting checkpoint is reused when you continue. It does *not* freeze partial candidate weights:
+**First run a short, resumable benchmark** (3 candidates per provider, 9 total × 100 local simulations). This is the same scientific computation as full preparation, and every valid resulting checkpoint is reused when you continue. It does *not* freeze partial candidate weights:
 
     time python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage benchmark --world P1 --workers 3
 
@@ -36,7 +36,11 @@ The benchmark prints mean measured seconds per candidate and a rough full-provid
 
 Preparation streams progress after each 4 newly completed candidates and prints a measured remaining-time estimate. This depends on CPU scheduling and thermal behavior. 3 workers are recommended initially; 4 may improve speed if CPU and memory permit. Parallelization does not guarantee a 3× speedup. The output root is locked per world to prevent another new-style preparation process from using the same directory simultaneously; do not run older runner revisions concurrently either.
 
-Then one graph (simulated twice, Top14 and budget-matched Top1):
+Then one graph (Top14 and budget-matched Top1, each using 1,400 native graph trajectories):
+
+Large dominant-rank jobs and the Top1 control are **also subdivided into independent seed blocks** when `--workers 3` is provided. This avoids a single-core tail even though Top1 contains just one joint provider model. The complete canonical ledger is reassembled with original seed IDs and trajectory ordinals, checked for duplicates, and frozen exactly as in serial execution. Each block has its own resumable simulation ledger; do not launch two runners on the same cell at once. The first run performs 2,800 native graph trajectories per cell; over 12 cells that is 33,600 trajectories. **Runtime is not yet calibrated:** use the first P1/G_PAR cell and its progress messages before scheduling the other 11.
+
+
 
     python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage predict --cell P1__G_PAR --workers 3
 
