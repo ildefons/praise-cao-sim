@@ -61,5 +61,7 @@ jobs:
           git add B1_OVERLEAF_PROJECT_V0_1.zip B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
           if ! git diff --staged --quiet; then
             git commit -m "Publish compiled B1 Overleaf ZIP and report PDF"
-            git push
+            git fetch origin "${GITHUB_REF_NAME}"
+            git rebase "origin/${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
