@@ -22,9 +22,19 @@ In the existing praise-cao Python environment from the repository root:
     git pull --ff-only origin praise-identifiability-feasibility
     python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage preflight
 
-First run one provider world (resumable):
+## Performance and bounded runtime estimates
 
-    python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage prepare --world P1
+The original Phase-5 reconstruction stage used `ProcessPoolExecutor` with `--workers 3` or `4`. This runner now parallelizes independent candidate evaluations the same way, using one persistent pool per provider. Each candidate writes its own atomic CSV checkpoint, and all parallel processes use the **same frozen public I1 input, exact candidate parameters and seed bank** as sequential execution. Workers cannot access hidden graph reference data.
+
+**First run a short, resumable benchmark** (2 candidates per provider, 6 total × 100 local simulations). This is the same scientific computation as full preparation, and every valid resulting checkpoint is reused when you continue. It does *not* freeze partial candidate weights:
+
+    time python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage benchmark --world P1 --workers 3
+
+The benchmark prints mean measured seconds per candidate and a rough full-provider estimate. Then execute the full P1 run (48 × 3 = 144 candidate models, each 100 local runs, 14,400 local simulations):
+
+    time python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage prepare --world P1 --workers 3
+
+Preparation streams progress after each 4 newly completed candidates and prints a measured remaining-time estimate. This depends on CPU scheduling and thermal behavior. 3 workers are recommended initially; 4 may improve speed if CPU and memory permit. Parallelization does not guarantee a 3× speedup. The output root is locked per world to prevent another new-style preparation process from using the same directory simultaneously; do not run older runner revisions concurrently either.
 
 Then one graph (simulated twice, Top14 and budget-matched Top1):
 
@@ -32,7 +42,7 @@ Then one graph (simulated twice, Top14 and budget-matched Top1):
 
 After examining the smoke-like pilot execution for consistency, run the other worlds:
 
-    python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage prepare
+    python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage prepare --workers 3
     python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage predict --workers 3
     python first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py --stage evaluate
 

@@ -10,10 +10,14 @@ outcomes. evaluate is disabled until the complete 12-cell prediction freeze exis
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
+import contextlib
+import fcntl
 import json
 import math
 import os
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -166,8 +170,71 @@ def candidate_design(cfg, world, provider):
     return t
 
 
-def prepare_provider(cfg, world, provider):
-    """The same frozen Phase-5 48-point LHS design, freshly scored on public I1."""
+
+_PREPARE_CONTEXT = None
+
+
+def _init_prepare_worker(metadata, public_surface, seeds):
+    """Initialize simulator input once per process, not once per candidate."""
+    global _PREPARE_CONTEXT
+    _PREPARE_CONTEXT = (metadata, public_surface, tuple(seeds))
+
+
+def _score_candidate_worker(task):
+    """Write only this candidate's checkpoint; never read graph white-box data."""
+    if _PREPARE_CONTEXT is None:
+        raise RuntimeError("Candidate worker was not initialized")
+    metadata, public, seeds = _PREPARE_CONTEXT
+    row, curve_name = task
+    destination = Path(curve_name)
+    if destination.exists():
+        raise RuntimeError(f"Unexpected concurrently created checkpoint: {destination}")
+    started = time.perf_counter()
+    metrics, _simulated, comparison = _simulate_and_score(
+        metadata=metadata, public_surface=public,
+        mean_service_time=float(row["mean_service_time"]),
+        cost_rate=float(row["cost_rate"]),
+        service_cv=float(row["service_cv"]),
+        trajectory_seeds=seeds, canonical_ipt=1000000.0,
+        execution_fraction=0.5, quiet=True,
+    )
+    curve = comparison[["sigma_i1", "sigma_m1_local"]].copy()
+    curve.insert(0, "point_index", range(len(curve)))
+    if curve.empty or not np.isfinite(curve[["sigma_i1", "sigma_m1_local"]]).all().all():
+        raise RuntimeError(f"Invalid simulation curve for {row['candidate_id']}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    tmp = destination.with_suffix(f".{os.getpid()}.tmp")
+    try:
+        curve.to_csv(tmp, index=False)
+        tmp.replace(destination)
+    finally:
+        tmp.unlink(missing_ok=True)
+    return {"candidate_id": str(row["candidate_id"]),
+            "elapsed_seconds": float(time.perf_counter() - started),
+            "local_mse": float(metrics["mse"])}
+
+
+@contextlib.contextmanager
+def _world_prepare_lock(world):
+    """Prevent two new-style preparation processes overwriting the same world."""
+    directory = OUT / "locks"
+    directory.mkdir(parents=True, exist_ok=True)
+    with (directory / f"prepare_{world}.lock").open("a+") as handle:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise RuntimeError(
+                f"Another preparation run for {world} is active; "
+                "do not launch concurrent writers"
+            ) from exc
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def prepare_provider(cfg, world, provider, workers=1, limit_candidates=0):
+    """Frozen 48-point LHS scored in parallel on public I1; resume checkpoints."""
     base = OUT / "candidates" / world / provider
     base.mkdir(parents=True, exist_ok=True)
     design = candidate_design(cfg, world, provider)
@@ -184,37 +251,90 @@ def prepare_provider(cfg, world, provider):
         design.to_csv(design_file, index=False)
 
     metadata, public, record = _load_public_card(world, provider)
-    seeds = list(range(cfg["local_rescore_start"],
-                       cfg["local_rescore_start"] + cfg["local_rescore_n"]))
+    seeds = tuple(range(cfg["local_rescore_start"],
+                        cfg["local_rescore_start"] + cfg["local_rescore_n"]))
+    all_records = design.to_dict("records")
+    scheduled = (all_records[:limit_candidates] if limit_candidates
+                 else all_records)
+    candidate_path = lambda r: base / "surfaces" / (str(r["candidate_id"]) + ".csv")
+    pending = [(rec, str(candidate_path(rec))) for rec in scheduled
+               if not candidate_path(rec).is_file()]
+    cached = len(scheduled) - len(pending)
+    print(f"PREPARE {world}/{provider}: {len(scheduled)}/48 targeted, "
+          f"{cached} cached, {len(pending)} new, workers={workers}", flush=True)
+
+    done = 0
+    seconds = 0.0
+    started = time.perf_counter()
+
+    def progress(result):
+        nonlocal done, seconds
+        done += 1
+        seconds += result["elapsed_seconds"]
+        completed = cached + done
+        wall = max(1e-9, time.perf_counter() - started)
+        throughput = done / wall
+        eta = (len(pending) - done) / throughput if done else float("nan")
+        if done == 1 or done % 4 == 0 or done == len(pending):
+            print(
+                f"PREPARE {world}/{provider}: {completed}/{len(scheduled)} "
+                f"({done} newly computed); elapsed={wall/60:.1f} min, "
+                f"estimated remaining={eta/60:.1f} min "
+                f"(based on observed throughput)", flush=True
+            )
+
+    if pending:
+        if workers == 1:
+            _init_prepare_worker(metadata, public, seeds)
+            for task in pending:
+                progress(_score_candidate_worker(task))
+        else:
+            with concurrent.futures.ProcessPoolExecutor(
+                max_workers=workers,
+                initializer=_init_prepare_worker,
+                initargs=(metadata, public, seeds),
+            ) as pool:
+                futures = {pool.submit(_score_candidate_worker, task): task[0]["candidate_id"]
+                           for task in pending}
+                try:
+                    for future in concurrent.futures.as_completed(futures):
+                        progress(future.result())
+                except BaseException:
+                    for future in futures:
+                        future.cancel()
+                    raise
+    if limit_candidates:
+        if len(scheduled) < 48:
+            wall = max(time.perf_counter() - started, 1e-9)
+            if done:
+                observed_per_candidate = seconds / done
+                per_batch = observed_per_candidate * 48 / workers
+                print(
+                    f"BENCHMARK {world}/{provider}: {done} new candidates, "
+                    f"mean CPU elapsed={observed_per_candidate:.1f}s/candidate; "
+                    f"rough full-provider compute={per_batch/60:.1f} min at "
+                    f"{workers} workers, excluding contention/startup "
+                    f"(reuse cached candidates).", flush=True
+                )
+            else:
+                print(f"BENCHMARK {world}/{provider}: all targeted candidates cached", flush=True)
+            return False
+
     scores = []
     surfaces = []
     public_vector = None
-    for i, row in enumerate(design.itertuples(index=False), start=1):
-        cid = str(row.candidate_id)
-        curve_file = base / "surfaces" / (cid + ".csv")
-        if curve_file.is_file():
-            curve = pd.read_csv(curve_file)
-            if not np.isfinite(curve["sigma_m1_local"].to_numpy(dtype=float)).all():
-                raise RuntimeError(f"Corrupt cached candidate surface {cid}")
-        else:
-            metrics, _simulated, comparison = _simulate_and_score(
-                metadata=metadata, public_surface=public,
-                mean_service_time=float(row.mean_service_time),
-                cost_rate=float(row.cost_rate),
-                service_cv=float(row.service_cv),
-                trajectory_seeds=seeds, canonical_ipt=1000000.0,
-                execution_fraction=0.5, quiet=True,
-            )
-            curve = comparison[["sigma_i1", "sigma_m1_local"]].copy()
-            curve.insert(0, "point_index", range(len(curve)))
-            curve_file.parent.mkdir(parents=True, exist_ok=True)
-            tmp = curve_file.with_suffix(".tmp")
-            curve.to_csv(tmp, index=False)
-            tmp.replace(curve_file)
+    for i, row in enumerate(all_records, start=1):
+        cid = str(row["candidate_id"])
+        curve_file = candidate_path(row)
+        if not curve_file.is_file():
+            raise RuntimeError(f"Incomplete candidate checkpoints: {cid}")
+        curve = pd.read_csv(curve_file)
         if not {"point_index", "sigma_i1", "sigma_m1_local"}.issubset(curve.columns):
             raise RuntimeError(f"Incomplete candidate curve {cid}")
         if curve["point_index"].astype(int).tolist() != list(range(len(curve))):
             raise RuntimeError(f"Invalid point indexing {cid}")
+        if not np.isfinite(curve[["sigma_i1", "sigma_m1_local"]].to_numpy()).all():
+            raise RuntimeError(f"Non-finite candidate surface {cid}")
         p = curve["sigma_i1"].to_numpy(dtype=float)
         s = curve["sigma_m1_local"].to_numpy(dtype=float)
         if public_vector is None:
@@ -224,8 +344,6 @@ def prepare_provider(cfg, world, provider):
         surfaces.append(s)
         scores.append({"candidate_id": cid, "local_mse": float(np.mean((p-s)**2)),
                        "curve_sha256": sha256_file(curve_file)})
-        if i == 1 or i % 8 == 0 or i == 48:
-            print(f"PUBLIC-I1 LHS {world}/{provider}: {i}/48", flush=True)
 
     weights = gibbs_weights(
         design["candidate_id"].astype(str), np.stack(surfaces),
@@ -264,11 +382,24 @@ def prepare_provider(cfg, world, provider):
             raise RuntimeError("Frozen provider manifest changed")
     else:
         write_json(manifest, payload)
+    print(f"FROZEN {world}/{provider}: 48 candidates, {cached} checkpoint(s) reused", flush=True)
+    return True
 
 
-def prepare_world(cfg, world):
-    for provider in PROVIDERS:
-        prepare_provider(cfg, world, provider)
+def prepare_world(cfg, world, workers=1, limit_candidates=0):
+    with _world_prepare_lock(world):
+        complete = [
+            prepare_provider(cfg, world, provider, workers, limit_candidates)
+            for provider in PROVIDERS
+        ]
+        if not all(complete):
+            print(f"BENCHMARK {world}: incomplete by design; resume with "
+                  f"--stage prepare --world {world} --workers {workers}", flush=True)
+            return
+        _prepare_world_support(cfg, world)
+
+
+def _prepare_world_support(cfg, world):
     base = OUT / "candidate_support" / world
     base.mkdir(parents=True, exist_ok=True)
     p = {}
@@ -567,19 +698,28 @@ def evaluate(cfg):
 
 def main():
     a = argparse.ArgumentParser(description="Original-style M3 retrospective generalization battery")
-    a.add_argument("--stage", required=True, choices=["preflight", "prepare", "predict", "freeze", "evaluate"])
+    a.add_argument("--stage", required=True, choices=["preflight", "benchmark", "prepare", "predict", "freeze", "evaluate"])
     a.add_argument("--world", choices=["P1", "P3", "P4"])
     a.add_argument("--cell", help="e.g. P1__G_PAR")
     a.add_argument("--workers", type=int, default=1)
+    a.add_argument("--benchmark-candidates", type=int, default=2,
+                   help="Candidates per provider for --stage benchmark (1..47); reusable checkpoints")
     args = a.parse_args()
     cfg, contracts = configuration()
     if args.workers < 1:
         raise ValueError("workers must be >=1")
     if args.stage == "preflight":
         preflight(cfg)
-    elif args.stage == "prepare":
+    elif args.stage in ("prepare", "benchmark"):
+        if args.stage == "benchmark":
+            if not 1 <= args.benchmark_candidates < 48:
+                raise ValueError("--benchmark-candidates must be between 1 and 47")
+            if args.world is None:
+                raise ValueError("Use --world P1, P3 or P4 for a bounded benchmark")
         for w in ([args.world] if args.world else cfg["eligible_worlds"]):
-            prepare_world(cfg, w)
+            prepare_world(cfg, w, workers=args.workers,
+                          limit_candidates=(args.benchmark_candidates
+                                            if args.stage == "benchmark" else 0))
     elif args.stage == "predict":
         allowed = {physical_cell_id(w, g) for w in cfg["eligible_worlds"] for g in cfg["graphs"]}
         if args.cell and args.cell not in allowed:
