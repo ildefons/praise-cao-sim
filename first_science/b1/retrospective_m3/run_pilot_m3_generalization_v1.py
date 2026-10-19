@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -22,6 +23,40 @@ HERE = Path(__file__).resolve().parent
 FIRST = HERE.parent.parent
 P5 = FIRST / "phase5"
 P4 = FIRST / "phase4"
+
+# The project uses a PRAISE-modified YAFS checkout from the sibling AICon
+# repository. It was not packaged as a dependency of praise-cao-sim.
+# Resolve it before importing the Phase-3/4 simulator modules.
+_yafs_override = os.environ.get("PRAISE_YAFS_SRC")
+_yafs_candidates = (
+    ([Path(_yafs_override).expanduser()] if _yafs_override else [])
+    + [FIRST.parent.parent / "aicon" / "src" / "yafs" / "src"]
+)
+YAFS_SOURCE = None
+for candidate in _yafs_candidates:
+    if (candidate / "yafs" / "application.py").is_file():
+        YAFS_SOURCE = candidate.resolve()
+        if str(YAFS_SOURCE) not in sys.path:
+            sys.path.insert(0, str(YAFS_SOURCE))
+        break
+if YAFS_SOURCE is None:
+    try:
+        from yafs.application import Application as _YAFSApplication
+    except ModuleNotFoundError as exc:
+        if exc.name == "yafs":
+            raise SystemExit(
+                "Cannot import the modified YAFS runtime. Expected sibling checkout "
+                "~/praise/aicon/src/yafs/src; alternatively export "
+                "PRAISE_YAFS_SRC=/absolute/path/to/aicon/src/yafs/src"
+            ) from exc
+        raise
+else:
+    from yafs.application import Application as _YAFSApplication
+if not callable(getattr(_YAFSApplication, "add_service_module_praise", None)):
+    raise SystemExit(
+        "The imported YAFS lacks PRAISE composition extensions; select the "
+        "modified AICon checkout with PRAISE_YAFS_SRC."
+    )
 for directory in (P5, P4):
     if str(directory) not in sys.path:
         sys.path.insert(0, str(directory))
@@ -99,6 +134,8 @@ def preflight(cfg):
         for g in cfg["graphs"]:
             _query_definitions(physical_cell_id(w, g))
     print("B1_PILOT_M3_RETROSPECTIVE_PREFLIGHT_PASS")
+    import yafs.application
+    print("Modified YAFS runtime:", Path(yafs.application.__file__).resolve())
     print("12 historical eligible cells; frozen I1, Step-0 queries and reconstruction domains accessible")
     print("No white-box reference was opened")
 
