@@ -27,7 +27,7 @@ header-includes:
 
 # Executive synthesis {.unnumbered}
 
-Composed cloud-edge services can expose little more than provider-local workload and SLA evidence while keeping their stochastic execution models private. The methodological challenge is to predict an end-to-end, horizon-dependent SLA-satisfaction probability from these disclosures without silently assuming access to hidden process parameters. We report the development, implementation, and evaluation of a family of methods indexed by provider information representation $I$ and integration procedure $M$, together with the native discrete-event composition testbed and a complete account of observed limitations.
+Composed cloud-edge services can expose little more than provider-local workload and SLA evidence while keeping their stochastic execution models private. The methodological challenge is to predict an end-to-end, horizon-dependent SLA-satisfaction probability from these disclosures without silently assuming access to hidden process parameters. We report the development, implementation, and evaluation of a family of methods indexed by provider information representation $I$ and integration procedure $M$, together with a simulator and a complete account of observed limitations.
 
 We define the evaluated quantity as $\sigma_G(A,H;\rho)=\Pr[c_G(A,H)\ge\rho]$, where $c_G(A,H)$ is the fraction of **decided** composed requests that meet a specified latency-cost-quality region by time $H$. A missed latency deadline is a decided failure; requests not yet decided are excluded; zero decided requests yield compliance one. This is a cumulative horizon-specific SLA-satisfaction probability, **not** first-passage survival.
 
