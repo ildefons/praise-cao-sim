@@ -157,6 +157,8 @@ def prepare_provider(cfg, world, provider):
         curve_file = base / "surfaces" / (cid + ".csv")
         if curve_file.is_file():
             curve = pd.read_csv(curve_file)
+            if not np.isfinite(curve["sigma_m1_local"].to_numpy(dtype=float)).all():
+                raise RuntimeError(f"Corrupt cached candidate surface {cid}")
         else:
             metrics, _simulated, comparison = _simulate_and_score(
                 metadata=metadata, public_surface=public,
@@ -320,9 +322,14 @@ def predict_cell(cfg, contracts, cell, workers):
     if sha256_file(support_file) != read_json(support_manifest)["top14_support_sha256"]:
         raise RuntimeError("Frozen support hash mismatch")
     if marker.exists():
-        if read_json(marker)["status"] != "B1_RETROSPECTIVE_CELL_PREDICTED":
+        previous = read_json(marker)
+        if previous["status"] != "B1_RETROSPECTIVE_CELL_PREDICTED":
             raise RuntimeError("Unknown existing prediction status")
-        for filename, digest in read_json(marker)["outputs_sha256"].items():
+        if previous["config_sha256"] != sha256_file(CONFIG):
+            raise RuntimeError("Retrospective config changed after prediction")
+        if previous["support_sha256"] != sha256_file(support_file):
+            raise RuntimeError("Candidate support changed after prediction")
+        for filename, digest in previous["outputs_sha256"].items():
             if sha256_file(root / filename) != digest:
                 raise RuntimeError(f"Prediction output changed: {cell}/{filename}")
         print(f"REUSED FROZEN CELL {cell}")
@@ -330,8 +337,14 @@ def predict_cell(cfg, contracts, cell, workers):
     root.mkdir(parents=True, exist_ok=True)
     top = pd.read_csv(support_file)
     lookups = {}
+    support_details = read_json(support_manifest)
+    if support_details["config_sha256"] != sha256_file(CONFIG):
+        raise RuntimeError("Candidate support was frozen under a different config")
     for provider in PROVIDERS:
-        t = pd.read_csv(OUT/"candidates"/world/provider/"provider_weights.csv")
+        weights_file = OUT/"candidates"/world/provider/"provider_weights.csv"
+        if sha256_file(weights_file) != support_details["provider_weights_sha256"][provider]:
+            raise RuntimeError(f"{world}/{provider}: frozen provider weights changed")
+        t = pd.read_csv(weights_file)
         lookups[provider] = {
             str(r.candidate_id): _surrogate(pd.Series({
                 "mean_service_time": r.mean_service_time,
