@@ -113,7 +113,7 @@ $$
 \tag{4}
 $$
 
-The probability is taken over independent stochastic trajectories of the specified provider world, workload and execution graph. $H$ describes a *cumulative observation horizon*, not necessarily the time until the first violation. A trajectory can be below its required compliance fraction at one horizon and rise above it later when more compliant requests are decided. Consequently $\sigma_G(A,H;\rho)$ is **not guaranteed to decrease with $H$**. While historical CAO writing uses the shorthand “survival”, in this report “horizon-dependent SLA-satisfaction probability” is the exact term.
+The probability is taken over independent stochastic trajectories of the specified provider world, workload and execution graph. The horizon $H$ determines which decided requests are included in the compliance fraction. As more requests are decided, this fraction may rise or fall, so $\sigma_G(A,H;\rho)$ is **not guaranteed to decrease with $H$**. We therefore use the precise term “horizon-dependent SLA-satisfaction probability” throughout the report.
 
 The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidden world is only evaluated through a separate finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}$ under experimental conditions that permit it.
 
