@@ -190,7 +190,7 @@ The subsequent October P2/G_PAR study instead explicitly tested an **unscaled, d
 
 ## 3.3 Enriched I2 interfaces
 
-The Phase-6 experiments explore additional anonymous provider-compliance summaries. **I2a** exposes a fuller marginal distribution of the trajectory compliance statistic, compared with the I1 thresholded surfaces. **I2b** provides anonymous paired within-window temporal-compliance information; later I2b variants test different weighting and hierarchical reconstruction losses.
+The post-result I1/I2 experiments (historical Phase-6, within global Phase III) explore additional anonymous provider-compliance summaries. **I2a** exposes a fuller marginal distribution of the trajectory compliance statistic, compared with the I1 thresholded surfaces. **I2b** provides anonymous paired within-window temporal-compliance information; later I2b variants test different weighting and hierarchical reconstruction losses.
 
 These augmentations enlarge or reorganize disclosed information. However, they also change the objective used to fit provider surrogates. A comparison between I1strong-M2 and an I2b-M2 variant therefore tests an **interface plus reconstruction-loss combination** under a matched search/propagation architecture. It does not, by itself, identify the effect of information quantity while holding the inference method fixed.
 
@@ -453,7 +453,11 @@ The 6,660 measurements reuse simulation trajectories across SLA conditions and t
 
 The scientifically material result is twofold: a weighted finite ensemble maintained a favorable aggregate *ranking* among the executed methods, and its **absolute prediction remained too inaccurate in several difficult regions** to claim dependable generic SLA estimation.
 
-## 8.4 Retrospective original-style M3 transfer to the same Phase-5 cases
+# 9. Phase III: retrospective divergence tracing
+
+Phase III brings together original-method comparisons on the previously inspected Phase II reference, D0--D9 pilot–battery forensic checks, and related post-result exploratory investigations. The latter retain their historical experiment labels and do not provide a new independent holdout.
+
+## 9.1 Original-style M3 transfer to the Phase II battery
 
 To address the missing comparison with the original M3, a **retrospective** experiment reconstructed the originally registered Phase-5 V2-style M3 method across all **12 Step-0-eligible physical cases** (P1, P3 and P4, each on four graph structures). This experiment was designed **after** the earlier Phase-5 V3b reference outcomes had been inspected. It reused the existing frozen 15 SLA queries per cell, 37 scored horizons (60 to 240 seconds), and N=1000 final white-box reference per cell. P2 was neither repaired nor reintroduced.
 
@@ -486,9 +490,9 @@ These results **do not establish that a larger ensemble causes better prediction
 
 The supplied result archive passed **316 independently recomputed numerical and SHA-256 checks, with zero failures**. This includes 12/12 global prediction-manifest links, all included model-prediction hashes, provider weight normalization, recovery of the Top14 from all $48^3$ joint products, and pointwise/error table reconciliation. The comparator reproduces the earlier FULL343 MAE 0.121890. The archive does **not** include 12 Top14 member-curve files or raw graph trajectory ledgers, so this is numerical/artifact verification, **not an independent bitwise replay**.
 
-## 8.5 Phase III: pilot–battery divergence tracing
+## 9.2 Pilot–battery divergence tracing
 
-The experimental record now separates three phases: **I, the original one-world parallel-graph pilot**; **II, the multi-world, multi-graph evaluation**; and **III, this retrospective deviation audit**. Phase III is not a new prospective accuracy test. It asks what the pilot and the broader battery actually held constant.
+This Phase III forensic control tests what was preserved when progressing from the Phase I controlled pilot to the Phase II expanded battery. It uses archived records and sampled replay trajectories, not a new prospective accuracy test.
 
 **The estimator and parallel-graph engines were reproduced.** The original public-I1 candidate curves yield Gibbs weight differences no larger than 2.78e-16 when recomputed by the newer helper. All 14 pilot joint models, their order, retained mass 0.999174197017, and their B1400 allocations agree. Using the frozen original models and matching IPT=10^6, the newer G_PAR implementation reproduced the original G0 native ledgers across all 14 archived member subsets. Ranks 1–9 used two seeds each (2,398 requests/rank); ranks 10–14 had only one archived trajectory each (1,199 requests/rank). Changing the numerical provider-IPT gauge to 10^9 caused small continuous changes, but no completion-status changes. For ranks 10–14, **zero of 555 original-pilot query-horizon SLA predictions changed**, even at the new gauge. The entire weighted B1400 pilot and its 14-rank SLA aggregate were **not** resimulated.
 
@@ -509,11 +513,9 @@ These scores measure how well the models reproduce each provider's advertised pr
 
 The complete audit ledger is `first_science/b1/retrospective_m3/PHASE_III_DIVERGENCE_CONTROL_REGISTER_2026-10-20.md`.
 
-# 9. Post-main investigations: information, public regions and search
+## 9.3 Post-result I1/I2 pipeline development (historical Phase-6)
 
-## 9.1 Phase-6 matched information–method pipelines
-
-After Phase 5, the I1 strong-control and I2 experiments focused on **P4/G_SEQPAR**, using 15 queries × 37 horizons = 555 related SLA measurements per method. They matched reconstruction search architecture (Sobol initialization followed by TPE refinement, frozen rescore banks) and 27-member equal-weight M2 graph propagation at **B=2700 per variant**, while altering the public interface and the corresponding reconstruction loss.
+After the Phase II expanded battery (historical Phase-5), the I1 strong-control and I2 experiments focused on **P4/G_SEQPAR**, using 15 queries × 37 horizons = 555 related SLA measurements per method. They matched reconstruction search architecture (Sobol initialization followed by TPE refinement, frozen rescore banks) and 27-member equal-weight M2 graph propagation at **B=2700 per variant**, while altering the public interface and the corresponding reconstruction loss.
 
 | P4/G_SEQPAR method | MAE | RMSE | Evidence status |
 |:--|--:|--:|:--|
@@ -530,7 +532,7 @@ The stronger I1 control performs best or near-best among these **joint informati
 
 Privileged known-provider/oracle studies and provider-factorial substitutions were additionally reported, but are not treated as deployable I1-only methods or as equivalently independently audited core results.
 
-## 9.2 Distinct P2 public-induced-region comparison
+## 9.4 Distinct P2 public-induced-region comparison
 
 The October P2/G_PAR study chose the graph admissibility region deterministically from the **same published I1 rectangles** for all three reconstruction methods. It evaluated five same-$\rho$ queries over 37 horizons, or **185 points per method**, with a new reference design distinct from the failed Phase-5 P2 Step-0 conditions.
 
@@ -542,7 +544,7 @@ The October P2/G_PAR study chose the graph admissibility region deterministicall
 
 Here all three methods receive **the same** $A_G^{I1}$ and differ in process reconstruction and subsequent graph prediction. Hence no difference above measures graph-region reconstruction quality. The simulation budgets are **unmatched**; M3's small observed MAE advantage does not establish equal-cost superiority. This study cannot be read as a post-hoc repair of four earlier ineligible P2 cells.
 
-## 9.3 Privileged search-deficit diagnosis
+## 9.5 Privileged search-deficit diagnosis
 
 A separate P2 audit evaluated the actual hidden provider parameters against the public I1 target using the **same $N=100$ rescore and independent replay bank** as the finite reconstruction candidates. For each of three providers the true parameter vector was inside the search domain, yet it achieved better I1 RMSE than the selected best available V3b candidates:
 
@@ -618,7 +620,9 @@ The different uncertainties are summarized as follows:
 | Across-world/graph variation | Distinct designed physical cells | Representative real-world uncertainty from only a few cells |
 | Hidden-truth error and parameter diagnostics | Privileged reference available after freeze | A deployable estimator without privileged evidence |
 
-## 10.3 Cross-experiment lessons
+## 10.3 Cross-phase lessons
+
+These lessons compare global Phase I (controlled pilot), Phase II (expanded battery) and Phase III (retrospective divergence tracing) while preserving their distinct reference populations and evidence status.
 
 **Candidate search is a plausible limiting mechanism, demonstrably so in P2.** The fact that true parameters better fit I1 than selected candidates makes the inverse search procedure a high-priority diagnosis. It does not eliminate other causes of graph discrepancy, including information compression and model-family restrictions.
 
@@ -654,7 +658,7 @@ The different uncertainties are summarized as follows:
 
 # 12. Conclusions and falsifiable next questions
 
-The PRAISE program implemented a discrete-event native composition benchmark, finite public provider SLA disclosures and multiple reconstructed-model integration procedures. It established robust provenance for important frozen outputs, including a hash-frozen prediction/reference separation in the broad Phase-5 battery. The favorable single-world pilot numerical findings were genuine, but the broader evaluation showed **material residual prediction errors** and did not establish general reconstruction sufficiency.
+Across Phase I (controlled pilot), Phase II (expanded battery) and Phase III (retrospective divergence tracing), the PRAISE program implemented a discrete-event native composition benchmark, finite public provider SLA disclosures and multiple reconstructed-model integration procedures. It established robust provenance for important frozen outputs, including a hash-frozen prediction/reference separation in the broad Phase-5 battery. The favorable single-world pilot numerical findings were genuine, but the broader evaluation showed **material residual prediction errors** and did not establish general reconstruction sufficiency.
 
 The added retrospective M3 study shows that near-complete mass coverage of an inferred bank cannot ensure external SLA prediction accuracy. Phase III confirms bounded estimator and native-graph equivalence while demonstrating reconstruction-protocol changes, especially inherited Gibbs lambda rather than repeated public-I1 CV. These are established differences, not a unique cause of graph error. A new holdout with controlled reconstruction ablations is needed to distinguish the causes.
 
