@@ -45,7 +45,7 @@ The overall conclusion is conditional: end-to-end SLA estimation from limited di
 
 ## 1.1 Composable offerings and information boundaries
 
-The computing continuum spans resources and services controlled by different administrative entities. An integrator may know its own workflow or service-composition graph while observing only restricted public claims about the providers on which it depends. Physical execution is shaped by stochastic service times, queues, branch synchronization, workload and cost accumulation. Composing provider-local advertised measures is therefore not, in general, equivalent to observing the actual composed service.
+The computing continuum spans resources and services controlled by different administrative entities. An integrator may know its own workflow or service-composition graph while observing only restricted public claims about the providers on which it depends. Physical execution is shaped by stochastic service times, queues, branch synchronization, workload and cost accumulation. Predicting the performance of composed black-box services using only their providers' advertised performance measures is not equivalent to observing the resulting end-to-end behavior.
 
 The Composable Autonomic Offering (CAO) abstraction represents an offering as
 
