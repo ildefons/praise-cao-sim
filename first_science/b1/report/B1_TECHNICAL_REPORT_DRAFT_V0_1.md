@@ -117,13 +117,11 @@ The probability is taken over independent stochastic trajectories of the specifi
 
 The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidden world is only evaluated through a separate finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}$ under experimental conditions that permit it.
 
-## 2.2 Contractual compliance and SLA prediction
+## 2.2 Prediction target and evaluation reference
 
-A service contract specifies an acceptable performance region $A$, an observation horizon $H$, and the minimum fraction $\rho$ of decided requests that must satisfy the SLA. Once the service runs, the client can measure the actual compliance fraction $c_G^{\mathrm{obs}}(A,H)$. The contractual requirement is met if $c_G^{\mathrm{obs}}(A,H)\ge\rho$ and missed otherwise. For example, if $\rho=0.95$ but only 92% of decided requests comply in the agreed observation window, the SLA target was missed. Any penalty or complaint then follows the contract's measurement, verification, and remedy terms.
+**What do we estimate?** For a known composition graph $G$ and an SLA query $(A,H;\rho)$, Equation (4) defines $\sigma_G(A,H;\rho)$, the probability that the composed service meets the required compliance fraction. The integrator does not know the providers' hidden stochastic execution models. It has only the information each provider discloses through interface $I$. Integration method $M$ uses those disclosures and the known graph to produce the end-to-end prediction $\widehat\sigma_G^{(I,M)}(A,H;\rho)$. **The scientific task is to assess the accuracy and limits of this probability prediction.**
 
-**Our research question is predictive, not contractual enforcement:** before observing the outcome, how likely is the composed service to meet that requirement? Equation (4) defines this probability as $\sigma_G(A,H;\rho)$. For example, $\sigma_G=0.80$ means an 80% probability of satisfying the contracted compliance target, and a 20% probability of missing it, under the specified stochastic world. We estimate this probability from limited provider disclosures and compare the result with a separate white-box simulation reference where available. **No additional decision threshold is needed to define the SLA or its predicted satisfaction probability.**
-
-A narrow numerical interval around a model-based estimate may measure Monte Carlo precision, but it does not by itself account for errors in reconstructed provider models or guarantee real-world contractual compliance. These uncertainties are discussed in Chapter 10 and Appendix A.
+**How do we evaluate it?** In the simulator, the true provider models can be used to generate an independent finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}(A,H;\rho)$. We compare each method's prediction with this reference across the tested SLA queries, horizons, provider worlds and graph topologies. The hidden provider models used for final reference generation are not supplied to the methods being evaluated. Because the reference is computed from a finite number of stochastic runs, it is itself an estimate of $\sigma_G$, not an exact value. Numerical simulation error and reconstruction error must therefore be distinguished (Chapter 10 and Appendix A).
 
 ## 2.3 Graph composition algebra and its status
 
