@@ -36,7 +36,7 @@ We separate these choices explicitly:
 \tau=(I,M), \tag{2}
 ```
 
-with **information interface** $I$ and **integration method** $M$. $I$ constrains what a provider can disclose, while $M$ selects, fits and propagates models from that disclosure. Distinct $M$ may use the same $I$; conversely an information-rich interface can require a different reconstruction objective, making the evaluated unit an **information–method pair**.
+with **information interface** $I$ and **integration method** $M$. The interface $I$ specifies what each provider discloses. Given these separate disclosures and the known composition graph $G$, the integrator applies $M$ to estimate the composed service's end-to-end SLA probability, $\widehat\sigma_G(A,H;\rho)$. Depending on the method, this may involve reconstructing provider models and propagating their predictions through $G$. Distinct $M$ may use the same $I$; conversely an information-rich interface can require a different reconstruction objective, making the evaluated unit an **information–method pair**.
 
 The question is not whether analytical or stochastic QoS composition exists. It does [3,8,17–19]. Rather, the specific problem is **inverse, public-evidence-constrained** composition: can an integrator, with provider-local probability surfaces and no hidden execution traces or true parameters, predict a finite-horizon, end-to-end SLA event?
 
