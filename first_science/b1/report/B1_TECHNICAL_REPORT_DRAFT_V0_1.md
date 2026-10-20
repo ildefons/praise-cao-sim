@@ -27,7 +27,7 @@ header-includes:
 
 # Executive synthesis {.unnumbered}
 
-Composed cloud-edge services can expose little more than provider-local workload and SLA evidence while keeping their stochastic execution models private. The methodological challenge is to predict an end-to-end, horizon-dependent SLA-satisfaction probability from these disclosures without silently assuming access to hidden process parameters. We report the development, implementation, and evaluation of a family of methods indexed by provider information representation $I$ and integration procedure $M$, together with a simulator and a complete account of observed limitations.
+In composed cloud-edge services, individual providers may advertise limited workload and SLA evidence while keeping their stochastic execution models private. The methodological challenge is to combine these separate disclosures into a prediction of end-to-end SLA satisfaction over a time horizon, without assuming access to hidden process parameters. We report the development, implementation, and evaluation of a family of methods indexed by provider information representation $I$ and integration procedure $M$, together with a simulator and a complete account of observed limitations.
 
 We define the evaluated quantity as $\sigma_G(A,H;\rho)=\Pr[c_G(A,H)\ge\rho]$, where $c_G(A,H)$ is the fraction of **decided** composed requests that meet a specified latency-cost-quality region by time $H$. A missed latency deadline is a decided failure; requests not yet decided are excluded; zero decided requests yield compliance one. This quantity measures the probability that the composed service meets its SLA compliance target over the observation horizon $H$.
 
@@ -63,7 +63,7 @@ $$
 
 with **information interface** $I$ and **integration method** $M$. The interface $I$ specifies what each provider discloses. Given these separate disclosures and the known composition graph $G$, the integrator applies $M$ to estimate the composed service's end-to-end SLA probability, $\widehat\sigma_G(A,H;\rho)$. Depending on the method, this may involve reconstructing provider models and propagating their predictions through $G$. Distinct $M$ may use the same $I$; conversely an information-rich interface can require a different reconstruction objective, making the evaluated unit an **information–method pair**.
 
-The question is not whether analytical or stochastic QoS composition exists. It does [3,8,17–19]. Rather, the specific problem is **inverse, public-evidence-constrained** composition: can an integrator, with provider-local probability surfaces and no hidden execution traces or true parameters, predict a finite-horizon, end-to-end SLA event?
+The question is not whether analytical or stochastic QoS composition exists. It does [3,8,17–19]. Rather, the specific problem is **inverse, public-evidence-constrained** composition: can an integrator combine the probability surfaces advertised by individual black-box providers to estimate the composed service's finite-horizon, end-to-end SLA probability, without access to their execution traces or true parameters?
 
 ## 1.2 Research questions and evidence categories
 
@@ -135,7 +135,7 @@ The distinction remains even if a pointwise numerical interval around the fitted
 
 ## 2.3 Graph composition algebra and its status
 
-For ideal rectangular local service bounds, a serial composition accumulates latency and cost and takes the minimum quality, while an all-required parallel join takes the longest branch latency, adds branch costs and takes the minimum branch quality. Ignoring shared fixed terms for the moment,
+For ideal rectangular per-provider service bounds, a serial composition accumulates latency and cost and takes the minimum quality, while an all-required parallel join takes the longest branch latency, adds branch costs and takes the minimum branch quality. Ignoring shared fixed terms for the moment,
 
 $$
 \begin{aligned}
@@ -153,7 +153,7 @@ This is **boundary algebra**, not a theorem that an analogous product of finite-
 
 ## 3.1 Public interface I1
 
-The original provider-local public interface I1 offers a nested family of rectangular admissibility regions:
+Under the original public interface I1, each provider advertises a nested family of rectangular admissibility regions:
 
 $$
 A_i(\rho_r)=
@@ -161,7 +161,7 @@ A_i(\rho_r)=
 \tag{7}
 $$
 
-Here **$\rho_r$ is a region-content index**, used in constructing the provider-local region. It is conceptually distinct from **$\rho_q$**, the required fraction of decided requests inside the region. For each region the public card exposes an empirical probability surface
+Here **$\rho_r$ is a region-content index**, used to construct a provider's advertised region. It is conceptually distinct from **$\rho_q$**, the required fraction of decided requests inside the region. For each region the public card exposes an empirical probability surface
 
 $$
 \widehat\sigma_i^{I1}(A_i(\rho_r),H;\rho_q)
@@ -180,11 +180,11 @@ $$
 \tag{9}
 $$
 
-for mean service time, cost rate, and coefficient of variation of service time. The inverse learner does not observe $\theta_i$. The historical I1 specification enforces nested local regions in its frozen acquisition design; complete raw-event/acquisition replay and all probabilistic-coverage properties were not independently reverified for this report version.
+for mean service time, cost rate, and coefficient of variation of service time. The inverse learner does not observe $\theta_i$. The historical I1 specification enforces nested regions for each provider in its frozen acquisition design; complete raw-event/acquisition replay and all probabilistic-coverage properties were not independently reverified for this report version.
 
 ## 3.2 I1 is not the same as the SLA query region
 
-The local disclosure rectangles must be distinguished from the **requested graph-level** region $A_G$. The historical pilot first composed local rectangles to obtain an induced graph region $A_G^{\rm base}(\rho_r)$, then multiplied only the induced latency and cost limits by calibrated factors $\gamma$ to define Easy, Mid and Stress evaluation regions. In the Phase-5 battery, query construction and eligibility used a separate preregistered Step-0 calibration/confirmation process.
+Each provider's advertised SLA rectangles must be distinguished from the **requested graph-level** region $A_G$. The historical pilot first combined the providers' advertised rectangles to obtain an induced graph region $A_G^{\rm base}(\rho_r)$, then multiplied only the induced latency and cost limits by calibrated factors $\gamma$ to define Easy, Mid and Stress evaluation regions. In the Phase-5 battery, query construction and eligibility used a separate preregistered Step-0 calibration/confirmation process.
 
 The subsequent October P2/G_PAR study instead explicitly tested an **unscaled, deterministically induced public graph region** $A_G^{I1}=\operatorname{Compose}_G(A_A,A_B,A_C)$ and varied the stochastic prediction methods over the **same** region. The study does not compare alternative learned global region constructors, and it does not reinstate P2 in the excluded Phase-5 prospective cohort.
 
@@ -198,7 +198,7 @@ These augmentations enlarge or reorganize disclosed information. However, they a
 
 ## 4.1 M0: analytical public-boundary predictor
 
-M0 propagates the local rectangular boundaries through the known composition graph, without fitting private stochastic provider processes. For a requested graph region $A_G$, it is scored only where the publicly induced rectangle $A_G^{I1}$ is contained in $A_G$. On applicable queries its same-$\rho$ product is
+M0 propagates the advertised rectangular boundaries of individual providers through the known composition graph, without fitting private stochastic provider processes. For a requested graph region $A_G$, it is scored only where the publicly induced rectangle $A_G^{I1}$ is contained in $A_G$. On applicable queries its same-$\rho$ product is
 
 $$
 \widehat\sigma_G^{M0}(A_G,H;\rho)
@@ -361,7 +361,7 @@ Interpretations should be made **within a row** unless there is a justified same
 
 ## 7.1 Query population and reference
 
-The original pilot held one hidden three-provider configuration, one fixed parallel-all graph, a workload period of 0.2 seconds and the public I1 card constant. Query difficulty was varied by scaling the latency and cost limits of a graph region induced from public local regions:
+The original pilot held one hidden three-provider configuration, one fixed parallel-all graph, a workload period of 0.2 seconds and the providers' published I1 cards constant. Query difficulty was varied by scaling the latency and cost limits of a graph region induced from the providers' advertised regions:
 
 $$
 A_G(\gamma,\rho)
@@ -496,16 +496,16 @@ The experimental record now separates three phases: **I, the original one-world 
 
 **The reconstruction procedure did change.** The same 48 normalized Latin-hypercube coordinates were retained for each provider, but physical parameter bounds changed and every new provider-world combination selected a different highest-weight candidate index. The original pilot selected Gibbs `lambda=30` by blocked five-fold cross-validation on public I1. The battery and original-style retrospective carried over the *value* 30 rather than repeating that selection rule. Reapplying the original rule retrospectively gives:
 
-| World | Public-I1 CV-selected lambda | Used lambda | Best held-out local KL | Local KL with lambda=30 | Relative KL increase |
+| World | Public-I1 CV-selected lambda | Used lambda | Best held-out provider KL | Provider KL with lambda=30 | Relative KL increase |
 |:--|--:|--:|--:|--:|--:|
 | Original pilot | 30 | 30 | 0.126042 | 0.126042 | 0% |
 | P1 | 3 | 30 | 0.099806 | 0.124984 | +25.23% |
 | P3 | 5 | 30 | 0.082610 | 0.158658 | +92.06% |
 | P4 | 20 | 30 | 0.090682 | 0.098781 | +8.93% |
 
-These scores concern the **local disclosed provider surfaces, not graph-level predictions**. We have not simulated alternative graph models under the new lambdas, so the CV result identifies a protocol deviation, **not a demonstrated cause of graph error**. The pilot's adaptive 99.9%-mass rule gave K=14; on the new model banks the same rule would require K=19 (P1), K=22 (P3), and K=15 (P4), rather than the retrospective fixed K=14.
+These scores measure how well the models reproduce each provider's advertised probability surfaces, **not** the composed-service SLA probability. We have not simulated alternative graph models under the new lambdas, so the CV result identifies a protocol deviation, **not a demonstrated cause of graph error**. The pilot's adaptive 99.9%-mass rule gave K=14; on the new model banks the same rule would require K=19 (P1), K=22 (P3), and K=15 (P4), rather than the retrospective fixed K=14.
 
-**A simple local-fit explanation also fails.** Mean provider Full48 public-I1 reconstruction MAE was 0.1277 (pilot), 0.1314 (P1), 0.1556 (P3), and 0.1101 (P4), while original-style Top14 G_PAR graph MAE was respectively 0.0304, 0.2447, 0.2511, and 0.1098. Local and global MAE measure different targets and cannot be equated. They nevertheless show that the new-world failures were not simply accompanied by uniformly worse local fits. Composition-sensitive statistics, query calibration, approximation errors and cancellation remain competing explanations; *intrinsic insufficiency of I1 has not been proved*.
+**A simple provider-fit explanation also fails.** Mean provider-level Full48 public-I1 reconstruction MAE was 0.1277 (pilot), 0.1314 (P1), 0.1556 (P3), and 0.1101 (P4), while original-style Top14 G_PAR graph MAE was respectively 0.0304, 0.2447, 0.2511, and 0.1098. Provider-level and composed-graph MAE measure different targets and cannot be equated. They nevertheless show that the new-world failures were not simply accompanied by uniformly worse provider fits. Composition-sensitive statistics, query calibration, approximation errors and cancellation remain competing explanations; *intrinsic insufficiency of I1 has not been proved*.
 
 **The methodological lessons have two levels.** First, a **predictive-sufficiency challenge**: matching public provider statistics may not preserve everything relevant to a composed SLA decision. Second, a **protocol-fidelity challenge**: a nominally unchanged method can be instantiated with different candidate domains, hyperparameter-selection rules, model support and evaluation regions. Phase III closes the bounded D0–D9 equivalence checks, but **does not uniquely attribute the pilot–battery accuracy gap**. That would require prospective one-factor-at-a-time ablations on fresh holdout conditions.
 
