@@ -31,11 +31,11 @@ In composed cloud-edge services, individual providers may advertise limited work
 
 We define the evaluated quantity as $\sigma_G(A,H;\rho)=\Pr[c_G(A,H)\ge\rho]$, where $c_G(A,H)$ is the fraction of **decided** composed requests that meet a specified latency-cost-quality region by time $H$. A missed latency deadline is a decided failure; requests not yet decided are excluded; zero decided requests yield compliance one. This quantity measures the probability that the composed service meets its SLA compliance target over the observation horizon $H$.
 
-The original controlled three-provider parallel-graph pilot was promising. Against a fresh white-box reference ($N_{\mathrm{WB}}=200$: 200 new simulation runs using the true underlying model), across 555 related measurements (15 SLA conditions, each evaluated at 37 time horizons using shared simulation runs), the mean absolute errors (MAE) of a single reconstructed model (M1), a 27-member equal-weight ensemble (M2), and a Gibbs-weighted pilot M3 with 14 propagated joint models were respectively **0.18517, 0.06815 and 0.03037**. However, a retrospective cost-matched support audit found a Top1 estimator with MAE **0.02878**, slightly below the weighted Top14 estimator in that fixed pilot. The pilot therefore did not establish that multi-model averaging was necessary.
+**Phase I (controlled pilot)** tested the original three-provider parallel graph. The original controlled pilot was promising. Against a fresh white-box reference ($N_{\mathrm{WB}}=200$: 200 new simulation runs using the true underlying model), across 555 related measurements (15 SLA conditions, each evaluated at 37 time horizons using shared simulation runs), the mean absolute errors (MAE) of a single reconstructed model (M1), a 27-member equal-weight ensemble (M2), and a Gibbs-weighted pilot M3 with 14 propagated joint models were respectively **0.18517, 0.06815 and 0.03037**. However, a retrospective cost-matched support audit found a Top1 estimator with MAE **0.02878**, slightly below the weighted Top14 estimator in that fixed pilot. The pilot therefore did not establish that multi-model averaging was necessary.
 
-A later evaluation across multiple provider configurations and composition graphs provided a more informative test of generalization. Sixteen evaluation cases were planned (four provider configurations combined with four composition graphs). The four cases involving configuration P2 did not meet the predefined criteria for informative SLA test conditions, so they were excluded without replacement. On the remaining 12 cells, with independent $N_{\mathrm{WB}}=1000$ final white-box trajectories per cell and 6,660 related measurements (555 per case) per fully applicable method, the executed Phase-5 V3b algorithms produced MAE **0.15702** (M1), **0.13395** (M2), and **0.12189** (M3 FULL343). M3 retained the best aggregate ranking, but hard conditions still had substantial errors. Its algorithm and candidate support also changed from the pilot and from the initially registered Phase-5 method. Accordingly these numbers cannot be treated as direct replications of the original 14-member method.
+**Phase II (expanded battery)** evaluated generalization across multiple provider configurations and composition graphs. Sixteen evaluation cases were planned (four provider configurations combined with four composition graphs). The four cases involving configuration P2 did not meet the predefined criteria for informative SLA test conditions, so they were excluded without replacement. On the remaining 12 cells, with independent $N_{\mathrm{WB}}=1000$ final white-box trajectories per cell and 6,660 related measurements (555 per case) per fully applicable method, the executed Phase-5 V3b algorithms produced MAE **0.15702** (M1), **0.13395** (M2), and **0.12189** (M3 FULL343). M3 retained the best aggregate ranking, but hard conditions still had substantial errors. Its algorithm and candidate support also changed from the pilot and from the initially registered Phase-5 method. Accordingly these numbers cannot be treated as direct replications of the original 14-member method.
 
-A new **retrospective original-style M3 comparison** addresses that gap. Reconstructing 48 public-I1-scored candidates/provider and propagating Top14 at B=1400 on the same 12 cells gave **MAE 0.15416** (separately simulated Top1, **0.16228**), versus **0.12189** for the executed V3b FULL343. Despite Top14 retaining at least **99.64%** of its inferred joint-model weight across P1, P3 and P4, FULL343 outperformed it in **11 of 12** cells. These post-result comparisons do not isolate member count or constitute a fresh holdout. A subsequent Phase III audit reproduced pilot estimator and native parallel-graph behavior on archived seeds while documenting candidate-domain drift and the transfer of the numerical Gibbs concentration instead of its original selection rule.
+**Phase III (retrospective divergence tracing)** investigates that gap, including an original-style M3 comparison, without creating a new independent holdout. Reconstructing 48 public-I1-scored candidates/provider and propagating Top14 at B=1400 on the same 12 cells gave **MAE 0.15416** (separately simulated Top1, **0.16228**), versus **0.12189** for the executed V3b FULL343. Despite Top14 retaining at least **99.64%** of its inferred joint-model weight across P1, P3 and P4, FULL343 outperformed it in **11 of 12** cells. These post-result comparisons do not isolate member count or constitute a fresh holdout. A subsequent Phase III audit reproduced pilot estimator and native parallel-graph behavior on archived seeds while documenting candidate-domain drift and the transfer of the numerical Gibbs concentration instead of its original selection rule.
 
 Subsequent development tests revealed further limitations. On P4/G_SEQPAR, stronger reconstruction from I1 alone performed comparably to, and on average slightly better than, several richer I2 information-and-loss pipelines under matched search and graph-propagation designs. This does **not** isolate the causal utility of information quantity because fitting objectives also changed. In a separate P2/G_PAR experiment using a deterministically composed public graph region, M1, M2 and M3 achieved MAE **0.13200, 0.14058 and 0.12787**, respectively, under **unmatched** graph budgets. A privileged retrospective audit then found that the true generating provider parameters fitted the public I1 evidence better than the selected reconstructed candidates despite lying inside the search domain. This is direct evidence of a search/reconstruction deficit, not a proof of structural non-identifiability.
 
@@ -77,7 +77,7 @@ The program addresses four related questions:
 
 **RQ4, provenance and decision meaning.** How reproducible are the finite results, and what do numerical Monte Carlo intervals, model spread, reference error and support-truncation guarantees actually mean for an SLA threshold?
 
-We distinguish **frozen same-condition pilot**, **registered battery**, **documented pre-final-white-box development revision**, **final held-out reference evaluation**, **post-result development** and **privileged retrospective diagnostic**. “Prospective” always refers to the named freeze and reference bank, not to the idea that all versions were fixed at the beginning of the entire project.
+We organize the evidence into **three overarching phases: Phase I (controlled pilot), Phase II (expanded battery), and Phase III (retrospective divergence tracing)**. Phase I covers the frozen same-setting pilot; Phase II the registered expanded battery, documented pre-reference method revisions and held-out final evaluation; Phase III the retrospective divergence audit and related post-result exploratory analyses. These remain different evidence categories within the three phases. Prospective claims are relative to their specified freezes and reference banks.
 
 ## 1.3 Scientific boundaries
 
@@ -288,6 +288,8 @@ The proof writes $p_{\rm full}=m_Sp_S+(1-m_S)p_{\rm omitted}$ and uses both prob
 
 ### Method-version matrix
 
+Historical Phase-4, Phase-5 and Phase-6 names identify repository experiment stages, **not** further overarching research phases. They belong respectively to global Phases I, II and III.
+
 | Period | M1 selection | M2 membership | M3 support | Main M3 graph budget | Evidence role |
 |:--|:--|:--|:--|--:|:--|
 | Phase-4 pilot | Historical TPE single fit/provider | 3 diverse/provider; M1 anchor excluded | 48/provider $\to$ weighted Top14 | 1,400 or 2,000 | Same-world frozen pilot |
@@ -337,27 +339,23 @@ The required engineering-smoke checks were ultimately completed, with four froze
 
 # 6. Research sequence and comparison validity
 
-A reconstruction methodology cannot be evaluated independently of its development history. The main chronology is summarized below; exact paths and freeze IDs are supplied in Appendix B and the companion machine-readable registry.
+The three overarching phases below are separate from the original experiment-stage labels. Historical labels are preserved to identify frozen methods and archived evidence; exact paths and freeze IDs appear in Appendix B.
 
-| Stage | Event or revision | Inferential role |
+| Overarching phase | Historical stage | Evidence role |
 |:--|:--|:--|
-| Phases 1–2 | Physical generator and finite public I1 cards | Benchmark design and disclosure |
-| Phase 3 | M0 public product and M1 inverse fitting | Method development |
-| Phase 4 G1/G2 | M2 diversity selection and prospective graph stresses | Exploratory/prospective *within stage* |
-| September pilot | M3 48/provider, weighted Top14, N200 reference | Frozen same-world benchmark |
-| September post-hoc | Top1/Top3/support/weighting/hidden-parameter audits | Retrospective explanation |
-| Phase-5 V2 | Four-world, four-graph protocol; 16 planned cells | Registered battery design |
-| Phase-5 V3/V3b | Seven independent fit runs; common-N100 candidate ranking | Pre-final-WB method development |
-| Phase-5 FULL343 | Replace Top14 after poor retained mass, before graph WB | Pre-graph-WB support revision |
-| Phase-5 final | 12 eligible cells, N1000 final WB, deterministic comparison | Primary broad evaluation of executed V3b |
-| October M3 retrospective | Original-style Top14 and independent Top1 B1400 on 12 eligible cells | Post-result matched-graph-budget diagnostic |
-| October Phase III forensic trace | D0–D9 estimator, graph, IPT, domain, lambda and I1 controls | Retrospective evidence, not independent confirmation |
-| Phase 6 | I1strong, I2a and I2b reconstruction variations | Post-main development on a known cell |
-| October P2 | Public induced region, fit-fidelity and perturbation probes | Separate retrospective/development evidence |
+| I: Controlled pilot | Historical Phases 1–3 and Phase-4 G1/G2 | Simulator, I1 disclosure, M0/M1/M2 development |
+| I: Controlled pilot | September M3 Top14 pilot, N200 | Frozen same-condition reference evaluation |
+| I: Controlled pilot | September Top1/Top3 and hidden-parameter audits | Post-hoc pilot diagnostics, no new holdout |
+| II: Expanded battery | Historical Phase-5 V2 | Registered 4-world/4-graph design |
+| II: Expanded battery | Historical Phase-5 V3/V3b and FULL343 | Revised methodology before final WB |
+| II: Expanded battery | Historical Phase-5 final | 12 eligible cases, N1000 reference |
+| III: Retrospective divergence tracing | October original-style M3 Top14/Top1 | Post-result comparison on Phase II reference |
+| III: Retrospective divergence tracing | D0–D9 pilot–battery controls | Forensic parity and protocol audit |
+| III: Retrospective divergence tracing | Historical Phase-6 I1/I2 and October P2 | Related post-result development, separate tests |
 
-Interpretations should be made **within a row** unless there is a justified same-population, same-budget and same-method cross-row comparison. No retrospective experiment is disguised as a registered test.
+The global phases classify research purpose and evidence status, not three unchanged algorithms. Phase II's documented method revisions occurred before its final white-box reference but differed from the initially registered method. Phase III results are retrospective or exploratory. Cross-phase comparisons require comparable populations, methods and budgets.
 
-# 7. Historical fixed-graph pilot
+# 7. Phase I: controlled pilot
 
 ## 7.1 Query population and reference
 
@@ -412,7 +410,7 @@ The retrospective pilot Table 4 compared hidden generating parameters with M1 an
 
 The historical Figure 2 labeled a curve the “nondominated” recurring-cost/MAE frontier while plotting only chosen primary prospective implementations. In the same reported two-coordinate cost plane, the retrospective operational Top1 at B100/MAE 0.0399 dominates M1 at B100/MAE 0.1852. Thus the original line is **not** the nondominated frontier over all reported operating points; it can only be described as the frontier of the *selected prospective primary set*, or it must be redrawn and annotated with retrospective status and additional provider-construction cost. This first B1 draft does not reuse the misleading frontier graphic.
 
-# 8. Phase-5 multi-world, multi-graph evaluation
+# 8. Phase II: expanded battery
 
 ## 8.1 Eligibility and exact prediction population
 
