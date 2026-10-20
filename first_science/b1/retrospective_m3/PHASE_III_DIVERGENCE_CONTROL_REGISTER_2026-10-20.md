@@ -13,23 +13,26 @@
 | D4 | Frozen local public-I1 reconstruction audit | Mean across A/B/C Full48 local MAE: pilot 0.1277, P1 0.1314, P3 0.1556, P4 0.1101; local fitting quality does not monotonically predict composed graph MAE | Completed, user terminal | Provider-local public I1 is not the same observable as graph SLA |
 | D5 | Internal Top14 retained-mass comparison | Pilot adaptive 99.9% rule selected K14 (mass 0.999174); fixed-K14 retrospective masses P1 0.996404, P3 0.996771, P4 0.998925; 99.9% would need K19, K22, K15 | Completed from archived weights | Mass omission bounds only the inferred finite mixture, not prediction error to WB |
 
-## Remaining executable controls, all separately versioned and read-only
+## Executed D6-D9 controls, from 2026-10-20 terminal logs
 
-| ID | Script | Scope | Approximate runtime on laptop | Cost |
-|:--|:--|:--|:--|:--|
-| D6 | audit_pilot_estimator_parity_v1.py | Recompute Phase-4 pilot's 48/provider Gibbs weights using Phase-5 helper; check all 14 pilot joint candidate IDs/ranks, alpha and B1400 allocation | About 2–30 s | No simulations |
-| D7 | audit_candidate_domain_transfer_v1.py | Check identical normalized 48-point LHS positions and report changes in mapped physical candidate domains, plus Top1 candidate-index changes | About 2–15 s | No simulations |
-| D8 | audit_lambda_cv_transfer_v1.py | Rerun the exact frozen pilot 5-fold *public-I1-only* lambda CV formula on archived candidate curves for original and new worlds, report whether lambda=30 transfers | About 15–90 s | No simulations |
-| D9 | audit_original_world_bridge_v1.py | First K frozen original pilot M3 hypotheses, same original pilot query regions and first N historical seeds: compare archived native G0 to new Phase-5 G_PAR at both IPT gauges | Typically about 1–3 min for K=3, N=2; native runtime varies | Only 12 native graph trajectories, no new local simulations |
+| ID | Archived-input check | Observed result | Status |
+|:--|:--|:--|:--|
+| D6 | audit_pilot_estimator_parity_v1.py | Provider Gibbs weights reproduced within 2.78e-16; exact 14/14 joint IDs/order; joint weights within 2.78e-16; retained mass 0.999174197017 and exact B1400 integer allocations | **PASS** |
+| D7 | audit_candidate_domain_transfer_v1.py | Normalized LHS coordinates exactly matched; all 9 P-world/provider cases changed KL-Top1 candidate index; physical mu and/or kappa ranges changed while CV mapping remained unchanged | **PASS** |
+| D8 | audit_lambda_cv_transfer_v1.py | The original public-I1-only five-fold blocked CV selected lambda=30 (pilot), lambda=3 (P1), lambda=5 (P3) and lambda=20 (P4). Transferring fixed lambda=30 adds 25.23%, 92.06% and 8.93% respectively to the *held-out public-local Bernoulli KL score* compared with each new world's selected minimum | **PASS, specific selection-policy divergence** |
+| D9 | audit_original_world_bridge_v1.py | Frozen Phase-4 pilot hypotheses ranks 1–9, two seeds each, **match exactly** at matched IPT=1e6 in 2398 request rows/rank (up to ~5.7e-14 numerical tolerance). Phase-5 IPT=1e9 changes some L/C/complete times by up to 2.26e-5, with no observed change of request status in these first nine ranks | **PARTIAL**; stopped before rank 10 because the script requested two historical seeds not present in that rank's archived ledger |
 
-**Execution order:** D6 -> D7 -> D8 -> D9. D9 requires original Phase-4 M3 v4 archived ledgers under the local repository results path. None of D6–D9 reads final white-box outcomes or changes frozen predictions. Source-level validation workflows are distinct from scientific execution. Mark each as COMPLETE only after the local output has been inspected.
+D8 full held-out scores:
+- P_DEV: selected lambda 30, KL 0.126042; fixed lambda30 KL 0.126042.
+- P1: selected lambda 3, KL 0.099806; fixed lambda30 KL 0.124984 (excess 0.025178, +25.23%).
+- P3: selected lambda 5, KL 0.082610; fixed lambda30 KL 0.158658 (excess 0.076048, +92.06%).
+- P4: selected lambda 20, KL 0.090682; fixed lambda30 KL 0.098781 (excess 0.008099, +8.93%).
 
-**Interpretation rules:**
-- D6 PASS proves archived-input and numerical estimator parity in the original pilot, not external prediction performance.
-- D7 quantifies candidate-domain shifts. A changed Top1 index does not isolate whether the cause is physical-domain mapping, new I1 observations or stochastic local rescoring.
-- D8 can demonstrate whether transferred lambda=30 was or was not preferred under new public-I1-only cross-validation; its world-specific CV scores are retrospective diagnostics, **not permission to retune frozen methods**.
-- D9 exact native and query-curve parity at IPT=1e6 would eliminate a major graph implementation concern for the checked model-seed subset. IPT=1e9 differences are evaluated on *the original pilot query thresholds*, the missing bridge from D3's new P3/G_PAR thresholds.
-- If all controls pass, the remaining source of divergence is not established as a unique mechanism: **provider-generating worlds, their public disclosures, domain mapping and independently calibrated global queries co-vary**. Further causal isolation requires a separate one-axis-at-a-time design with fresh evidence and an explicitly declared cost. It is legitimate to close B1 Phase III as a bounded, reproducible forensic account without a universal cause.
+**Causal restraint:** These CV findings establish that transferring the *numerical value* lambda30 is not equivalent to transferring the original pilot's *public-I1 CV selection procedure*. They do **not** establish that a lower CV-KL choice would improve graph-white-box prediction. Changing lambda would change the joint support; absent simulated alternative members, original graph accuracy under reweighting is unknown. The D7 Top1 differences are similarly multicausal.
+
+**D9 fix committed:** The diagnostic now preflights each pilot rank's frozen original seed count, verifies it agrees with the B2000 allocation, and uses at most the requested number of seeds per rank. It supports `--start-rank 10 --ranks 14 --seeds-per-rank 2`, avoiding another replay of already-verified ranks 1–9. The resulting weighted readout for ranks 10–14 alone is *not* a full 14-member mixture or official MAE. If an archive is truly missing a frozen seed, the preflight still raises rather than silently ignoring missing evidence.
+
+**Remaining action:** execute the corrected D9 for ranks 10–14, inspect its 555 original-pilot query-horizon equivalence comparisons, then freeze the bounded forensic interpretation. No full 12-cell rerun or white-box access is needed for these parity checks.
 
 ## Scientific framing
 
