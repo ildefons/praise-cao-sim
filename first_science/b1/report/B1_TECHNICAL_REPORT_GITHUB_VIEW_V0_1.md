@@ -268,6 +268,7 @@ The proof writes $p_{\rm full}=m_Sp_S+(1-m_S)p_{\rm omitted}$ and uses both prob
 | Phase-4 pilot | Historical TPE single fit/provider | 3 diverse/provider; M1 anchor excluded | 48/provider $\to$ weighted Top14 | 1,400 or 2,000 | Same-world frozen pilot |
 | Phase-5 registered V2 | Frozen TPE/domain policies | Separate diversity/compatibility policy | Originally Top14 | Planned 1,400 | Protocol, not final executed version |
 | Phase-5 executed V3b | Best common-$N100$ RMSE of seven | RMSE ranks 1–3; includes M1 anchor | All 7/provider $\to$ FULL343 | 1,400 | 12-cell final-WB evaluation |
+| October retrospective M3 | V3b remains comparator | Not re-estimated | 48/provider Top14 and Top1 | 1,400 each | Post-result same-WB comparison |
 | Phase-6 matched | Strong I1 or I2-specific loss and 256-trial search | Top3/provider, 27 equal weights | **Not evaluated** | Not applicable | Post-Phase5 development |
 
 The matrix deliberately does **not** imply identical candidate search, local costs, physical-cell populations or empirical credibility across the rows.
@@ -324,6 +325,7 @@ A reconstruction methodology cannot be evaluated independently of its developmen
 | Phase-5 V3/V3b | Seven independent fit runs; common-N100 candidate ranking | Pre-final-WB method development |
 | Phase-5 FULL343 | Replace Top14 after poor retained mass, before graph WB | Pre-graph-WB support revision |
 | Phase-5 final | 12 eligible cells, N1000 final WB, deterministic comparison | Primary broad evaluation of executed V3b |
+| October M3 retrospective | Original-style Top14 and independent Top1 B1400 on 12 eligible cells | Post-result matched-graph-budget diagnostic |
 | Phase 6 | I1strong, I2a and I2b reconstruction variations | Post-main development on a known cell |
 | October P2 | Public induced region, fit-fidelity and perturbation probes | Separate retrospective/development evidence |
 
@@ -575,6 +577,7 @@ The different uncertainties are summarized as follows:
 
 **Ensembling is neither futile nor proved necessary.** The pilot same-support weighting test favored nonuniform public-evidence weights over uniform weights, while pilot Top1 slightly outperformed the larger weighted mixture at a matched budget. In the larger Phase-5 study M3 FULL343 had the best aggregate MAE but still made sizeable errors. The data support context-dependent method performance, not a model-count law.
 
+**Internal mixture coverage is not external prediction validity.** The retrospective original-style Top14 captured over 99.6% of the inferred joint-model mass in each eligible provider world, yet its overall MAE exceeded V3b FULL343. This does not isolate member count because the candidate-fitting and weighting pipelines changed.
 **Richer disclosure is not sufficient by itself.** The I2 development variants were matched in broad search effort but changed loss functions and used an already studied cell. Their results test implemented pipelines, not the optimal value of their disclosed statistics.
 
 **Graph structure matters without a simple universal directional rule.** A registered serial-versus-parallel masking prediction did not retain one direction across eligible worlds. The finite design does not identify a universal composition-graph error mechanism.
@@ -591,6 +594,7 @@ The different uncertainties are summarized as follows:
 
 **Method changes and development leakage.** V3, V3b and FULL343 changed model search, selection and support after earlier development evidence. The final graph WB was held back behind a hashed global prediction freeze, and archived timestamps/hash links were checked, but this does not restore the stronger status of having all methods fixed before every component of experimental evidence was observed. The same cell was reused while developing Phase-6 I2 variants.
 
+**Retrospective original-style M3.** The B1400 Top14 and Top1 comparison was specified after prior V3b outcomes were known and reused the same reference. Different provider proposal/fit and local costs prevent causal attribution to ensemble size. The archived audit omits raw native graph ledgers, so it verifies included results rather than bitwise replay.
 **Budget and correlation.** M1/M2/M3 graph budgets differ (100/2700/1400); their numbers of locally simulated trajectories and method fitting time differ as well. The 555 and 6,660 SLA measurements reuse simulation trajectories and query definitions, so they are not independent. Reference bootstrap and per-method numerical error do not simultaneously quantify scenario selection, model-search and physical-world extrapolation uncertainty.
 
 **Engineering and software provenance.** The modified composition controller is in an external AICon/YAFS repository. The local current dependency revision and source SHA fingerprints were recorded, but exact clean-tree/source-lock provenance at each archived October run was not recovered. Several required smoke checks were completed only after early scientific work, a sequencing deviation documented in the audit. The Phase-5 graph simulator received optional trace-exposure updates after main runs, so current repository HEAD alone does not identify the historical program state.
@@ -602,6 +606,8 @@ The different uncertainties are summarized as follows:
 # 12. Conclusions and falsifiable next questions
 
 The PRAISE program implemented a discrete-event native composition benchmark, finite public provider SLA disclosures and multiple reconstructed-model integration procedures. It established robust provenance for important frozen outputs, including a hash-frozen prediction/reference separation in the broad Phase-5 battery. The favorable single-world pilot numerical findings were genuine, but the broader evaluation showed **material residual prediction errors** and did not establish general reconstruction sufficiency.
+
+The added retrospective M3 study shows that near-complete mass coverage of an inferred bank cannot ensure external SLA prediction accuracy. A new holdout with controlled reconstruction ablations is needed to distinguish the causes.
 
 The most actionable scientific questions now concern mechanisms rather than adding model members indiscriminately:
 
@@ -671,6 +677,7 @@ The following documents in \`first_science/b1/\` are the companion reproducibili
 - \`METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md\`, 132 V3b selection/allocation checks;
 - \`SIMULATOR_PROVENANCE_AUDIT_2026-10-16.md\` and \`RUNTIME_PROVENANCE_VERIFICATION_REVIEW_2026-10-16.md\`, code scope, smoke sequencing, 94-pass stage/hash audit;
 - \`UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md\`, exact and approximate interval/variance results;
+- B1_M3_RETROSPECTIVE_EVIDENCE_AUDIT_2026-10-20.md, retrospective original-style M3: 316 pass, zero fail;
 - \`FINAL_AUDIT_SIGNOFF_2026-10-16.md\`, conditional drafting authorization and unresolved publication gates;
 - \`MANUSCRIPT_CLAIM_AUDIT_V0_1.csv\`, 68 claims and required dispositions.
 
@@ -684,6 +691,7 @@ The following documents in \`first_science/b1/\` are the companion reproducibili
 | Phase5 V3b member selection/allocation | 132 passed, zero failed |
 | Historical pilot source display archive | 22/22 collector hashes and 13/13 checked scientific output hashes match |
 | Phase5 runtime/reference chain | 94 passed; 12/12 prediction hashes and 12/12 WB freeze backlinks |
+| Retrospective original-style M3 archive | 316 passed; all 12 prediction-manifest backlinks verified |
 | Historical source paper | 26-page \`v11_45\` PDF, preserved and not overwritten |
 
 ## B.2 Version-dependent costs and seeds
