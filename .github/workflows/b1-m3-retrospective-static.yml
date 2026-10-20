@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check Python syntax and JSON
         run: |
-          python -m py_compile first_science/b1/retrospective_m3/run_pilot_m3_generalization_v1.py
+          python -m compileall -q first_science/b1/retrospective_m3
           python -m json.tool first_science/b1/retrospective_m3/config_pilot_m3_generalization_v1.json > /dev/null
           python - <<'PY'
           from pathlib import Path
