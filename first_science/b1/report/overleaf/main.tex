@@ -35,7 +35,7 @@ Composed cloud-edge services can expose little more than provider-local workload
 
 We define the evaluated quantity as $\sigma_G(A,H;\rho)=\Pr[c_G(A,H)\ge\rho]$, where $c_G(A,H)$ is the fraction of \textbf{decided} composed requests that meet a specified latency-cost-quality region by time $H$. A missed latency deadline is a decided failure; requests not yet decided are excluded; zero decided requests yield compliance one. This quantity measures the probability that the composed service meets its SLA compliance target over the observation horizon $H$.
 
-The original controlled three-provider parallel-graph pilot was promising. Against a fresh white-box reference ($N_{\mathrm{WB}}=200$: 200 new simulation runs using the true underlying model), across 555 related measurements (15 SLA conditions, each evaluated at 37 time horizons using shared simulation runs), the mean absolute errors (MAE) of a single reconstructed model (M1), a 27-member equal-weight ensemble (M2), and a Gibbs-weighted pilot M3 with 14 propagated joint models were respectively \textbf{0.18517, 0.06815 and 0.03037}. However, a retrospective cost-matched support audit found a Top1 estimator with MAE \textbf{0.02878}, slightly below the weighted Top14 estimator in that fixed pilot. The pilot therefore did not establish that multi-model averaging was necessary.
+The internal empirical record distinguishes a one-world pilot, a broader battery and a retrospective forensic divergence audit. The original controlled three-provider parallel-graph pilot was promising. Against a fresh white-box reference ($N_{\mathrm{WB}}=200$: 200 new simulation runs using the true underlying model), across 555 related measurements (15 SLA conditions, each evaluated at 37 time horizons using shared simulation runs), the mean absolute errors (MAE) of a single reconstructed model (M1), a 27-member equal-weight ensemble (M2), and a Gibbs-weighted pilot M3 with 14 propagated joint models were respectively \textbf{0.18517, 0.06815 and 0.03037}. However, a retrospective cost-matched support audit found a Top1 estimator with MAE \textbf{0.02878}, slightly below the weighted Top14 estimator in that fixed pilot. The pilot therefore did not establish that multi-model averaging was necessary.
 
 A later evaluation across multiple provider configurations and composition graphs provided a more informative test of generalization. Sixteen evaluation cases were planned (four provider configurations combined with four composition graphs). The four cases involving configuration P2 did not meet the predefined criteria for informative SLA test conditions, so they were excluded without replacement. On the remaining 12 cells, with independent $N_{\mathrm{WB}}=1000$ final white-box trajectories per cell and 6,660 related measurements (555 per case) per fully applicable method, the executed Phase-5 V3b algorithms produced MAE \textbf{0.15702} (M1), \textbf{0.13395} (M2), and \textbf{0.12189} (M3 FULL343). M3 retained the best aggregate ranking, but hard conditions still had substantial errors. Its algorithm and candidate support also changed from the pilot and from the initially registered Phase-5 method. Accordingly these numbers cannot be treated as direct replications of the original 14-member method.
 
@@ -605,6 +605,35 @@ These findings \textbf{do not establish that larger ensembles cause better predi
 
 The uploaded archive passed \textbf{316 independently recomputed numeric and SHA-256 checks, zero failures}. The review checked 12/12 frozen prediction-manifest links, all included prediction hashes, provider-weight normalization, Top14 members from all $48^3$ products, and pointwise/error values. FULL343 reproduces its earlier MAE 0.121890. Missing member-curve files and raw native graph ledgers prevent an independent bitwise simulation replay.
 
+\subsection*{8.5 Phase III: pilot--battery divergence tracing}
+
+The study is presented in three phases: \textbf{(I) the one-world G0 pilot}, \textbf{(II) the wider multi-world and multi-graph battery}, and \textbf{(III) this retrospective forensic trace}. Phase III investigates method identity and deviations, not a new independent accuracy holdout.
+
+\textbf{Estimator and simulator equivalence.} The pilot's provider Gibbs weight vectors were reproduced by the newer helper to within $2.78\times10^{-16}$, with the same 14 joint members, weights, retained mass (0.999174197017) and B1400 allocations. On archived-seed subsets, G\_PAR and historical G0 native request ledgers agree to floating-point precision when both use provider IPT $10^6$. Ranks 1--9 used two seeds each (2,398 requests per rank); ranks 10--14 had one available frozen B2000 seed each (1,199 requests per rank). Switching provider IPT to $10^9$ introduced small continuous latency/cost differences without changing completion status. Ranks 10--14 also showed \textbf{zero changes over 555 original-pilot query--horizon SLA predictions} at either gauge. The complete B1400 experiment and the aggregate 14-rank SLA scoring were not replayed.
+
+\textbf{Reconstruction-policy deviation.} All nine new provider-world combinations reused the original 48 normalized Latin-hypercube coordinates, but different physical parameter-domain maps were used, and every Top1 candidate index changed. The original pilot chose $\lambda=30$ by five-fold blocked CV on public I1; the broad battery and retrospective instead inherited the fixed value 30. Repeating the same local public-I1-only CV rule retrospectively gives:
+
+\begingroup\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}p{0.19\textwidth}rrrrr@{}}
+\toprule
+World & Best $\lambda$ & Used $\lambda$ & Best KL & KL at 30 & Excess \\
+\midrule\endfirsthead
+\toprule
+World & Best $\lambda$ & Used $\lambda$ & Best KL & KL at 30 & Excess \\
+\midrule\endhead
+Pilot & 30 & 30 & 0.126042 & 0.126042 & 0\% \\
+P1 & 3 & 30 & 0.099806 & 0.124984 & +25.23\% \\
+P3 & 5 & 30 & 0.082610 & 0.158658 & +92.06\% \\
+P4 & 20 & 30 & 0.090682 & 0.098781 & +8.93\% \\
+\bottomrule
+\end{longtable}\endgroup
+
+These are \textbf{held-out provider-local KL scores, not graph prediction errors}. Different $\lambda$ would alter propagated model support. A lower CV-KL therefore does \emph{not} demonstrate better global SLA prediction. The pilot's adaptive 99.9\%-mass policy yielded K=14; on the new banks it would select K=19 (P1), 22 (P3), or 15 (P4), rather than the fixed K=14.
+
+\textbf{Local versus global fit.} Mean provider Full48 local public-I1 MAE was 0.1277 (pilot), 0.1314 (P1), 0.1556 (P3) and 0.1101 (P4). Corresponding original-style Top14 G\_PAR graph MAEs were 0.0304, 0.2447, 0.2511 and 0.1098. The two error measures have different targets and cannot be equated, but the pattern rejects a simple account of uniformly worse local fit. Sensitivity to particular SLA queries, approximation errors and error cancellation remain possible explanations; inherent insufficiency of I1 is \emph{not} proved.
+
+Two interacting methodological challenges emerge: \textbf{predictive sufficiency} of locally reconstructed provider statistics for composed SLA events, and \textbf{experimental-protocol fidelity} as parameter domains, hyperparameter selection, support rules and query regions change. D0--D9 close a bounded forensic audit; they do not uniquely attribute the pilot--battery accuracy gap. A new prospective one-axis-at-a-time experiment would be needed for causal attribution. Full register: \texttt{first\_science/b1/retrospective\_m3/PHASE\_III\_DIVERGENCE\_CONTROL\_REGISTER\_2026-10-20.md}.
+
 \section*{9. Post-main investigations: information, public regions and search}
 \addcontentsline{toc}{section}{9. Post-main investigations: information, public regions and search}
 
@@ -812,7 +841,7 @@ Hidden-truth error and parameter diagnostics & Privileged reference available af
 
 The PRAISE program implemented a discrete-event native composition benchmark, finite public provider SLA disclosures and multiple reconstructed-model integration procedures. It established robust provenance for important frozen outputs, including a hash-frozen prediction/reference separation in the broad Phase-5 battery. The favorable single-world pilot numerical findings were genuine, but the broader evaluation showed \textbf{material residual prediction errors} and did not establish general reconstruction sufficiency.
 
-The added retrospective M3 study shows that near-complete mass coverage of an inferred bank cannot ensure external SLA prediction accuracy. A new holdout with controlled reconstruction ablations is needed to distinguish the causes.
+The retrospective M3 comparison shows that near-complete model-bank mass coverage cannot ensure external SLA accuracy. Phase III then established bounded pilot estimator/native-graph parity and documented altered candidate domains and transferred rather than reselected $\lambda=30$. These are verified protocol differences, not a unique causal explanation. A new holdout with controlled reconstruction ablations is needed to distinguish the causes.
 
 The most actionable scientific questions now concern mechanisms rather than adding model members indiscriminately:
 
@@ -888,6 +917,7 @@ The following documents in \texttt{first\_science/b1/} are the companion reprodu
 \item \texttt{SIMULATOR\_PROVENANCE\_AUDIT\_2026-10-16.md} and \texttt{RUNTIME\_PROVENANCE\_VERIFICATION\_REVIEW\_2026-10-16.md}, code scope, smoke sequencing, 94-pass stage/hash audit;
 \item \texttt{UNCERTAINTY\_MATHEMATICS\_AUDIT\_2026-10-16.md}, exact and approximate interval/variance results;
 \item \texttt{B1\_M3\_RETROSPECTIVE\_EVIDENCE\_AUDIT\_2026-10-20.md}, retrospective original-style M3: 316 pass, zero fail;
+\item \texttt{retrospective\_m3/PHASE\_III\_DIVERGENCE\_CONTROL\_REGISTER\_2026-10-20.md}, bounded D0--D9 forensic results and limitations;
 \item \texttt{FINAL\_AUDIT\_SIGNOFF\_2026-10-16.md}, conditional drafting authorization and unresolved publication gates;
 \item \texttt{MANUSCRIPT\_CLAIM\_AUDIT\_V0\_1.csv}, 68 claims and required dispositions.
 \end{itemize}
