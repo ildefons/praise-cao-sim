@@ -77,7 +77,7 @@ The program addresses four related questions:
 
 **RQ4, provenance and decision meaning.** How reproducible are the finite results, and what do numerical Monte Carlo intervals, model spread, reference error and support-truncation guarantees actually mean for an SLA threshold?
 
-We organize the evidence into **three overarching phases: Phase I (controlled pilot), Phase II (expanded battery), and Phase III (retrospective divergence tracing)**. Phase I covers the frozen same-setting pilot; Phase II the registered expanded battery, documented pre-reference method revisions and held-out final evaluation; Phase III the retrospective divergence audit and related post-result exploratory analyses. These remain different evidence categories within the three phases. Prospective claims are relative to their specified freezes and reference banks.
+We organize the evidence into **three overarching phases: Phase I (controlled pilot), Phase II (expanded battery), and Phase III (retrospective divergence tracing)**. Phase I covers the frozen same-setting pilot; Phase II the registered expanded battery, documented pre-reference method revisions and held-out final evaluation; Phase III the retrospective divergence audit and related post-result exploratory analyses. These remain different evidence categories within the three phases. In Phase II, the final graph predictions were recorded before the final white-box results were examined, although the methods had already been revised during development. Phase III examines earlier results retrospectively and does not provide a new independent validation of those methods.
 
 ## 1.3 Scientific boundaries
 
