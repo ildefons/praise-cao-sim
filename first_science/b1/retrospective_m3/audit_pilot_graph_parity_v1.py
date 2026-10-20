@@ -79,9 +79,9 @@ def main(seeds, stop, tol):
     fraction = float(family["execution_fraction_x"])
     # Explicit diagnostic surrogate, not an inferred result or a WB lookup.
     models = {
-        "ProviderA": GraphProviderSurrogate(0.12, 3.0, 0.3),
-        "ProviderB": GraphProviderSurrogate(0.15, 3.0, 0.3),
-        "ProviderC": GraphProviderSurrogate(0.18, 3.0, 0.3),
+        "ProviderA": GraphProviderSurrogate(0.137, 2.1, 0.45),
+        "ProviderB": GraphProviderSurrogate(0.163, 3.7, 0.65),
+        "ProviderC": GraphProviderSurrogate(0.195, 1.9, 0.85),
     }
     start = time.perf_counter()
     valid = True
