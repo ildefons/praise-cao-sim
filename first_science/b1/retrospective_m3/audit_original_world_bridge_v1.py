@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Matched original-world native G0 -> G_PAR replay using archived pilot M3 models.
 
-No new provider reconstruction and no white-box access. Select first N frozen
+No new provider reconstruction and no white-box access. Select at most N frozen
 graph seeds for each of the first K frozen pilot M3 joint members, compare their
 archived native G0 request records with fresh Phase5 G_PAR native records under
 (1) exactly matched IPT=1e6, and (2) Phase5 IPT=1e9. Evaluate on precisely
@@ -13,6 +13,7 @@ No frozen files are written or modified.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import sys
@@ -122,7 +123,7 @@ def weighted_query_predictions(members, queries, rank_weights):
     return a, b
 
 
-def main(ranks, n_per_rank):
+def main(ranks, n_per_rank, start_rank=1):
     begin = time.monotonic()
     design = pd.read_csv(PILOT / "m3_v4_dominant_design.csv")
     design = design.sort_values("rank").reset_index(drop=True)
@@ -131,8 +132,8 @@ def main(ranks, n_per_rank):
                           "sigma_regime_v2_selected_regions_frozen.csv")
     if len(design) != 14 or len(queries) != 15 or len(weights) != 144:
         raise RuntimeError("Unexpected frozen Phase4 pilot artifacts")
-    if ranks > len(design):
-        raise RuntimeError("Requested more than 14 frozen ranks")
+    if ranks > len(design) or not 1 <= start_rank <= ranks:
+        raise RuntimeError("Invalid pilot rank interval")
     phase5 = json.loads((P5 / "config_phase5_recoverability_battery_v2.json").read_text())
     graph = next(g for g in phase5["graphs"] if g["id"] == "G_PAR")
     family = phase5["provider_family"]
@@ -143,11 +144,41 @@ def main(ranks, n_per_rank):
         raise RuntimeError("Phase5 gauge unexpectedly changed")
     data = {"OLD_G0": {}, "NEW_GPAR_1E6": {}, "NEW_GPAR_1E9": {}}
     rank_weights = {}
-    print(f"B1 original-world bridge: K={ranks}, N={n_per_rank} per rank, "
-          f"{2*ranks*n_per_rank} new graph trajectories. No WB access.", flush=True)
+    selected = design[(design["rank"].astype(int) >= start_rank)
+                      & (design["rank"].astype(int) <= ranks)].copy()
+    # Preflight every archived seed bank BEFORE running any native simulation.
+    # Low-weight hypotheses can have just one trajectory under B2000.
+    planned = {}
+    for row in selected.itertuples(index=False):
+        rank = int(row.rank)
+        count = int(row.max_n_trajectories)
+        if count != int(row.n_B2000):
+            raise RuntimeError(f"rank={rank}: max bank differs from frozen B2000 allocation")
+        if int(row.seed_end_inclusive) - int(row.seed_start) + 1 != count:
+            raise RuntimeError(f"rank={rank}: frozen seed range inconsistent")
+        original_file = PILOT / "ledgers" / f"M3Q_R{rank:02d}.csv"
+        if not original_file.is_file():
+            raise FileNotFoundError(original_file)
+        seeds = pd.read_csv(original_file, usecols=["trajectory_seed", "trajectory"])
+        actual = sorted(seeds["trajectory_seed"].astype(int).unique().tolist())
+        expected = list(range(int(row.seed_start), int(row.seed_start) + count))
+        if actual != expected:
+            raise RuntimeError(f"rank={rank}: original archived seed bank incomplete: "
+                               f"expected {len(expected)}, observed {len(actual)}")
+        wanted = min(n_per_rank, count)
+        planned[rank] = expected[:wanted]
+        print(f"PREFLIGHT rank={rank}: archived B2000 N={count}, "
+              f"diagnostic N={wanted}", flush=True)
+    new_count = 2 * sum(len(seeds) for seeds in planned.values())
+    print(f"B1 original-world bridge: ranks {start_rank}..{ranks}, "
+          f"at most N={n_per_rank} each; {new_count} new graph trajectories. "
+          "No WB access.", flush=True)
+    if start_rank > 1:
+        print("NOTE: this run diagnoses only the selected rank subset; "
+              "the earlier ranks were verified separately.", flush=True)
     native_ok = True
 
-    for row in design.head(ranks).itertuples(index=False):
+    for row in selected.itertuples(index=False):
         rank = int(row.rank)
         rank_weights[rank] = float(row.alpha_renormalized)
         local_models = {}
@@ -166,18 +197,18 @@ def main(ranks, n_per_rank):
         original_file = PILOT / "ledgers" / f"M3Q_R{rank:02d}.csv"
         legacy = pd.read_csv(original_file)
         # The original graph contract uses the first N of the rank seed stream.
-        requested = [int(row.seed_start) + j for j in range(n_per_rank)]
+        requested = planned[rank]
         old = legacy.loc[legacy["trajectory_seed"].astype(int).isin(requested)].copy()
         if sorted(old["trajectory_seed"].astype(int).unique().tolist()) != requested:
             raise RuntimeError(f"Missing historical pilot graph ledger seeds for rank {rank}")
-        if sorted(old["trajectory"].astype(int).unique().tolist()) != list(range(n_per_rank)):
+        if sorted(old["trajectory"].astype(int).unique().tolist()) != list(range(len(requested))):
             raise RuntimeError("Archived rank trajectory ordinals do not match seed prefix")
         data["OLD_G0"][rank] = old
         produced = {}
         for label, ipt in (("NEW_GPAR_1E6", 1e6), ("NEW_GPAR_1E9", 1e9)):
             pieces = []
             for ordinal, seed in enumerate(requested):
-                with warnings.catch_warnings():
+                with warnings.catch_warnings(), open(os.devnull, "w") as null, contextlib.redirect_stdout(null):
                     warnings.simplefilter("ignore", FutureWarning)
                     ledger, _ = execute_one_phase5_graph_trajectory(
                         graph_id="G_PAR", graph_ast=graph["ast"],
@@ -206,8 +237,9 @@ def main(ranks, n_per_rank):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ranks", type=int, default=3)
+    parser.add_argument("--start-rank", type=int, default=1)
     parser.add_argument("--seeds-per-rank", type=int, default=2)
     args = parser.parse_args()
-    if not 1 <= args.ranks <= 14 or not 1 <= args.seeds_per_rank <= 10:
-        parser.error("ranks in 1..14 and seeds-per-rank in 1..10 required")
-    raise SystemExit(main(args.ranks, args.seeds_per_rank))
+    if not 1 <= args.start_rank <= args.ranks <= 14 or not 1 <= args.seeds_per_rank <= 10:
+        parser.error("1 <= start-rank <= ranks <= 14, seeds-per-rank in 1..10")
+    raise SystemExit(main(args.ranks, args.seeds_per_rank, args.start_rank))
