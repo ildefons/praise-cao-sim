@@ -98,32 +98,18 @@ The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidd
 
 **How do we evaluate it?** In the simulator, the true provider models can be used to generate an independent finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}(A,H;\rho)$. We compare each method's prediction with this reference across the tested SLA queries, horizons, provider worlds and graph topologies. The hidden provider models used for final reference generation are not supplied to the methods being evaluated. Because the reference is computed from a finite number of stochastic runs, it is itself an estimate of $\sigma_G$, not an exact value. Numerical simulation error and reconstruction error must therefore be distinguished (Chapter 10 and Appendix A).
 
-## 2.3 Graph composition algebra and its status
-
-For ideal rectangular per-provider service bounds, a serial composition accumulates latency and cost and takes the minimum quality, while an all-required parallel join takes the longest branch latency, adds branch costs and takes the minimum branch quality. Ignoring shared fixed terms for the moment,
-
-```math
-\begin{aligned}
-\operatorname{Seq}:&\quad
-\ell=\sum_i\ell_i,\quad c=\sum_i c_i,\quad q=\min_i q_i,\\
-\operatorname{ParAll}:&\quad
-\ell=\max_i\ell_i,\quad c=\sum_i c_i,\quad q=\min_i q_i.
-\end{aligned}
-\tag{5}
-```
-
-This is **boundary algebra**, not a theorem that an analogous product of finite-horizon trajectory-compliance probabilities exactly predicts composed compliance under queueing and synchronized arrivals. The original fixed parallel pilot also includes measured fixed terms $\ell_G=0.014003+\max_i\ell_i$ and $c_G=0.03+\sum_i c_i$ under its own graph/network configuration; these constants are not to be transferred automatically to other experimental graph structures.
-
-# 3. Provider disclosure interfaces and reconstruction targets
+# 3. Public provider evidence shared by integration methods
 
 ## 3.1 Public interface I1
+
+This section defines **the public information available to the integrator**, rather than a method for predicting the composed SLA. M0 (Section 4.1) combines the advertised provider boundaries and probabilities directly. M1–M3 (Sections 4.2–4.4) use the same I1 probability surfaces to select, fit or weight candidate stochastic provider models before propagating their predictions through the known graph. The enriched I2 disclosures used in later experiments are introduced in Section 3.3.
 
 Under the original public interface I1, each provider advertises a nested family of rectangular admissibility regions:
 
 ```math
 A_i(\rho_r)=
 \{L_i\le\ell_i(\rho_r),\, C_i\le c_i(\rho_r),\, Q_i\ge q_i\}.
-\tag{6}
+\tag{5}
 ```
 
 Here **$\rho_r$ is a region-content index**, used to construct a provider's advertised region. It is conceptually distinct from **$\rho_q$**, the required fraction of decided requests inside the region. For each region the public card exposes an empirical probability surface
@@ -131,21 +117,14 @@ Here **$\rho_r$ is a region-content index**, used to construct a provider's adve
 ```math
 \widehat\sigma_i^{I1}(A_i(\rho_r),H;\rho_q)
 \approx \Pr\{c_i(A_i(\rho_r),H)\ge\rho_q\}.
-\tag{7}
+\tag{6}
 ```
 
 The historical pilot used $\rho_r,\rho_q\in\{0.95,0.975,0.98333,0.99,0.995\}$ and a 5-second horizon grid up to 240 seconds. Separate $N=100$ trajectory banks were used for region construction and the empirical probability surface; the workload period was 0.2 seconds. The card does **not** disclose request timestamps, hidden queue/service trajectories or the provider parameters.
 
 The source-side procedure uses provider-private simulation evidence to *publish* a finite I1 card. The integrator, by design, sees only the card. This publisher-versus-consumer division is essential: giving a method the hidden sample identities, generating parameters or white-box graph predictions would change $I$ and invalidate the intended inverse reconstruction comparison.
 
-The underlying experiments assume a family of provider surrogate processes parameterized by
-
-```math
-\theta_i=(\mu_i,\kappa_i,\mathrm{CV}_i),
-\tag{8}
-```
-
-for mean service time, cost rate, and coefficient of variation of service time. The inverse learner does not observe $\theta_i$. The historical I1 specification enforces nested regions for each provider in its frozen acquisition design; complete raw-event/acquisition replay and all probabilistic-coverage properties were not independently reverified for this report version.
+The historical I1 specification enforces nested regions for each provider in its frozen acquisition design; complete raw-event/acquisition replay and all probabilistic-coverage properties were not independently reverified for this report version.
 
 ## 3.2 I1 is not the same as the SLA query region
 
@@ -163,18 +142,41 @@ These augmentations enlarge or reorganize disclosed information. However, they a
 
 ## 4.1 M0: analytical public-boundary predictor
 
-M0 propagates the advertised rectangular boundaries of individual providers through the known composition graph, without fitting private stochastic provider processes. For a requested graph region $A_G$, it is scored only where the publicly induced rectangle $A_G^{I1}$ is contained in $A_G$. On applicable queries its same-$\rho$ product is
+For ideal rectangular per-provider service bounds, a serial composition accumulates latency and cost and takes the minimum quality, while an all-required parallel join takes the longest branch latency, adds costs and takes the minimum quality. Ignoring shared fixed terms,
+
+$
+\begin{aligned}
+\operatorname{Seq}:&\quad
+\ell=\sum_i\ell_i,\quad c=\sum_i c_i,\quad q=\min_i q_i,\\
+\operatorname{ParAll}:&\quad
+\ell=\max_i\ell_i,\quad c=\sum_i c_i,\quad q=\min_i q_i.
+\end{aligned}
+\tag{7}
+$
+
+These rules compose **advertised performance boundaries**, not stochastic SLA probabilities. The original fixed parallel pilot includes measured fixed terms $\ell_G=0.014003+\max_i\ell_i$ and $c_G=0.03+\sum_i c_i$ under its graph/network configuration; these constants do not automatically transfer to other graph structures.
+
+M0 uses this boundary composition without fitting hidden stochastic provider processes. For a requested graph region $A_G$, it is scored only where the publicly induced rectangle $A_G^{I1}$ is contained in $A_G$. On applicable queries its same-$\rho$ product is
 
 ```math
 \widehat\sigma_G^{M0}(A_G,H;\rho)
 =\prod_{i\in\{A,B,C\}}
 \widehat\sigma_i^{I1}(A_i(\rho),H;\rho).
-\tag{9}
+\tag{8}
 ```
 
 This is an **explicit heuristic baseline**, not a general stochastic lower or upper bound for the graph SLA. Each provider's local compliance fraction can exceed $\rho$ while the sets of locally failing requests differ, preventing a corresponding end-to-end compliance implication. Queue interactions and branch synchronization create additional coupling. M0 applicability is also nonuniform, so its aggregate MAE cannot be ranked against all-query M1/M2/M3 without reporting the denominator.
 
 ## 4.2 M1: one reconstructed provider process per provider
+
+M1–M3 reconstruct stochastic provider-process candidates from the disclosed evidence. The assumed process family for each provider is parameterized by
+
+$
+\theta_i=(\mu_i,\kappa_i,\mathrm{CV}_i),
+\tag{9}
+$
+
+where $\mu_i$ is mean service time, $\kappa_i$ is cost rate and $\mathrm{CV}_i$ is the coefficient of variation of service time. The actual generating parameters are hidden from the integrator; fitted candidates need not recover the physical truth.
 
 M1 fits one stochastic surrogate to each provider's public evidence, combines the three selected provider models and simulates the native graph. The original Phase-3/4 method used a larger single TPE search with its own confirm/replay process and selected one provider hypothesis each. The executed Phase-5 V3b version instead started from **seven independent 25-trial TPE searches per provider**, with separate local search seeds. It rescored the seven run winners on a fresh common $N=100$ local evidence bank and selected the minimum I1 RMSE candidate. A second independent local bank was diagnostic and not used to choose the model.
 
