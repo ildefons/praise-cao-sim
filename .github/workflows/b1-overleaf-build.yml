@@ -9,6 +9,10 @@ on:
       - first_science/b1/report/overleaf/figures/**
   workflow_dispatch:
 
+concurrency:
+  group: b1-overleaf-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -58,10 +62,13 @@ jobs:
           cd first_science/b1/report
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "${GITHUB_REF_NAME}"
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse "origin/${GITHUB_REF_NAME}")" ]; then
+            echo "::notice::A newer report commit is present; skip publishing stale PDF/ZIP from this build."
+            exit 0
+          fi
           git add B1_OVERLEAF_PROJECT_V0_1.zip B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
           if ! git diff --staged --quiet; then
             git commit -m "Publish compiled B1 Overleaf ZIP and report PDF"
-            git fetch origin "${GITHUB_REF_NAME}"
-            git rebase "origin/${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
