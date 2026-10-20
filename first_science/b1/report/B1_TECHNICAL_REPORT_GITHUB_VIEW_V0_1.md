@@ -94,7 +94,7 @@ The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidd
 
 ## 2.2 Decisions versus predictions
 
-Our main task is to estimate $\sigma_G$: the probability that the composed service meets its SLA target. An integrator may then face a simpler practical question: **should this service composition be admitted?** To make that optional yes-or-no decision, the integrator chooses a minimum acceptable probability $\beta\in[0,1]$. For example, $\rho=0.95$ requires at least 95% of decided requests to meet the SLA, while $\beta=0.90$ means admitting the composition only if its **estimated probability** of meeting that requirement is at least 90%. The decision rule is
+Our main task is to estimate $\sigma_G$: the probability that the composed service meets its SLA target. Before contracting, an integrator may face a practical question: **should this service composition be admitted?** To make that optional yes-or-no decision, the integrator chooses a minimum acceptable probability $\beta\in[0,1]$. For example, $\rho=0.95$ requires at least 95% of decided requests to meet the SLA, while $\beta=0.90$ means admitting the composition only if its **estimated probability** of meeting that requirement is at least 90%. The decision rule is
 
 ```math
 \widehat D_{\beta}^{(I,M)}(A,H;\rho)
@@ -102,7 +102,9 @@ Our main task is to estimate $\sigma_G$: the probability that the composed servi
 \tag{5}
 ```
 
-Here $\widehat D_{\beta}^{(I,M)}=1$ means **admit**, and $0$ means **reject**. The threshold $\beta$ does not change the definition of $\sigma_G$ or its white-box estimate; it only specifies how an integrator uses the predicted probability. Because the decision is based on a reconstructed model, admitting a composition is **not** a guarantee that its true SLA-satisfaction probability exceeds $\beta$.
+Here $\widehat D_{\beta}^{(I,M)}=1$ means **admit**, and $0$ means **reject**. The threshold $\beta$ does not change the definition of $\sigma_G$ or its white-box estimate; it only specifies how an integrator uses the predicted probability. Because the decision is based on a reconstructed model, admitting a composition is **not** a guarantee that its true SLA-satisfaction probability exceeds $\beta$. 
+
+After contracting, the client's task is different: **checking whether the agreed SLA was actually met**. The client compares the observed fraction of compliant requests over the contractual observation window, $c_G^{\mathrm{obs}}(A,H)$, with the agreed requirement $\rho$. For example, if $\rho=0.95$ but only 92% of decided requests comply, the measured requirement has not been met and the client may have grounds for an SLA complaint, subject to the contract's measurement and dispute terms. This check uses observed compliance and $\rho$, **not** the prediction threshold $\beta$.
 
 The distinction remains even if a pointwise numerical interval around the fitted estimate lies entirely above $\beta$. Such an interval can quantify finite Monte Carlo error conditional on the reconstructed models; it does not include arbitrary provider-model misspecification or hidden-system uncertainty. The precise uncertainty decomposition appears in Chapter 10 and Appendix A.
 
