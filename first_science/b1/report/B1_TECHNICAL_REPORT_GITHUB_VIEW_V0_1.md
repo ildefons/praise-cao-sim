@@ -92,23 +92,13 @@ The probability is taken over independent stochastic trajectories of the specifi
 
 The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidden world is only evaluated through a separate finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}$ under experimental conditions that permit it.
 
-## 2.2 Decisions versus predictions
+## 2.2 Contractual compliance and SLA prediction
 
-Our main task is to estimate $\sigma_G$: the probability that the composed service meets its SLA target. Before contracting, an integrator may face a practical question: **should this service composition be admitted?** To make that optional yes-or-no decision, the integrator chooses a minimum acceptable probability $\beta\in[0,1]$. For example, $\rho=0.95$ requires at least 95% of decided requests to meet the SLA, while $\beta=0.90$ means admitting the composition only if its **estimated probability** of meeting that requirement is at least 90%. The decision rule is
+A service contract specifies an acceptable performance region $A$, an observation horizon $H$, and the minimum fraction $\rho$ of decided requests that must satisfy the SLA. Once the service runs, the client can measure the actual compliance fraction $c_G^{\mathrm{obs}}(A,H)$. The contractual requirement is met if $c_G^{\mathrm{obs}}(A,H)\ge\rho$ and missed otherwise. For example, if $\rho=0.95$ but only 92% of decided requests comply in the agreed observation window, the SLA target was missed. Any penalty or complaint then follows the contract's measurement, verification, and remedy terms.
 
-```math
-\widehat D_{\beta}^{(I,M)}(A,H;\rho)
-=\mathbf 1\!\left[\widehat\sigma_G^{(I,M)}(A,H;\rho)\ge\beta\right].
-\tag{5}
-```
+**Our research question is predictive, not contractual enforcement:** before observing the outcome, how likely is the composed service to meet that requirement? Equation (4) defines this probability as $\sigma_G(A,H;\rho)$. For example, $\sigma_G=0.80$ means an 80% probability of satisfying the contracted compliance target, and a 20% probability of missing it, under the specified stochastic world. We estimate this probability from limited provider disclosures and compare the result with a separate white-box simulation reference where available. **No additional decision threshold is needed to define the SLA or its predicted satisfaction probability.**
 
-Here $\widehat D_{\beta}^{(I,M)}=1$ means **admit**, and $0$ means **reject**. The threshold $\beta$ does not change the definition of $\sigma_G$ or its white-box estimate; it only specifies how an integrator uses the predicted probability. Because the decision is based on a reconstructed model, admitting a composition is **not** a guarantee that its true SLA-satisfaction probability exceeds $\beta$. 
-
-After contracting, **whether the client can claim an SLA breach depends on what the contract guarantees**. Consider the same example, $\rho=0.95$ and $\beta=0.90$. Suppose only 92% of decided requests comply during one observed window, so $c_G^{\mathrm{obs}}(A,H)=0.92$. This window falls below the 95% compliance target. It could support a complaint **if the contract guarantees at least 95% compliance in each specified window**.
-
-However, if the contract instead guarantees a **probability of at least 90% of meeting that 95% target**, one unsuccessful window does not establish a breach. Assessing such a probabilistic guarantee requires evidence across comparable observation windows and accounting for statistical uncertainty. The admission threshold $\beta$ becomes a contractual requirement **only if the contract explicitly includes it**; otherwise it remains the integrator's pre-contract decision threshold.
-
-The distinction remains even if a pointwise numerical interval around the fitted estimate lies entirely above $\beta$. Such an interval can quantify finite Monte Carlo error conditional on the reconstructed models; it does not include arbitrary provider-model misspecification or hidden-system uncertainty. The precise uncertainty decomposition appears in Chapter 10 and Appendix A.
+A narrow numerical interval around a model-based estimate may measure Monte Carlo precision, but it does not by itself account for errors in reconstructed provider models or guarantee real-world contractual compliance. These uncertainties are discussed in Chapter 10 and Appendix A.
 
 ## 2.3 Graph composition algebra and its status
 
@@ -121,7 +111,7 @@ For ideal rectangular per-provider service bounds, a serial composition accumula
 \operatorname{ParAll}:&\quad
 \ell=\max_i\ell_i,\quad c=\sum_i c_i,\quad q=\min_i q_i.
 \end{aligned}
-\tag{6}
+\tag{5}
 ```
 
 This is **boundary algebra**, not a theorem that an analogous product of finite-horizon trajectory-compliance probabilities exactly predicts composed compliance under queueing and synchronized arrivals. The original fixed parallel pilot also includes measured fixed terms $\ell_G=0.014003+\max_i\ell_i$ and $c_G=0.03+\sum_i c_i$ under its own graph/network configuration; these constants are not to be transferred automatically to other experimental graph structures.
@@ -135,7 +125,7 @@ Under the original public interface I1, each provider advertises a nested family
 ```math
 A_i(\rho_r)=
 \{L_i\le\ell_i(\rho_r),\, C_i\le c_i(\rho_r),\, Q_i\ge q_i\}.
-\tag{7}
+\tag{6}
 ```
 
 Here **$\rho_r$ is a region-content index**, used to construct a provider's advertised region. It is conceptually distinct from **$\rho_q$**, the required fraction of decided requests inside the region. For each region the public card exposes an empirical probability surface
@@ -143,7 +133,7 @@ Here **$\rho_r$ is a region-content index**, used to construct a provider's adve
 ```math
 \widehat\sigma_i^{I1}(A_i(\rho_r),H;\rho_q)
 \approx \Pr\{c_i(A_i(\rho_r),H)\ge\rho_q\}.
-\tag{8}
+\tag{7}
 ```
 
 The historical pilot used $\rho_r,\rho_q\in\{0.95,0.975,0.98333,0.99,0.995\}$ and a 5-second horizon grid up to 240 seconds. Separate $N=100$ trajectory banks were used for region construction and the empirical probability surface; the workload period was 0.2 seconds. The card does **not** disclose request timestamps, hidden queue/service trajectories or the provider parameters.
@@ -154,7 +144,7 @@ The underlying experiments assume a family of provider surrogate processes param
 
 ```math
 \theta_i=(\mu_i,\kappa_i,\mathrm{CV}_i),
-\tag{9}
+\tag{8}
 ```
 
 for mean service time, cost rate, and coefficient of variation of service time. The inverse learner does not observe $\theta_i$. The historical I1 specification enforces nested regions for each provider in its frozen acquisition design; complete raw-event/acquisition replay and all probabilistic-coverage properties were not independently reverified for this report version.
@@ -181,7 +171,7 @@ M0 propagates the advertised rectangular boundaries of individual providers thro
 \widehat\sigma_G^{M0}(A_G,H;\rho)
 =\prod_{i\in\{A,B,C\}}
 \widehat\sigma_i^{I1}(A_i(\rho),H;\rho).
-\tag{10}
+\tag{9}
 ```
 
 This is an **explicit heuristic baseline**, not a general stochastic lower or upper bound for the graph SLA. Each provider's local compliance fraction can exceed $\rho$ while the sets of locally failing requests differ, preventing a corresponding end-to-end compliance implication. Queue interactions and branch synchronization create additional coupling. M0 applicability is also nonuniform, so its aggregate MAE cannot be ranked against all-query M1/M2/M3 without reporting the denominator.
@@ -199,7 +189,7 @@ Given three candidate provider models for each provider, M2 propagates the $3^3=
 ```math
 \widehat\sigma_G^{M2}
 =\frac{1}{27}\sum_{j=1}^{27}\widehat\sigma_G(A,H;\rho\mid\vartheta_j).
-\tag{11}
+\tag{10}
 ```
 
 The historical **Phase-4 M2** selected deliberately diverse I1-compatible representatives and **excluded the M1 anchor** from its portfolio by contract. The executed **Phase-5 V3b M2** chose ranks 1–3 by common-bank I1 RMSE among seven candidates per provider, so the M1 rank-1 provider model **is included** in each V3b M2 local portfolio. There was no hard I1-compatible threshold in the V3b ranking. M2's reported 27 models are thus not a fixed scientific intervention across phases.
@@ -214,14 +204,14 @@ M3 forms a provider-model candidate bank and scores its members only against pub
 w_{i,k}
 =\frac{\exp[-\lambda E_{i,k}]}
 {\sum_{k'}\exp[-\lambda E_{i,k'}]},
-\tag{12}
+\tag{11}
 ```
 
 where $E_{i,k}$ is a public-I1 loss (for the executed version, a Jeffreys-smoothed Bernoulli KL discrepancy) and the temperature parameter $\lambda$ was selected from public-evidence development procedures. A joint model $\vartheta_j=(\theta_{A,a},\theta_{B,b},\theta_{C,c})$ receives product weight
 
 ```math
 W_{a,b,c}=w_{A,a}w_{B,b}w_{C,c}.
-\tag{13}
+\tag{12}
 ```
 
 This is a weight over *hypotheses about providers*. The product does not remove the actual queueing/dependency interactions once a joint triple is propagated through the native simulator; those interactions remain inside each stochastic graph run. These Gibbs weights are **not calibrated posterior probabilities** of the hidden generating model.
@@ -232,7 +222,7 @@ For a selected set $S$, normalized aggregate weights $\alpha_j=W_j/\sum_{k\in S}
 \widehat\sigma_G^{M3}
 =\sum_{j\in S}\alpha_j
 \widehat\sigma_G(A,H;\rho\mid\vartheta_j).
-\tag{14}
+\tag{13}
 ```
 
 The **historical pilot M3-v4** began with **48 candidates per provider**, used public-I1 Gibbs weights with $\lambda=30$, and propagated the **Top14** joint hypotheses under total graph budgets $B=1400$ or $2000$. Within this *finite* inferred distribution, those 14 members carried approximately 99.917% of the joint weight.
@@ -245,7 +235,7 @@ For weights $W_j$ and independent Bernoulli member trajectories,
 \mathrm{Var}_{MC}(\widehat\sigma_G^{M3})
 \le\frac14\sum_j\frac{W_j^2}{N_j},
 \qquad \sum_jN_j=B.
-\tag{15}
+\tag{14}
 ```
 
 The continuous relaxation gives $N_j\propto W_j$; the finite algorithm initializes one trajectory/member and iteratively chooses the largest $\Delta_j=W_j^2/[N_j(N_j+1)]$, with a frozen rank tie-break rule. Archive verification reconstructed the P1/P3/P4 allocations **exactly**.
@@ -258,7 +248,7 @@ For any finite normalized Gibbs support, let $S$ retain weight mass $m_S\in(0,1]
 
 ```math
 \boxed{|p_{\rm full}-p_S|\le1-m_S.}
-\tag{16}
+\tag{15}
 ```
 
 The proof writes $p_{\rm full}=m_Sp_S+(1-m_S)p_{\rm omitted}$ and uses both probabilities in $[0,1]$. This is an **exact within-bank truncation bound**. For the pilot Top14, $1-m_S$ was approximately $0.000826$; for Phase-5 FULL343 it is zero **relative to the chosen 343-member bank**. Neither statement bounds error with respect to hidden graph truth.
@@ -343,12 +333,12 @@ A_G(\gamma,\rho)
 =\{L_G\le\gamma\ell_G^{\rm base}(\rho),\
 C_G\le\gamma c_G^{\rm base}(\rho),\
 Q_G\ge q_G^{\rm base}(\rho)\}.
-\tag{17}
+\tag{16}
 ```
 
 Five thresholds times three difficulty regimes generated 15 queries. Evaluation used 37 horizons from 60 to 240 seconds. The pilot's fresh reference bank contained $N_{\rm WB}=200$ trajectories.
 
-## 7.2 Prediction errors and conditional decisions
+## 7.2 Prediction errors and historical cutoff diagnostic
 
 The original pilot production results were re-scored from saved pointwise tables and manifest-linked hashes:
 
@@ -362,7 +352,7 @@ The original pilot production results were re-scored from saved pointwise tables
 
 *MAE, RMSE and bias are computed against the finite WB reference. Positive bias means optimistic prediction. M0 has a different applicable query set (9/15 queries, 333 horizon points), so its row must not be ranked directly against all 555-point methods. The main M3 graph-propagation budget B=1400 is 48.15% smaller than M2's 2700 trajectories, **not** proof of smaller end-to-end computational cost including provider fitting. The M0 RMSE value is deliberately not invented where the archived review does not report it as a reconciled principal comparison.*
 
-An illustrative $\beta=0.90$ decision audit used reference-WB pointwise Wilson intervals to identify **481 reference-certain** query/horizon points among 555. Only **274** were M0-applicable and reference-certain. The historically observed agreements were **33.94%** (M0 on 274), **37.63%** (M1), **86.07%** (M2), **96.47%** (M3 B1400), and **97.09%** (M3 B2000), with the latter four computed on 481 points. These percentages are **descriptive conditional agreements against a finite WB reference**, not calibrated real-world admission success rates or independent-scenario accuracy estimates.
+As a **secondary historical diagnostic**, the pilot applied an arbitrary cutoff $\beta=0.90$ to predicted and white-box-referenced SLA-satisfaction probabilities and compared the resulting yes/no labels. This cutoff was **not a contractual SLA requirement**, and the diagnostic was not part of the main probability-estimation objective. The audit used reference-WB pointwise Wilson intervals to identify **481 reference-certain** query/horizon points among 555. Only **274** were M0-applicable and reference-certain. The historically observed agreements were **33.94%** (M0 on 274), **37.63%** (M1), **86.07%** (M2), **96.47%** (M3 B1400), and **97.09%** (M3 B2000), with the latter four computed on 481 points. These percentages are **descriptive conditional agreements against a finite WB reference**, not calibrated real-world admission success rates or independent-scenario accuracy estimates.
 
 The pilot's M3 production errors were substantially smaller than those of M1/M2 in this exact world and graph. That is a genuine, archived numerical observation. It does not demonstrate the same numerical advantage in worlds with altered provider demand or different logical dependencies.
 
@@ -421,7 +411,7 @@ The prospectively specified topology statistic for each method and provider worl
 \operatorname{MAE}_M(P,G_{\mathrm{SEQ}})
 -
 \operatorname{MAE}_M(P,G_{\mathrm{PAR}}).
-\tag{18}
+\tag{17}
 ```
 
 The original directional masking hypothesis anticipated $\Delta_P^M>0$. The completed analysis did **not** yield that sign consistently across the eligible worlds: P1 differed in sign from P3/P4 for the examined contrast. It is therefore not supported as a universal or robust rule by this evaluation. A second registered heterogeneous-minus-symmetric contrast required P2 and was **not estimable** after Step-0 exclusion. The two other graph ASTs offer mechanistic triangulation but do not constitute a clean factorial manipulation separating workload shift from aggregation structure.
@@ -545,10 +535,10 @@ For a fixed reconstructed ensemble with normalized weights $\alpha_j$ and estima
 V_{\rm MC}(\widehat p_M)
 =\sum_j\alpha_j^2 V_j+
 2\sum_{j<k}\alpha_j\alpha_k C_{jk}.
-\tag{19}
+\tag{18}
 ```
 
-The covariance $C_{jk}$ matters for **M2's shared seed indices**. A seed-index paired bootstrap should resample each 27-member seed-vector as one unit rather than resampling individual member trajectories independently. M3's independent member seed streams permit the simpler variance form in Eq. (15), conditional on fixed weights, models and allocation.
+The covariance $C_{jk}$ matters for **M2's shared seed indices**. A seed-index paired bootstrap should resample each 27-member seed-vector as one unit rather than resampling individual member trajectories independently. M3's independent member seed streams permit the simpler variance form in Eq. (14), conditional on fixed weights, models and allocation.
 
 The pilot's numerical-width appendix used Wilson intervals for fixed single-model binomial curves, paired percentile resampling for M2 and a normal approximation for M3 using a **worst-case variance**. The variance bound itself is conservative; the resulting **normal-approximation 95% interval is not an exact distribution-free confidence interval**, particularly when the FULL343 allocation leaves some models with only one trajectory. All such intervals are **pointwise** over $(A,H,\rho)$ and conditional on the reconstructed method, not simultaneous across all 555 or 6,660 related SLA measurements.
 
@@ -561,7 +551,7 @@ Let $p_j=E[\widehat p_j]$, $p_\alpha=\sum_j\alpha_jp_j$ and $\widehat p=\sum_j\a
 ```math
 V_{\rm raw}
 =\sum_j\alpha_j(\widehat p_j-\widehat p)^2.
-\tag{20}
+\tag{19}
 ```
 
 Under fixed weights and unbiased member estimators, its expectation equals latent finite-model spread plus a contribution from numerical sampling,
@@ -571,7 +561,7 @@ E[V_{\rm raw}]
 =\sum_j\alpha_j(p_j-p_\alpha)^2+
 \sum_j\alpha_j\operatorname{Var}(\widehat p_j)
 -\operatorname{Var}(\widehat p).
-\tag{21}
+\tag{20}
 ```
 
 The manuscript's nonnegative MC-subtracted plug-in diagnostic estimates only the *spread among the selected models*. The max-with-zero clipping and finite member budgets make it neither an unbiased calibrated risk estimate nor a guaranteed bound on model-to-hidden-world error.
@@ -581,7 +571,7 @@ Similarly, if the method predictor and white-box reference are independent and i
 ```math
 E\!\left[(\widehat p_M-\widehat p_{\rm WB})^2\right]
 =(p_M-\sigma_G)^2+V_{\rm MC,M}+V_{\rm WB}.
-\tag{22}
+\tag{21}
 ```
 
 Subtracting empirical noise estimates from an observed squared difference and clipping at zero is an **experimental noise-correction diagnostic**. It does not make the unobserved model approximation error known exactly, and its square root adds estimation bias.
@@ -653,6 +643,8 @@ These questions are **future hypotheses**, not positive claims established by th
 
 ## A.1 Finite-portfolio admission envelopes
 
+🟩 **REVISIT APPENDIX A.1 WHEN REVIEWING THIS SECTION.** The historical $\beta$-based admission-envelope interpretation below is retained provisionally. Decide whether to remove it or reinterpret the finite-model extrema as a descriptive range of predicted SLA-satisfaction probabilities. Do not treat $\beta$ as part of the contracted SLA.
+
 For a specified, finite method-generated set $\mathcal M_M$ of joint stochastic models, define
 
 ```math
@@ -667,7 +659,7 @@ If $\beta\le\sigma^-_{G,M}$ then *all enumerated models* accept under their own 
 
 ## A.2 Conditional numerical precision and model spread
 
-The general covariance identity (19) holds for fixed finite weights. M2's paired common-seed bootstrap captures cross-model covariance; M3's independent-member variance bound (15) is conditional on the model bank and frozen weight rule. For a fixed sample allocation and truly independent bounded member outcomes, a weighted Hoeffding inequality gives
+The general covariance identity (18) holds for fixed finite weights. M2's paired common-seed bootstrap captures cross-model covariance; M3's independent-member variance bound (14) is conditional on the model bank and frozen weight rule. For a fixed sample allocation and truly independent bounded member outcomes, a weighted Hoeffding inequality gives
 
 ```math
 \Pr\bigl(|\widehat p-p_\alpha|\ge\varepsilon\bigr)
@@ -685,7 +677,7 @@ yielding a fixed-sample half-width
 
 This is included as an *analytical consequence of standard bounded-variable concentration*, **not** a newly tested method or a bound on $|p_\alpha-\sigma_G|$. It is not automatically anytime-valid if sample sizes are chosen by repeatedly observing the outcomes.
 
-The historical noise-adjusted model-spread quantities and white-box correction (20)–(22) are expectation-based diagnostics. Positive-part corrections may be convenient but must not be described as exact interval widths for physical model misspecification.
+The historical noise-adjusted model-spread quantities and white-box correction (19)–(21) are expectation-based diagnostics. Positive-part corrections may be convenient but must not be described as exact interval widths for physical model misspecification.
 
 ## A.3 Numerical-width scaling
 
