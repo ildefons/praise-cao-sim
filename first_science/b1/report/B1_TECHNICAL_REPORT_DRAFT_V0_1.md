@@ -83,8 +83,6 @@ We organize the evidence into **three overarching phases: Phase I (controlled pi
 
 This document does not establish a structural identifiability theorem. Multiple candidate models with different parameters and similar *finite empirical* I1 errors may reflect a non-injective information map, measurement noise, search limitations, model family restrictions, or some combination. The present observations cannot distinguish these causes in full generality.
 
-The report is also deliberately separate from earlier unpublished PPG work: no unpublished GP+DVI construction, readiness score, prior private code/data, or PPG-specific QR/YOLO/Lidar configuration is used to define this benchmark.
-
 # 2. Formal SLA objective and benchmark semantics
 
 ## 2.1 Request-level admissibility
