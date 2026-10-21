@@ -11,12 +11,12 @@ if [[ "$(git branch --show-current)" != "$branch" ]]; then
   echo "ERROR: switch to $branch first." >&2
   exit 1
 fi
-for tool in latexmk xelatex zip pdfinfo; do
+for tool in latexmk xelatex zip unzip pdfinfo; do
   if ! command -v "$tool" >/dev/null 2>&1; then
     echo "ERROR: $tool is not installed." >&2
     echo "On Ubuntu, install the LaTeX prerequisites:" >&2
     echo "  sudo apt-get update" >&2
-    echo "  sudo apt-get install -y texlive-xetex texlive-latex-extra texlive-pictures texlive-fonts-recommended texlive-plain-generic latexmk zip poppler-utils fonts-dejavu-core" >&2
+    echo "  sudo apt-get install -y texlive-xetex texlive-latex-extra texlive-pictures texlive-fonts-recommended texlive-plain-generic latexmk zip unzip poppler-utils fonts-dejavu-core" >&2
     exit 1
   fi
 done
@@ -25,7 +25,7 @@ report="first_science/b1/report"
 pdf="$report/B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf"
 archive="$report/B1_OVERLEAF_PROJECT_V0_1.zip"
 
-if [[ -n "$(git status --porcelain -- "$report/overleaf")" ]]; then
+if [[ -n "$(git status --porcelain --untracked-files=no -- "$report/overleaf/main.tex" "$report/overleaf/README.md" "$report/overleaf/figures")" ]]; then
   echo "ERROR: uncommitted changes exist in the Overleaf source. Commit or stash them before rebuilding." >&2
   exit 1
 fi
@@ -43,6 +43,7 @@ fi
 
 unzip -tqq "$archive"
 test -s "$pdf"
+unzip -p "$archive" B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf | cmp - "$pdf"
 echo "Compiled: $pdf"
 echo "Packaged: $archive"
 
