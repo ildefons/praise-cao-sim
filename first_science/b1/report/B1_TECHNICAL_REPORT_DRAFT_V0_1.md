@@ -123,11 +123,9 @@ The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidd
 
 **How do we evaluate it?** In the simulator, the true provider models can be used to generate an independent finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}(A,H;\rho)$. We compare each method's prediction with this reference across the tested SLA queries, horizons, provider worlds and graph topologies. The hidden provider models used for final reference generation are not supplied to the methods being evaluated. Because the reference is computed from a finite number of stochastic runs, it is itself an estimate of $\sigma_G$, not an exact value. Numerical simulation error and reconstruction error must therefore be distinguished (Chapter 10 and Appendix A).
 
-# 3. Public provider evidence shared by integration methods
+# 3. Provider disclosures
 
 ## 3.1 Public interface I1
-
-This section defines **the public information available to the integrator**, rather than a method for predicting the composed SLA. M0 (Section 4.1) combines the advertised provider boundaries and probabilities directly. M1–M3 (Sections 4.2–4.4) use the same I1 probability surfaces to select, fit or weight candidate stochastic provider models before propagating their predictions through the known graph. The enriched I2 disclosures used in later experiments are introduced in Section 3.3.
 
 Under the original public interface I1, each provider advertises a nested family of rectangular admissibility regions:
 
