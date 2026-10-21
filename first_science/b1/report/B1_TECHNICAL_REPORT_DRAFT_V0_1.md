@@ -167,7 +167,7 @@ The post-result I1/I2 experiments were developed in the repository's `first_scie
 
 ## 4.1 M0: analytical public-boundary predictor
 
-For ideal rectangular per-provider service bounds, a serial composition accumulates latency and cost and takes the minimum quality, while an all-required parallel join takes the longest branch latency, adds costs and takes the minimum quality. Ignoring shared fixed terms,
+The advertised region $A_i(\rho_r)$ of each provider, defined in Eq. (5), specifies an upper limit on latency $\ell_i$, an upper limit on cost $c_i$ and a lower limit on quality $q_i$. M0 first combines these limits to obtain corresponding limits for the composed service. For this calculation, consider a request for which all providers satisfy their advertised regions. In a serial composition, the latency and cost limits add. In an all-required parallel join, the latency limit is the largest among the branches, while the cost limits add. In both cases, the quality limit is the lowest provider quality limit. Ignoring shared fixed terms,
 
 $
 \begin{aligned}
@@ -179,7 +179,7 @@ $
 \tag{7}
 $
 
-These rules compose **advertised performance boundaries**, not stochastic SLA probabilities. The original fixed parallel pilot includes measured fixed terms $\ell_G=0.014003+\max_i\ell_i$ and $c_G=0.03+\sum_i c_i$ under its graph/network configuration; these constants do not automatically transfer to other graph structures.
+These rules only combine the limits from the advertised provider regions. They do not establish how often all providers meet those limits together, or the probability that the composed service meets its SLA. The original fixed parallel pilot includes measured fixed terms $\ell_G=0.014003+\max_i\ell_i$ and $c_G=0.03+\sum_i c_i$ under its graph/network configuration; these constants do not automatically transfer to other graph structures.
 
 M0 uses this boundary composition without fitting hidden stochastic provider processes. For a requested graph region $A_G$, it is scored only where the publicly induced rectangle $A_G^{I1}$ is contained in $A_G$. On applicable queries its same-$\rho$ product is
 
