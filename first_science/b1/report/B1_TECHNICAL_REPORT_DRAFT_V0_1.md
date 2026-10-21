@@ -167,7 +167,7 @@ The post-result I1/I2 experiments were developed in the repository's `first_scie
 
 ## 4.1 M0: analytical public-boundary predictor
 
-The advertised region $A_i(\rho_r)$ of each provider, defined in Eq. (5), specifies an upper limit on latency $\ell_i$, an upper limit on cost $c_i$ and a lower limit on quality $q_i$. M0 first combines these limits to obtain corresponding limits for the composed service. For this calculation, consider a request for which all providers satisfy their advertised regions. In a serial composition, the latency and cost limits add. In an all-required parallel join, the latency limit is the largest among the branches, while the cost limits add. In both cases, the quality limit is the lowest provider quality limit. Ignoring shared fixed terms,
+The advertised region $A_i(\rho_r)$ of each provider, defined in Eq. (5), specifies an upper limit on latency $\ell_i$, an upper limit on cost $c_i$ and a lower limit on quality $q_i$. M0 first combines these limits to obtain corresponding limits for the composed service. These limits apply to a composed request when each provider satisfies its advertised region. In a serial composition, the latency and cost limits add. In an all-required parallel join, the latency limit is the largest among the branches, while the cost limits add. In both cases, the quality limit is the lowest provider quality limit. Ignoring shared fixed terms,
 
 $
 \begin{aligned}
