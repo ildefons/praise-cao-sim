@@ -15,7 +15,7 @@
 **Build status: SUCCESS**. The [GitHub Actions XeLaTeX run](https://github.com/ildefons/praise-cao-sim/actions/runs/38920807623) compiled the complete report. Its outputs are now tracked on this branch.
 
 - [Rendered **22-page PDF**](B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf)
-- [Overleaf **import ZIP**](B1_OVERLEAF_PROJECT_V0_1.zip)
+- [Overleaf **import ZIP**](B1_OVERLEAF_PROJECT_V0_1.zip), including `main.tex`, both LaTeX figure sources, and a copy of the compiled report PDF.
 - [Full LaTeX source directory](overleaf/), containing `main.tex` and two PGFPlots figure files.
 - [GitHub-readable Markdown with 26 math fences](B1_TECHNICAL_REPORT_GITHUB_VIEW_V0_1.md)
 
