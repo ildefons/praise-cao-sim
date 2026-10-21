@@ -167,7 +167,9 @@ The post-result I1/I2 experiments were developed in the repository's `first_scie
 
 ## 4.1 M0: analytical public-boundary predictor
 
-M0 starts from the provider regions $A_i(\rho_r)$ advertised through I1 (Eq. (5)). For a fixed $\rho_r$, write their maximum latencies as $\ell_i$, their maximum costs as $c_i$, and their minimum qualities as $q_i$. Equation (7) follows from the execution rules of the two supported composition operators. If required services execute in sequence, their elapsed times and costs add. If they execute in parallel and the composition waits for *all* branches, elapsed time is determined by the slowest branch, while every invoked branch contributes to cost. Under the adopted quality rule, composed quality is the minimum among required services. Before adding processing or communication overhead, the resulting limits are
+M0 starts with a worst-case question: **If every provider meets its advertised limits for a request, what limits can we guarantee for the complete service?** The provider's advertised region $A_i(\rho_r)$ (Eq. (5)) gives a maximum latency $\ell_i$, a maximum cost $c_i$ and a minimum quality $q_i$. We combine these limits, rather than assuming that providers always satisfy them.
+
+The rules follow from how the services execute. In a sequence, one service starts after the preceding one finishes, so the maximum total latency is the sum of the individual maximum latencies. In a parallel composition whose branches start together and must all finish, the maximum latency is that of the slowest branch. Cost is added in both cases because every required service incurs cost. For quality, the model explicitly defines the composed value as the lowest quality among the required services; this is a modeling rule, not a universal law. Before including processing and communication overhead, we obtain
 
 $
 \begin{aligned}
@@ -179,7 +181,7 @@ $
 \tag{7}
 $
 
-If all providers meet their advertised limits for a request, Equation (7) gives the resulting limits for the complete service. If a provider exceeds its limits, the combined limits may no longer hold. These formulas do not tell us how often the complete service will meet its SLA.
+Equation (7) applies only to requests for which all required providers respect their advertised limits. If any provider exceeds its limits, these combined limits may no longer hold. The equations do not tell us how often the providers meet those limits or how likely the composed service is to meet its SLA.
 
 For a graph made of sequences and all-required parallel joins, M0 applies the same rules recursively. For example, in $G=A\to(B\parallel C)$, the provider-only limits are $\ell_G=\ell_A+\max(\ell_B,\ell_C)$, $c_G=c_A+c_B+c_C$ and $q_G=\min(q_A,q_B,q_C)$. The actual execution graph can also contain fixed processing stages, network hops and join-control messages. Their latency and cost contributions must be included at the positions where they occur in the graph, before applying the sums and maxima. Different branch overheads, for example, belong inside the parallel maximum.
 
