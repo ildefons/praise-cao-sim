@@ -187,7 +187,7 @@ M0 starts from the provider regions $A_i(\rho_r)$ advertised through I1 (Eq. (5)
 \tag{7}
 \end{equation*}
 
-The limits in Eq. (7) are \textbf{conditional request-level bounds}, not unconditional worst-case guarantees. They apply when every required provider satisfies its advertised region on the same request, and they need not be tight. In particular, these rules do not say how frequently that joint condition occurs or what probability the composed service has of meeting a graph-level SLA.
+If all providers meet their advertised limits for a request, Equation (7) gives the resulting limits for the complete service. If a provider exceeds its limits, the combined limits may no longer hold. These formulas do not tell us how often the complete service will meet its SLA.
 
 For a graph made of sequences and all-required parallel joins, M0 applies the same rules recursively. For example, in $G=A\to(B\parallel C)$, the provider-only limits are $\ell_G=\ell_A+\max(\ell_B,\ell_C)$, $c_G=c_A+c_B+c_C$ and $q_G=\min(q_A,q_B,q_C)$. The actual execution graph can also contain fixed processing stages, network hops and join-control messages. Their latency and cost contributions must be included at the positions where they occur in the graph, before applying the sums and maxima. Different branch overheads, for example, belong inside the parallel maximum.
 
