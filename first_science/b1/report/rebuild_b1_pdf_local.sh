@@ -54,16 +54,32 @@ PY
   cd "$report/overleaf"
   latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
   test -s main.pdf
-  # Confirm that the final Section 4.1 paragraph survived TeX rendering.
+  # Confirm the complete Section 4.1 conclusion survived TeX rendering.
+  # PDF extraction can insert line breaks or hyphens inside words, so compare
+  # normalized alphanumeric text instead of exact spacing and punctuation.
   python3 - <<'PY'
 import re
 import subprocess
+import unicodedata
+
 pdf_text = subprocess.check_output(["pdftotext", "-layout", "main.pdf", "-"], text=True)
-normalized = re.sub(r"\s+", " ", pdf_text)
-for phrase in ["white-box reference evaluates the requested", "providers can fail on different requests"]:
-    if phrase not in normalized:
+
+def canonical(text):
+    text = unicodedata.normalize("NFKC", text).lower()
+    return re.sub(r"[^a-z0-9]+", "", text)
+
+rendered = canonical(pdf_text)
+checks = [
+    "M0 estimates the SLA probability",
+    "white-box reference evaluates the requested graph-level region",
+    "same probability for every requested region",
+    "providers can fail on different requests",
+]
+for phrase in checks:
+    if canonical(phrase) not in rendered:
         raise SystemExit(
-            f"ERROR: compiled PDF does not contain expected Section 4.1 text: {phrase!r}"
+            f"ERROR: compiled PDF may be missing Section 4.1 text: {phrase!r}. "
+            "Inspect the final page of Section 4.1 and the extracted PDF text."
         )
 print("Section 4.1 PDF text verification passed.")
 PY
