@@ -102,7 +102,7 @@ The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidd
 
 ## 3.1 Public interface I1
 
-Under the original public interface I1, each provider advertises a nested family of rectangular admissibility regions:
+Under the original public interface I1, each provider advertises a finite family of rectangular admissibility regions indexed by a target content level $\rho_r$:
 
 ```math
 A_i(\rho_r)=
@@ -110,7 +110,9 @@ A_i(\rho_r)=
 \tag{5}
 ```
 
-Here **$\rho_r$ is a region-content index**, used to construct a provider's advertised region. It is conceptually distinct from **$\rho_q$**, the required fraction of decided requests inside the region. For each region the public card exposes an empirical probability surface
+Here $L_i$, $C_i$ and $Q_i$ are the provider's latency, cost and quality outcomes. The functions $\ell_i(\rho_r)$ and $c_i(\rho_r)$ specify **numerical latency and cost limits** for each advertised index $\rho_r$. They are finite lookup mappings, not time-varying performance functions. During publication, the provider fits a joint model of its private latency and cost observations (a Gaussian mixture in log latency and log cost). It draws a fixed synthetic sample from that model and, for each $\rho_r$, chooses a minimum-area rectangle containing at least that fraction of sampled outcomes, while retaining the preceding region. Consequently the regions are **nested**: when $\rho_r<\rho_r'$, $A_i(\rho_r)\subseteq A_i(\rho_r')$, so neither the latency nor the cost limit decreases. The pilot keeps the quality limit $q_i=0.5$ fixed.
+
+The index $\rho_r$ thus specifies the **target content of the fitted latency-cost model**, not a guaranteed fraction of compliant requests during an execution horizon. The latter is the separate SLA-compliance threshold $\rho_q$. Once the regions are fixed, each provider advertises an empirical probability surface
 
 ```math
 \widehat\sigma_i^{I1}(A_i(\rho_r),H;\rho_q)
@@ -122,7 +124,7 @@ The historical pilot used $\rho_r,\rho_q\in\{0.95,0.975,0.98333,0.99,0.995\}$ an
 
 The source-side procedure uses provider-private simulation evidence to *publish* a finite I1 card. The integrator, by design, sees only the card. This publisher-versus-consumer division is essential: giving a method the hidden sample identities, generating parameters or white-box graph predictions would change $I$ and invalidate the intended inverse reconstruction comparison.
 
-The historical I1 specification enforces nested regions for each provider in its frozen acquisition design; complete raw-event/acquisition replay and all probabilistic-coverage properties were not independently reverified for this report version.
+These construction details describe the frozen I1 acquisition design. The full raw-event acquisition and the relationship between target content under the fitted model and coverage in the underlying provider world were not independently reverified for this report version.
 
 ## 3.2 I1 is not the same as the SLA query region
 
