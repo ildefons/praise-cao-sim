@@ -161,7 +161,7 @@ The post-result I1/I2 experiments were developed in the repository's `first_scie
 
 **I2b: paired compliance at two horizons.** I2b includes the I2a distributions and adds pairs of compliance fractions measured in the *same* trajectory at two selected horizons. A pair such as (0.98, 0.91) means that cumulative compliance in one run declined from 98% to 91% between those horizons; the fractions still refer to all requests decided since the start, not just requests processed within the interval. For each selected interval, the published representation contains 100 such pairs. The frozen design samples intervals starting at 5 seconds and then every 10 seconds, with separations of 20, 30, 40, 50, 75, 100, 150 or 200 seconds where both endpoints fit within the 240-second horizon. The pairs reveal whether good or poor compliance tends to persist or change over time. They contain no trajectory identifiers, and the published records cannot be linked across different intervals by a shared identifier; they are not complete request histories or labelled trajectories.
 
-The tested I2b variants retain the paired data but differ in how reconstructed provider models are fitted to them. The base loss weights the eight selected time separations equally and gives their respective windows equal weight within each separation. Later variants emphasize windows with more temporal variation or balance weights across regions and separations. One variant also introduces a public aggregate of within-interval compliance variation to set these weights. Consequently, comparisons against I1strong-M2 evaluate a combination of interface and fitting procedure, not just the effect of additional disclosure.
+**Additional disclosure in I2b-v4.** The later I2b-v4 extension publishes one more value for each selected interval: the average, across the 100 runs, of the difference between the highest and lowest cumulative compliance fractions recorded during that interval on the 5-second evaluation grid. This describes variation *inside* an interval that its two endpoint values alone cannot reveal. Individual runs' ranges and complete histories remain private. Section 4.3 explains how M2 uses I1, I2a, I2b and this additional summary to reconstruct provider models. The results appear in Section 9.3.
 
 # 4. Integration algorithms and historical method versions
 
@@ -220,6 +220,19 @@ $$
 The historical **Phase-4 M2** selected deliberately diverse I1-compatible representatives and **excluded the M1 anchor** from its portfolio by contract. The executed **Phase-5 V3b M2** chose ranks 1–3 by common-bank I1 RMSE among seven candidates per provider, so the M1 rank-1 provider model **is included** in each V3b M2 local portfolio. There was no hard I1-compatible threshold in the V3b ranking. M2's reported 27 models are thus not a fixed scientific intervention across phases.
 
 The main Phase-5 graph budget for M2 was 100 trajectories per joint model, **2,700 trajectories per physical cell**. Shared seed indices were used across M2 member graph simulations, so a paired seed-index bootstrap is the appropriate numerical dependence-aware design.
+
+**Phase-6 M2 reconstruction variants.** The six evaluated variants retain the 27 equally weighted joint models of Eq. (10), the same provider-model family and parameter domains, and matched reconstruction and graph-simulation budgets. Each provider search evaluates 256 candidate parameter settings (64 initial space-filling proposals, then 192 adaptive proposals). Each candidate is initially scored using 25 provider simulation runs; the best 24 are rescored with a separate common bank of 100 runs, and the best three per provider are retained. Each of the resulting 27 joint models is simulated 100 times in the graph, for 2,700 graph runs per variant. Search settings and random-number banks are matched, although adaptive proposals can differ when the fitting scores differ. The variants differ in **which disclosed evidence they use and how they select candidate provider models**:
+
+| M2 variant | Public evidence and model-fitting criterion |
+|:--|:--|
+| I1STRONG_M2 | Uses the I1 probability surfaces. It selects candidate models that best reproduce the published probabilities of meeting each specified compliance threshold, across regions and horizons. |
+| I2AFS_M2 | Uses the I2a distributions of per-run compliance. It selects candidates by comparing their predicted and disclosed distributions across all possible compliance thresholds, rather than only I1's five thresholds. |
+| I2B_M2 | Uses the I2b pairs of compliance fractions at two horizons in the same run. It scores how closely the simulated *distribution of pairs* matches the published one, giving equal overall weight to each of the eight time separations and equal weight to windows within each separation. |
+| I2BVAR_M2 | Uses the same I2b pairs and pair-matching score, but weights each window by the average squared change in compliance between its endpoints. The weights are normalized over all windows, so regions and time separations can receive different overall importance. |
+| I2BHIER_M2 | Uses the same I2b pairs and pair-matching score. It preserves equal total weight for each of the five regions and eight time separations, while giving more weight to starting horizons with larger endpoint changes within each region and separation. |
+| I2BV4_M2 | Uses the I2b endpoint pairs plus the new public mean within-interval range from Section 3.2. The range determines the weights of endpoint-pair matching within each region and separation; candidate models are not directly scored against the additional range statistic. |
+
+Thus **I2a and I2b specify what providers disclose**, while these six M2 variants specify how a method fits provider models using that information. I2BVAR_M2 and I2BHIER_M2 change only the fitting weights applied to the same I2b pair data. I2BV4_M2 also uses an additional disclosed statistic. Comparisons across interfaces therefore test implemented disclosure-and-fitting combinations, not the isolated benefit of more information. All these Phase-6 tests are post-result development evidence; Section 9.3 reports their outcomes.
 
 ## 4.4 M3: public-evidence-weighted finite reconstruction
 
@@ -507,16 +520,16 @@ The complete audit ledger is `first_science/b1/retrospective_m3/PHASE_III_DIVERG
 
 ## 9.3 Post-result I1/I2 pipeline development (historical Phase-6)
 
-After the Phase II expanded battery (historical Phase-5), the I1 strong-control and I2 experiments focused on **P4/G_SEQPAR**, using 15 queries × 37 horizons = 555 related SLA measurements per method. They matched reconstruction search architecture (Sobol initialization followed by TPE refinement, frozen rescore banks) and 27-member equal-weight M2 graph propagation at **B=2700 per variant**, while altering the public interface and the corresponding reconstruction loss.
+After the Phase II expanded battery (historical Phase-5), the six M2 variants defined in Section 4.3 were evaluated on **P4/G_SEQPAR**, using 15 queries × 37 horizons = 555 related SLA measurements per variant. Their reconstruction-search architecture and graph-propagation budgets were matched at **B=2,700 graph runs per variant**. Their disclosed evidence and/or provider-fitting criteria differed, as specified in Section 4.3.
 
-| P4/G_SEQPAR method | MAE | RMSE | Evidence status |
-|:--|--:|--:|:--|
-| **I1STRONG_M2** | **0.09178** | **0.11390** | Stronger I1 fitting |
-| I2AFS_M2 | 0.09475 | 0.11826 | I2a/full marginal loss |
-| I2B_M2 | 0.10210 | 0.13617 | I2b paired loss |
-| I2BHIER_M2 | 0.09429 | 0.11695 | I2b hierarchical loss |
-| I2BV4_M2 | 0.10854 | 0.15354 | I2b later weighting variant |
-| I2BVAR_M2 | 0.15731 | 0.22086 | I2b variation-weighted loss |
+| P4/G_SEQPAR M2 variant | MAE | RMSE |
+|:--|--:|--:|
+| **I1STRONG_M2** | **0.09178** | **0.11390** |
+| I2AFS_M2 | 0.09475 | 0.11826 |
+| I2B_M2 | 0.10210 | 0.13617 |
+| I2BHIER_M2 | 0.09429 | 0.11695 |
+| I2BV4_M2 | 0.10854 | 0.15354 |
+| I2BVAR_M2 | 0.15731 | 0.22086 |
 
 ![Phase-6 P4/G_SEQPAR matched-budget development comparison. All six rows use 555 related SLA measurements (15 conditions at 37 horizons) and 27-member M2 graph propagation at B=2,700; disclosed information and fitting losses vary together.](figures/phase6_matched_mae_v0_1.svg){width=95%}
 
