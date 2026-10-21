@@ -59,7 +59,7 @@ PY
 import re
 import subprocess
 pdf_text = subprocess.check_output(["pdftotext", "-layout", "main.pdf", "-"], text=True)
-normalized = re.sub(r"\\s+", " ", pdf_text)
+normalized = re.sub(r"\s+", " ", pdf_text)
 for phrase in ["80% of individual requests", "may be higher or lower"]:
     if phrase not in normalized:
         raise SystemExit(
