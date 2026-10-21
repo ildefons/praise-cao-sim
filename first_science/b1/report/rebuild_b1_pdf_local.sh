@@ -60,7 +60,7 @@ import re
 import subprocess
 pdf_text = subprocess.check_output(["pdftotext", "-layout", "main.pdf", "-"], text=True)
 normalized = re.sub(r"\s+", " ", pdf_text)
-for phrase in ["80% of individual requests", "may be higher or lower"]:
+for phrase in ["white-box reference evaluates the requested", "providers can fail on different requests"]:
     if phrase not in normalized:
         raise SystemExit(
             f"ERROR: compiled PDF does not contain expected Section 4.1 text: {phrase!r}"
