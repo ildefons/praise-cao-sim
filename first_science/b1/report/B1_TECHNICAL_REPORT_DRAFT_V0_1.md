@@ -151,8 +151,6 @@ The public I1 card includes pointwise 95\% Wilson binomial confidence intervals 
 
 The provider-side procedure uses private simulation evidence to construct the finite I1 card. The integrator, by design, sees only that card. This provider-versus-integrator information boundary is essential: giving a method the hidden sample identities, generating parameters or white-box graph predictions would change $I$ and invalidate the intended inverse reconstruction comparison.
 
-These construction details describe the frozen I1 acquisition design. The full raw-event acquisition and the relationship between target content under the fitted model and coverage in the underlying provider world were not independently reverified for this report version.
-
 ## 3.2 I1 is not the same as the SLA query region
 
 Each provider's advertised SLA rectangles must be distinguished from the **requested graph-level** region $A_G$. The historical pilot first combined the providers' advertised rectangles to obtain an induced graph region $A_G^{\rm base}(\rho_r)$, then multiplied only the induced latency and cost limits by calibrated factors $\gamma$ to define Easy, Mid and Stress evaluation regions. In the Phase-5 battery, query construction and eligibility used a separate preregistered Step-0 calibration/confirmation process.
@@ -636,6 +634,8 @@ These lessons compare global Phase I (controlled pilot), Phase II (expanded batt
 **Finite physical setting.** The core study uses three providers and four logical ASTs on a fixed physical embedding. It does not generalize by itself to arbitrary service graphs, cross-region placement, multi-tenant failures, dynamic routing or real production deployments. The provider generators and fitted process family are related; robustness to substantial model misspecification is not established.
 
 **Limited observables.** I1 is deliberately compressed and empirical. Region construction was calibrated in frozen simulated worlds; its disclosure noise and dependence on the acquisition policy can affect inverse fits. Quality and power are part of the broader conceptual LCQ/continuum setting but not demonstrated as independent varying stress dimensions here.
+
+**I1 acquisition verification.** The I1 acquisition procedure was checked against its frozen implementation and provenance records, but the complete acquisition was not independently reproduced from raw simulation events. Moreover, the actual coverage of the constructed regions in the generating provider worlds was not separately validated against the target probability content of the fitted latency-cost models.
 
 **Condition selection and missing P2.** The Phase-5 registered Step-0 eligibility gate failed for P2 and removed four of 16 intended physical cells. Main 12-cell estimates are **conditional on eligibility**, not estimates of all planned or unseen worlds. The P2-derived retrospective tests use new query regions and are not missing-data imputation.
 
