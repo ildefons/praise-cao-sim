@@ -130,7 +130,7 @@ Note that I1 discloses provider-level regions $A_i$, not the graph-level SLA que
 
 ## 3.2 Enriched I2 interfaces
 
-The post-result I1/I2 experiments (historical Phase-6, within global Phase III) explore additional anonymous provider-compliance summaries. **I2a** exposes a fuller marginal distribution of the trajectory compliance statistic, compared with the I1 thresholded surfaces. **I2b** provides anonymous paired within-window temporal-compliance information; later I2b variants test different weighting and hierarchical reconstruction losses.
+The post-result I1/I2 experiments, developed in the repository's `first_science/phase6/` folder (historical Phase-6) and classified within global Phase III in this report, explore additional anonymous provider-compliance summaries. **I2a** exposes a fuller marginal distribution of the trajectory compliance statistic, compared with the I1 thresholded surfaces. **I2b** provides anonymous paired within-window temporal-compliance information; later I2b variants test different weighting and hierarchical reconstruction losses.
 
 These augmentations enlarge or reorganize disclosed information. However, they also change the objective used to fit provider surrogates. A comparison between I1strong-M2 and an I2b-M2 variant therefore tests an **interface plus reconstruction-loss combination** under a matched search/propagation architecture. It does not, by itself, identify the effect of information quantity while holding the inference method fixed.
 
