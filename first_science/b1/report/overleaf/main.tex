@@ -175,7 +175,7 @@ The post-result I1/I2 experiments were developed in the repository's \texttt{fir
 
 \subsection*{4.1 M0: analytical public-boundary predictor}
 
-The advertised region $A_i(\rho_r)$ of each provider, defined in Eq. (5), specifies an upper limit on latency $\ell_i$, an upper limit on cost $c_i$ and a lower limit on quality $q_i$. M0 first combines these limits to obtain corresponding limits for the composed service. These limits apply to a composed request when each provider satisfies its advertised region. In a serial composition, the latency and cost limits add. In an all-required parallel join, the latency limit is the largest among the branches, while the cost limits add. In both cases, the quality limit is the lowest provider quality limit. Ignoring shared fixed terms,
+M0 starts from the provider regions $A_i(\rho_r)$ advertised through I1 (Eq. (5)). For a fixed $\rho_r$, write their maximum latencies as $\ell_i$, their maximum costs as $c_i$, and their minimum qualities as $q_i$. Equation (7) follows from the execution rules of the two supported composition operators. If required services execute in sequence, their elapsed times and costs add. If they execute in parallel and the composition waits for \emph{all} branches, elapsed time is determined by the slowest branch, while every invoked branch contributes to cost. Under the adopted quality rule, composed quality is the minimum among required services. Before adding processing or communication overhead, the resulting limits are
 
 \begin{equation*}
 \begin{aligned}
@@ -187,7 +187,11 @@ The advertised region $A_i(\rho_r)$ of each provider, defined in Eq. (5), specif
 \tag{7}
 \end{equation*}
 
-These rules only combine the limits from the advertised provider regions. They do not establish how often all providers meet those limits together, or the probability that the composed service meets its SLA. The original fixed parallel pilot includes measured fixed terms $\ell_G=0.014003+\max_i\ell_i$ and $c_G=0.03+\sum_i c_i$ under its graph/network configuration; these constants do not automatically transfer to other graph structures.
+The limits in Eq. (7) are \textbf{conditional request-level bounds}, not unconditional worst-case guarantees. They apply when every required provider satisfies its advertised region on the same request, and they need not be tight. In particular, these rules do not say how frequently that joint condition occurs or what probability the composed service has of meeting a graph-level SLA.
+
+For a graph made of sequences and all-required parallel joins, M0 applies the same rules recursively. For example, in $G=A\to(B\parallel C)$, the provider-only limits are $\ell_G=\ell_A+\max(\ell_B,\ell_C)$, $c_G=c_A+c_B+c_C$ and $q_G=\min(q_A,q_B,q_C)$. The actual execution graph can also contain fixed processing stages, network hops and join-control messages. Their latency and cost contributions must be included at the positions where they occur in the graph, before applying the sums and maxima. Different branch overheads, for example, belong inside the parallel maximum.
+
+The original Phase-I pilot provides one concrete instance. Its execution path is Source $\to$ Fpre $\to$ $(A\parallel B\parallel C)$ $\to$ Fpost. The frozen configuration contributes three network-data hops of $0.001001$ s each (into Fpre, out to a provider branch, and onward to Fpost), a zero-byte provider-to-controller completion message taking $0.001$ s, and two fixed processing stages of $0.005$ s each. The fixed latency is therefore $3(0.001001)+0.001+2(0.005)=0.014003$ s. Fpre and Fpost each add $0.015$ cost units, while those network hops carry no cost, giving $0.015+0.015=0.03$. For this pilot, the composed limits are $\ell_G^{M0}=0.014003+\max_i\ell_i$, $c_G^{M0}=0.03+\sum_i c_i$ and $q_G^{M0}=\min_i q_i$. These terms are calculated from the frozen simulator configuration, \textbf{not measured from white-box SLA outcomes}. Another graph requires its own accounting of processing, communication and synchronization; the pilot constants cannot simply be reused.
 
 M0 uses this boundary composition without fitting hidden stochastic provider processes. For a requested graph region $A_G$, it is scored only where the publicly induced rectangle $A_G^{I1}$ is contained in $A_G$. On applicable queries its same-$\rho$ product is
 
