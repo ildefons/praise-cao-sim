@@ -171,7 +171,7 @@ M0 uses this boundary composition without fitting hidden stochastic provider pro
 \tag{8}
 ```
 
-This is an **explicit heuristic baseline**, not a general stochastic lower or upper bound for the graph SLA. Each provider's local compliance fraction can exceed $\rho$ while the sets of locally failing requests differ, preventing a corresponding end-to-end compliance implication. Queue interactions and branch synchronization create additional coupling. M0 applicability is also nonuniform, so its aggregate MAE cannot be ranked against all-query M1/M2/M3 without reporting the denominator.
+M0 uses Eq. (8) to estimate the probability that the complete service meets its SLA. **This estimate is not a guarantee:** if M0 predicts 80%, the real probability could be higher or lower. The reason is that providers may fail on different requests. For example, in one run of 100 requests, providers A and B could each meet their own limits on 95 requests, but on different sets of requests; then only 90 requests meet both providers' limits. Thus meeting the same compliance threshold at each provider does not ensure that the composed service meets it. Queues and branch synchronization can further affect end-to-end performance. M0 also produces predictions only when the composed provider limits fit within the requested graph region, so its mean absolute error (MAE) should be compared with M1/M2/M3 on the same set of queries.
 
 ## 4.2 M1: one reconstructed provider process per provider
 
