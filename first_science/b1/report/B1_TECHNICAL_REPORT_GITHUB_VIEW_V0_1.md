@@ -162,9 +162,9 @@ For a graph made of sequences and all-required parallel joins, M0 applies the sa
 
 The original Phase-I pilot provides one concrete instance. Its execution path is Source $\to$ Fpre $\to$ $(A\parallel B\parallel C)$ $\to$ Fpost. The frozen configuration contributes three network-data hops of $0.001001$ s each (into Fpre, out to a provider branch, and onward to Fpost), a zero-byte provider-to-controller completion message taking $0.001$ s, and two fixed processing stages of $0.005$ s each. The fixed latency is therefore $3(0.001001)+0.001+2(0.005)=0.014003$ s. Fpre and Fpost each add $0.015$ cost units, while those network hops carry no cost, giving $0.015+0.015=0.03$. For this pilot, the composed limits are $\ell_G^{M0}=0.014003+\max_i\ell_i$, $c_G^{M0}=0.03+\sum_i c_i$ and $q_G^{M0}=\min_i q_i$. These terms are calculated from the frozen simulator configuration, **not measured from white-box SLA outcomes**. Another graph requires its own accounting of processing, communication and synchronization; the pilot constants cannot simply be reused.
 
-Two different graph-level regions enter this comparison. The region $A_G^{I1}$ is obtained by combining the advertised provider limits with the graph's fixed overheads, as described above. The region $A_G$ is the SLA requested for the complete service. They need not be equal. For example, $A_G^{I1}$ may allow at most $80$ ms latency and $8$ cost units, while the requested $A_G$ allows $100$ ms and $10$ units, with the same minimum quality. The white-box reference tests complete-service requests against the requested $A_G$. M0 instead uses the I1 probabilities for the provider regions that generated $A_G^{I1}$.
+Two different graph-level regions enter this comparison. We denote by $A_G^{I1+M0}$ the region obtained by applying the M0 composition rules to the limits advertised through I1, including the graph's fixed overheads. The region $A_G$ is the SLA requested for the complete service. They need not be equal. For example, $A_G^{I1+M0}$ may allow at most $80$ ms latency and $8$ cost units, while the requested $A_G$ allows $100$ ms and $10$ units, with the same minimum quality. The white-box reference tests complete-service requests against the requested $A_G$. M0 instead uses the I1 probabilities for the provider regions that generated $A_G^{I1+M0}$.
 
-M0 can make a prediction only if the calculated latency and cost limits do not exceed those requested, and the calculated minimum quality meets the requested minimum. Equivalently, $A_G^{I1}\subseteq A_G$. For example, if the SLA permits at most $100$ ms but M0 calculates a limit of $120$ ms, M0 reports **not applicable** for that query. This does not mean the actual service will fail; the advertised limits are simply insufficient for this M0 prediction. When the limits pass the check and the required I1 card values are available, M0 multiplies the provider probabilities at the same $\rho$:
+M0 can make a prediction only if the calculated latency and cost limits do not exceed those requested, and the calculated minimum quality meets the requested minimum. Equivalently, $A_G^{I1+M0}\subseteq A_G$. For example, if the SLA permits at most $100$ ms but M0 calculates a limit of $120$ ms, M0 reports **not applicable** for that query. This does not mean the actual service will fail; the advertised limits are simply insufficient for this M0 prediction. When the limits pass the check and the required I1 card values are available, M0 multiplies the provider probabilities at the same $\rho$:
 
 ```math
 \widehat\sigma_G^{M0}(A_G,H;\rho)
@@ -173,7 +173,7 @@ M0 can make a prediction only if the calculated latency and cost limits do not e
 \tag{8}
 ```
 
-M0 estimates the SLA probability from the advertised provider regions, whereas the white-box reference evaluates the requested graph-level region $A_G$ directly. For fixed provider cards, $H$ and $\rho$, M0 therefore gives the same probability for every requested region containing $A_G^{I1}$, even though the white-box probability can change with $A_G$. The two probabilities may differ even when $A_G=A_G^{I1}$, because providers can fail on different requests.
+M0 estimates the SLA probability from the advertised provider regions, whereas the white-box reference evaluates the requested graph-level region $A_G$ directly. For fixed provider cards, $H$ and $\rho$, M0 therefore gives the same probability for every requested region containing $A_G^{I1+M0}$, even though the white-box probability can change with $A_G$. The two probabilities may differ even when $A_G=A_G^{I1+M0}$, because providers can fail on different requests.
 
 ## 4.2 M1: one reconstructed provider process per provider
 
@@ -357,7 +357,7 @@ Q_G\ge q_G^{\rm base}(\rho)\}.
 \tag{16}
 ```
 
-Here $A_G^{\rm base}(\rho)$ is the region $A_G^{I1}$ calculated by M0 from the advertised provider limits. The scaling factor $\gamma$ changes the requested region scored by the white-box reference, but does not change the I1 provider probabilities used in M0's product. In particular, if $\gamma>1$, the requested latency and cost limits are looser than M0's calculated limits. Thus the white-box reference is evaluated at the larger requested region, whereas M0 still uses the same provider-card product. If $\gamma<1$, M0's calculated limits do not fit the tighter query and M0 is not applicable.
+Here $A_G^{\rm base}(\rho)$ is the region $A_G^{I1+M0}$ calculated by M0 from the advertised provider limits. The scaling factor $\gamma$ changes the requested region scored by the white-box reference, but does not change the I1 provider probabilities used in M0's product. In particular, if $\gamma>1$, the requested latency and cost limits are looser than M0's calculated limits. Thus the white-box reference is evaluated at the larger requested region, whereas M0 still uses the same provider-card product. If $\gamma<1$, M0's calculated limits do not fit the tighter query and M0 is not applicable.
 
 Five thresholds times three difficulty regimes generated 15 queries. Evaluation used 37 horizons from 60 to 240 seconds. The pilot's fresh reference bank contained $N_{\rm WB}=200$ trajectories.
 
@@ -532,7 +532,7 @@ The October P2/G_PAR study chose the graph admissibility region deterministicall
 | M2 V3b | 2,700 | 0.14058 | 0.16371 | +0.13791 |
 | M3 V3b FULL343 | 1,400 | **0.12787** | **0.14853** | +0.04263 |
 
-Here all three methods receive **the same** $A_G^{I1}$ and differ in process reconstruction and subsequent graph prediction. Hence no difference above measures graph-region reconstruction quality. The simulation budgets are **unmatched**; M3's small observed MAE advantage does not establish equal-cost superiority. This study cannot be read as a post-hoc repair of four earlier ineligible P2 cells.
+Here all three methods are evaluated against **the same** $A_G^{I1+M0}$, constructed from the I1 provider limits using M0's boundary rules. They differ in process reconstruction and subsequent graph prediction. Hence no difference above measures graph-region reconstruction quality. The simulation budgets are **unmatched**; M3's small observed MAE advantage does not establish equal-cost superiority. This study cannot be read as a post-hoc repair of four earlier ineligible P2 cells.
 
 ## 9.5 Privileged search-deficit diagnosis
 
