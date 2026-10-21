@@ -42,7 +42,8 @@ jobs:
           pdfinfo main.pdf | grep -E 'Pages:|Page size:'
           mkdir -p ../
           cp main.pdf ../B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
-          zip -9 -r ../B1_OVERLEAF_PROJECT_V0_1.zip main.tex README.md figures
+          cp main.pdf B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
+          zip -9 -r ../B1_OVERLEAF_PROJECT_V0_1.zip main.tex README.md figures B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
           test -s ../B1_OVERLEAF_PROJECT_V0_1.zip
 
       - name: Upload completed PDF and Overleaf ZIP

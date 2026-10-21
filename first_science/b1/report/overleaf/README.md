@@ -11,7 +11,7 @@ This LaTeX is a format conversion of the existing 9,000-word B1 report, preservi
 
 ## Overleaf
 
-Create a new blank project and upload `main.tex` and the `figures/` directory (or upload a ZIP containing this folder). Set **Menu > Compiler > XeLaTeX**, with `main.tex` as the main file. Compile twice for the table of contents.
+Create a new blank project and upload `main.tex` and the `figures/` directory (or upload the self-contained ZIP, which also includes the rendered report PDF). Set **Menu > Compiler > XeLaTeX**, with `main.tex` as the main file. Compile twice for the table of contents.
 
 ## Local build
 
