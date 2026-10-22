@@ -310,7 +310,11 @@ $
 \tag{15}
 $
 
-The bound follows because a Bernoulli outcome has variance at most $1/4$. Its continuous-budget optimum allocates $N_j\propto\alpha_j$. In the executed full-support procedure, $\alpha_j=W_j$ because all 343 joint weights sum to one. The integer algorithm starts with one trajectory per model and repeatedly assigns the next trajectory to the model maximizing $\Delta_j=W_j^2/[N_j(N_j+1)]$, with a fixed tie-break rule. Archived verification reproduced the P1/P3/P4 allocations exactly. This allocation addresses numerical precision for the selected weighted models; it does not alter their parameters or correct reconstruction errors.
+For fixed models, weights and simulation counts, the bound uses the elementary fact that a Bernoulli indicator with success probability $p_j$ has variance $p_j(1-p_j)\le1/4$. Minimizing this **worst-case numerical variance bound** with a continuous trajectory budget gives $N_j=B\alpha_j$, a special case of the weighted allocation principle of Neyman (1934; Appendix D). This is not an allocation optimized for the unknown member-specific variances.
+
+For integer counts $N_j\ge1$, adding one trajectory to member $j$ reduces the bound by $\alpha_j^2/[4N_j(N_j+1)]$. M3 starts with one trajectory per joint model and assigns each remaining trajectory to the largest reduction, with deterministic rank-based ties. This is a marginal-priority integer allocation of the kind studied by Wright (2014; Appendix D). The factor $1/4$ is common to all members and can be omitted when ranking priorities. In the executed FULL343 support, $\alpha_j=W_j$, giving the implemented rule $\Delta_j=W_j^2/[N_j(N_j+1)]$.
+
+The independent read-only checker `first_science/b1/verify_method_support_v0_1.py` reproduced the archived 343-member, $B=1400$ allocation counts for P1, P3 and P4; its findings are recorded in `METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md` (Appendix B.1). This checks agreement between the saved allocations and the specified rule. It does **not** demonstrate improved prediction accuracy, verify every simulation trajectory or address error caused by the reconstructed provider models.
 
 **M3 Top1 is not necessarily M1.** M1 selects by minimum I1 RMSE, while M3's highest-weight joint model is determined by the product of KL-based provider weights. More generally, comparing M3 with M2 also changes candidate coverage, weighting loss and graph-simulation allocation. An observed difference in prediction accuracy therefore does not isolate the effect of KL weighting alone.
 
@@ -711,7 +715,15 @@ If $\beta\le\sigma^-_{G,M}$ then *all enumerated models* accept under their own 
 
 ## A.2 Conditional numerical precision and model spread
 
-The general covariance identity (18) holds for fixed finite weights. M2's paired common-seed bootstrap captures cross-model covariance; M3's independent-member variance bound (14) is conditional on the model bank and frozen weight rule. For a fixed sample allocation and truly independent bounded member outcomes, a weighted Hoeffding inequality gives
+The general covariance identity (19) holds for fixed finite weights. M2's paired common-seed bootstrap captures cross-model covariance; M3's independent-member variance bound (15) is conditional on the model bank, fixed weights and allocation. For member success probabilities $p_j$, independence across members and trajectories gives the exact conditional identity
+
+$
+\mathrm{Var}_{MC}(\widehat\sigma_G^{M3})
+=\sum_{j\in S}\frac{\alpha_j^2p_j(1-p_j)}{N_j}
+\le\frac14\sum_{j\in S}\frac{\alpha_j^2}{N_j}.
+$
+
+For a positive normalized weight vector, Cauchy--Schwarz gives $\sum_j\alpha_j^2/N_j\ge(\sum_j\alpha_j)^2/B=1/B$, with equality at $N_j=B\alpha_j$ in the continuous relaxation. For integer allocations, the bound decrease from one extra run is $\alpha_j^2/[4N_j(N_j+1)]$, a diminishing quantity as $N_j$ grows. Greedily taking the largest available decrease therefore minimizes this separable bound among positive integer allocations at a fixed total $B$ (cf. Neyman, 1934; Wright, 2014, Appendix D). It need not minimize variance based on unknown $p_j(1-p_j)$ or physical-model error. For a fixed sample allocation and truly independent bounded member outcomes, a weighted Hoeffding inequality gives
 
 $$
 \Pr\bigl(|\widehat p-p_\alpha|\ge\varepsilon\bigr)
@@ -729,7 +741,7 @@ $$
 
 This is included as an *analytical consequence of standard bounded-variable concentration*, **not** a newly tested method or a bound on $|p_\alpha-\sigma_G|$. It is not automatically anytime-valid if sample sizes are chosen by repeatedly observing the outcomes.
 
-The historical noise-adjusted model-spread quantities and white-box correction (19)–(21) are expectation-based diagnostics. Positive-part corrections may be convenient but must not be described as exact interval widths for physical model misspecification.
+The historical noise-adjusted model-spread quantities and white-box correction (20)–(22) are expectation-based diagnostics. Positive-part corrections may be convenient but must not be described as exact interval widths for physical model misspecification.
 
 ## A.3 Numerical-width scaling
 
@@ -755,6 +767,8 @@ The following documents in \`first_science/b1/\` are the companion reproducibili
 - \`retrospective_m3/PHASE_III_DIVERGENCE_CONTROL_REGISTER_2026-10-20.md\`, bounded D0–D9 controls and unresolved causal interpretations;
 - \`FINAL_AUDIT_SIGNOFF_2026-10-16.md\`, conditional drafting authorization and unresolved publication gates;
 - \`MANUSCRIPT_CLAIM_AUDIT_V0_1.csv\`, 68 claims and required dispositions.
+
+The Phase-5 M3 allocation check uses `first_science/b1/verify_method_support_v0_1.py` to recompute greedy member counts from archived Gibbs weights and compare them with frozen pre-execution allocation tables for P1, P3 and P4. This is an allocation-consistency check, not independent evidence of predictive validity.
 
 ### Audited integrity milestones
 
@@ -809,7 +823,7 @@ The matrix deliberately does **not** imply identical candidate search, local cos
 
 # Appendix D. Provisional literature references
 
-**Bibliographic status:** The entries below are transcribed or lightly reformatted from the historical October 2 manuscript. They provide a sourced scholarly starting point, **not a newly completed verification of every author, venue, year or DOI**, and do not claim exhaustive coverage of 2026 research.
+**Bibliographic status:** Entries 1–20 are transcribed or lightly reformatted from the historical October 2 manuscript, without a new verification of every bibliographic detail. The allocation-specific references 21–22 were checked against publisher and U.S. Census Bureau records. This list does not claim exhaustive coverage of 2026 research.
 
 1. Bissiri, P. G., Holmes, C. C., and Walker, S. G. “A general framework for updating belief distributions.” *Journal of the Royal Statistical Society B* **78**(5), 1103–1130 (2016). DOI: 10.1111/rssb.12158.
 2. Bergstra, J., Bardenet, R., Bengio, Y., and Kégl, B. “Algorithms for hyper-parameter optimization.” *NeurIPS 24*, 2546–2554 (2011).
@@ -831,3 +845,6 @@ The matrix deliberately does **not** imply identical candidate search, local cos
 18. Zeng, L., Benatallah, B., Ngu, A. H. H., Dumas, M., Kalagnanam, J., and Chang, H. “QoS-aware middleware for web services composition.” *IEEE Transactions on Software Engineering* **30**(5), 311–327 (2004). DOI: 10.1109/TSE.2004.11.
 19. Zheng, H., Yang, J., and Zhao, W. “Probabilistic QoS aggregations for service composition.” *ACM Transactions on the Web* **10**(2), 1–36 (2016). DOI: 10.1145/2876513.
 20. Gibbs, A. L., and Su, F. E. “On choosing and bounding probability metrics.” *International Statistical Review* **70**(3), 419–435 (2002). DOI: 10.1111/j.1751-5823.2002.tb00178.x.
+21. Neyman, J. “On the two different aspects of the representative method: The method of stratified sampling and the method of purposive selection.” *Journal of the Royal Statistical Society* **97**(4), 558–606 (1934). DOI: 10.1111/j.2397-2335.1934.tb04184.x.
+22. Wright, T. “A simple method of exact optimal sample allocation under stratification with any mixed constraint patterns.” U.S. Census Bureau, Research Report Series RRS2014-07 (2014). https://www.census.gov/library/working-papers/2014/adrm/rrs2014-07.html.
+
