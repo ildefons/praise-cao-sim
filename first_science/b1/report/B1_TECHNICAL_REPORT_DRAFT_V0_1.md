@@ -326,21 +326,23 @@ To answer this, fix the requested graph, SLA region, horizon and compliance thre
 
 Suppose we simulate only a selected set $S$ of joint models. The **retained weight mass** $m_S$ is the sum of the weights of those models. The full portfolio prediction $p_{\mathrm{full}}$ and the prediction $p_S$ based only on the retained models are defined by
 
-$$
-m_S=\sum_{j\in S}W_j,\qquad
-p_{\mathrm{full}}=\sum_{j\in\mathcal J}W_jp_j,\qquad
-p_S=\frac{1}{m_S}\sum_{j\in S}W_jp_j,
-$$
+$
+\begin{aligned}
+m_S&=\sum_{j\in S}W_j,\\
+p_{\mathrm{full}}&=\sum_{j\in\mathcal J}W_jp_j,\qquad
+p_S=\frac{1}{m_S}\sum_{j\in S}W_jp_j.
+\end{aligned}
+$
 
 where $\mathcal J$ is the complete finite portfolio and $m_S>0$. Dividing by $m_S$ redistributes the retained weights so that they sum to one, as in Eq. (14). For example, if the retained models carry 95% of the portfolio weight, the remaining models carry only 5%. Even if their SLA predictions differ maximally from the retained models, omitting them can change the full weighted prediction by **at most five percentage points**.
 
-More generally, the full prediction is a weighted average of the retained prediction $p_S$ and the omitted models' weighted prediction $p_{\mathrm{omitted}}$:
+If $m_S<1$, the full prediction is a weighted average of the retained prediction $p_S$ and the omitted models' weighted prediction $p_{\mathrm{omitted}}$:
 
 $$
 p_{\mathrm{full}}=m_Sp_S+(1-m_S)p_{\mathrm{omitted}}.
 $$
 
-Because both probabilities lie between zero and one, the difference satisfies
+Both probabilities lie between zero and one. Therefore, the difference satisfies the following bound, which also holds trivially when $m_S=1$ and nothing is omitted:
 
 $$
 \boxed{|p_{\mathrm{full}}-p_S|\le 1-m_S.}
