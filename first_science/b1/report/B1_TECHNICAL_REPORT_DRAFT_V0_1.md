@@ -213,19 +213,22 @@ In the executed Phase-5 V3b protocol, M1 performs seven independent TPE searches
 
 ## 4.3 M2: equal-weight finite model propagation
 
-Given three candidate provider models for each provider, M2 propagates the $3^3=27$ Cartesian joint models. Its point estimate is
+Like M1, M2 reconstructs stochastic provider models from public disclosures and simulates their composition using the known graph to estimate end-to-end SLA satisfaction. The difference is that M2 retains three reconstructed models per provider instead of one. It then simulates all $3^3=27$ combinations of the three providers' models and averages the resulting graph-level predictions with equal weights:
 
 $$
-\widehat\sigma_G^{M2}
-=\frac{1}{27}\sum_{j=1}^{27}\widehat\sigma_G(A,H;\rho\mid\vartheta_j).
+\widehat\sigma_G^{M2}(A_G,H;\rho)
+=\frac{1}{27}\sum_{j=1}^{27}
+\widehat\sigma_G(A_G,H;\rho\mid\vartheta_j).
 \tag{10}
 $$
 
-The historical **Phase-4 M2** selected deliberately diverse I1-compatible representatives and **excluded the M1 anchor** from its portfolio by contract. The executed **Phase-5 V3b M2** chose ranks 1–3 by common-bank I1 RMSE among seven candidates per provider, so the M1 rank-1 provider model **is included** in each V3b M2 local portfolio. There was no hard I1-compatible threshold in the V3b ranking. M2's reported 27 models are thus not a fixed scientific intervention across phases.
+Here $\vartheta_j$ denotes one joint model containing a reconstructed model for each provider, and the conditional prediction is obtained by simulating that model on graph $G$ for the requested region $A_G$, horizon $H$ and compliance threshold $\rho$. Equal weighting is a design choice, not an estimate of the probability that any reconstructed model is the true provider implementation.
 
-The main Phase-5 graph budget for M2 was 100 trajectories per joint model, **2,700 trajectories per physical cell**. Shared seed indices were used across M2 member graph simulations, so a paired seed-index bootstrap is the appropriate numerical dependence-aware design.
+In the executed Phase-5 V3b procedure, M2 uses the same seven I1-fitted candidates per provider described in Section 4.2 and retains the three with the lowest common-bank I1 RMSE. Each provider's M1-selected model is therefore included in M2's support, and the M1 joint model is one of the 27 combinations. This selection has no explicit diversity requirement or hard I1-compatibility threshold. The historical Phase-4 M2 instead selected diverse candidates and excluded the M1 anchor, as recorded in the method-version matrix.
 
-**Phase-6 M2 reconstruction variants.** The six evaluated variants retain the 27 equally weighted joint models of Eq. (10), the same provider-model family and parameter domains, and matched reconstruction and graph-simulation budgets. Each provider search evaluates 256 candidate parameter settings (64 initial space-filling proposals, then 192 adaptive proposals). Each candidate is initially scored using 25 provider simulation runs; the best 24 are rescored with a separate common bank of 100 runs, and the best three per provider are retained. Each of the resulting 27 joint models is simulated 100 times in the graph, for 2,700 graph runs per variant. Search settings and random-number banks are matched, although adaptive proposals can differ when the fitting scores differ. The variants differ in **which disclosed evidence they use and how they select candidate provider models**:
+Each of the 27 joint models is simulated for 100 graph trajectories, giving **2,700 graph trajectories per physical cell**. Shared seed indices across member simulations must be respected in numerical uncertainty estimates (Section 10.1). M2 reduces dependence on one selected reconstruction, but averaging cannot guarantee better graph prediction or remove errors shared by the selected models.
+
+**Phase-6 extensions to M2.** The six evaluated variants retain the 27 equally weighted joint models of Eq. (10), the same provider-model family and parameter domains, and matched reconstruction and graph-simulation budgets. Each provider search evaluates 256 candidate parameter settings (64 initial space-filling proposals, then 192 adaptive proposals). Each candidate is initially scored using 25 provider simulation runs; the best 24 are rescored with a separate common bank of 100 runs, and the best three per provider are retained. Each of the resulting 27 joint models is simulated 100 times in the graph, for 2,700 graph runs per variant. Search settings and random-number banks are matched, although adaptive proposals can differ when the fitting scores differ. The variants differ in **which disclosed evidence they use and how they select candidate provider models**:
 
 | M2 variant | Public evidence and model-fitting criterion |
 |:--|:--|
