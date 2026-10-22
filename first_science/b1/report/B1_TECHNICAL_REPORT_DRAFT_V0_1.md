@@ -322,11 +322,15 @@ A separate read-only verification script `first_science/b1/verify_method_support
 
 # 5. Native simulator, graph structures, and experiment protocol
 
-## 5.1 Modified YAFS/AICon composition engine
+## 5.1 AICon-based simulation framework and composition extensions
 
-The discrete-event environment uses YAFS as extended under AICon [9,11]. Modified YAFS application/core code registers compositions and per-branch dependencies, carries a per-request **composition path**, activates a dependent branch when its required sibling completions for that invocation have been received, and emits a single all-required composition output. Standalone code probes cover elementary joins, scoped dependency isolation and nested compositions.
+The experiments use AICon (Agentic Intelligence for the Computing Continuum) [11], built on a modified fork of YAFS (Yet Another Fog Simulator) [9]. YAFS provides a Python-based discrete-event environment for simulating applications across edge, fog and cloud infrastructure, including network communication, service execution and queueing. AICon adds a management-agent layer through which agents can observe simulated system conditions and intervene in their operation.
 
-The [Phase-5](#appendix-c-experimental-chronology-and-method-versions) scientific test does **not** exercise arbitrary nested service DAGs. It compiles a small family of exactly three-provider sequence/parallel ASTs into dependencies in **one** native composition controller. Source/Fpre/provider/Fpost execution uses fixed physical node embedding and placement across all four logical graphs. Periodic arrivals are sent to stochastic provider services, with native queueing, service cost and network delays.
+Why use AICon rather than extend YAFS directly? The choice connects this performance-prediction testbed to the broader research programme on Composable Autonomic Offerings (CAO) [12]. In future work, management agents could use runtime observations and performance predictions to investigate **local resilience**: detecting degradation and considering changes to service offerings or compositions before operational objectives are lost. This is a direction for subsequent CAO experiments, **not a capability validated by the present results**. In particular, the prediction accuracy demonstrated here is not assumed sufficient for dependable autonomous intervention.
+
+For the present study, the modified AICon/YAFS runtime provides service-composition mechanisms beyond individual service execution. It registers branches and their execution dependencies, tracks the progress of each composition request separately, releases a dependent branch only after the required predecessor results for that request have arrived, and emits a single result when all required branches complete. Standalone engineering probes exercise joins, isolation between concurrent composition requests and nested composition behavior. These mechanisms let us measure end-to-end service outcomes under sequential and parallel dependencies, including the effects of queueing and network delays.
+
+The [Phase-5](#appendix-c-experimental-chronology-and-method-versions) scientific evaluation uses a deliberately narrower setting. It compiles four logical sequence/parallel structures involving exactly three providers into **one** native composition controller; it does not test arbitrary nested service graphs. Source/Fpre/provider/Fpost execution retains the same physical node embedding and placements across the four structures. Periodic arrivals trigger stochastic provider services, with native queueing, service cost and network delays.
 
 The four frozen dependency maps are:
 
