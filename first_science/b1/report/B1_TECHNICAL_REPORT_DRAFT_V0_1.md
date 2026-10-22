@@ -318,18 +318,38 @@ A separate read-only verification script `first_science/b1/verify_method_support
 
 **M3 Top1 is not necessarily M1.** M1 selects by minimum I1 RMSE, while M3's highest-weight joint model is determined by the product of KL-based provider weights. More generally, comparing M3 with M2 also changes candidate coverage, weighting loss and graph-simulation allocation. An observed difference in prediction accuracy therefore does not isolate the effect of KL weighting alone.
 
-## 4.5 Within-ensemble support bounds
+## 4.5 Bounding the effect of omitted model combinations
 
-For any finite normalized Gibbs support, let $S$ retain weight mass $m_S\in(0,1]$, and let $p_{\rm full}$ and $p_S$ be respectively the expected SLA probability under the full finite distribution and the normalized retained submixture. Since each member probability is in $[0,1]$,
+M3 assigns weights to combinations of reconstructed provider models, but simulating every combination may be expensive. In the initial controlled pilot, for example, 48 candidate models per provider produced $48^3=110{,}592$ possible joint models. Only the 14 combinations with the largest Gibbs weights were propagated through the graph (Top14). We therefore need to ask a narrower question than whether M3 predicts the real system accurately: **how much can omitting the other combinations change the prediction of the weighted model portfolio itself?**
+
+To answer this, fix the requested graph, SLA region, horizon and compliance threshold. Let $W_j$ denote the weight assigned to joint model $j$ by Eq. (13), with weights summing to one across the full finite portfolio. Let $p_j\in[0,1]$ be the SLA-satisfaction probability that would be obtained for that model with unlimited graph-simulation runs. These are *model-conditional* probabilities, not observations of the hidden provider system.
+
+Suppose we simulate only a selected set $S$ of joint models. The **retained weight mass** $m_S$ is the sum of the weights of those models. The full portfolio prediction $p_{\mathrm{full}}$ and the prediction $p_S$ based only on the retained models are defined by
 
 $$
-\boxed{|p_{\rm full}-p_S|\le1-m_S.}
+m_S=\sum_{j\in S}W_j,\qquad
+p_{\mathrm{full}}=\sum_{j\in\mathcal J}W_jp_j,\qquad
+p_S=\frac{1}{m_S}\sum_{j\in S}W_jp_j,
+$$
+
+where $\mathcal J$ is the complete finite portfolio and $m_S>0$. Dividing by $m_S$ redistributes the retained weights so that they sum to one, as in Eq. (14). For example, if the retained models carry 95% of the portfolio weight, the remaining models carry only 5%. Even if their SLA predictions differ maximally from the retained models, omitting them can change the full weighted prediction by **at most five percentage points**.
+
+More generally, the full prediction is a weighted average of the retained prediction $p_S$ and the omitted models' weighted prediction $p_{\mathrm{omitted}}$:
+
+$$
+p_{\mathrm{full}}=m_Sp_S+(1-m_S)p_{\mathrm{omitted}}.
+$$
+
+Because both probabilities lie between zero and one, the difference satisfies
+
+$$
+\boxed{|p_{\mathrm{full}}-p_S|\le 1-m_S.}
 \tag{16}
 $$
 
-The proof writes $p_{\rm full}=m_Sp_S+(1-m_S)p_{\rm omitted}$ and uses both probabilities in $[0,1]$. This is an **exact within-bank truncation bound**. For the pilot Top14, $1-m_S$ was approximately $0.000826$; for [Phase-5](#appendix-c-experimental-chronology-and-method-versions) FULL343 it is zero **relative to the chosen 343-member bank**. Neither statement bounds error with respect to hidden graph truth.
+**What this means for the experiments.** In the original pilot, Top14 retained approximately 99.9174% of the inferred portfolio weight. The remaining 0.0826% therefore contributes at most $0.000826$, or **0.0826 percentage points**, to the difference between the *exact* full-portfolio and retained-portfolio predictions. In the later expanded evaluation, M3 FULL343 propagated all 343 combinations of its own seven-candidate-per-provider bank. No model was omitted from that bank, so its within-bank truncation bound is zero.
 
-The historical method versions are summarized in Appendix C, Table C.2. This distinction matters because the label M2 does not denote identical candidate selection across experiments.
+**What this does not mean.** Equation (16) is a deterministic statement about omitting models from a **specified finite weighted portfolio**. It does not establish that the portfolio contains the true provider models or that its prediction is close to the real composed service's SLA probability. Finite graph simulations introduce additional numerical error, treated separately in Section 4.4 and Appendix A.2. Moreover, M2 selects its own 27 models using a different rule; it is not the Top27 truncation of M3, so this retained-mass bound cannot be used to explain differences between M2 and M3. The archived weight-mass calculations and method versions are documented in Appendices B and C.
 
 # 5. Native simulator, graph structures, and experiment protocol
 
