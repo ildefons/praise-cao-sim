@@ -330,7 +330,7 @@ Why use AICon rather than extend YAFS directly? The choice connects this perform
 
 For the present study, the modified AICon/YAFS runtime provides service-composition mechanisms beyond individual service execution. It registers branches and their execution dependencies, tracks the progress of each composition request separately, releases a dependent branch only after the required predecessor results for that request have arrived, and emits a single result when all required branches complete. Standalone engineering probes exercise joins, isolation between concurrent composition requests and nested composition behavior. These mechanisms let us measure end-to-end service outcomes under sequential and parallel dependencies, including the effects of queueing and network delays.
 
-The [Phase-5](#appendix-c-experimental-chronology-and-method-versions) scientific evaluation uses a deliberately narrower setting. It compiles four logical sequence/parallel structures involving exactly three providers into **one** native composition controller; it does not test arbitrary nested service graphs. Source/Fpre/provider/Fpost execution retains the same physical node embedding and placements across the four structures. Periodic arrivals trigger stochastic provider services, with native queueing, service cost and network delays.
+The expanded [Phase-5](#appendix-c-experimental-chronology-and-method-versions) evaluation (Phase II) tests the prediction methods beyond the initial single-world, single-graph pilot, across several service-composition graphs $G$ and provider worlds. Here $G$ denotes the **logical dependencies among provider services**, not the topology of the underlying edge/fog infrastructure. The battery considers four fixed three-provider graphs: fully parallel, fully sequential, and two mixed sequence/parallel structures. Each graph is compiled into **one** native composition controller on the same physical Source/Fpre/provider/Fpost infrastructure with fixed placements. Periodic arrivals trigger stochastic provider services, with native queueing, service cost and network delays. The experiment covers these four structures, rather than arbitrary nested service graphs; Section 5.2 describes the provider-world and SLA-query variations.
 
 The four frozen dependency maps are:
 
@@ -341,7 +341,7 @@ The four frozen dependency maps are:
 | G_SEQPAR | none | A | A | $A\to(B\parallel C)$ |
 | G_PARSEQ | none | none | B | $A\parallel(B\to C)$ |
 
-**These are four logical composition structures, not four separately changed physical infrastructure topologies.** The companion source-level audit documents the Graph AST compiler, validation of unique leaves, deterministic replay probes and controller source locations.
+The companion source-level audit documents the Graph AST compiler, validation of unique leaves, deterministic replay probes and controller source locations.
 
 The inspected runtime constructs an empty acting management-agent network. It therefore evaluates *offline graph performance estimation*, not online active-inference orchestration, decentralized planning or adaptive placement. WATT is zero in these test topologies and messages use a neutral QoS propagation specification; although $(L,C,Q)$ is the formal admissibility schema, strong empirical energy/quality variation was not established by the core battery. These are limits on external validity, not omissions to conceal.
 
