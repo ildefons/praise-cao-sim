@@ -196,18 +196,20 @@ M0 estimates the SLA probability from the providers' I1 cards; the white-box ref
 
 ## 4.2 M1: one reconstructed provider process per provider
 
-M1–M3 reconstruct stochastic provider-process candidates from the disclosed evidence. The assumed process family for each provider is parameterized by
+M0 estimates the end-to-end SLA-satisfaction probability (Eqs. (3) and (4)) using analytical composition rules and the probabilities advertised by individual providers. M1 follows a different approach. It reconstructs one stochastic execution model for each provider from its public I1 information, connects these models according to the known composition graph $G$, and estimates the end-to-end SLA probability through simulation. Unlike M0, M1 evaluates the requested graph-level SLA region $A_G$ directly in the simulated executions of the reconstructed system.
+
+Each reconstructed provider is represented by three parameters:
 
 $
 \theta_i=(\mu_i,\kappa_i,\mathrm{CV}_i),
 \tag{9}
 $
 
-where $\mu_i$ is mean service time, $\kappa_i$ is cost rate and $\mathrm{CV}_i$ is the coefficient of variation of service time. The actual generating parameters are hidden from the integrator; fitted candidates need not recover the physical truth.
+where $\mu_i$ is the mean processing time, $\kappa_i$ is the cost per unit of processing time, and $\mathrm{CV}_i$ is the coefficient of variation of processing time, defined as its standard deviation divided by its mean. Processing times follow a gamma distribution with the specified mean and variability. This parameterization defines the family of candidate provider models used by M1, M2 and M3.
 
-M1 fits one stochastic surrogate to each provider's public evidence, combines the three selected provider models and simulates the native graph. The original Phase-3/4 method used a larger single TPE search with its own confirm/replay process and selected one provider hypothesis each. The executed Phase-5 V3b version instead started from **seven independent 25-trial TPE searches per provider**, with separate local search seeds. It rescored the seven run winners on a fresh common $N=100$ local evidence bank and selected the minimum I1 RMSE candidate. A second independent local bank was diagnostic and not used to choose the model.
+For each provider, M1 searches for parameters whose simulated I1 SLA-satisfaction probabilities resemble those publicly advertised by that provider. Candidate models are compared with the published probabilities across the advertised regions, horizons and compliance thresholds using root mean squared error (RMSE). The search uses a Tree-structured Parzen Estimator (TPE) to propose candidate parameters. It has no access to the provider's internal traces or generating parameters. Consequently, its objective is to construct a model consistent with the disclosed evidence, not necessarily to recover the provider's true implementation.
 
-A reconstructed parameter vector is a **candidate fitted to I1**, not a recovered physical truth. Later privileged P2 tests found lower I1 errors at the actual generating parameters than at the selected candidates.
+In the executed Phase-5 V3b protocol, M1 performs seven independent TPE searches per provider, each evaluating 25 candidate configurations using 15 local simulation runs per candidate. The seven selected candidates are then reevaluated using a fresh common bank of 100 provider-local simulations. The candidate with the lowest I1 RMSE is retained for each provider. A second independent local bank is used only for diagnostics, not selection. Finally, the three selected provider models are combined and simulated within the native composition graph to estimate the requested end-to-end SLA probability. The historical Phase-3/4 implementation used a different search procedure, summarized in the method-version matrix.
 
 ## 4.3 M2: equal-weight finite model propagation
 
