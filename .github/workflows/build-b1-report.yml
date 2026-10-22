@@ -1,0 +1,74 @@
+name: Rebuild B1 report artifacts
+
+on:
+  push:
+    branches:
+      - praise-identifiability-feasibility
+    paths:
+      - first_science/b1/report/overleaf/**
+      - .github/workflows/build-b1-report.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compile-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout report branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: praise-identifiability-feasibility
+      - name: Compile B1 with XeLaTeX
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: main.tex
+          working_directory: first_science/b1/report/overleaf
+          latexmk_use_xelatex: true
+          os: debian
+          extra_system_packages: fonts-dejavu-core
+      - name: Validate and package PDF and Overleaf project
+        run: |
+          set -euo pipefail
+          report=first_science/b1/report
+          latex="$report/overleaf"
+          test -s "$latex/main.pdf"
+          pdftotext -layout "$latex/main.pdf" "$latex/main.txt"
+          python3 - "$latex/main.txt" <<'PY'
+          import re, sys, unicodedata
+          raw = open(sys.argv[1], encoding='utf-8').read()
+          def canonical(s):
+              return re.sub(r'[^a-z0-9]+', '', unicodedata.normalize('NFKC', s).lower())
+          check = canonical(raw)
+          for phrase in [
+              'M0 estimates the end-to-end SLA-satisfaction probability',
+              'Eqs. (3) and (4)',
+              'gamma distribution',
+              'seven independent TPE searches',
+              '15 local simulation runs per candidate',
+          ]:
+              if canonical(phrase) not in check:
+                  raise SystemExit(f'Compiled PDF missing expected M1 text: {phrase}')
+          print('B1 Section 4.2 verified in PDF.')
+          PY
+          cp "$latex/main.pdf" "$report/B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf"
+          cp "$latex/main.pdf" "$latex/B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf"
+          (
+            cd "$latex"
+            rm -f ../B1_OVERLEAF_PROJECT_V0_1.zip
+            zip -q -9 -r ../B1_OVERLEAF_PROJECT_V0_1.zip \
+              main.tex README.md figures B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
+          )
+          unzip -tqq "$report/B1_OVERLEAF_PROJECT_V0_1.zip"
+          unzip -p "$report/B1_OVERLEAF_PROJECT_V0_1.zip" \
+            B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf | cmp - "$report/B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf"
+          git config user.name github-actions\[bot\]
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$report/B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf" \
+                  "$report/B1_OVERLEAF_PROJECT_V0_1.zip"
+          if ! git diff --cached --quiet; then
+            git commit -m 'Rebuild B1 PDF and Overleaf ZIP after Section 4.2 revision'
+            git push origin HEAD:praise-identifiability-feasibility
+          fi
