@@ -236,31 +236,35 @@ In the expanded evaluation across multiple provider configurations and graphs (h
 
 Each of the 27 joint models is simulated for 100 graph trajectories, giving \textbf{2,700 graph trajectories per physical cell}. Shared seed indices across member simulations must be respected in numerical uncertainty estimates (Section 10.1). By retaining several provider reconstructions selected for their agreement with the public I1 evidence, M2 reduces the dependence of the graph-level prediction on a single fitted model. The hypothesis is that averaging predictions from these alternative reconstructions can mitigate errors specific to one model selection, especially when the disclosed evidence does not clearly favor a unique reconstruction.
 
-\textbf{Post-result I1/I2 reconstruction experiments (historical \hyperref[app:experiment-stages]{Phase-6}).} The six evaluated variants retain the 27 equally weighted joint models of Eq. (10), the same provider-model family and parameter domains, and matched reconstruction and graph-simulation budgets. Each provider search evaluates 256 candidate parameter settings (64 initial space-filling proposals, then 192 adaptive proposals). Each candidate is initially scored using 25 provider simulation runs; the best 24 are rescored with a separate common bank of 100 runs, and the best three per provider are retained. Each of the resulting 27 joint models is simulated 100 times in the graph, for 2,700 graph runs per variant. Search settings and random-number banks are matched, although adaptive proposals can differ when the fitting scores differ. The variants differ in \textbf{which disclosed evidence they use and how they select candidate provider models}:
+\textbf{Reconstruction with enriched provider information.} M2 depends on the quality of the reconstructed provider models. Even when several models are retained, I1 discloses only probabilities of satisfying a finite set of compliance thresholds. We therefore investigated whether richer public evidence could better constrain provider reconstruction and improve subsequent graph-level prediction. I2a discloses the distribution of compliance across runs at each horizon, while I2b additionally discloses paired compliance fractions at two horizons within the same run (Section 3.2).
+
+Six reconstruction variants were evaluated using the same M2 aggregation rule in Eq. (10). All use the same provider-model family and parameter domains, retain three models per provider, and propagate their 27 joint combinations with equal weights. The I1STRONG\_M2 variant provides an I1-based reference under the same strengthened search budget. The variants differ in the \textbf{disclosed evidence used for fitting and the criterion used to select provider models}.
+
+For each provider and variant, the matched search evaluates 256 parameter settings: 64 initial space-filling proposals followed by 192 adaptive proposals. Each candidate is scored with 25 provider-local simulation runs; the best 24 are rescored on a fresh common bank of 100 runs, and the best three are retained. The 27 resulting joint models are each simulated for 100 graph trajectories, giving \textbf{2,700 graph trajectories per variant and physical cell}. Search budgets and random-number banks are matched, although adaptive proposals can diverge because their fitting scores differ.
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.235\textwidth}p{0.725\textwidth}@{}}
 \toprule
-M2 variant & Public evidence and model-fitting criterion \\
+M2 variant & Public evidence and reconstruction criterion \\
 \midrule
 \endfirsthead
 \toprule
-M2 variant & Public evidence and model-fitting criterion \\
+M2 variant & Public evidence and reconstruction criterion \\
 \midrule
 \endhead
-I1STRONG\_M2 & Uses the I1 probability surfaces. It selects candidate models that best reproduce the published probabilities of meeting each specified compliance threshold, across regions and horizons. \\
-I2AFS\_M2 & Uses the I2a distributions of per-run compliance. It selects candidates by comparing their predicted and disclosed distributions across all possible compliance thresholds, rather than only I1's five thresholds. \\
-I2B\_M2 & Uses the I2b pairs of compliance fractions at two horizons in the same run. It scores how closely the simulated \emph{distribution of pairs} matches the published one, giving equal overall weight to each of the eight time separations and equal weight to windows within each separation. \\
-I2BVAR\_M2 & Uses the same I2b pairs and pair-matching score, but weights each window by the average squared change in compliance between its endpoints. The weights are normalized over all windows, so regions and time separations can receive different overall importance. \\
-I2BHIER\_M2 & Uses the same I2b pairs and pair-matching score. It preserves equal total weight for each of the five regions and eight time separations, while giving more weight to starting horizons with larger endpoint changes within each region and separation. \\
-I2BV4\_M2 & Uses the I2b endpoint pairs plus the new public mean within-interval range from Section 3.2. The range determines the weights of endpoint-pair matching within each region and separation; candidate models are not directly scored against the additional range statistic. \\
+I1STRONG\_M2 & Fits the full I1 surface of published probabilities across advertised regions, horizons and compliance thresholds. \\
+I2AFS\_M2 & Fits the I2a distributions of per-run compliance across all possible thresholds, rather than only the five thresholds published by I1. \\
+I2B\_M2 & Fits the joint distribution of I2b compliance pairs at two horizons within a run, weighting the eight time separations equally and windows equally within each separation. \\
+I2BVAR\_M2 & Uses the same I2b pair-matching loss but gives more weight to windows with larger average squared changes between endpoints; weights are normalized globally across windows. \\
+I2BHIER\_M2 & Uses the same I2b pairs, weighting larger endpoint changes more heavily within each region and separation, while preserving equal total weight for the five regions and eight separations. \\
+I2BV4\_M2 & Uses the I2b pair-matching loss and the additional public mean within-interval range (Section 3.2). The range determines fitting weights; it is not itself an additional direct fitting target. \\
 \bottomrule
 \end{longtable}
 \endgroup
 
-Thus \textbf{I2a and I2b specify what providers disclose}, while these six M2 variants specify how a method fits provider models using that information. I2BVAR\_M2 and I2BHIER\_M2 change only the fitting weights applied to the same I2b pair data. I2BV4\_M2 also uses an additional disclosed statistic. Comparisons across interfaces therefore test implemented disclosure-and-fitting combinations, not the isolated benefit of more information. All these \hyperref[app:experiment-stages]{Phase-6} tests are post-result development evidence; Section 9.3 reports their outcomes.
+These variants differ not only in what providers disclose (I1, I2a or I2b), but also in how the evidence is used to fit reconstructed models. Their comparison therefore evaluates complete disclosure-and-fitting procedures, not the isolated contribution of additional information. The tests were conducted after earlier results were known, on the previously studied P4/G\_SEQPAR cell, and are \textbf{post-result development evidence}, not an independent confirmation (historical \hyperref[app:experiment-stages]{Phase-6}; see Section 9.3).
 
 \subsection*{4.4 M3: public-evidence-weighted finite reconstruction}
 
