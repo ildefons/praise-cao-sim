@@ -320,16 +320,18 @@ The \textbf{initial controlled pilot (historical M3-v4)} used a different candid
 
 The subsequent expanded evaluation (historical \hyperref[app:experiment-stages]{Phase-5 V3b}) used the seven candidates per provider described above and propagated \textbf{all $7^3=343$ joint models} with total graph budget $B=1400$. The initially registered Top14 approximation was replaced before the final graph white-box results were read because a permitted pre-graph diagnostic found that Top14 retained only 0.552 of the inferred mass in P1, 0.962 in P3 and 0.867 in P4. This preserved the candidate bank and Gibbs weights, but changed numerical propagation and therefore remains a \textbf{documented method revision}, not an unchanged test of the original Top14 method.
 
-For independent Bernoulli graph trajectories within each weighted member, the conditional numerical variance satisfies
+\textbf{Allocation of the graph-simulation budget.} After weighting the reconstructed joint models, M3 still needs graph simulations to estimate their individual SLA probabilities. In the expanded evaluation, all 343 joint models share a budget of $B=1400$ trajectories. Allocating the same number of runs to every model would ignore their unequal influence on the weighted prediction. Instead, M3 allocates runs to reduce an upper bound on the prediction's Monte Carlo variance.
+
+For a propagated support $S$ with normalized weights $\alpha_j$ (Eq. (14)), let $N_j$ be the number of independent graph trajectories simulated for model $j$. Each trajectory records whether the requested compliance target is met. Assuming independent simulation estimates across joint models, the conditional numerical variance satisfies
 
 \begin{equation*}
 \mathrm{Var}_{MC}(\widehat\sigma_G^{M3})
-\le\frac14\sum_j\frac{W_j^2}{N_j},
-\qquad \sum_jN_j=B.
+\le\frac14\sum_{j\in S}\frac{\alpha_j^2}{N_j},
+\qquad \sum_{j\in S}N_j=B.
 \tag{15}
 \end{equation*}
 
-The continuous relaxation gives $N_j\propto W_j$. The executed finite allocation first assigns one trajectory to every joint model, then repeatedly assigns the next trajectory to the model maximizing $\Delta_j=W_j^2/[N_j(N_j+1)]$, using a frozen tie-break rule. Archived verification reproduced the allocations for P1, P3 and P4 exactly.
+The bound follows because a Bernoulli outcome has variance at most $1/4$. Its continuous-budget optimum allocates $N_j\propto\alpha_j$. In the executed full-support procedure, $\alpha_j=W_j$ because all 343 joint weights sum to one. The integer algorithm starts with one trajectory per model and repeatedly assigns the next trajectory to the model maximizing $\Delta_j=W_j^2/[N_j(N_j+1)]$, with a fixed tie-break rule. Archived verification reproduced the P1/P3/P4 allocations exactly. This allocation addresses numerical precision for the selected weighted models; it does not alter their parameters or correct reconstruction errors.
 
 \textbf{M3 Top1 is not necessarily M1.} M1 selects by minimum I1 RMSE, while M3's highest-weight joint model is determined by the product of KL-based provider weights. More generally, comparing M3 with M2 also changes candidate coverage, weighting loss and graph-simulation allocation. An observed difference in prediction accuracy therefore does not isolate the effect of KL weighting alone.
 
