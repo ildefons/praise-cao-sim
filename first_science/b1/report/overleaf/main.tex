@@ -320,6 +320,8 @@ The \textbf{initial controlled pilot (historical M3-v4)} used a different candid
 
 The subsequent expanded evaluation (historical \hyperref[app:experiment-stages]{Phase-5 V3b}) used the seven candidates per provider described above and propagated \textbf{all $7^3=343$ joint models} with total graph budget $B=1400$. The initially registered Top14 approximation was replaced before the final graph white-box results were read because a permitted pre-graph diagnostic found that Top14 retained only 0.552 of the inferred mass in P1, 0.962 in P3 and 0.867 in P4. This preserved the candidate bank and Gibbs weights, but changed numerical propagation and therefore remains a \textbf{documented method revision}, not an unchanged test of the original Top14 method.
 
+For any retained subset of total Gibbs weight $m_S$, omitting the remaining reconstructed models changes the exact weighted-portfolio prediction by at most $1-m_S$. The maximum difference was approximately 0.000826 for the original pilot Top14 and zero for FULL343 within its own 343-member bank; neither value bounds prediction error relative to the real composed service.
+
 \textbf{Allocation of the graph-simulation budget.} After weighting the reconstructed joint models, M3 still needs graph simulations to estimate their individual SLA probabilities. In the expanded evaluation, all 343 joint models share a budget of $B=1400$ trajectories. Allocating the same number of runs to every model would ignore their unequal influence on the weighted prediction. Instead, M3 allocates runs to reduce an upper bound on the prediction's Monte Carlo variance.
 
 For a propagated support $S$ with normalized weights $\alpha_j$ (Eq. (14)), let $N_j$ be the number of independent graph trajectories simulated for model $j$. Each trajectory records whether the requested compliance target is met. Assuming independent simulation estimates across joint models, the conditional numerical variance satisfies
@@ -338,41 +340,6 @@ For integer counts $N_j\ge1$, adding one trajectory to member $j$ reduces the bo
 A separate read-only verification script \texttt{verify\_method\_support\_v0\_1.py} reproduced the archived 343-member, $B=1400$ allocation counts for P1, P3 and P4; its findings are recorded in \texttt{METHOD\_SUPPORT\_VERIFICATION\_REVIEW\_2026-10-16.md} (Appendix B.1). This checks agreement between the saved allocations and the specified rule. It does \textbf{not} demonstrate improved prediction accuracy, verify every simulation trajectory or address error caused by the reconstructed provider models.
 
 \textbf{M3 Top1 is not necessarily M1.} M1 selects by minimum I1 RMSE, while M3's highest-weight joint model is determined by the product of KL-based provider weights. More generally, comparing M3 with M2 also changes candidate coverage, weighting loss and graph-simulation allocation. An observed difference in prediction accuracy therefore does not isolate the effect of KL weighting alone.
-
-\subsection*{4.5 Bounding the effect of omitted model combinations}
-
-M3 assigns weights to combinations of reconstructed provider models, but simulating every combination may be expensive. In the initial controlled pilot, for example, 48 candidate models per provider produced $48^3=110{,}592$ possible joint models. Only the 14 combinations with the largest Gibbs weights were propagated through the graph (Top14). Section 4.4 addressed the numerical uncertainty arising from estimating each reconstructed model's SLA probability with a finite number of simulation trajectories. Equation (15) bounds this sampling variance and motivates the allocation of simulation resources among models. A different approximation arises when some reconstructed joint models are excluded altogether. Even with unlimited simulations of the retained models, their combined prediction may differ from the prediction obtained using the complete weighted model portfolio. This section quantifies that difference, which we call \emph{model-support truncation error}. Neither bound measures the prediction error relative to the real composed service.
-
-To isolate the effect of omitting models, we compare two predictions for the same SLA requirement: one using the complete weighted model portfolio and another using only the retained models. We consider each model's predicted probability without finite-simulation error, so any difference between these portfolio predictions comes from omitting models. Let $W_j$ denote the weight assigned to joint model $j$ by Eq. (13), with weights summing to one across the full finite portfolio. Let $p_j\in[0,1]$ denote the SLA-satisfaction probability predicted by that model. These are \emph{model-conditional} probabilities, not observations of the hidden provider system.
-
-Suppose we simulate only a selected set $S$ of joint models. The \textbf{retained weight mass} $m_S$ is the sum of the weights of those models. The full portfolio prediction $p_{\mathrm{full}}$ and the prediction $p_S$ based only on the retained models are defined by
-
-\begin{equation*}
-\begin{aligned}
-m_S&=\sum_{j\in S}W_j,\\
-p_{\mathrm{full}}&=\sum_{j\in\mathcal J}W_jp_j,\qquad
-p_S=\frac{1}{m_S}\sum_{j\in S}W_jp_j.
-\end{aligned}
-\end{equation*}
-
-where $\mathcal J$ is the complete finite portfolio and $m_S>0$. Dividing by $m_S$ redistributes the retained weights so that they sum to one, as in Eq. (14). For example, if the retained models carry 95\% of the portfolio weight, the remaining models carry only 5\%. Even if their SLA predictions differ maximally from the retained models, omitting them can change the full weighted prediction by \textbf{at most five percentage points}.
-
-If $m_S<1$, the full prediction is a weighted average of the retained prediction $p_S$ and the omitted models' weighted prediction $p_{\mathrm{omitted}}$:
-
-\begin{equation*}
-p_{\mathrm{full}}=m_Sp_S+(1-m_S)p_{\mathrm{omitted}}.
-\end{equation*}
-
-Both probabilities lie between zero and one. Therefore, the difference satisfies the following bound, which also holds trivially when $m_S=1$ and nothing is omitted:
-
-\begin{equation*}
-\boxed{|p_{\mathrm{full}}-p_S|\le 1-m_S.}
-\tag{16}
-\end{equation*}
-
-\textbf{What this means for the experiments.} In the original pilot, Top14 retained approximately 99.9174\% of the inferred portfolio weight. The remaining 0.0826\% therefore contributes at most $0.000826$, or \textbf{0.0826 percentage points}, to the difference between the \emph{exact} full-portfolio and retained-portfolio predictions. In the later expanded evaluation, M3 FULL343 propagated all 343 combinations of its own seven-candidate-per-provider bank. No model was omitted from that bank, so its within-bank truncation bound is zero.
-
-\textbf{What this does not mean.} Equation (16) is a deterministic statement about omitting models from a \textbf{specified finite weighted portfolio}. It does not establish that the portfolio contains the true provider models or that its prediction is close to the real composed service's SLA probability. Finite graph simulations introduce additional numerical error, treated separately in Section 4.4 and Appendix A.2. Moreover, M2 selects its own 27 models using a different rule; it is not the Top27 truncation of M3, so this retained-mass bound cannot be used to explain differences between M2 and M3. The archived weight-mass calculations and method versions are documented in Appendices B and C.
 
 \section*{5. Native simulator, graph structures, and experiment protocol}
 \addcontentsline{toc}{section}{5. Native simulator, graph structures, and experiment protocol}
@@ -442,7 +409,7 @@ A_G(\gamma,\rho)
 =\{L_G\le\gamma\ell_G^{\rm base}(\rho),\
 C_G\le\gamma c_G^{\rm base}(\rho),\
 Q_G\ge q_G^{\rm base}(\rho)\}.
-\tag{17}
+\tag{16}
 \end{equation*}
 
 Here $A_G^{\rm base}(\rho)$ is the region $A_G^{I1+M0}$ calculated by M0 from the advertised provider limits. The scaling factor $\gamma$ changes the requested region scored by the white-box reference, but does not change the I1 provider probabilities used in M0's product. In particular, if $\gamma>1$, the requested latency and cost limits are looser than M0's calculated limits. Thus the white-box reference is evaluated at the larger requested region, whereas M0 still uses the same provider-card product. If $\gamma<1$, M0's calculated limits do not fit the tighter query and M0 is not applicable.
@@ -566,7 +533,7 @@ The prospectively specified topology statistic for each method and provider worl
 \operatorname{MAE}_M(P,G_{\mathrm{SEQ}})
 -
 \operatorname{MAE}_M(P,G_{\mathrm{PAR}}).
-\tag{18}
+\tag{17}
 \end{equation*}
 
 The original directional masking hypothesis anticipated $\Delta_P^M>0$. The completed analysis did \textbf{not} yield that sign consistently across the eligible worlds: P1 differed in sign from P3/P4 for the examined contrast. It is therefore not supported as a universal or robust rule by this evaluation. A second registered heterogeneous-minus-symmetric contrast required P2 and was \textbf{not estimable} after Step-0 exclusion. The two other graph ASTs offer mechanistic triangulation but do not constitute a clean factorial manipulation separating workload shift from aggregation structure.
@@ -600,7 +567,7 @@ Retrospective original Top1 & 6,660 & 0.162280 & 0.225373 & +0.054562 \\
 \bottomrule
 \end{longtable}\endgroup
 
-Top14 retained mass within the reconstructed 48-per-provider bank was \textbf{0.996404 (P1)}, \textbf{0.996771 (P3)} and \textbf{0.998925 (P4)}. Section 4.5 therefore bounds the \emph{full-bank versus truncated-bank expectation} discrepancy by 0.003596, 0.003229 and 0.001075, respectively. This bound does \textbf{not} cover graph Monte Carlo noise or guarantee accuracy against the true composition. High internal support coverage coexists with material external prediction error.
+Top14 retained mass within the reconstructed 48-per-provider bank was \textbf{0.996404 (P1)}, \textbf{0.996771 (P3)} and \textbf{0.998925 (P4)}. Applying the omitted-weight bound stated in Section 4.4, the \emph{full-bank versus truncated-bank expectation} discrepancy is at most 0.003596, 0.003229 and 0.001075, respectively. This bound does \textbf{not} cover graph Monte Carlo noise or guarantee accuracy against the true composition. High internal support coverage coexists with material external prediction error.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.29\textwidth}rrr@{}}
@@ -765,7 +732,7 @@ For a fixed reconstructed ensemble with normalized weights $\alpha_j$ and estima
 V_{\rm MC}(\widehat p_M)
 =\sum_j\alpha_j^2 V_j+
 2\sum_{j<k}\alpha_j\alpha_k C_{jk}.
-\tag{19}
+\tag{18}
 \end{equation*}
 
 The covariance $C_{jk}$ matters for \textbf{M2's shared seed indices}. A seed-index paired bootstrap should resample each 27-member seed-vector as one unit rather than resampling individual member trajectories independently. M3's independent member seed streams permit the simpler variance form in Eq. (15), conditional on fixed weights, models and allocation.
@@ -783,7 +750,7 @@ Let $p_j=E[\widehat p_j]$, $p_\alpha=\sum_j\alpha_jp_j$ and $\widehat p=\sum_j\a
 \begin{equation*}
 V_{\rm raw}
 =\sum_j\alpha_j(\widehat p_j-\widehat p)^2.
-\tag{20}
+\tag{19}
 \end{equation*}
 
 Under fixed weights and unbiased member estimators, its expectation equals latent finite-model spread plus a contribution from numerical sampling,
@@ -793,7 +760,7 @@ E[V_{\rm raw}]
 =\sum_j\alpha_j(p_j-p_\alpha)^2+
 \sum_j\alpha_j\operatorname{Var}(\widehat p_j)
 -\operatorname{Var}(\widehat p).
-\tag{21}
+\tag{20}
 \end{equation*}
 
 The manuscript's nonnegative MC-subtracted plug-in diagnostic estimates only the \emph{spread among the selected models}. The max-with-zero clipping and finite member budgets make it neither an unbiased calibrated risk estimate nor a guaranteed bound on model-to-hidden-world error.
@@ -803,7 +770,7 @@ Similarly, if the method predictor and white-box reference are independent and i
 \begin{equation*}
 E\!\left[(\widehat p_M-\widehat p_{\rm WB})^2\right]
 =(p_M-\sigma_G)^2+V_{\rm MC,M}+V_{\rm WB}.
-\tag{22}
+\tag{21}
 \end{equation*}
 
 Subtracting empirical noise estimates from an observed squared difference and clipping at zero is an \textbf{experimental noise-correction diagnostic}. It does not make the unobserved model approximation error known exactly, and its square root adds estimation bias.
@@ -916,7 +883,7 @@ If $\beta\le\sigma^-_{G,M}$ then \emph{all enumerated models} accept under their
 
 \subsection*{A.2 Conditional numerical precision and model spread}
 
-The general covariance identity (19) holds for fixed finite weights. M2's paired common-seed bootstrap captures cross-model covariance; M3's independent-member variance bound (15) is conditional on the model bank, fixed weights and allocation. For member success probabilities $p_j$, independence across members and trajectories gives the exact conditional identity
+The general covariance identity (18) holds for fixed finite weights. M2's paired common-seed bootstrap captures cross-model covariance; M3's independent-member variance bound (15) is conditional on the model bank, fixed weights and allocation. For member success probabilities $p_j$, independence across members and trajectories gives the exact conditional identity
 
 \begin{equation*}
 \mathrm{Var}_{MC}(\widehat\sigma_G^{M3})
@@ -942,7 +909,7 @@ yielding a fixed-sample half-width
 
 This is included as an \emph{analytical consequence of standard bounded-variable concentration}, \textbf{not} a newly tested method or a bound on $|p_\alpha-\sigma_G|$. It is not automatically anytime-valid if sample sizes are chosen by repeatedly observing the outcomes.
 
-The historical noise-adjusted model-spread quantities and white-box correction (20)–(22) are expectation-based diagnostics. Positive-part corrections may be convenient but must not be described as exact interval widths for physical model misspecification.
+The historical noise-adjusted model-spread quantities and white-box correction (19)–(21) are expectation-based diagnostics. Positive-part corrections may be convenient but must not be described as exact interval widths for physical model misspecification.
 
 \subsection*{A.3 Numerical-width scaling}
 
