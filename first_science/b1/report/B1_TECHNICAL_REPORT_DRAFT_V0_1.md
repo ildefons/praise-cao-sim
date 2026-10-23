@@ -121,7 +121,7 @@ The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidd
 
 **What do we estimate?** For a known composition graph $G$ and an SLA query $(A,H;\rho)$, Equation (4) defines $\sigma_G(A,H;\rho)$, the probability that the composed service meets the required compliance fraction. The integrator does not know the providers' hidden stochastic execution models. It has only the information each provider discloses through interface $I$. Integration method $M$ uses those disclosures and the known graph to produce the end-to-end prediction $\widehat\sigma_G^{(I,M)}(A,H;\rho)$. **The scientific task is to assess the accuracy and limits of this probability prediction.**
 
-**How do we evaluate it?** In the simulator, the true provider models can be used to generate an independent finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}(A,H;\rho)$. We compare each method's prediction with this reference across the tested SLA queries, horizons, provider worlds and graph topologies. The hidden provider models used for final reference generation are not supplied to the methods being evaluated. Because the reference is computed from a finite number of stochastic runs, it is itself an estimate of $\sigma_G$, not an exact value. Numerical simulation error and reconstruction error must therefore be distinguished (Chapter 10 and Appendix A).
+**How do we evaluate it?** In the simulator, the true provider models can be used to generate an independent finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}(A,H;\rho)$. We compare each method's prediction with this reference across the tested SLA queries, horizons, provider worlds and graph topologies. The hidden provider models used for final reference generation are not supplied to the methods being evaluated. Because the reference is computed from a finite number of stochastic runs, it is itself an estimate of $\sigma_G$, not an exact value. Numerical simulation error and reconstruction error must therefore be distinguished (Section 9 and Appendix A).
 
 # 3. Provider disclosures
 
@@ -161,7 +161,7 @@ The post-result I1/I2 experiments were developed in the repository's `first_scie
 
 **I2b: paired compliance at two horizons.** I2b includes the I2a distributions and adds pairs of compliance fractions measured in the *same* trajectory at two selected horizons. A pair such as (0.98, 0.91) means that cumulative compliance in one run declined from 98% to 91% between those horizons; the fractions still refer to all requests decided since the start, not just requests processed within the interval. For each selected interval, the published representation contains 100 such pairs. The frozen design samples intervals starting at 5 seconds and then every 10 seconds, with separations of 20, 30, 40, 50, 75, 100, 150 or 200 seconds where both endpoints fit within the 240-second horizon. The pairs reveal whether good or poor compliance tends to persist or change over time. They contain no trajectory identifiers, and the published records cannot be linked across different intervals by a shared identifier; they are not complete request histories or labelled trajectories.
 
-**Additional disclosure in I2b-v4.** The later I2b-v4 extension publishes one more value for each selected interval: the average, across the 100 runs, of the difference between the highest and lowest cumulative compliance fractions recorded during that interval on the 5-second evaluation grid. This describes variation *inside* an interval that its two endpoint values alone cannot reveal. Individual runs' ranges and complete histories remain private. Section 4.3 explains how M2 uses I1, I2a, I2b and this additional summary to reconstruct provider models. The results appear in Section 9.3.
+**Additional disclosure in I2b-v4.** The later I2b-v4 extension publishes one more value for each selected interval: the average, across the 100 runs, of the difference between the highest and lowest cumulative compliance fractions recorded during that interval on the 5-second evaluation grid. This describes variation *inside* an interval that its two endpoint values alone cannot reveal. Individual runs' ranges and complete histories remain private. Section 4.3 explains how M2 uses I1, I2a, I2b and this additional summary to reconstruct provider models. The results appear in Section 8.3.
 
 # 4. Integration algorithms and historical method versions
 
@@ -226,7 +226,7 @@ Here $\vartheta_j$ denotes one joint model containing a reconstructed model for 
 
 In the expanded evaluation across multiple provider configurations and graphs (historical [Phase-5 V3b](#appendix-c-experimental-chronology-and-method-versions)), M2 uses the same seven I1-fitted candidates per provider described in Section 4.2 and retains the three with the lowest common-bank I1 RMSE. Each provider's M1-selected model is therefore included in M2's support, and the M1 joint model is one of the 27 combinations. This selection has no explicit diversity requirement or hard I1-compatibility threshold. The historical [Phase-4](#appendix-c-experimental-chronology-and-method-versions) M2 instead selected diverse candidates and excluded the M1 anchor, as recorded in the method-version matrix.
 
-Each of the 27 joint models is simulated for 100 graph trajectories, giving **2,700 graph trajectories per physical cell**. Shared seed indices across member simulations must be respected in numerical uncertainty estimates (Section 10.1). By retaining several provider reconstructions selected for their agreement with the public I1 evidence, M2 reduces the dependence of the graph-level prediction on a single fitted model. The hypothesis is that averaging predictions from these alternative reconstructions can mitigate errors specific to one model selection, especially when the disclosed evidence does not clearly favor a unique reconstruction.
+Each of the 27 joint models is simulated for 100 graph trajectories, giving **2,700 graph trajectories per physical cell**. Shared seed indices across member simulations must be respected in numerical uncertainty estimates (Section 9.1). By retaining several provider reconstructions selected for their agreement with the public I1 evidence, M2 reduces the dependence of the graph-level prediction on a single fitted model. The hypothesis is that averaging predictions from these alternative reconstructions can mitigate errors specific to one model selection, especially when the disclosed evidence does not clearly favor a unique reconstruction.
 
 **Reconstruction with enriched provider information.** M2 depends on the quality of the reconstructed provider models. Even when several models are retained, I1 discloses only probabilities of satisfying a finite set of compliance thresholds. We therefore investigated whether richer public evidence could better constrain provider reconstruction and improve subsequent graph-level prediction. I2a discloses the distribution of compliance across runs at each horizon, while I2b additionally discloses paired compliance fractions at two horizons within the same run (Section 3.2).
 
@@ -243,7 +243,7 @@ For each provider and variant, the matched search evaluates 256 parameter settin
 | I2BHIER_M2 | Uses the same I2b pairs, weighting larger endpoint changes more heavily within each region and separation, while preserving equal total weight for the five regions and eight separations. |
 | I2BV4_M2 | Uses the I2b pair-matching loss and the additional public mean within-interval range (Section 3.2). The range determines fitting weights; it is not itself an additional direct fitting target. |
 
-These variants differ not only in what providers disclose (I1, I2a or I2b), but also in how the evidence is used to fit reconstructed models. Their comparison therefore evaluates complete disclosure-and-fitting procedures, not the isolated contribution of additional information. The tests were conducted after earlier results were known, on the previously studied P4/G_SEQPAR cell, and are **post-result development evidence**, not an independent confirmation (historical [Phase-6](#appendix-c-experimental-chronology-and-method-versions); see Section 9.3).
+These variants differ not only in what providers disclose (I1, I2a or I2b), but also in how the evidence is used to fit reconstructed models. Their comparison therefore evaluates complete disclosure-and-fitting procedures, not the isolated contribution of additional information. The tests were conducted after earlier results were known, on the previously studied P4/G_SEQPAR cell, and are **post-result development evidence**, not an independent confirmation (historical [Phase-6](#appendix-c-experimental-chronology-and-method-versions); see Section 8.3).
 
 ## 4.4 M3: public-evidence-weighted finite reconstruction
 
@@ -277,7 +277,7 @@ w_{i,k}
 \tag{12}
 $$
 
-where $\lambda\ge0$ determines the concentration of weights: $\lambda=0$ gives equal weights, while larger values favor smaller KL discrepancies. In the original pilot, $\lambda=30$ was selected by five-fold cross-validation on the public I1 probability surface, without access to the graph white-box reference. The expanded evaluation **reused the value 30 without repeating that cross-validation**; Section 9.2 reports the consequences of that protocol difference. These Gibbs weights express relative support within a finite candidate bank; they are **not calibrated posterior probabilities** that candidates are the hidden generating models.
+where $\lambda\ge0$ determines the concentration of weights: $\lambda=0$ gives equal weights, while larger values favor smaller KL discrepancies. In the original pilot, $\lambda=30$ was selected by five-fold cross-validation on the public I1 probability surface, without access to the graph white-box reference. The expanded evaluation **reused the value 30 without repeating that cross-validation**; Section 8.2 reports the consequences of that protocol difference. These Gibbs weights express relative support within a finite candidate bank; they are **not calibrated posterior probabilities** that candidates are the hidden generating models.
 
 For a joint reconstruction $\vartheta_j=(\theta_{A,a},\theta_{B,b},\theta_{C,c})$, M3 multiplies the three provider weights:
 
@@ -363,13 +363,11 @@ A subsequent audit examined whether this separation was supported by the saved e
 
 The methods and procedures also changed during development. Provider-model reconstruction and the integration of reconstructed models were revised in response to earlier diagnostics, before the final reference results were examined. Some engineering checks were completed after scientific experiments had already begun. Appendix C identifies these revisions and their scientific roles, so the expanded evaluation should not be interpreted as an unchanged test of the original plan. The repository retains source versions, simulation configurations and verification records, but the exact AICon/YAFS software state used in every historical run has not been fully established. Reference [23] identifies the audited AICon checkout; complete bitwise reproduction of the original runs is therefore not claimed.
 
-# 6. Research sequence and comparison validity
+# 6. Controlled pilot (Phase I)
 
-The study progressed from simulator and disclosure development to a controlled single-graph pilot, then to a broader multi-world, multi-graph evaluation, and finally to retrospective diagnoses and new interface experiments. These episodes serve different scientific purposes. The pilot provided a first accuracy test; the expanded evaluation tested transfer to more conditions using revised methods; the subsequent analyses examined failures and hypotheses after previous results were known. Appendix C, Table C.1 maps each episode to its historical repository stage and states whether its evidence was developmental, pre-reference evaluation, or retrospective. Method versions are compared in Table C.2. The expanded-evaluation revisions were made before the final graph white-box reference was opened, but they were changes to the initially registered methods, not an unchanged confirmatory replication.
+The controlled pilot (Phase I) provided the first evaluation of the prediction methods using a single provider configuration and composition graph. It established an initial comparison of their prediction accuracy under fixed experimental conditions. The results also motivated the broader evaluation presented in the following section. As detailed in Appendix C, the pilot and subsequent evaluations involved different method versions and therefore serve distinct scientific purposes.
 
-# 7. Controlled pilot (Phase I)
-
-## 7.1 Query population and reference
+## 6.1 Query population and reference
 
 The original pilot held one hidden three-provider configuration, one fixed parallel-all graph, a workload period of 0.2 seconds and the providers' published I1 cards constant. Query difficulty was varied by scaling the latency and cost limits of a graph region induced from the providers' advertised regions:
 
@@ -385,7 +383,7 @@ Here $A_G^{\rm base}(\rho)$ is the region $A_G^{I1+M0}$ calculated by M0 from th
 
 Five thresholds times three difficulty regimes generated 15 queries. Evaluation used 37 horizons from 60 to 240 seconds. The pilot's fresh reference bank contained $N_{\rm WB}=200$ trajectories.
 
-## 7.2 Prediction errors and historical cutoff diagnostic
+## 6.2 Prediction errors and historical cutoff diagnostic
 
 The original pilot production results were re-scored from saved pointwise tables and manifest-linked hashes:
 
@@ -403,7 +401,7 @@ As a **secondary historical diagnostic**, the pilot applied an arbitrary cutoff 
 
 The pilot's M3 production errors were substantially smaller than those of M1/M2 in this exact world and graph. That is a genuine, archived numerical observation. It does not demonstrate the same numerical advantage in worlds with altered provider demand or different logical dependencies.
 
-## 7.3 Retrospective support and weighting
+## 6.3 Retrospective support and weighting
 
 A later frozen pilot Stage-B audit compared several estimators at matched total $B=1400$ in the same world:
 
@@ -418,21 +416,21 @@ Using the **same 14 model members and the same equal-allocation ledgers**, weigh
 
 The historical operational readouts also reported Top1 B100 and Top3 B300 MAEs near 0.0399 and 0.0401, respectively, but the direct underlying first-100 source arrays have not yet been independently reconciled in the B1 checks. They remain **reported historical numbers, not upgraded to primary independently checked evidence**.
 
-## 7.4 Hidden-parameter audit and restricted cost frontier
+## 6.4 Hidden-parameter audit and restricted cost frontier
 
 The retrospective pilot Table 4 compared hidden generating parameters with M1 and M3-Top1 surrogate parameters and public-I1 reconstruction losses. The archived values were independently reconciled. Their discrepancies, including notably different Provider C reconstructions, show that **good graph prediction can co-occur with very poor recovery of hidden parameters in this one pilot**. They do not prove the public interface cannot identify those parameters in principle.
 
 The historical Figure 2 labeled a curve the “nondominated” recurring-cost/MAE frontier while plotting only chosen primary prospective implementations. In the same reported two-coordinate cost plane, the retrospective operational Top1 at B100/MAE 0.0399 dominates M1 at B100/MAE 0.1852. Thus the original line is **not** the nondominated frontier over all reported operating points; it can only be described as the frontier of the *selected prospective primary set*, or it must be redrawn and annotated with retrospective status and additional provider-construction cost. This first B1 draft does not reuse the misleading frontier graphic.
 
-# 8. Expanded evaluation (Phase II)
+# 7. Expanded evaluation (Phase II)
 
-## 8.1 Eligibility and exact prediction population
+## 7.1 Eligibility and exact prediction population
 
 [Phase-5](#appendix-c-experimental-chronology-and-method-versions) planned 16 physical world-by-graph cells. Under the Step-0 eligibility/confirmation protocol, the four cells in world P2 failed. The remaining **12** cells cover worlds P1, P3, P4 across G_PAR, G_SEQ, G_SEQPAR and G_PARSEQ. Each has 15 frozen SLA queries, evaluated at 37 horizons; each has a distinct fresh $N_{\mathrm{WB}}=1000$ graph reference.
 
 There is **no estimate for the preregistered P2 component of the [Phase-5](#appendix-c-experimental-chronology-and-method-versions) directional heterogeneity contrast**. The later induced-public-region P2 study used a different query design and cannot be substituted into this missing prospective cohort.
 
-## 8.2 Executed V3b method comparison
+## 7.2 Executed V3b method comparison
 
 The [Phase-5](#appendix-c-experimental-chronology-and-method-versions) evaluation used V3b-selected candidate banks: **M1 = one joint model, M2 = 27 equal-weight joint members, M3 = FULL343 weighted joint members**. The independently checked saved pointwise metrics are:
 
@@ -449,7 +447,7 @@ These are aggregate scores over the **12 eligible physical cells only**, not a p
 
 Because M0 is defined on a smaller and selected applicable set, its aggregate MAE cannot be directly compared to the all-query rows. Moreover M1/M2/M3 have sharply different graph simulation budgets, so the aggregate ranking does not isolate simulation efficiency at equal cost, nor does the pre-WB change from Top14 to FULL343 permit a direct unchanged-algorithm replication of the September pilot.
 
-## 8.3 Topology and provider-world effects
+## 7.3 Topology and provider-world effects
 
 The prospectively specified topology statistic for each method and provider world was
 
@@ -467,11 +465,11 @@ The 6,660 measurements reuse simulation trajectories across SLA conditions and t
 
 The scientifically material result is twofold: a weighted finite ensemble maintained a favorable aggregate *ranking* among the executed methods, and its **absolute prediction remained too inaccurate in several difficult regions** to claim dependable generic SLA estimation.
 
-# 9. Retrospective investigation (Phase III)
+# 8. Retrospective investigation (Phase III)
 
 [Phase III](#appendix-c-experimental-chronology-and-method-versions) brings together original-method comparisons on the previously inspected [Phase II](#appendix-c-experimental-chronology-and-method-versions) reference, D0--D9 pilot–battery forensic checks, and related post-result exploratory investigations. The latter retain their historical experiment labels and do not provide a new independent holdout.
 
-## 9.1 Original-style M3 transfer to the Phase II battery
+## 8.1 Original-style M3 transfer to the Phase II battery
 
 To address the missing comparison with the original M3, a **retrospective** experiment reconstructed the originally registered [Phase-5 V2](#appendix-c-experimental-chronology-and-method-versions)-style M3 method across all **12 Step-0-eligible physical cases** (P1, P3 and P4, each on four graph structures). This experiment was designed **after** the earlier [Phase-5 V3b](#appendix-c-experimental-chronology-and-method-versions) reference outcomes had been inspected. It reused the existing frozen 15 SLA queries per cell, 37 scored horizons (60 to 240 seconds), and N=1000 final white-box reference per cell. P2 was neither repaired nor reintroduced.
 
@@ -504,7 +502,7 @@ These results **do not establish that a larger ensemble causes better prediction
 
 The supplied result archive passed **316 independently recomputed numerical and SHA-256 checks, with zero failures**. This includes 12/12 global prediction-manifest links, all included model-prediction hashes, provider weight normalization, recovery of the Top14 from all $48^3$ joint products, and pointwise/error table reconciliation. The comparator reproduces the earlier FULL343 MAE 0.121890. The archive does **not** include 12 Top14 member-curve files or raw graph trajectory ledgers, so this is numerical/artifact verification, **not an independent bitwise replay**.
 
-## 9.2 Pilot–battery divergence tracing
+## 8.2 Pilot–battery divergence tracing
 
 This [Phase III](#appendix-c-experimental-chronology-and-method-versions) forensic control tests what was preserved when progressing from the [Phase I](#appendix-c-experimental-chronology-and-method-versions) controlled pilot to the [Phase II](#appendix-c-experimental-chronology-and-method-versions) expanded battery. It uses archived records and sampled replay trajectories, not a new prospective accuracy test.
 
@@ -527,7 +525,7 @@ These scores measure how well the models reproduce each provider's advertised pr
 
 The complete audit ledger is `first_science/b1/retrospective_m3/PHASE_III_DIVERGENCE_CONTROL_REGISTER_2026-10-20.md`.
 
-## 9.3 Post-result I1/I2 pipeline development (historical Phase-6)
+## 8.3 Post-result I1/I2 pipeline development (historical Phase-6)
 
 After the [Phase II](#appendix-c-experimental-chronology-and-method-versions) expanded battery (historical [Phase-5](#appendix-c-experimental-chronology-and-method-versions)), the six M2 variants defined in Section 4.3 were evaluated on **P4/G_SEQPAR**, using 15 queries × 37 horizons = 555 related SLA measurements per variant. Their reconstruction-search architecture and graph-propagation budgets were matched at **B=2,700 graph runs per variant**. Their disclosed evidence and/or provider-fitting criteria differed, as specified in Section 4.3.
 
@@ -546,7 +544,7 @@ The stronger I1 control performs best or near-best among these **joint informati
 
 Privileged known-provider/oracle studies and provider-factorial substitutions were additionally reported, but are not treated as deployable I1-only methods or as equivalently independently audited core results.
 
-## 9.4 Distinct P2 public-induced-region comparison
+## 8.4 Distinct P2 public-induced-region comparison
 
 The October P2/G_PAR study chose the graph admissibility region deterministically from the **same published I1 rectangles** for all three reconstruction methods. It evaluated five same-$\rho$ queries over 37 horizons, or **185 points per method**, with a new reference design distinct from the failed [Phase-5](#appendix-c-experimental-chronology-and-method-versions) P2 Step-0 conditions.
 
@@ -558,7 +556,7 @@ The October P2/G_PAR study chose the graph admissibility region deterministicall
 
 Here all three methods are evaluated against **the same** $A_G^{I1+M0}$, constructed from the I1 provider limits using M0's boundary rules. They differ in process reconstruction and subsequent graph prediction. Hence no difference above measures graph-region reconstruction quality. The simulation budgets are **unmatched**; M3's small observed MAE advantage does not establish equal-cost superiority. This study cannot be read as a post-hoc repair of four earlier ineligible P2 cells.
 
-## 9.5 Privileged search-deficit diagnosis
+## 8.5 Privileged search-deficit diagnosis
 
 A separate P2 audit evaluated the actual hidden provider parameters against the public I1 target using the **same $N=100$ rescore and independent replay bank** as the finite reconstruction candidates. For each of three providers the true parameter vector was inside the search domain, yet it achieved better I1 RMSE than the selected best available V3b candidates:
 
@@ -572,9 +570,9 @@ The registered seven-by-25-trial search generated **525** total provider trials 
 
 It remains possible for a public interface to be non-identifying in some formal sense; however this particular evidence cannot prove that non-identifiability caused the observed prediction error. A 42-configuration, two-seed-bank $\pm20\%$ one-at-a-time local perturbation audit additionally measured finite objective sensitivity; it neither identifies the full local Hessian nor proves uniqueness or global optimizer convergence.
 
-# 10. Uncertainty mathematics and cross-experiment interpretation
+# 9. Uncertainty mathematics and cross-experiment interpretation
 
-## 10.1 Numerical Monte Carlo precision
+## 9.1 Numerical Monte Carlo precision
 
 For a fixed reconstructed ensemble with normalized weights $\alpha_j$ and estimates $\widehat p_j$, let $\widehat p_M=\sum_j\alpha_j\widehat p_j$. The variance identity is
 
@@ -593,7 +591,7 @@ Separately, the Wilson intervals included in I1 measure sampling uncertainty in 
 
 A rigorous fixed-sample conditional alternative, if required in later work, can be derived from a weighted Hoeffding inequality for independent bounded member outcomes, but this was **not an evaluated new estimator** in the frozen experiments. Sequentially peeking at ordinary fixed-sample intervals until a threshold is crossed does not preserve nominal coverage without a separately specified anytime-valid procedure.
 
-## 10.2 Model dispersion is a distinct diagnostic
+## 9.2 Model dispersion is a distinct diagnostic
 
 Let $p_j=E[\widehat p_j]$, $p_\alpha=\sum_j\alpha_jp_j$ and $\widehat p=\sum_j\alpha_j\widehat p_j$. The observed finite-ensemble dispersion is
 
@@ -636,7 +634,7 @@ The different uncertainties are summarized as follows:
 | Across-world/graph variation | Distinct designed physical cells | Representative real-world uncertainty from only a few cells |
 | Hidden-truth error and parameter diagnostics | Privileged reference available after freeze | A deployable estimator without privileged evidence |
 
-## 10.3 Cross-phase lessons
+## 9.3 Cross-phase lessons
 
 These lessons compare global [Phase I](#appendix-c-experimental-chronology-and-method-versions) (controlled pilot), [Phase II](#appendix-c-experimental-chronology-and-method-versions) (expanded battery) and [Phase III](#appendix-c-experimental-chronology-and-method-versions) (retrospective divergence tracing) while preserving their distinct reference populations and evidence status.
 
@@ -651,7 +649,7 @@ These lessons compare global [Phase I](#appendix-c-experimental-chronology-and-m
 
 **Numerical convergence is insufficient for dependability.** Larger graph budget can reduce finite simulation noise without changing bias due to model/search error. No threshold band yet covers the total uncertainty required for a certified real-service admission decision.
 
-# 11. Threats to validity and reproducibility
+# 10. Threats to validity and reproducibility
 
 **Finite physical setting.** The core study uses three providers and four logical ASTs on a fixed physical embedding. It does not generalize by itself to arbitrary service graphs, cross-region placement, multi-tenant failures, dynamic routing or real production deployments. The provider generators and fitted process family are related; robustness to substantial model misspecification is not established.
 
@@ -674,7 +672,7 @@ These lessons compare global [Phase I](#appendix-c-experimental-chronology-and-m
 
 **External literature and coauthor consent.** The bibliography is inherited from the source manuscript and is **provisional**. References, citation details, current related work and venue overlap policy must be verified before any public release. This draft is internal and does not constitute coauthor approval for arXiv posting.
 
-# 12. Conclusions and falsifiable next questions
+# 11. Conclusions and falsifiable next questions
 
 Across [Phase I](#appendix-c-experimental-chronology-and-method-versions) (controlled pilot), [Phase II](#appendix-c-experimental-chronology-and-method-versions) (expanded battery) and [Phase III](#appendix-c-experimental-chronology-and-method-versions) (retrospective divergence tracing), the PRAISE program implemented a discrete-event native composition benchmark, finite public provider SLA disclosures and multiple reconstructed-model integration procedures. It established robust provenance for important frozen outputs, including a hash-frozen prediction/reference separation in the broad [Phase-5](#appendix-c-experimental-chronology-and-method-versions) battery. The favorable single-world pilot numerical findings were genuine, but the broader evaluation showed **material residual prediction errors** and did not establish general reconstruction sufficiency.
 
