@@ -343,7 +343,7 @@ The four frozen dependency maps are:
 | G_SEQPAR | none | A | A | $A\to(B\parallel C)$ |
 | G_PARSEQ | none | none | B | $A\parallel(B\to C)$ |
 
-WATT is zero in these test topologies and messages use a neutral QoS propagation specification; although $(L,C,Q)$ is the formal admissibility schema, strong empirical energy/quality variation was not established by the core battery. These are limits on external validity, not omissions to conceal.
+The simulator can also represent device power consumption and the quality of a service's output. In this evaluation, the power-consumption parameter (WATT) is set to zero for every simulated device. AICon can vary output quality according to the fraction of an application's required instructions that are executed, but here each module executes its full instruction demand, so this mechanism does not introduce quality variation. Although the SLA objective includes latency, cost and quality $(L,C,Q)$, the experiments primarily investigate latency and cost, not changes in energy consumption or output quality.
 
 ## 5.2 White-box worlds, public evidence, and test set design
 
