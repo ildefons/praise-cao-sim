@@ -343,7 +343,7 @@ The four frozen dependency maps are:
 | G_SEQPAR | none | A | A | $A\to(B\parallel C)$ |
 | G_PARSEQ | none | none | B | $A\parallel(B\to C)$ |
 
-The inspected runtime constructs an empty acting management-agent network. It therefore evaluates *offline graph performance estimation*, not online active-inference orchestration, decentralized planning or adaptive placement. WATT is zero in these test topologies and messages use a neutral QoS propagation specification; although $(L,C,Q)$ is the formal admissibility schema, strong empirical energy/quality variation was not established by the core battery. These are limits on external validity, not omissions to conceal.
+WATT is zero in these test topologies and messages use a neutral QoS propagation specification; although $(L,C,Q)$ is the formal admissibility schema, strong empirical energy/quality variation was not established by the core battery. These are limits on external validity, not omissions to conceal.
 
 ## 5.2 White-box worlds, public evidence, and test set design
 
