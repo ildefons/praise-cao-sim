@@ -419,7 +419,7 @@ Q_G\ge q_G^{\rm base}(\rho)\}.
 
 The scaling factor specifies the difficulty of the requested SLA: $\gamma>1$ allows more latency and cost, whereas $\gamma<1$ imposes tighter limits. We combined three such difficulty levels with five compliance thresholds $\rho$, giving 15 SLA conditions. Each condition was evaluated at 37 observation horizons, from 60 to 240 seconds, using the same bank of $N_{\rm WB}=200$ independent simulation trajectories. For each trajectory and horizon, we calculated the fraction of decided requests satisfying the requested SLA region. The reference probability was the proportion of trajectories in which that fraction reached the required threshold $\rho$. Because the same trajectories were evaluated repeatedly, these reference measurements are related.
 
-Using M0's rules to choose the test conditions is separate from using M0 as a predictor. Its prediction is based on the published I1 probabilities, not the simulated reference outcomes. With fixed provider disclosures, M0 gives the same probability for requested regions containing its baseline region ($\gamma\ge1$), while it is not applicable to tighter regions ($\gamma<1$).
+Using M0's aggregation rules to choose the SLA test conditions is separate from using M0 to predict SLA satisfaction. The reference probabilities were obtained from simulations of the actual composed service, independently of M0's predictions.
 
 \subsection*{6.2 Prediction errors and historical cutoff diagnostic}
 
