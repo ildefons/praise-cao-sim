@@ -501,11 +501,9 @@ Weighted14 production-allocation B1400 & 0.03037 & 0.03578 & +0.02824 \\
 
 The two equal-allocation variants use the same simulated trajectories, so their difference shows the effect of changing the averaging weights. In contrast, production allocation changes both the number of simulations assigned to each model and the random simulation seeds. Its lower error therefore cannot be attributed to allocation alone. Top1 also achieved a slightly lower MAE than production Weighted14 in this pilot, showing that averaging several models was not necessary for the lowest observed error under these conditions.
 
-\subsection*{6.4 Hidden-parameter audit and restricted cost frontier}
+\subsection*{6.4 Hidden-parameter recovery}
 
 A retrospective analysis compared the actual provider parameters used in the simulations with those reconstructed by M1 and M3-Top1. In this pilot, some reconstructed parameters, particularly for Provider C, differed substantially from the actual values, even when graph-level prediction errors were small. This shows that accurate graph-level prediction does not necessarily require accurate recovery of the hidden provider parameters.
-
-The historical Figure 2 labeled a curve the “nondominated” recurring-cost/MAE frontier while plotting only chosen primary prospective implementations. In the same reported two-coordinate cost plane, the retrospective operational Top1 at B100/MAE 0.0399 dominates M1 at B100/MAE 0.1852. Thus the original line is \textbf{not} the nondominated frontier over all reported operating points; it can only be described as the frontier of the \emph{selected prospective primary set}, or it must be redrawn and annotated with retrospective status and additional provider-construction cost. This first B1 draft does not reuse the misleading frontier graphic.
 
 \section*{7. Expanded evaluation (Phase II)}
 \addcontentsline{toc}{section}{7. Expanded evaluation (Phase II)}
