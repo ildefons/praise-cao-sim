@@ -403,9 +403,11 @@ The methods and procedures also changed during development. Provider-model recon
 
 The controlled pilot (Phase I) provided the first evaluation of the prediction methods using a single provider configuration and composition graph. It established an initial comparison of their prediction accuracy under fixed experimental conditions. The results also motivated the broader evaluation presented in the following section. As detailed in Appendix C, the pilot and subsequent evaluations involved different method versions and therefore serve distinct scientific purposes.
 
-\subsection*{6.1 Query population and reference}
+\subsection*{6.1 Construction of the pilot reference}
 
-The pilot evaluated a service composed of three providers operating in parallel. Throughout the experiment, the providers' underlying models and published I1 information remained fixed. A new request was generated every 0.2 seconds. To construct the SLA test conditions, we first combined the advertised provider limits using M0's aggregation rules (Section 4.1). For this parallel composition, the baseline latency was the largest provider latency plus fixed delays, the baseline cost was the sum of provider costs plus fixed costs, and the baseline quality was the lowest provider quality. These limits define the baseline graph region $A_G^{\rm base}(\rho)=A_G^{I1+M0}(\rho)$. We then scaled its latency and cost limits by a factor $\gamma$ to obtain different requested SLA regions:
+The pilot evaluated one fixed service composed of three providers operating in parallel, with a new request generated every 0.2 seconds. To measure prediction accuracy, we needed reference probabilities for the actual composed service. We therefore simulated it repeatedly using the underlying provider models, which were not available to the prediction methods. Each simulation produced request outcomes from which we could assess end-to-end SLA compliance at different observation horizons. The provider models and their published I1 information remained fixed throughout the pilot.
+
+The simulation outcomes could be assessed against many different SLA requirements, so we first had to choose which requirements to test. In the original pilot, we used the advertised provider limits as a starting point. We combined them using M0's aggregation rules (Section 4.1): for this parallel graph, the baseline latency is the largest provider latency plus fixed delays, the costs are added together with fixed costs, and the baseline quality is the lowest provider quality. This defines the baseline SLA region $A_G^{\rm base}(\rho)=A_G^{I1+M0}(\rho)$. We then scaled its latency and cost limits by a factor $\gamma$, leaving the quality limit unchanged:
 
 \begin{equation*}
 A_G(\gamma,\rho)
@@ -415,9 +417,9 @@ Q_G\ge q_G^{\rm base}(\rho)\}.
 \tag{16}
 \end{equation*}
 
-The factor $\gamma$ sets how demanding the requested SLA is: values above one allow greater latency and cost, while values below one impose tighter limits. M0 has two separate roles in this experiment. Its aggregation rules define the baseline region, but its probability prediction multiplies the providers' published I1 probabilities. Because those probabilities remain fixed, M0 gives the same estimate for every requested region containing its baseline region ($\gamma\ge1$). For tighter requests ($\gamma<1$), M0 reports that it is not applicable. The white-box reference instead estimates satisfaction of each requested region $A_G(\gamma,\rho)$ using the underlying provider models.
+The scaling factor specifies the difficulty of the requested SLA: $\gamma>1$ allows more latency and cost, whereas $\gamma<1$ imposes tighter limits. We combined three such difficulty levels with five compliance thresholds $\rho$, giving 15 SLA conditions. Each condition was evaluated at 37 observation horizons, from 60 to 240 seconds, using the same bank of $N_{\rm WB}=200$ independent simulation trajectories. For each trajectory and horizon, we calculated the fraction of decided requests satisfying the requested SLA region. The reference probability was the proportion of trajectories in which that fraction reached the required threshold $\rho$. Because the same trajectories were evaluated repeatedly, these reference measurements are related.
 
-Five thresholds times three difficulty regimes generated 15 queries. Evaluation used 37 horizons from 60 to 240 seconds. The pilot's fresh reference bank contained $N_{\rm WB}=200$ trajectories.
+Using M0's rules to choose the test conditions is separate from using M0 as a predictor. Its prediction is based on the published I1 probabilities, not the simulated reference outcomes. With fixed provider disclosures, M0 gives the same probability for requested regions containing its baseline region ($\gamma\ge1$), while it is not applicable to tighter regions ($\gamma<1$).
 
 \subsection*{6.2 Prediction errors and historical cutoff diagnostic}
 
