@@ -424,7 +424,9 @@ The pilot's M3 production errors were substantially smaller than those of M1/M2 
 
 ## 6.3 Retrospective support and weighting
 
-A later frozen pilot Stage-B audit compared several estimators at matched total $B=1400$ in the same world:
+To understand the role of model selection, weighting, and simulation allocation in the pilot, we compared alternative predictors on the same provider configuration and graph. Table 2 presents their prediction errors, with each method using a total of 1,400 simulations of the composed service.
+
+**Table 2.** Retrospective comparison of pilot estimators using 1,400 composed-service simulations each. Top1 uses the highest-weight joint model; the 14-model variants differ in model weighting and simulation allocation. Errors are measured against the pilot WB reference.
 
 | Retrospective pilot estimator | MAE | RMSE | Bias |
 |:--|--:|--:|--:|
