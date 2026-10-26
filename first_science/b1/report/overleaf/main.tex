@@ -5,9 +5,12 @@
 \setsansfont{DejaVu Sans}
 \usepackage{amsmath,amssymb,mathtools}
 \usepackage{booktabs,longtable,array}
+\usepackage{ragged2e}
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 \usepackage{graphicx,subcaption}
 \usepackage{xcolor}
 \usepackage{microtype}
+\usepackage{xurl}
 \usepackage{hyperref}
 \usepackage{float}
 \usepackage{enumitem}
@@ -18,6 +21,7 @@
 \setcounter{tocdepth}{2}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{4.8pt plus 1.1pt minus 1pt}
+\emergencystretch=2em
 \setlist[itemize]{leftmargin=*,itemsep=1pt}
 \setlist[enumerate]{leftmargin=*,itemsep=1pt}
 \title{\textbf{End-to-End SLA Estimation from Limited Provider Disclosures}\\[4pt]
@@ -162,7 +166,7 @@ Note that I1 discloses provider-level regions $A_i$, not the graph-level SLA que
 
 \subsection*{3.2 Enriched I2 interfaces}
 
-The post-result I1/I2 experiments were developed in the repository's \texttt{first\_science/phase6/} folder (historical \hyperref[app:experiment-stages]{Phase-6}) and belong to global \hyperref[app:experiment-stages]{Phase III} in this report. They retain the I1 provider regions and horizon grid and reuse the corresponding provider-local simulation evidence. What changes is the information disclosed to the integrator about how often, and how consistently, each provider satisfies its advertised regions.
+The post-result I1/I2 experiments were developed in the repository's \path{first_science/phase6/} folder (historical \hyperref[app:experiment-stages]{Phase-6}) and belong to global \hyperref[app:experiment-stages]{Phase III} in this report. They retain the I1 provider regions and horizon grid and reuse the corresponding provider-local simulation evidence. What changes is the information disclosed to the integrator about how often, and how consistently, each provider satisfies its advertised regions.
 
 \textbf{I2a: distribution of compliance across simulation runs.} Fix one advertised provider region and one evaluation horizon. In each independent simulation run, the provider handles many requests. We calculate the percentage of requests decided by that horizon that satisfy the region's latency, cost and quality limits. This gives \textbf{one compliance percentage per run}. To illustrate, suppose four runs produce 98\%, 96\%, 94\% and 70\% compliance. If the SLA requires at least 95\%, two runs satisfy it and two do not. For this threshold, I1 would report only the pass rate, 2 out of 4 runs (50\%). I2a would instead disclose the four compliance percentages themselves, sorted as 70\%, 94\%, 96\% and 98\%. The integrator can therefore see not only how often the SLA is met, but also how much compliance varies and how severely it can fall below the requirement. In the actual experiment, \textbf{100 independent runs}, rather than four, provide 100 compliance percentages for each advertised region and horizon. These percentages are sorted separately for every horizon, so I2a does not reveal which values at different horizons came from the same run.
 
@@ -337,7 +341,7 @@ For fixed models, weights and simulation counts, the bound uses the elementary f
 
 For integer counts $N_j\ge1$, adding one trajectory to member $j$ reduces the bound by $\alpha_j^2/[4N_j(N_j+1)]$. M3 starts with one trajectory per joint model and assigns each remaining trajectory to the largest reduction, with deterministic rank-based ties. This is a marginal-priority integer allocation of the kind studied by Wright (2014; Appendix D). The factor $1/4$ is common to all members and can be omitted when ranking priorities. In the executed FULL343 support, $\alpha_j=W_j$, giving the implemented rule $\Delta_j=W_j^2/[N_j(N_j+1)]$.
 
-A separate read-only verification script \texttt{verify\_method\_support\_v0\_1.py} reproduced the archived 343-member, $B=1400$ allocation counts for P1, P3 and P4; its findings are recorded in \texttt{METHOD\_SUPPORT\_VERIFICATION\_REVIEW\_2026-10-16.md} (Appendix B.1). This checks agreement between the saved allocations and the specified rule. It does \textbf{not} demonstrate improved prediction accuracy, verify every simulation trajectory or address error caused by the reconstructed provider models.
+A separate read-only verification script \path{verify_method_support_v0_1.py} reproduced the archived 343-member, $B=1400$ allocation counts for P1, P3 and P4; its findings are recorded in \path{METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md} (Appendix B.1). This checks agreement between the saved allocations and the specified rule. It does \textbf{not} demonstrate improved prediction accuracy, verify every simulation trajectory or address error caused by the reconstructed provider models.
 
 \textbf{M3 Top1 is not necessarily M1.} M1 selects by minimum I1 RMSE, while M3's highest-weight joint model is determined by the product of KL-based provider weights. More generally, comparing M3 with M2 also changes candidate coverage, weighting loss and graph-simulation allocation. An observed difference in prediction accuracy therefore does not isolate the effect of KL weighting alone.
 
@@ -361,7 +365,7 @@ The four frozen dependency maps are:
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}@{}}
+\begin{longtable}{@{}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}@{}}
 \toprule
 Logical graph & A predecessors & B predecessors & C predecessors & Reading \\
 \midrule
@@ -428,7 +432,7 @@ Table~\ref{tab:pilot-prediction-errors} compares the prediction errors of the fo
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}@{}}
+\begin{longtable}{@{}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}@{}}
 \caption{Pilot prediction errors, measured against the simulation-based reference. MAE is mean absolute error; RMSE is root mean squared error. The applicable measurements differ for M0.}\label{tab:pilot-prediction-errors}\\
 \toprule
 Method, pilot & Graph trajectories & Applicable points & MAE & RMSE & Signed bias \\
@@ -477,7 +481,7 @@ To understand the role of model selection, weighting, and simulation allocation 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.2400\textwidth}p{0.2400\textwidth}p{0.2400\textwidth}p{0.2400\textwidth}@{}}
+\begin{longtable}{@{}L{0.2400\textwidth}L{0.2400\textwidth}L{0.2400\textwidth}L{0.2400\textwidth}@{}}
 \caption{Retrospective pilot comparison with 1,400 composed-service simulations per variant. Top1 uses only the highest-weight joint model. Equal-allocation variants simulate each of the 14 selected models 100 times: Uniform14 averages their predictions equally, whereas Weighted14 uses the weights derived from public provider information. Production-allocation Weighted14 uses the same models and weights but assigns more simulations to higher-weight models. Errors are measured against the pilot WB reference.}\label{tab:pilot-retrospective-comparison}\\
 \toprule
 Retrospective pilot estimator & MAE & RMSE & Bias \\
@@ -521,7 +525,7 @@ The \hyperref[app:experiment-stages]{Phase-5} evaluation used V3b-selected candi
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}@{}}
+\begin{longtable}{@{}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}@{}}
 \toprule
 \hyperref[app:experiment-stages]{Phase-5} executed V3b & Evaluated points & Graph trajectories/cell & MAE & RMSE & Signed bias \\
 \midrule
@@ -655,7 +659,7 @@ These are \textbf{held-out KL scores on the individual providers' advertised pro
 
 \textbf{Provider-level versus composed-graph fit.} Mean provider-level Full48 public-I1 MAE was 0.1277 (pilot), 0.1314 (P1), 0.1556 (P3) and 0.1101 (P4). Corresponding original-style Top14 G\_PAR graph MAEs were 0.0304, 0.2447, 0.2511 and 0.1098. The two error measures have different targets and cannot be equated, but the pattern rejects a simple account of uniformly worse provider-level fit. Sensitivity to particular SLA queries, approximation errors and error cancellation remain possible explanations; inherent insufficiency of I1 is \emph{not} proved.
 
-Two interacting methodological challenges emerge: \textbf{predictive sufficiency} of provider statistics reconstructed from individual disclosures for composed SLA events, and \textbf{experimental-protocol fidelity} as parameter domains, hyperparameter selection, support rules and query regions change. D0--D9 close a bounded forensic audit; they do not uniquely attribute the pilot--battery accuracy gap. A new prospective one-axis-at-a-time experiment would be needed for causal attribution. Full register: \texttt{first\_science/b1/retrospective\_m3/PHASE\_III\_DIVERGENCE\_CONTROL\_REGISTER\_2026-10-20.md}.
+Two interacting methodological challenges emerge: \textbf{predictive sufficiency} of provider statistics reconstructed from individual disclosures for composed SLA events, and \textbf{experimental-protocol fidelity} as parameter domains, hyperparameter selection, support rules and query regions change. D0--D9 close a bounded forensic audit; they do not uniquely attribute the pilot--battery accuracy gap. A new prospective one-axis-at-a-time experiment would be needed for causal attribution. Full register: \path{first_science/b1/retrospective_m3/PHASE_III_DIVERGENCE_CONTROL_REGISTER_2026-10-20.md}.
 
 \subsection*{8.3 Post-result I1/I2 pipeline development (historical Phase-6)}
 
@@ -700,7 +704,7 @@ The October P2/G\_PAR study chose the graph admissibility region deterministical
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}@{}}
+\begin{longtable}{@{}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}@{}}
 \toprule
 P2/G\_PAR method & Native graph trajectories & MAE & RMSE & Bias \\
 \midrule
@@ -725,7 +729,7 @@ A separate P2 audit evaluated the actual hidden provider parameters against the 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}p{0.1920\textwidth}@{}}
+\begin{longtable}{@{}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}@{}}
 \toprule
 P2 provider & True $\theta$ rescore RMSE & Selected-best rescore RMSE & True $\theta$ replay RMSE & Selected-best replay RMSE \\
 \midrule
@@ -804,7 +808,7 @@ The different uncertainties are summarized as follows:
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.3200\textwidth}p{0.3200\textwidth}p{0.3200\textwidth}@{}}
+\begin{longtable}{@{}L{0.3200\textwidth}L{0.3200\textwidth}L{0.3200\textwidth}@{}}
 \toprule
 Quantity & Obtained from & What it does \emph{not} certify \\
 \midrule
@@ -949,21 +953,21 @@ For experimental assertions: frozen experiment contract plus source implementati
 The following documents in \texttt{first\_science/b1/} are the companion reproducibility record:
 
 \begin{itemize}
-\item \texttt{evidence\_registry\_v1\_0.json}, E01–E12, machine-readable study roles, versions, source paths, numerical values and caveats;
-\item \texttt{METHOD\_VERSION\_CHRONOLOGY\_2026-10-16.md}, \hyperref[app:experiment-stages]{Phase1}–6 and October P2 stage order;
-\item \texttt{PHASE4\_VERIFICATION\_REVIEW\_2026-10-16.md}, independent pilot and Stage-B pointwise checks;
-\item \texttt{VERIFICATION\_REVIEW\_V0\_3\_2026-10-16.md}, \hyperref[app:experiment-stages]{Phase5}/\hyperref[app:experiment-stages]{Phase6}/P2 verified saved metrics;
-\item \texttt{TABLES\_FIGURES\_SOURCE\_RECONCILIATION\_2026-10-16.md}, 22 original source files, Table2–4 and Fig2–3 checks;
-\item \texttt{METHOD\_SUPPORT\_VERIFICATION\_REVIEW\_2026-10-16.md}, 132 V3b selection/allocation checks;
-\item \texttt{SIMULATOR\_PROVENANCE\_AUDIT\_2026-10-16.md} and \texttt{RUNTIME\_PROVENANCE\_VERIFICATION\_REVIEW\_2026-10-16.md}, code scope, smoke sequencing, 94-pass stage/hash audit;
-\item \texttt{UNCERTAINTY\_MATHEMATICS\_AUDIT\_2026-10-16.md}, exact and approximate interval/variance results;
-\item \texttt{B1\_M3\_RETROSPECTIVE\_EVIDENCE\_AUDIT\_2026-10-20.md}, retrospective original-style M3: 316 pass, zero fail;
-\item \texttt{retrospective\_m3/PHASE\_III\_DIVERGENCE\_CONTROL\_REGISTER\_2026-10-20.md}, bounded D0--D9 forensic results and limitations;
-\item \texttt{FINAL\_AUDIT\_SIGNOFF\_2026-10-16.md}, conditional drafting authorization and unresolved publication gates;
-\item \texttt{MANUSCRIPT\_CLAIM\_AUDIT\_V0\_1.csv}, 68 claims and required dispositions.
+\item \path{evidence_registry_v1_0.json}, E01–E12, machine-readable study roles, versions, source paths, numerical values and caveats;
+\item \path{METHOD_VERSION_CHRONOLOGY_2026-10-16.md}, \hyperref[app:experiment-stages]{Phase1}–6 and October P2 stage order;
+\item \path{PHASE4_VERIFICATION_REVIEW_2026-10-16.md}, independent pilot and Stage-B pointwise checks;
+\item \path{VERIFICATION_REVIEW_V0_3_2026-10-16.md}, \hyperref[app:experiment-stages]{Phase5}/\hyperref[app:experiment-stages]{Phase6}/P2 verified saved metrics;
+\item \path{TABLES_FIGURES_SOURCE_RECONCILIATION_2026-10-16.md}, 22 original source files, Table2–4 and Fig2–3 checks;
+\item \path{METHOD_SUPPORT_VERIFICATION_REVIEW_2026-10-16.md}, 132 V3b selection/allocation checks;
+\item \path{SIMULATOR_PROVENANCE_AUDIT_2026-10-16.md} and \path{RUNTIME_PROVENANCE_VERIFICATION_REVIEW_2026-10-16.md}, code scope, smoke sequencing, 94-pass stage/hash audit;
+\item \path{UNCERTAINTY_MATHEMATICS_AUDIT_2026-10-16.md}, exact and approximate interval/variance results;
+\item \path{B1_M3_RETROSPECTIVE_EVIDENCE_AUDIT_2026-10-20.md}, retrospective original-style M3: 316 pass, zero fail;
+\item \path{retrospective_m3/PHASE_III_DIVERGENCE_CONTROL_REGISTER_2026-10-20.md}, bounded D0--D9 forensic results and limitations;
+\item \path{FINAL_AUDIT_SIGNOFF_2026-10-16.md}, conditional drafting authorization and unresolved publication gates;
+\item \path{MANUSCRIPT_CLAIM_AUDIT_V0_1.csv}, 68 claims and required dispositions.
 \end{itemize}
 
-The Phase-5 M3 allocation check uses the archived \texttt{verify\_method\_support\_v0\_1.py} script to recompute greedy member counts from Gibbs weights and compare them with frozen pre-execution allocation tables for P1, P3 and P4. This is an allocation-consistency check, not independent evidence of predictive validity.
+The Phase-5 M3 allocation check uses the archived \path{verify_method_support_v0_1.py} script to recompute greedy member counts from Gibbs weights and compare them with frozen pre-execution allocation tables for P1, P3 and P4. This is an allocation-consistency check, not independent evidence of predictive validity.
 
 \subsubsection*{Audited integrity milestones}
 
@@ -1007,7 +1011,7 @@ This appendix distinguishes the \textbf{scientific role} of an experiment from t
 \addcontentsline{toc}{subsection}{C.1 Experiment chronology (Table C.1)}
 
 \begingroup\small\setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.21\textwidth}p{0.22\textwidth}p{0.52\textwidth}@{}}
+\begin{longtable}{@{}L{0.21\textwidth}L{0.22\textwidth}p{0.52\textwidth}@{}}
 \toprule
 Scientific purpose & Historical repository stage & What was done and what it establishes \\
 \midrule
@@ -1037,7 +1041,7 @@ The repository chronology and source-level method audits are listed in Appendix 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{@{}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}p{0.1600\textwidth}@{}}
+\begin{longtable}{@{}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}@{}}
 \toprule
 Period & M1 selection & M2 membership & M3 support & Main M3 graph budget & Evidence role \\
 \midrule
