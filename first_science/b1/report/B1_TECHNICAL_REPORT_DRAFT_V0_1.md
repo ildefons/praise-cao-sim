@@ -401,7 +401,24 @@ Table 1 compares the prediction errors of the four methods against the pilot's s
 
 *MAE, RMSE and bias are computed against the WB reference. Positive bias means optimistic prediction. M0 could produce predictions for only 9 of the 15 SLA conditions (333 of 555 measurements). For the other six SLA conditions, M0 could not provide a prediction because the required latency and cost limits were tighter than those it calculated from the providers' advertised information. This does not imply that the service would fail those conditions. Its prediction errors are therefore not directly comparable with those of the other methods, which were evaluated on all 15 conditions. M3 used 1,400 simulations of the composed service, compared with 2,700 for M2. However, these counts exclude the computational cost of reconstructing the provider models, so they do not establish which method is less expensive overall.*
 
-As a **secondary historical diagnostic**, the pilot applied an arbitrary cutoff $\beta=0.90$ to predicted and white-box-referenced SLA-satisfaction probabilities and compared the resulting yes/no labels. This cutoff was **not a contractual SLA requirement**, and the diagnostic was not part of the main probability-estimation objective. The audit used reference-WB pointwise Wilson intervals to identify **481 reference-certain** query/horizon points among 555. Only **274** were M0-applicable and reference-certain. The historically observed agreements were **33.94%** (M0 on 274), **37.63%** (M1), **86.07%** (M2), **96.47%** (M3 B1400), and **97.09%** (M3 B2000), with the latter four computed on 481 points. These percentages are **descriptive conditional agreements with the WB reference**, not calibrated real-world admission success rates or independent-scenario accuracy estimates.
+Besides measuring probability errors, the pilot also examined whether the methods made the same yes/no decision as the WB reference. The quantity being predicted, defined in Eq. (4), is the probability that at least a fraction $\rho$ of decided requests meets the SLA. For this additional analysis, we used an illustrative probability threshold $\beta=0.90$:
+
+$$
+\begin{aligned}
+\sigma_G(A,H;\rho)
+&=\Pr\{c_G(A,H)\ge\rho\},\\[3pt]
+d_M(A,H;\rho,\beta)
+&=
+\begin{cases}
+1, & \widehat{\sigma}_G^M(A,H;\rho)\ge\beta,\\
+0, & \widehat{\sigma}_G^M(A,H;\rho)<\beta.
+\end{cases}
+\end{aligned}
+$$
+
+Here $\rho$ is the required fraction of compliant requests, while $\beta$ is the minimum predicted probability of achieving that fraction. A decision of 1 means the method predicts a probability of at least 0.90; otherwise the decision is 0. We obtained the corresponding WB decision by applying the same threshold to the WB reference probability. The choice $\beta=0.90$ was made for this secondary comparison and was not part of the contractual SLA requirements.
+
+To compare these decisions, pointwise Wilson intervals for the WB reference identified **481 measurements** among 555 for which the reference yes/no decision was sufficiently certain. Of these, **274** were conditions for which M0 could produce a prediction. The observed agreement with the WB decisions was **33.94%** for M0 (on 274 measurements), **37.63%** for M1, **86.07%** for M2, **96.47%** for M3 with 1,400 simulations, and **97.09%** for M3 with 2,000 simulations (the latter four on 481 measurements). These are descriptive agreements with the WB reference, not measured real-world SLA acceptance rates or independent-scenario accuracy estimates.
 
 The pilot's M3 production errors were substantially smaller than those of M1/M2 in this exact world and graph. That is a genuine, archived numerical observation. It does not demonstrate the same numerical advantage in worlds with altered provider demand or different logical dependencies.
 
