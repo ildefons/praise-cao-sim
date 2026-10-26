@@ -439,7 +439,7 @@ The two equal-allocation variants use the same simulated trajectories, so their 
 
 ## 6.4 Hidden-parameter audit and restricted cost frontier
 
-The retrospective pilot Table 4 compared hidden generating parameters with M1 and M3-Top1 surrogate parameters and public-I1 reconstruction losses. The archived values were independently reconciled. Their discrepancies, including notably different Provider C reconstructions, show that **good graph prediction can co-occur with very poor recovery of hidden parameters in this one pilot**. They do not prove the public interface cannot identify those parameters in principle.
+A retrospective analysis compared the actual provider parameters used in the simulations with those reconstructed by M1 and M3-Top1. In this pilot, some reconstructed parameters, particularly for Provider C, differed substantially from the actual values, even when graph-level prediction errors were small. This shows that accurate graph-level prediction does not necessarily require accurate recovery of the hidden provider parameters.
 
 The historical Figure 2 labeled a curve the “nondominated” recurring-cost/MAE frontier while plotting only chosen primary prospective implementations. In the same reported two-coordinate cost plane, the retrospective operational Top1 at B100/MAE 0.0399 dominates M1 at B100/MAE 0.1852. Thus the original line is **not** the nondominated frontier over all reported operating points; it can only be described as the frontier of the *selected prospective primary set*, or it must be redrawn and annotated with retrospective status and additional provider-construction cost. This first B1 draft does not reuse the misleading frontier graphic.
 
