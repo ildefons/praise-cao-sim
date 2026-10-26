@@ -426,7 +426,7 @@ The pilot's M3 production errors were substantially smaller than those of M1/M2 
 
 To understand the role of model selection, weighting, and simulation allocation in the pilot, we compared alternative predictors on the same provider configuration and graph. Table 2 presents their prediction errors, with each method using a total of 1,400 simulations of the composed service.
 
-**Table 2.** Retrospective comparison of pilot estimators using 1,400 composed-service simulations each. Top1 uses the highest-weight joint model; the 14-model variants differ in model weighting and simulation allocation. Errors are measured against the pilot WB reference.
+**Table 2.** Retrospective pilot comparison with 1,400 composed-service simulations per variant. Top1 uses only the highest-weight joint model. Equal-allocation variants simulate each of the 14 selected models 100 times: Uniform14 averages their predictions equally, whereas Weighted14 uses the weights derived from public provider information. Production-allocation Weighted14 uses the same models and weights but assigns more simulations to higher-weight models. Errors are measured against the pilot WB reference.
 
 | Retrospective pilot estimator | MAE | RMSE | Bias |
 |:--|--:|--:|--:|
@@ -435,7 +435,7 @@ To understand the role of model selection, weighting, and simulation allocation 
 | Weighted14 equal-allocation B1400 | 0.04222 | 0.05016 | +0.04066 |
 | Weighted14 production-allocation B1400 | 0.03037 | 0.03578 | +0.02824 |
 
-Using the **same 14 model members and the same equal-allocation ledgers**, weighted versus uniform averaging is the cleanest isolated *weighting* contrast. However, the production versus equal-allocation comparison also changes seed/trajectory allocation; its difference is descriptive rather than a clean causal isolate. Top1 does slightly better than production weighted14 on this same retrospective fixed-world matched-budget test, which defeats any claim that *retaining more models is intrinsically necessary for point accuracy*.
+The two equal-allocation variants use the same simulated trajectories, so their difference shows the effect of changing the averaging weights. In contrast, production allocation changes both the number of simulations assigned to each model and the random simulation seeds. Its lower error therefore cannot be attributed to allocation alone. Top1 also achieved a slightly lower MAE than production Weighted14 in this pilot, showing that averaging several models was not necessary for the lowest observed error under these conditions.
 
 The historical operational readouts also reported Top1 B100 and Top3 B300 MAEs near 0.0399 and 0.0401, respectively, but the direct underlying first-100 source arrays have not yet been independently reconciled in the B1 checks. They remain **reported historical numbers, not upgraded to primary independently checked evidence**.
 
