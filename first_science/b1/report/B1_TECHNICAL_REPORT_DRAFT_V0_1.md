@@ -369,7 +369,7 @@ The controlled pilot (Phase I) provided the first evaluation of the prediction m
 
 ## 6.1 Query population and reference
 
-The pilot evaluated a service composed of three providers operating in parallel. Throughout the experiment, the providers' underlying models and published I1 information remained fixed. A new request was generated every 0.2 seconds. To test prediction accuracy under different SLA requirements, we varied the latency and cost limits of a graph region derived from the providers' advertised regions:
+The pilot evaluated a service composed of three providers operating in parallel. Throughout the experiment, the providers' underlying models and published I1 information remained fixed. A new request was generated every 0.2 seconds. To construct the SLA test conditions, we first combined the advertised provider limits using M0's aggregation rules (Section 4.1). For this parallel composition, the baseline latency was the largest provider latency plus fixed delays, the baseline cost was the sum of provider costs plus fixed costs, and the baseline quality was the lowest provider quality. These limits define the baseline graph region $A_G^{\rm base}(\rho)=A_G^{I1+M0}(\rho)$. We then scaled its latency and cost limits by a factor $\gamma$ to obtain different requested SLA regions:
 
 $$
 A_G(\gamma,\rho)
@@ -379,7 +379,7 @@ Q_G\ge q_G^{\rm base}(\rho)\}.
 \tag{16}
 $$
 
-Here $A_G^{\rm base}(\rho)$ is the region $A_G^{I1+M0}$ calculated by M0 from the advertised provider limits. The scaling factor $\gamma$ changes the requested region scored by the white-box reference, but does not change the I1 provider probabilities used in M0's product. In particular, if $\gamma>1$, the requested latency and cost limits are looser than M0's calculated limits. Thus the white-box reference is evaluated at the larger requested region, whereas M0 still uses the same provider-card product. If $\gamma<1$, M0's calculated limits do not fit the tighter query and M0 is not applicable.
+The factor $\gamma$ sets how demanding the requested SLA is: values above one allow greater latency and cost, while values below one impose tighter limits. M0 has two separate roles in this experiment. Its aggregation rules define the baseline region, but its probability prediction multiplies the providers' published I1 probabilities. Because those probabilities remain fixed, M0 gives the same estimate for every requested region containing its baseline region ($\gamma\ge1$). For tighter requests ($\gamma<1$), M0 reports that it is not applicable. The white-box reference instead estimates satisfaction of each requested region $A_G(\gamma,\rho)$ using the underlying provider models.
 
 Five thresholds times three difficulty regimes generated 15 queries. Evaluation used 37 horizons from 60 to 240 seconds. The pilot's fresh reference bank contained $N_{\rm WB}=200$ trajectories.
 
