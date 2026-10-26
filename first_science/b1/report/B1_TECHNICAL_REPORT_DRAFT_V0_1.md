@@ -387,7 +387,9 @@ Using M0's aggregation rules to choose the SLA test conditions is separate from 
 
 ## 6.2 Prediction errors and historical cutoff diagnostic
 
-The original pilot production results were re-scored from saved pointwise tables and manifest-linked hashes:
+Table 1 compares the prediction errors of the four methods against the pilot's simulation-based reference probabilities:
+
+**Table 1.** Pilot prediction errors, measured against the simulation-based reference. MAE is mean absolute error; RMSE is root mean squared error. The applicable measurements differ for M0.
 
 | Method, pilot | Graph trajectories | Applicable points | MAE | RMSE | Signed bias |
 |:--|--:|--:|--:|--:|--:|
