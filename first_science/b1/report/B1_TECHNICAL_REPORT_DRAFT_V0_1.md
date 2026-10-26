@@ -437,8 +437,6 @@ To understand the role of model selection, weighting, and simulation allocation 
 
 The two equal-allocation variants use the same simulated trajectories, so their difference shows the effect of changing the averaging weights. In contrast, production allocation changes both the number of simulations assigned to each model and the random simulation seeds. Its lower error therefore cannot be attributed to allocation alone. Top1 also achieved a slightly lower MAE than production Weighted14 in this pilot, showing that averaging several models was not necessary for the lowest observed error under these conditions.
 
-The historical operational readouts also reported Top1 B100 and Top3 B300 MAEs near 0.0399 and 0.0401, respectively, but the direct underlying first-100 source arrays have not yet been independently reconciled in the B1 checks. They remain **reported historical numbers, not upgraded to primary independently checked evidence**.
-
 ## 6.4 Hidden-parameter audit and restricted cost frontier
 
 The retrospective pilot Table 4 compared hidden generating parameters with M1 and M3-Top1 surrogate parameters and public-I1 reconstruction losses. The archived values were independently reconciled. Their discrepancies, including notably different Provider C reconstructions, show that **good graph prediction can co-occur with very poor recovery of hidden parameters in this one pilot**. They do not prove the public interface cannot identify those parameters in principle.
