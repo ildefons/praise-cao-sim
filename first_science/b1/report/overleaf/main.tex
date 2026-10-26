@@ -405,7 +405,7 @@ The controlled pilot (Phase I) provided the first evaluation of the prediction m
 
 \subsection*{6.1 Query population and reference}
 
-The original pilot held one hidden three-provider configuration, one fixed parallel-all graph, a workload period of 0.2 seconds and the providers' published I1 cards constant. Query difficulty was varied by scaling the latency and cost limits of a graph region induced from the providers' advertised regions:
+The pilot evaluated a service composed of three providers operating in parallel. Throughout the experiment, the providers' underlying models and published I1 information remained fixed. A new request was generated every 0.2 seconds. To test prediction accuracy under different SLA requirements, we varied the latency and cost limits of a graph region derived from the providers' advertised regions:
 
 \begin{equation*}
 A_G(\gamma,\rho)
