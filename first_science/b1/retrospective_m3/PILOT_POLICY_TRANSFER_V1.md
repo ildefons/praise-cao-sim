@@ -31,6 +31,36 @@ This is a **retrospective exploratory experiment**. The existing Phase-II refere
 
 The reused local simulator initially writes provisional lambda30 weights after scoring a provider. Once the three providers' candidate curves are ready, the policy controller runs the original public-I1 CV procedure and replaces these provisional weights with **final CV-selected provider weights**. Only these final frozen weights enter the joint support and graph prediction. Provisional weights are not results.
 
+## Mandatory first step: reproduce the ORIGINAL pilot only
+
+Before any P1/P3/P4 candidate benchmark or battery run, the transfer controller now requires a signed local pilot-reproduction gate. This reproduces the September pilot on its own public cards, candidate domains, original G0 parallel graph, original 15 SLA cases and original graph seeds. No new provider worlds are used in these steps.
+
+From the existing praise-cao environment:
+
+    cd ~/praise/praise-cao-sim
+    git pull --ff-only origin praise-identifiability-feasibility
+    python -m py_compile first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py first_science/b1/retrospective_m3/run_pilot_m3_policy_transfer_v1.py
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage preflight
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage deterministic
+
+The deterministic check reconstructs **all 144 original pilot candidate proposals**, re-runs the **original five-fold public-I1 CV**, and verifies that lambda=30, the ordered Top14 weight support, and the integer B1400 allocations agree with the frozen pilot.
+
+Then verify all archived 555 pilot graph prediction values without new simulation, and run a small matched-native-G0 smoke:
+
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage archived-scoring
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage graph-smoke
+
+The full native-G0 B1400 replay is a distinct, **potentially expensive** reproducibility test. Every trajectory is compared with its archived counterpart, with small resumable local checkpoints. First test a bounded sample:
+
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage full-graph --max-trajectories 10
+
+If the subset passes and full reproduction is warranted:
+
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage full-graph
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage seal
+
+Only a successful seal prints `B1_PILOT_M3_REPRODUCTION_GATE_PASS` and creates the local `first_science/b1/local_audit/pilot_m3_reproduction_gate_v1/gate.json`. That artifact checks the frozen transfer code and contracts. All subsequent battery execution stages fail closed if the gate is missing or stale. The gate is a verification of fidelity to the original pilot, **not** evidence of generalization.
+
 ## Execute locally
 
 Run in the existing praise-cao environment:
