@@ -11,12 +11,12 @@ if [[ "$(git branch --show-current)" != "$branch" ]]; then
   echo "ERROR: switch to $branch first." >&2
   exit 1
 fi
-for tool in latexmk xelatex zip unzip pdfinfo pdftotext python3; do
+for tool in latexmk pdflatex zip unzip pdfinfo pdftotext python3; do
   if ! command -v "$tool" >/dev/null 2>&1; then
     echo "ERROR: $tool is not installed." >&2
     echo "On Ubuntu, install the LaTeX prerequisites:" >&2
     echo "  sudo apt-get update" >&2
-    echo "  sudo apt-get install -y texlive-xetex texlive-latex-extra texlive-pictures texlive-fonts-recommended texlive-plain-generic latexmk zip unzip poppler-utils fonts-dejavu-core" >&2
+    echo "  sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-pictures texlive-fonts-recommended texlive-plain-generic latexmk zip unzip poppler-utils" >&2
     exit 1
   fi
 done
@@ -52,7 +52,7 @@ PY
 
 (
   cd "$report/overleaf"
-  latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
+  latexmk -pdf -interaction=nonstopmode -halt-on-error -file-line-error main.tex
   test -s main.pdf
   # Confirm the complete Section 4.1 conclusion survived TeX rendering.
   # PDF extraction can insert line breaks or hyphens inside words, so compare
