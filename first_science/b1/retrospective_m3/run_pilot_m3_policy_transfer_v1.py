@@ -355,6 +355,48 @@ def prepare_world(cfg, world, *, workers, benchmark_candidates=0):
         cv_select_and_freeze(cfg, world)
 
 
+def require_reproduced_pilot_gate():
+    """Fail closed: no battery simulations before exact pilot reproduction."""
+    import hashlib
+
+    def sha(path):
+        h = hashlib.sha256()
+        with Path(path).open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest()
+
+    root = FIRST / "b1" / "local_audit" / "pilot_m3_reproduction_gate_v1"
+    gate = root / "gate.json"
+    if not gate.is_file():
+        raise RuntimeError(
+            "Original pilot reproduction gate is not passed. "
+            "First run run_pilot_m3_reproduction_gate_v1.py on PILOT cases only, "
+            "through deterministic, archived-scoring, graph-smoke, full-graph and seal."
+        )
+    record = core.read_json(gate)
+    if record.get("status") != "B1_PILOT_REPRODUCTION_GATE_PASS" or record.get("decision") != "PASS":
+        raise RuntimeError("Pilot reproduction gate did not pass")
+    for key, path in (
+        ("transfer_contract_sha256", CONFIG),
+        ("transfer_code_sha256", HERE / "run_pilot_m3_policy_transfer_v1.py"),
+        ("transfer_core_sha256", HERE / "_pilot_m3_policy_transfer_core_v1.py"),
+        ("pilot_graph_contract_sha256", P4 / "config_phase4_m3_v4_dominant_mass_graph_v1.json"),
+        ("pilot_cv_contract_sha256", PILOT_CV),
+    ):
+        if record.get(key) != sha(path):
+            raise RuntimeError(f"Stale pilot reproduction gate: {key}")
+    for stage, expected_sha in record.get("pilot_stages_sha256", {}).items():
+        stagefile = root / (stage + ".json")
+        if not stagefile.is_file() or sha(stagefile) != expected_sha:
+            raise RuntimeError(f"Pilot reproduction stage checkpoint differs: {stage}")
+    if set(record.get("pilot_stages_sha256", {})) != {
+        "deterministic", "archived_scoring", "graph_smoke", "full_graph"
+    }:
+        raise RuntimeError("Incomplete pilot reproduction checks")
+    print("B1_PILOT_M3_REPRODUCTION_GATE_CONFIRMED")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Faithful pilot M3 selection-policy transfer")
     parser.add_argument("--stage", required=True, choices=[
@@ -367,6 +409,8 @@ def main():
     parser.add_argument("--benchmark-candidates", type=int, default=3)
     args = parser.parse_args()
     cfg, contracts = configuration()
+    if args.stage != "preflight":
+        require_reproduced_pilot_gate()
     if args.workers < 1:
         raise ValueError("workers must be >=1")
     if args.stage == "preflight":
