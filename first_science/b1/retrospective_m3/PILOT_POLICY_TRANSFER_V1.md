@@ -75,10 +75,21 @@ The full B1400 replay is a distinct, **potentially expensive** reproducibility t
 
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage full-graph --max-trajectories 10
 
-If the subset passes and full reproduction is warranted:
+If the subset passes, **optional four-worker acceleration** uses the original
+native simulator and archive comparison, with identical per-seed checkpoint
+format and no change to the original gate source. First test eight NEW
+trajectories after the ten already checked, then complete all 1,400:
 
-    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage full-graph
+    python -m py_compile first_science/b1/retrospective_m3/run_pilot_m3_full_graph_parallel_v1.py
+    time python first_science/b1/retrospective_m3/run_pilot_m3_full_graph_parallel_v1.py --workers 4 --max-trajectories 18
+    time python first_science/b1/retrospective_m3/run_pilot_m3_full_graph_parallel_v1.py --workers 4
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage seal
+
+Do not run original serial full-graph and parallel native replay at the same
+time, and do not seal until the parallel script prints
+`FULL_GRAPH_PASS` and `PILOT_FULL_GRAPH_PARALLEL_CHECKPOINTS_VERIFIED`.
+For a fully serial alternative, run the original `--stage full-graph` without
+a trajectory limit, followed by `--stage seal`.
 
 Only a successful seal prints `B1_PILOT_M3_REPRODUCTION_GATE_PASS` and creates the local `first_science/b1/local_audit/pilot_m3_reproduction_gate_v1/gate.json`. That artifact checks the frozen transfer code and contracts. All subsequent battery execution stages fail closed if the gate is missing or stale. The gate checks original candidate generation, **actual local stochastic simulation**, CV, support, graph scoring and full native reproduction in the newer graph simulator. It is a verification of fidelity to the original pilot, **not** evidence of generalization.
 
