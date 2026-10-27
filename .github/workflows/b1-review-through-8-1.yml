@@ -1,4 +1,4 @@
-name: Build B1 reviewed-through-8.1 Overleaf ZIP
+name: Build default-pdfLaTeX B1 reviewed-through-8.1 Overleaf ZIP
 
 on:
   push:
@@ -21,15 +21,15 @@ jobs:
           ref: praise-identifiability-feasibility
           fetch-depth: 0
 
-      - name: Install XeLaTeX tools
+      - name: Install default pdfLaTeX toolchain
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            texlive-xetex texlive-latex-extra texlive-pictures \
+            texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-pictures \
             texlive-fonts-recommended texlive-plain-generic \
-            latexmk zip poppler-utils fonts-dejavu-core
+            latexmk zip poppler-utils lmodern
 
       - name: Build and verify review-only snapshot
         shell: bash
