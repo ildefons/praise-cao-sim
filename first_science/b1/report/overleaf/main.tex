@@ -580,7 +580,7 @@ The results did not show a consistent direction. For M3 FULL343, $\Delta_P^M$ wa
 
 A second planned comparison would have contrasted the topology differences between the more symmetric provider worlds (P1/P3) and the unequal-load worlds (P2/P4). It could \textbf{not be completed} because all P2 cases were excluded by Step-0. The two mixed graphs, G\_SEQPAR and G\_PARSEQ, provide additional observations, but they also do not separate the effect of graph structure from changes in workload reaching each provider.
 
-For the expanded evaluation, each of the 12 eligible provider-world-by-graph cases was simulated using $N_{\mathrm{WB}}=1000$ separate final white-box trajectories. These are simulation replicates. Within each case, however, the \textbf{same trajectories} were used to calculate reference probabilities for 15 SLA query conditions at 37 horizons. The resulting 555 query-horizon measurements per case (6,660 across all 12 cases) are therefore related measurements, not 6,660 independently simulated system configurations. To reflect this dependence, the white-box bootstrap resamples \textbf{complete trajectory indices} together across conditions, horizons and any cells sharing random-number streams, while keeping method predictions fixed. Its intervals quantify uncertainty due to the finite white-box reference, \textbf{not uncertainty from model reconstruction or performance in untested provider worlds}.
+The expanded evaluation tested 12 provider-world-by-graph configurations. Each was simulated using $N_{\mathrm{WB}}=1000$ separate final white-box trajectories. Within each configuration, those same trajectories were evaluated against 15 SLA conditions at 37 horizons. Thus the 6,660 resulting probability measurements cover many SLA queries, but only 12 distinct tested configurations. This distinction matters when interpreting how broadly the observed topology effects can be generalized.
 
 The scientifically material result is twofold: a weighted finite ensemble maintained a favorable aggregate \emph{ranking} among the executed methods, and its \textbf{absolute prediction remained too inaccurate in several difficult regions} to claim dependable generic SLA estimation.
 
@@ -825,6 +825,8 @@ E\!\left[(\widehat p_M-\widehat p_{\rm WB})^2\right]
 \end{equation*}
 
 Subtracting empirical noise estimates from an observed squared difference and clipping at zero is an \textbf{experimental noise-correction diagnostic}. It does not make the unobserved model approximation error known exactly, and its square root adds estimation bias.
+
+The final white-box reference also has sampling uncertainty because its probabilities are estimated from 1,000 independent simulation trajectories per evaluated configuration. The recorded white-box bootstrap resamples complete trajectory indices jointly across SLA conditions and horizons, and across configurations when the same random-number indices were used, while keeping method predictions fixed. This estimates how much the reported prediction-error metrics could change if different reference trajectories had been sampled. Its purpose is to assess the precision of the finite simulation reference. Whether the reconstructed models work in other configurations must be assessed with separate tests.
 
 Table~\ref{tab:uncertainty-types} distinguishes the available uncertainty diagnostics and the claims each cannot support:
 
