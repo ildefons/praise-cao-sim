@@ -610,7 +610,7 @@ The investigation has three parts. Section 8.1 applies key rules of the original
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.20\textwidth}p{0.24\textwidth}p{0.20\textwidth}rrr@{}}
-\caption{Prediction errors shown in chronological experimental groups. The pilot results use one parallel composition with 555 related prediction queries (Top1 was added in a later analysis of that pilot; Section 6.3). The Phase II and III rows use the same 12 eligible provider-world-by-graph configurations, with 6,660 related queries per method and the same Phase II white-box reference. All estimators used B=1400 graph trajectories per configuration. Signed bias above zero indicates overprediction. The pilot and expanded battery have different test conditions, so their errors are not directly matched.}\label{tab:retrospective-m3-overall}\\
+\caption{Prediction errors shown in chronological experimental groups. The pilot results use one parallel composition with 555 related prediction queries (Top1 was added in a later analysis of that pilot; Section 6.3). The Phase II and retrospective Phase III rows use the same 12 eligible provider-world-by-graph configurations, with 6,660 related queries per method and the same Phase II white-box reference. All estimators used B=1400 graph trajectories per configuration. Signed bias above zero indicates overprediction. The pilot and expanded battery have different test conditions, so their errors are not directly matched.}\label{tab:retrospective-m3-overall}\\
 \toprule
 Evaluation stage & Estimator & \shortstack{Tested scope\\(queries)} & MAE & RMSE & \shortstack{Signed\\bias} \\
 \midrule\endfirsthead
@@ -620,8 +620,8 @@ Evaluation stage & Estimator & \shortstack{Tested scope\\(queries)} & MAE & RMSE
 Pilot (Phase I) & Original weighted Top14 & 1 graph (555) & 0.030370 & 0.035780 & +0.028240 \\
 Pilot follow-up & Original Top1 & 1 graph (555) & 0.028780 & 0.034060 & +0.024980 \\
 Expanded (Phase II) & V3b FULL343 & 12 cases (6,660) & \textbf{0.121890} & \textbf{0.180806} & +0.065105 \\
-\textbf{Retrospective (Phase III)} & Original-style Top14 & 12 cases (6,660) & 0.154155 & 0.212843 & +0.044867 \\
-\textbf{Retrospective (Phase III)} & Original-style Top1 & 12 cases (6,660) & 0.162280 & 0.225373 & +0.054562 \\
+\textbf{Phase III} & Original-style Top14 & 12 cases (6,660) & 0.154155 & 0.212843 & +0.044867 \\
+\textbf{Phase III} & Original-style Top1 & 12 cases (6,660) & 0.162280 & 0.225373 & +0.054562 \\
 \bottomrule
 \end{longtable}
 \endgroup
