@@ -1,7 +1,7 @@
 # Full B1 Overleaf project (first typeset draft)
 
 **Main document:** `main.tex`  
-**Compiler:** XeLaTeX  
+**Compiler:** pdfLaTeX (Overleaf default)  
 **Scientific source:** [B1 technical report draft](../B1_TECHNICAL_REPORT_DRAFT_V0_1.md)  
 **Status:** Internal draft. Neither author approval nor public release is implied.
 
@@ -11,13 +11,13 @@ This LaTeX is a format conversion of the existing 9,000-word B1 report, preservi
 
 ## Overleaf
 
-Create a new blank project and upload `main.tex` and the `figures/` directory (or upload the self-contained ZIP, which also includes the rendered report PDF). Set **Menu > Compiler > XeLaTeX**, with `main.tex` as the main file. Compile twice for the table of contents.
+Create a new blank project and upload `main.tex` and the `figures/` directory (or upload the self-contained ZIP, which also includes the rendered report PDF). Leave Overleaf's **default pdfLaTeX compiler** selected, with `main.tex` as the main file. Click Recompile. No special compiler selection, custom fonts, or shell escape are required.
 
 ## Local build
 
 ```bash
 cd first_science/b1/report/overleaf
-latexmk -xelatex -interaction=nonstopmode -halt-on-error main.tex
+latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
 ```
 
 ## Known publication-readiness issues
