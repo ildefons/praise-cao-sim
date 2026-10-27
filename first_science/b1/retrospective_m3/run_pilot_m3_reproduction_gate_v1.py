@@ -194,6 +194,102 @@ def deterministic():
     })
 
 
+def local_replay(*, max_candidates=0):
+    """Replay original 144x100 provider-local simulations against original I1."""
+    if not (OUT / "deterministic.json").exists():
+        raise RuntimeError("Run --stage deterministic first")
+    from run_m1_provider_lift_v2 import (
+        load_verified_public_i1_cards, _simulate_and_score,
+    )
+    meta, surfaces, _ = load_verified_public_i1_cards(PHASE2_CARD)
+    design = pd.read_csv(DESIGN).sort_values(
+        ["provider", "lhs_index"], kind="mergesort"
+    ).reset_index(drop=True)
+    if len(design) != 144:
+        raise RuntimeError("Original LHS design is not 144 rows")
+    legacy = read(P3 / "config_phase3_m1_contract_v2.json")
+    ipt = float(legacy["fixed_closure_conventions"]["canonical_IPT"])
+    fraction = float(legacy["pilot_scope"]["execution_fraction"])
+    seeds = tuple(range(35000, 35100))
+    checked = 0
+    for rec in design.itertuples(index=False):
+        provider, cid = str(rec.provider), str(rec.candidate_id)
+        original = LOCAL / "local_surfaces" / (cid + "_comparison.csv")
+        if not original.exists():
+            raise FileNotFoundError(original)
+        saved_sha = digest(original)
+        checkpoint = OUT / "local_replay" / provider / (cid + ".json")
+        if checkpoint.exists():
+            old = read(checkpoint)
+            if not (
+                old.get("candidate_id") == cid
+                and old.get("original_candidate_curve_sha256") == saved_sha
+                and old.get("reproduction_runner_sha256") == digest(Path(__file__))
+                and old.get("matched_original_local_curve") is True
+            ):
+                raise RuntimeError(f"Stale or invalid local replay checkpoint {checkpoint}")
+        else:
+            _metrics, _simulated, new = _simulate_and_score(
+                metadata=meta[provider],
+                public_surface=surfaces[provider],
+                mean_service_time=float(rec.mean_service_time),
+                cost_rate=float(rec.cost_rate),
+                service_cv=float(rec.service_cv),
+                trajectory_seeds=seeds,
+                canonical_ipt=ipt,
+                execution_fraction=fraction,
+                quiet=True,
+            )
+            archived = pd.read_csv(original)
+            keys = ["provider_id", "region_id", "horizon", "region_rho", "rho"]
+            fields = ["sigma_i1", "sigma_m1_local"]
+            for frame in (new, archived):
+                if not set(keys + fields).issubset(frame.columns):
+                    raise RuntimeError(f"Local curve columns differ for {cid}")
+                if frame.duplicated(keys).any():
+                    raise RuntimeError(f"Duplicate local prediction keys for {cid}")
+            pair = new[keys + fields].merge(
+                archived[keys + fields], on=keys, validate="one_to_one",
+                suffixes=("_replay", "_archive"),
+            )
+            if len(pair) != len(archived) or len(pair) != len(new):
+                raise RuntimeError(f"Local curve query support differs for {cid}")
+            delta = max(
+                float(abs(pair[field + "_replay"] - pair[field + "_archive"]).max())
+                for field in fields
+            )
+            if delta > 1e-12:
+                raise RuntimeError(f"Pilot local simulation mismatch {cid}: {delta}")
+            checkpoint.parent.mkdir(parents=True, exist_ok=True)
+            payload = {
+                "provider": provider, "candidate_id": cid,
+                "scored_points": len(pair), "n_local_seeds": len(seeds),
+                "max_abs_probability_diff": delta,
+                "original_candidate_curve_sha256": saved_sha,
+                "reproduction_runner_sha256": digest(Path(__file__)),
+                "matched_original_local_curve": True,
+            }
+            tmp = checkpoint.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+            os.replace(tmp, checkpoint)
+        checked += 1
+        if checked == 1 or checked % 4 == 0 or checked == 144:
+            print(f"PILOT LOCAL REPLAY: {checked}/144 provider candidates", flush=True)
+        if max_candidates and checked >= max_candidates:
+            print("BOUNDED LOCAL CHECKPOINT COMPLETE; full local gate NOT sealed.")
+            return
+    if checked != 144:
+        raise RuntimeError("Incomplete original pilot provider-local reproduction")
+    freeze("local_replay", {
+        "n_pilot_candidate_models": 144,
+        "provider_local_trajectories": 14400,
+        "n_local_seeds_per_candidate": 100,
+        "original_local_seed_range": [35000, 35099],
+        "pilot_candidate_design_sha256": digest(DESIGN),
+        "all_candidate_curves_match": True,
+    })
+
+
 def archived_scoring():
     """Rescore the ORIGINAL 15 queries using only archived original G0 ledgers."""
     if not (OUT / "deterministic.json").is_file():
@@ -293,7 +389,7 @@ def _matched_trajectory(original, fresh, *, rank, seed):
 
 def full_graph(*, max_trajectories=0):
     """Native ORIGINAL G0 replay, full B1400 seed bank, isolated per-seed checkpoints."""
-    for name in ("deterministic", "archived_scoring", "graph_smoke"):
+    for name in ("deterministic", "local_replay", "archived_scoring", "graph_smoke"):
         if not (OUT / (name + ".json")).exists():
             raise RuntimeError("Run --stage " + name.replace("_", "-") + " first")
     from m1_graph_simulator_v2 import (
@@ -395,7 +491,7 @@ def full_graph(*, max_trajectories=0):
 
 
 def seal():
-    stages = ("deterministic", "archived_scoring", "graph_smoke", "full_graph")
+    stages = ("deterministic", "local_replay", "archived_scoring", "graph_smoke", "full_graph")
     payload = {}
     for stage in stages:
         path = OUT / (stage + ".json")
@@ -431,17 +527,23 @@ def main():
     parser.add_argument(
         "--stage", required=True,
         choices=("preflight", "deterministic", "archived-scoring",
-                 "graph-smoke", "full-graph", "seal"),
+                 "graph-smoke", "local-replay", "full-graph", "seal"),
     )
+    parser.add_argument("--max-candidates", type=int, default=0,
+                        help="Bounded 144-candidate pilot local replay, 0=all")
     parser.add_argument("--max-trajectories", type=int, default=0,
                         help="Optional bounded full-graph checkpoint, 0=all 1400")
     args = parser.parse_args()
+    if args.max_candidates < 0 or args.max_candidates > 144:
+        parser.error("max-candidates must be 0..144")
     if args.max_trajectories < 0 or args.max_trajectories > 1400:
         parser.error("max-trajectories must be 0..1400")
     if args.stage == "preflight":
         check_inputs()
     elif args.stage == "deterministic":
         deterministic()
+    elif args.stage == "local-replay":
+        local_replay(max_candidates=args.max_candidates)
     elif args.stage == "archived-scoring":
         archived_scoring()
     elif args.stage == "graph-smoke":
