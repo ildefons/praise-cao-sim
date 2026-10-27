@@ -83,13 +83,14 @@ for phrase in checks:
         )
 print("Section 4.1 PDF text verification passed.")
 
-# Ensure the PDF contains the latest chronological five-row Table 6,
-# not just a current LaTeX source bundled with an older PDF.
+# Confirm unique caption, estimator names and values from revised Table 6.
+# Avoid checking full table-cell phrases: pdftotext -layout can interleave
+# neighboring columns or insert breaks inside narrow cells.
 table6_checks = [
     "Prediction errors shown in chronological experimental groups",
     "Pilot follow-up",
     "Original weighted Top14",
-    "Retrospective (Phase III)",
+    "Original-style Top1",
     "Original-style Top14",
     "0.154155",
     "0.162280",
