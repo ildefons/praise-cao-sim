@@ -449,7 +449,7 @@ A retrospective analysis compared the actual provider parameters used in the sim
 
 [Phase-5](#appendix-c-experimental-chronology-and-method-versions) planned 16 physical world-by-graph cells. As described in [Section 5.2](#52-experimental-design), Step-0 used preliminary simulations of the underlying provider models to select informative SLA conditions and confirm each cell's eligibility. All four P2 cells failed this check and were excluded without replacement. The remaining **12** cells cover worlds P1, P3, P4 across G_PAR, G_SEQ, G_SEQPAR and G_PARSEQ. Each has 15 frozen query conditions, each evaluated at 37 horizons; each has a distinct fresh $N_{\mathrm{WB}}=1000$ graph reference.
 
-There is **no estimate for the preregistered P2 component of the [Phase-5](#appendix-c-experimental-chronology-and-method-versions) directional heterogeneity contrast**. The later induced-public-region P2 study used a different query design and cannot be substituted into this missing prospective cohort.
+Phase-5 also planned to compare how prediction error changes between parallel and sequential compositions in symmetric provider worlds (P1/P3) and unequal-load worlds (P2/P4). Because all four P2 cases failed Step-0, this comparison could not be completed as planned. A later experiment involving P2 used different SLA conditions and cannot replace the missing results.
 
 ## 7.2 Executed V3b method comparison
 
