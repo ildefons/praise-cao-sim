@@ -1,0 +1,65 @@
+{
+  "status": "B1_PILOT_M3_POLICY_TRANSFER_V1_FROZEN",
+  "purpose": "Reapply the original pilot M3 PROCEDURAL rules to the existing 12 Phase-II cells. Exploratory post-result comparison, not an independent validation.",
+  "pilot_rule_sources": {
+    "domain": "first_science/phase4/m2_a2_nonadaptive_coverage.py _build_design; first_science/phase3/m1_joint_lift_v2.py build_search_bounds; ProviderC uses pilot expanded contract",
+    "cv": "first_science/phase4/m3_lambda_cv_v3.py; five-fold public-I1 blocked CV",
+    "mass": "first_science/phase4/m3_v4_dominant_mass_graph.py; minimal prefix to 0.999 cumulative joint weight",
+    "graph_allocation": "original greedy integer minimax allocation with B=1400"
+  },
+  "n_candidates_per_provider": 48,
+  "lhs_seed": 20260917,
+  "local_rescore_start": 35000,
+  "local_rescore_n": 100,
+  "lambda": 30,
+  "top_k": 14,
+  "cv_rule": "select lambda per new provider world by exact original blocked five-fold public-I1 validation; values lambda=30, top_k=14 above are PREPARE-stage compatibility placeholders, not production selection",
+  "lambda_grid": [
+    0,
+    0.25,
+    0.5,
+    1,
+    2,
+    3,
+    5,
+    7.5,
+    10,
+    15,
+    20,
+    30,
+    50,
+    75,
+    100,
+    150,
+    200
+  ],
+  "target_mass": 0.999,
+  "graph_budget": 1400,
+  "top14_seed_base": 9100000,
+  "top1_seed_base": 30000000,
+  "seed_stride": 10000,
+  "include_matched_top1": true,
+  "eligible_worlds": [
+    "P1",
+    "P3",
+    "P4"
+  ],
+  "graphs": [
+    "G_PAR",
+    "G_SEQ",
+    "G_SEQPAR",
+    "G_PARSEQ"
+  ],
+  "freeze": {
+    "source_candidate_domain": "derive from each new world's PUBLIC I1 metadata with original pilot M1 bound-construction rule, including pilot's expanded ProviderC rule",
+    "protocol": "48 LHS / 100 CRN local / five-fold CV lambda / >=99.9% adaptive support / greedy minimax B1400",
+    "support_feasibility": "hard stop if selected adaptive K>1400, never silently fix K or increase B",
+    "graph_reference": "use Phase-II frozen 12-cell white-box reference only in evaluate after freeze",
+    "seeds": "fresh disjoint graph RNG namespace, original 35000..35099 local seed bank"
+  },
+  "limitations": [
+    "Different worlds and graph SLA conditions from the single pilot, so not bitwise replication of full experiment",
+    "ProviderC domain rule transfers the pilot's declared expanded-ProviderC M3 domain, not an independently repeated M1 boundary escalation",
+    "Results from already inspected Phase-II reference are retrospective and not a new holdout"
+  ]
+}
