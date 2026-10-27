@@ -124,6 +124,43 @@ To complete the battery, after reviewing the P1 diagnostics:
 
 Do not use evaluate until all 12 cell predictions are frozen, and stop if any world is infeasible under B1400. There is no automatic fallback method.
 
+## Overnight unchanged-procedure battery scheduler
+
+The full pilot reproduction has passed, and P1 has already completed all
+144 provider candidates. Under its cross-validated lambda=3, P1's minimal
+99.9%-mass support has K=14267 > B=1400. Preserve this as an **infeasible
+original-policy transfer**, not a reason to change its selection rule.
+
+The separate \`run_pilot_m3_battery_overnight_v1.py\` is a resumable
+**scheduling-only wrapper** for the already frozen controller. It does not
+change the LHS domain rule, provider-local bank, CV, Gibbs weights,
+99.9%-mass support selection, B1400 allocation, simulation code, or
+white-box access restrictions. It:
+
+1. Validates the sealed original pilot reproduction and all 12 public-only
+   battery inputs.
+2. Preserves P1's infeasibility and independently prepares P3 then P4.
+3. Accepts a world-level prepare failure **only** when the canonical
+   feasibility checkpoint proves that K>B and the controller prints its
+   exact expected failure.
+4. Benchmarks and predicts each of the four graph cells for each feasible
+   world; per-cell prediction manifests are immutable and reusable.
+5. Saves a separate execution audit summary to
+   \`first_science/b1/local_audit/pilot_m3_battery_overnight_v1/overnight_status.json\`.
+
+Run \`--workers 4\` for the full unattended workflow, or add
+\`--prepare-only\` to stop after P3/P4 provider reconstruction.
+
+The wrapper intentionally does **not** read the existing Phase-II white-box
+reference, calculate accuracy, or claim a complete 12-cell evaluation.
+The existing \`freeze\` and \`evaluate\` stages of the frozen controller are
+valid only when all 12 eligible cells have successfully produced predictions,
+which is impossible for P1 at K=14267 with B=1400. Record such cases as
+**not estimable under the frozen budget**, never as accuracy failures or
+successful predictions. Partial accuracy evaluation, if desired, must be
+designed and labeled separately after the public-only predictions have
+been completely frozen.
+
 ## What to report
 
 At the first checkpoint: preflight output, cv_selection.json, cv_summary.csv, support_feasibility.json and (if feasible) adaptive_support.csv and support_manifest.json for P1.
