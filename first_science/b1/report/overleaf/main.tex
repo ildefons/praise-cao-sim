@@ -1,8 +1,8 @@
 \documentclass[10pt,a4paper]{article}
 \usepackage[a4paper,margin=24mm]{geometry}
-\usepackage{fontspec}
-\setmainfont{DejaVu Serif}
-\setsansfont{DejaVu Sans}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
 \usepackage{amsmath,amssymb,mathtools}
 \usepackage{booktabs,longtable,array}
 \setlength{\LTcapwidth}{0.95\textwidth}
@@ -705,7 +705,7 @@ Two interacting methodological challenges emerge: \textbf{predictive sufficiency
 
 \subsection*{8.3 Post-result I1/I2 pipeline development (historical Phase-6)}
 
-After the \hyperref[app:experiment-stages]{Phase II} expanded battery (historical \hyperref[app:experiment-stages]{Phase-5}), the six M2 variants defined in Section 4.3 were evaluated on \textbf{P4/G\_SEQPAR}, using 15 queries × 37 horizons = 555 related SLA measurements per variant. Their reconstruction-search architecture and graph-propagation budgets were matched at \textbf{B=2,700 graph runs per variant}. Their disclosed evidence and/or provider-fitting criteria differed, as specified in Section 4.3. Table~\ref{tab:phase6-m2-errors} compares the six methods against the shared reference.
+After the \hyperref[app:experiment-stages]{Phase II} expanded battery (historical \hyperref[app:experiment-stages]{Phase-5}), the six M2 variants defined in Section 4.3 were evaluated on \textbf{P4/G\_SEQPAR}, using 15 queries \ensuremath{\times} 37 horizons = 555 related SLA measurements per variant. Their reconstruction-search architecture and graph-propagation budgets were matched at \textbf{B=2,700 graph runs per variant}. Their disclosed evidence and/or provider-fitting criteria differed, as specified in Section 4.3. Table~\ref{tab:phase6-m2-errors} compares the six methods against the shared reference.
 
 \begingroup
 \footnotesize
