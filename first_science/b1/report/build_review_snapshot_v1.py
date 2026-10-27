@@ -46,8 +46,8 @@ def make_snapshot(full: str) -> str:
             # Earlier reviewed sections link to this appendix label.
             placeholders.append(r"\phantomsection\label{app:experiment-stages}")
         placeholders.append("")
-    if len(titles) != 11:
-        raise ValueError(f"Expected 11 placeholder titles, found {len(titles)}")
+    if len(titles) != 14:
+        raise ValueError(f"Expected 14 placeholder titles, found {len(titles)}")
     if not all(f"8.{n} " in titles[n - 2] for n in (2, 3, 4, 5)):
         raise ValueError("Missing 8.2 through 8.5 placeholder headings")
     result = before.rstrip() + "\n\n" + "\n".join(placeholders) + "\n\\end{document}\n"
