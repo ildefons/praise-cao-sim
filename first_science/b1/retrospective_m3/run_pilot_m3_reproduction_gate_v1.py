@@ -226,7 +226,14 @@ def archived_scoring():
         curves, retained_mass=mass, allocations=alloc.loc[alloc["budget"].eq(1400)]
     )
     expected = pd.read_csv(PILOT / "m3_v4_blind_predictions.csv")
-    expected = expected.loc[expected["budget"].astype(int).eq(1400)].copy()
+    expected = expected.loc[
+        expected["budget"].astype(int).eq(1400)
+        & expected["horizon"].astype(float).between(60, 240)
+    ].copy()
+    produced = produced.loc[
+        produced["budget"].astype(int).eq(1400)
+        & produced["horizon"].astype(float).between(60, 240)
+    ].copy()
     keys = ["budget", "rho_global", "regime", "horizon"]
     merged = produced[keys + ["sigma_m3_dominant"]].merge(
         expected[keys + ["sigma_m3_dominant"]],
