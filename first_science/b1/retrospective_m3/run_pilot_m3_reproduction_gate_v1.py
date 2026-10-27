@@ -63,6 +63,7 @@ def freeze(stage, info):
         "pilot_graph_contract_sha256": digest(PILOT_CORE),
         "pilot_cv_contract_sha256": digest(PILOT_CV),
         "transfer_contract_sha256": digest(CONFIG),
+        "reproduction_runner_sha256": digest(Path(__file__)),
         **info,
     }
     OUT.mkdir(parents=True, exist_ok=True)
@@ -344,7 +345,8 @@ def full_graph(*, max_trajectories=0):
                 t = read(checkpoint)
                 if (t.get("seed") != seed or
                     t.get("archived_rank_ledger_sha256") != source_hash or
-                    t.get("pilot_graph_contract_sha256") != digest(PILOT_CORE)):
+                    t.get("pilot_graph_contract_sha256") != digest(PILOT_CORE) or
+                    t.get("reproduction_runner_sha256") != digest(Path(__file__))):
                     raise RuntimeError(f"Incompatible native replay checkpoint: {checkpoint}")
             else:
                 archived_one = archive.loc[archive["trajectory_seed"].astype(int).eq(seed)]
@@ -364,6 +366,7 @@ def full_graph(*, max_trajectories=0):
                     "rank": rank, "seed": seed, "requests": n,
                     "archived_rank_ledger_sha256": source_hash,
                     "pilot_graph_contract_sha256": digest(PILOT_CORE),
+                    "reproduction_runner_sha256": digest(Path(__file__)),
                     "matched_original_native_G0": True,
                 }
                 tmp = checkpoint.with_suffix(".json.tmp")
@@ -405,6 +408,7 @@ def seal():
             ("pilot_graph_contract_sha256", digest(PILOT_CORE)),
             ("pilot_cv_contract_sha256", digest(PILOT_CV)),
             ("transfer_contract_sha256", digest(CONFIG)),
+            ("reproduction_runner_sha256", digest(Path(__file__))),
         ):
             if obj[field] != expected:
                 raise RuntimeError(f"Pilot parity checkpoint is stale: {stage}/{field}")
@@ -413,6 +417,7 @@ def seal():
         "decision": "PASS",
         "pilot_stages_sha256": payload,
         "transfer_code_sha256": digest(TRANSFER_CODE),
+        "reproduction_runner_sha256": digest(Path(__file__)),
         "transfer_core_sha256": digest(TRANSFER_CORE),
         "scope": "exact archived pilot design/CV/support/scoring and matched-seed native G0",
         "not_a_new_test_of_battery_accuracy": True,
