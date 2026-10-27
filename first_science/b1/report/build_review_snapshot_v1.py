@@ -46,10 +46,22 @@ def make_snapshot(full: str) -> str:
             # Earlier reviewed sections link to this appendix label.
             placeholders.append(r"\phantomsection\label{app:experiment-stages}")
         placeholders.append("")
-    if len(titles) != 14:
-        raise ValueError(f"Expected 14 placeholder titles, found {len(titles)}")
-    if not all(f"8.{n} " in titles[n - 2] for n in (2, 3, 4, 5)):
-        raise ValueError("Missing 8.2 through 8.5 placeholder headings")
+    # Four pending subsections plus Sections 9–11 and Appendices A–D.
+    expected = [
+        "8.2 Pilot--battery divergence tracing",
+        "8.3 Post-result I1/I2 pipeline development (historical Phase-6)",
+        "8.4 Distinct P2 public-induced-region comparison",
+        "8.5 Privileged search-deficit diagnosis",
+        "9. Uncertainty mathematics and cross-experiment interpretation",
+        "10. Threats to validity and reproducibility",
+        "11. Conclusions and falsifiable next questions",
+        "Appendix A. Mathematical and numerical interpretation",
+        "Appendix B. Archived source and audit provenance",
+        "Appendix C. Experimental chronology and method versions",
+        "Appendix D. Provisional literature references",
+    ]
+    if titles != expected:
+        raise ValueError(f"Unexpected placeholder headings: {titles!r}")
     result = before.rstrip() + "\n\n" + "\n".join(placeholders) + "\n\\end{document}\n"
     if result.count(r"\end{document}") != 1 or "phase6_aggregate.tex" in result:
         raise ValueError("Unreviewed material was not removed")
@@ -95,8 +107,10 @@ def main() -> None:
             ["pdftotext", "-layout", str(pdf), "-"],
             capture_output=True, text=True, check=True
         ).stdout
-        for phrase in ["Original-style Top14", "Original-style Top1",
-                       "0.154155", "0.162280", "Appendix C"]:
+        # Narrow PDF table cells wrap unpredictably. Check stable unique
+        # content and numbers, not phrases split by pdftotext column layout.
+        for phrase in ["0.154155", "0.162280", "Appendix C",
+                       "Pilot", "FULL343"]:
             if phrase not in extracted:
                 raise SystemExit("PDF validation missing " + phrase)
         standalone = output / PDF_NAME
