@@ -82,6 +82,25 @@ for phrase in checks:
             "Inspect the final page of Section 4.1 and the extracted PDF text."
         )
 print("Section 4.1 PDF text verification passed.")
+
+# Ensure the PDF contains the latest chronological five-row Table 6,
+# not just a current LaTeX source bundled with an older PDF.
+table6_checks = [
+    "Prediction errors shown in chronological experimental groups",
+    "Pilot follow-up",
+    "Original weighted Top14",
+    "Retrospective (Phase III)",
+    "Original-style Top14",
+    "0.154155",
+    "0.162280",
+]
+for phrase in table6_checks:
+    if canonical(phrase) not in rendered:
+        raise SystemExit(
+            f"ERROR: compiled PDF does not contain revised Table 6 text: {phrase!r}. "
+            "Check LaTeX rebuild and the PDF being opened."
+        )
+print("Section 8.1 Table 6 PDF text verification passed.")
 PY
   pdfinfo main.pdf | grep -E 'Pages:|Page size:'
   cp main.pdf ../B1_TECHNICAL_REPORT_DRAFT_V0_1.pdf
