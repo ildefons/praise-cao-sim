@@ -55,7 +55,7 @@ Then independently regenerate the 555 original pilot graph predictions from its 
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage archived-scoring
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage graph-smoke
 
-The full native-G0 B1400 replay is a distinct, **potentially expensive** reproducibility test. Every trajectory is compared with its archived counterpart, with small resumable local checkpoints. First test a bounded sample:
+The full B1400 replay is a distinct, **potentially expensive** reproducibility test. It uses the **new Phase-II G_PAR simulator**, configured with the original pilot provider candidates, original G0 seeds, original canonical IPT=1e6 and original SLA definitions. Every freshly simulated request ledger is compared with the archived pilot G0 ledger, using resumable per-seed checkpoints. First test a bounded sample:
 
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage full-graph --max-trajectories 10
 
@@ -64,7 +64,7 @@ If the subset passes and full reproduction is warranted:
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage full-graph
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage seal
 
-Only a successful seal prints `B1_PILOT_M3_REPRODUCTION_GATE_PASS` and creates the local `first_science/b1/local_audit/pilot_m3_reproduction_gate_v1/gate.json`. That artifact checks the frozen transfer code and contracts. All subsequent battery execution stages fail closed if the gate is missing or stale. The gate checks original candidate generation, **actual local stochastic simulation**, CV, support, graph scoring and full native graph simulation. It is a verification of fidelity to the original pilot, **not** evidence of generalization.
+Only a successful seal prints `B1_PILOT_M3_REPRODUCTION_GATE_PASS` and creates the local `first_science/b1/local_audit/pilot_m3_reproduction_gate_v1/gate.json`. That artifact checks the frozen transfer code and contracts. All subsequent battery execution stages fail closed if the gate is missing or stale. The gate checks original candidate generation, **actual local stochastic simulation**, CV, support, graph scoring and full native reproduction in the newer graph simulator. It is a verification of fidelity to the original pilot, **not** evidence of generalization.
 
 ## Execute locally
 
