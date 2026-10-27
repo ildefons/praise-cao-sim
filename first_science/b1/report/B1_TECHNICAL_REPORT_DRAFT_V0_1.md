@@ -532,15 +532,15 @@ The investigation has three parts. Section 8.1 applies key rules of the original
 
 <a id="table-6-retrospective-m3-overall"></a>
 
-**Table 6.** Prediction errors shown in chronological experimental groups. The pilot results use one parallel composition with 555 related prediction queries (Top1 was added in a later analysis of that pilot; Section 6.3). The Phase II and III rows use the same 12 eligible provider-world-by-graph configurations, with 6,660 related queries per method and the same Phase II white-box reference. All estimators used B=1400 graph trajectories per configuration. Signed bias above zero indicates overprediction. The pilot and expanded battery have different test conditions, so their errors are not directly matched.
+**Table 6.** Prediction errors shown in chronological experimental groups. The pilot results use one parallel composition with 555 related prediction queries (Top1 was added in a later analysis of that pilot; Section 6.3). The Phase II and retrospective Phase III rows use the same 12 eligible provider-world-by-graph configurations, with 6,660 related queries per method and the same Phase II white-box reference. All estimators used B=1400 graph trajectories per configuration. Signed bias above zero indicates overprediction. The pilot and expanded battery have different test conditions, so their errors are not directly matched.
 
 | Evaluation stage | Estimator | Tested scope (queries) | MAE | RMSE | Signed bias |
 |:--|:--|:--|--:|--:|--:|
 | Pilot (Phase I) | Original weighted Top14 | 1 graph (555) | 0.030370 | 0.035780 | +0.028240 |
 | Pilot follow-up | Original Top1 | 1 graph (555) | 0.028780 | 0.034060 | +0.024980 |
 | Expanded (Phase II) | V3b FULL343 | 12 cases (6,660) | **0.121890** | **0.180806** | +0.065105 |
-| **Retrospective (Phase III)** | Original-style Top14 | 12 cases (6,660) | 0.154155 | 0.212843 | +0.044867 |
-| **Retrospective (Phase III)** | Original-style Top1 | 12 cases (6,660) | 0.162280 | 0.225373 | +0.054562 |
+| **Phase III (retrospective)** | Original-style Top14 | 12 cases (6,660) | 0.154155 | 0.212843 | +0.044867 |
+| **Phase III (retrospective)** | Original-style Top1 | 12 cases (6,660) | 0.162280 | 0.225373 | +0.054562 |
 
 On the expanded battery, FULL343 had the lowest overall MAE (0.12189), followed by retrospective Top14 (0.15416) and Top1 (0.16228). For the original-style Top14 estimator, MAE was 0.03037 on the pilot and 0.15416 on the battery, an observed difference of approximately +0.1238. For Top1, it was 0.02878 and 0.16228, respectively (+0.1335). These are **comparisons across different provider configurations and SLA conditions**, not controlled measures of how either method would generalize under unchanged experimental conditions.
 
