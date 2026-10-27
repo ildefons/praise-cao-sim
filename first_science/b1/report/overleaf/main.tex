@@ -5,6 +5,7 @@
 \setsansfont{DejaVu Sans}
 \usepackage{amsmath,amssymb,mathtools}
 \usepackage{booktabs,longtable,array}
+\setlength{\LTcapwidth}{0.95\textwidth}
 \usepackage{ragged2e}
 \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 \usepackage{graphicx,subcaption}
@@ -245,12 +246,13 @@ Each of the 27 joint models is simulated for 100 graph trajectories, giving \tex
 
 Six reconstruction variants were evaluated using the same M2 aggregation rule in Eq. (10). All use the same provider-model family and parameter domains, retain three models per provider, and propagate their 27 joint combinations with equal weights. The I1STRONG\_M2 variant provides an I1-based reference under the same strengthened search budget. The variants differ in the \textbf{disclosed evidence used for fitting and the criterion used to select provider models}.
 
-For each provider and variant, the matched search evaluates 256 parameter settings: 64 initial space-filling proposals followed by 192 adaptive proposals. Each candidate is scored with 25 provider-local simulation runs; the best 24 are rescored on a fresh common bank of 100 runs, and the best three are retained. The 27 resulting joint models are each simulated for 100 graph trajectories, giving \textbf{2,700 graph trajectories per variant and physical cell}. Search budgets and random-number banks are matched, although adaptive proposals can diverge because their fitting scores differ.
+For each provider and variant, the matched search evaluates 256 parameter settings: 64 initial space-filling proposals followed by 192 adaptive proposals. Each candidate is scored with 25 provider-local simulation runs; the best 24 are rescored on a fresh common bank of 100 runs, and the best three are retained. The 27 resulting joint models are each simulated for 100 graph trajectories, giving \textbf{2,700 graph trajectories per variant and physical cell}. Search budgets and random-number banks are matched, although adaptive proposals can diverge because their fitting scores differ. Table~\ref{tab:m2-variants} specifies the six disclosure-and-fitting variants.
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.235\textwidth}p{0.725\textwidth}@{}}
+\caption{M2 disclosure-and-fitting variants used in the post-result P4/G\_SEQPAR comparison. Each row identifies the provider evidence and fitting criterion; all six variants share the 27-member equal-weight graph ensemble and a 2,700-trajectory graph budget. Disclosure and fitting change together, so this is not an isolated test of information quantity.}\label{tab:m2-variants}\\
 \toprule
 M2 variant & Public evidence and reconstruction criterion \\
 \midrule
@@ -361,12 +363,13 @@ A second extension introduces \textbf{stochastic instruction demand} for simulat
 
 The expanded \hyperref[app:experiment-stages]{Phase-5} evaluation (Phase II) tests the prediction methods beyond the initial single-world, single-graph pilot, across several service-composition graphs $G$ and provider worlds. Here $G$ denotes the \textbf{logical dependencies among provider services}. The battery considers four fixed three-provider graphs: fully parallel, fully sequential, and two mixed sequence/parallel structures. For each provider world, the four compositions use the same physical infrastructure and provider placements. Only the execution dependencies among the providers change. Periodic arrivals trigger stochastic provider services, with native queueing, service cost and network delays. The experiment covers these four structures, rather than arbitrary nested service graphs; Section 5.2 describes the provider-world and SLA-query variations.
 
-The four frozen dependency maps are:
+Table~\ref{tab:graph-dependencies} defines the four frozen dependency maps and their logical forms.
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}@{}}
+\caption{Four frozen service-composition graphs used in the experiments. The predecessor columns give immediate dependencies for providers A, B and C; ``none'' denotes no preceding provider. Logical forms use $\parallel$ for parallel-all and $\to$ for sequence. Physical infrastructure and provider placement are held fixed across these graphs.}\label{tab:graph-dependencies}\\
 \toprule
 Logical graph & A predecessors & B predecessors & C predecessors & Reading \\
 \midrule
@@ -437,7 +440,7 @@ Table~\ref{tab:pilot-prediction-errors} compares the prediction errors of the fo
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}@{}}
-\caption{Pilot prediction errors, measured against the simulation-based reference. MAE is mean absolute error; RMSE is root mean squared error. The applicable measurements differ for M0.}\label{tab:pilot-prediction-errors}\\
+\caption{Phase I pilot graph-level prediction errors against a fresh white-box reference ($N_{\mathrm{WB}}=200$), on one fixed parallel graph and provider world. The pilot comprises 15 query conditions at 37 horizons (555 related points); M0 is applicable to only 333 points. Graph trajectories count composed-service simulation runs per method. MAE is mean absolute error; RMSE is root mean squared error; positive signed bias denotes overprediction. M0 RMSE is not reported.}\label{tab:pilot-prediction-errors}\\
 \toprule
 Method, pilot & Graph trajectories & Applicable points & MAE & RMSE & Signed bias \\
 \midrule
@@ -486,7 +489,7 @@ To understand the role of model selection, weighting, and simulation allocation 
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.2400\textwidth}L{0.2400\textwidth}L{0.2400\textwidth}L{0.2400\textwidth}@{}}
-\caption{Retrospective pilot comparison with 1,400 composed-service simulations per variant. Top1 uses only the highest-weight joint model. Equal-allocation variants simulate each of the 14 selected models 100 times: Uniform14 averages their predictions equally, whereas Weighted14 uses the weights derived from public provider information. Production-allocation Weighted14 uses the same models and weights but assigns more simulations to higher-weight models. Errors are measured against the pilot WB reference.}\label{tab:pilot-retrospective-comparison}\\
+\caption{Retrospective Phase I pilot estimator comparison, with 1,400 composed-service simulations per variant and errors measured against the same pilot white-box reference. Top1 uses the highest-weight joint model. Uniform14 and Weighted14 with equal allocation simulate each of 14 selected models 100 times and differ only in averaging weights; production-allocation Weighted14 changes the allocation and random simulation seeds while retaining the same models and weights. MAE, RMSE and bias are probability-scale errors; positive bias denotes overprediction.}\label{tab:pilot-retrospective-comparison}\\
 \toprule
 Retrospective pilot estimator & MAE & RMSE & Bias \\
 \midrule
@@ -520,12 +523,13 @@ Phase-5 also planned to compare how prediction error changes between parallel an
 
 \subsection*{7.2 Executed V3b method comparison}
 
-The \hyperref[app:experiment-stages]{Phase-5} evaluation used V3b-selected candidate banks: \textbf{M1 = one joint model, M2 = 27 equal-weight joint members, M3 = FULL343 weighted joint members}. The independently checked saved pointwise metrics are:
+The \hyperref[app:experiment-stages]{Phase-5} evaluation used V3b-selected candidate banks: \textbf{M1 = one joint model, M2 = 27 equal-weight joint members, M3 = FULL343 weighted joint members}. Table~\ref{tab:phase5-v3b-errors} reports the independently checked aggregate prediction errors on the eligible Phase II population:
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}@{}}
+\caption{Phase II aggregate prediction errors for executed Phase-5 V3b methods on 12 Step-0-eligible provider-world-by-graph cells (P1, P3 and P4 across four graphs). Each fully applicable method is scored on 6,660 related query-horizon points, using a separate fresh white-box reference with $N_{\mathrm{WB}}=1000$ per cell; M0 is applicable to only 1,776 points. Graph simulation budgets differ (M1: 100, M2: 2,700, M3: 1,400 per cell). MAE, RMSE and signed bias are relative to the white-box reference; positive bias indicates overprediction. These are not cost-matched methods.}\label{tab:phase5-v3b-errors}\\
 \toprule
 \hyperref[app:experiment-stages]{Phase-5} executed V3b & Evaluated points & Graph trajectories/cell & MAE & RMSE & Signed bias \\
 \midrule
@@ -579,10 +583,11 @@ The scientifically material result is twofold: a weighted finite ensemble mainta
 
 To address the missing comparison with original M3, a \textbf{retrospective} experiment reconstructed the registered \hyperref[app:experiment-stages]{Phase-5 V2}-style M3 method across all \textbf{12 Step-0-eligible physical cases} (P1, P3 and P4, each on four graph structures). It was designed \textbf{after} earlier \hyperref[app:experiment-stages]{Phase-5 V3b} reference outcomes had been inspected. It reused the frozen 15 SLA queries per cell, 37 scored horizons (60 to 240 seconds), and N=1000 final white-box reference per cell. P2 was neither repaired nor reintroduced.
 
-For each provider in each eligible world, the registered V2-style \textbf{48-point nonadaptive LHS} was sampled within the frozen search domain and scored using \textbf{public I1} and the frozen N=100 local-rescore bank. Jeffreys-smoothed Bernoulli-KL with $\lambda=30$ gave normalized provider Gibbs weights whose products defined $48^3=110{,}592$ joint models. The 14 highest-weight combinations were propagated with \textbf{B=1400 graph trajectories per case}, allocated by the historical integer minimax variance-bound rule. The highest-weight \textbf{Top1 was separately simulated at B=1400}. All 12 retrospective predictions were frozen before this retrospective code read the existing white-box result. The seven-fit \textbf{V3b FULL343} remains an unchanged comparator. This reproduces key registered V2 M3-style rules, but is \textbf{not} a bit-for-bit reproduction of the September \hyperref[app:experiment-stages]{Phase-4} pilot.
+For each provider in each eligible world, the registered V2-style \textbf{48-point nonadaptive LHS} was sampled within the frozen search domain and scored using \textbf{public I1} and the frozen N=100 local-rescore bank. Jeffreys-smoothed Bernoulli-KL with $\lambda=30$ gave normalized provider Gibbs weights whose products defined $48^3=110{,}592$ joint models. The 14 highest-weight combinations were propagated with \textbf{B=1400 graph trajectories per case}, allocated by the historical integer minimax variance-bound rule. The highest-weight \textbf{Top1 was separately simulated at B=1400}. All 12 retrospective predictions were frozen before this retrospective code read the existing white-box result. The seven-fit \textbf{V3b FULL343} remains an unchanged comparator. This reproduces key registered V2 M3-style rules, but is \textbf{not} a bit-for-bit reproduction of the September \hyperref[app:experiment-stages]{Phase-4} pilot. Table~\ref{tab:retrospective-m3-overall} compares the errors of the executed and retrospective estimators.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.39\textwidth}rrrr@{}}
+\caption{Aggregate errors on the same 12 eligible Phase II cells (6,660 points each), comparing executed V3b FULL343 with retrospective original-style M3 Top14 and separately simulated Top1. Each retrospective estimator used 1,400 graph trajectories per cell and the previously saved final white-box reference. MAE, RMSE and signed bias quantify prediction error against that reference; positive bias denotes overprediction. This post-result comparison is not an independent holdout.}\label{tab:retrospective-m3-overall}\\
 \toprule
 Method on 12 eligible cells & Points & MAE & RMSE & Bias \\
 \midrule\endfirsthead
@@ -595,10 +600,11 @@ Retrospective original Top1 & 6,660 & 0.162280 & 0.225373 & +0.054562 \\
 \bottomrule
 \end{longtable}\endgroup
 
-Top14 retained mass within the reconstructed 48-per-provider bank was \textbf{0.996404 (P1)}, \textbf{0.996771 (P3)} and \textbf{0.998925 (P4)}. Applying the omitted-weight bound stated in Section 4.4, the \emph{full-bank versus truncated-bank expectation} discrepancy is at most 0.003596, 0.003229 and 0.001075, respectively. This bound does \textbf{not} cover graph Monte Carlo noise or guarantee accuracy against the true composition. High internal support coverage coexists with material external prediction error.
+Top14 retained mass within the reconstructed 48-per-provider bank was \textbf{0.996404 (P1)}, \textbf{0.996771 (P3)} and \textbf{0.998925 (P4)}. Applying the omitted-weight bound stated in Section 4.4, the \emph{full-bank versus truncated-bank expectation} discrepancy is at most 0.003596, 0.003229 and 0.001075, respectively. This bound does \textbf{not} cover graph Monte Carlo noise or guarantee accuracy against the true composition. High internal support coverage coexists with material external prediction error. Table~\ref{tab:retrospective-m3-by-world} breaks down MAE by provider world.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.29\textwidth}rrr@{}}
+\caption{Retrospective M3 transfer: mean absolute prediction error grouped by provider world. Each row aggregates the four eligible composition graphs and their 555 query-horizon points per graph. FULL343 is the executed Phase II V3b comparator; Top14 and Top1 are retrospectively reconstructed original-style estimators, each with 1,400 graph trajectories per cell. All errors use the same Phase II white-box reference.}\label{tab:retrospective-m3-by-world}\\
 \toprule
 Provider world & FULL343 MAE & Top14 MAE & Top1 MAE \\
 \midrule\endfirsthead
@@ -611,8 +617,11 @@ P4 & 0.12073 & 0.12415 & 0.13237 \\
 \bottomrule
 \end{longtable}\endgroup
 
+Table~\ref{tab:retrospective-m3-by-graph} presents the complementary MAE breakdown by composition graph.
+
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.29\textwidth}rrr@{}}
+\caption{Retrospective M3 transfer: mean absolute prediction error grouped by composition graph, aggregated over the three eligible provider worlds P1, P3 and P4 (555 query-horizon points per world). The compared FULL343, original-style Top14 and separately simulated Top1 predictors use the same Phase II white-box reference; the retrospective estimators each have 1,400 graph trajectories per cell.}\label{tab:retrospective-m3-by-graph}\\
 \toprule
 Graph & FULL343 MAE & Top14 MAE & Top1 MAE \\
 \midrule\endfirsthead
@@ -638,10 +647,11 @@ This \hyperref[app:experiment-stages]{Phase III} forensic control tests what was
 
 \textbf{Estimator and simulator equivalence.} The pilot's provider Gibbs weight vectors were reproduced by the newer helper to within $2.78\times10^{-16}$, with the same 14 joint members, weights, retained mass (0.999174197017) and B1400 allocations. On archived-seed subsets, G\_PAR and historical G0 native request ledgers agree to floating-point precision when both use provider IPT $10^6$. Ranks 1--9 used two seeds each (2,398 requests per rank); ranks 10--14 had one available frozen B2000 seed each (1,199 requests per rank). Switching provider IPT to $10^9$ introduced small continuous latency/cost differences without changing completion status. Ranks 10--14 also showed \textbf{zero changes over 555 original-pilot query--horizon SLA predictions} at either gauge. The complete B1400 experiment and the aggregate 14-rank SLA scoring were not replayed.
 
-\textbf{Reconstruction-policy deviation.} All nine new provider-world combinations reused the original 48 normalized Latin-hypercube coordinates, but different physical parameter-domain maps were used, and every Top1 candidate index changed. The original pilot chose $\lambda=30$ by five-fold blocked CV on public I1; the broad battery and retrospective instead inherited the fixed value 30. Repeating the same local public-I1-only CV rule retrospectively gives:
+\textbf{Reconstruction-policy deviation.} All nine new provider-world combinations reused the original 48 normalized Latin-hypercube coordinates, but different physical parameter-domain maps were used, and every Top1 candidate index changed. The original pilot chose $\lambda=30$ by five-fold blocked CV on public I1; the broad battery and retrospective instead inherited the fixed value 30. Table~\ref{tab:lambda-cv-transfer} reports the results of reapplying the pilot's public-I1 cross-validation rule retrospectively:
 
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.19\textwidth}rrrrr@{}}
+\caption{Retrospective transfer of the pilot Gibbs weighting temperature $\lambda=30$. For each provider world, blocked cross-validation over the public-I1 provider probability surfaces identifies a preferred $\lambda$ and its held-out KL loss, compared with the carried-over value 30. Excess is the relative KL increase at 30 versus the CV minimum. These provider-local KL scores are not graph-level SLA prediction errors; alternative temperatures were not evaluated by graph simulation here.}\label{tab:lambda-cv-transfer}\\
 \toprule
 World & Best $\lambda$ & Used $\lambda$ & Best KL & KL at 30 & Excess \\
 \midrule\endfirsthead
@@ -663,12 +673,13 @@ Two interacting methodological challenges emerge: \textbf{predictive sufficiency
 
 \subsection*{8.3 Post-result I1/I2 pipeline development (historical Phase-6)}
 
-After the \hyperref[app:experiment-stages]{Phase II} expanded battery (historical \hyperref[app:experiment-stages]{Phase-5}), the six M2 variants defined in Section 4.3 were evaluated on \textbf{P4/G\_SEQPAR}, using 15 queries × 37 horizons = 555 related SLA measurements per variant. Their reconstruction-search architecture and graph-propagation budgets were matched at \textbf{B=2,700 graph runs per variant}. Their disclosed evidence and/or provider-fitting criteria differed, as specified in Section 4.3.
+After the \hyperref[app:experiment-stages]{Phase II} expanded battery (historical \hyperref[app:experiment-stages]{Phase-5}), the six M2 variants defined in Section 4.3 were evaluated on \textbf{P4/G\_SEQPAR}, using 15 queries × 37 horizons = 555 related SLA measurements per variant. Their reconstruction-search architecture and graph-propagation budgets were matched at \textbf{B=2,700 graph runs per variant}. Their disclosed evidence and/or provider-fitting criteria differed, as specified in Section 4.3. Table~\ref{tab:phase6-m2-errors} compares the six methods against the shared reference.
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.40\textwidth}p{0.27\textwidth}p{0.27\textwidth}@{}}
+\caption{Post-result P4/G\_SEQPAR comparison of six M2 disclosure-and-fitting variants defined in Table~\ref{tab:m2-variants}. Each variant has 555 related query-horizon points, matched provider-reconstruction search structure and 2,700 graph trajectories using a 27-member equal-weight ensemble. MAE and RMSE are relative to the same white-box reference. Information disclosed and fitting criteria differ together, so differences are not causal estimates of information value.}\label{tab:phase6-m2-errors}\\
 \toprule
 P4/G\_SEQPAR M2 variant & MAE & RMSE \\
 \midrule
@@ -699,12 +710,13 @@ Privileged known-provider/oracle studies and provider-factorial substitutions we
 
 \subsection*{8.4 Distinct P2 public-induced-region comparison}
 
-The October P2/G\_PAR study chose the graph admissibility region deterministically from the \textbf{same published I1 rectangles} for all three reconstruction methods. It evaluated five same-$\rho$ queries over 37 horizons, or \textbf{185 points per method}, with a new reference design distinct from the failed \hyperref[app:experiment-stages]{Phase-5} P2 Step-0 conditions.
+The October P2/G\_PAR study chose the graph admissibility region deterministically from the \textbf{same published I1 rectangles} for all three reconstruction methods. It evaluated five same-$\rho$ queries over 37 horizons, or \textbf{185 points per method}, with a new reference design distinct from the failed \hyperref[app:experiment-stages]{Phase-5} P2 Step-0 conditions. Table~\ref{tab:p2-induced-errors} reports the resulting method errors and their unmatched graph budgets.
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}@{}}
+\caption{Separate post-result P2/G\_PAR prediction comparison on a graph admissibility region constructed identically from published I1 provider rectangles for all methods. The five compliance-threshold conditions at 37 horizons yield 185 scored points per method. Native graph simulation budgets are unmatched (M1: 100, M2: 2,700, M3: 1,400). MAE, RMSE and signed bias are relative to this study's white-box reference. This design does not replace the excluded Phase II P2 cells.}\label{tab:p2-induced-errors}\\
 \toprule
 P2/G\_PAR method & Native graph trajectories & MAE & RMSE & Bias \\
 \midrule
@@ -724,12 +736,13 @@ Here all three methods are evaluated against \textbf{the same} $A_G^{I1+M0}$, co
 
 \subsection*{8.5 Privileged search-deficit diagnosis}
 
-A separate P2 audit evaluated the actual hidden provider parameters against the public I1 target using the \textbf{same $N=100$ rescore and independent replay bank} as the finite reconstruction candidates. For each of three providers the true parameter vector was inside the search domain, yet it achieved better I1 RMSE than the selected best available V3b candidates:
+A separate P2 audit evaluated the actual hidden provider parameters against the public I1 target using the \textbf{same $N=100$ rescore and independent replay bank} as the finite reconstruction candidates. For each of three providers the true parameter vector was inside the search domain, yet it achieved better I1 RMSE than the selected best available V3b candidates, as detailed in Table~\ref{tab:p2-search-deficit}:
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}L{0.1800\textwidth}@{}}
+\caption{Privileged P2 provider-level I1-fitting audit: root mean squared error (RMSE) of the true generating parameter vector $\theta$ versus the best selected finite V3b candidate, measured on the same $N=100$ rescore bank and a disjoint replay bank. Smaller values mean closer agreement with the publicly advertised I1 probability surface. Hidden truth is available only to this retrospective audit, not to the reconstruction methods.}\label{tab:p2-search-deficit}\\
 \toprule
 P2 provider & True $\theta$ rescore RMSE & Selected-best rescore RMSE & True $\theta$ replay RMSE & Selected-best replay RMSE \\
 \midrule
@@ -803,12 +816,13 @@ E\!\left[(\widehat p_M-\widehat p_{\rm WB})^2\right]
 
 Subtracting empirical noise estimates from an observed squared difference and clipping at zero is an \textbf{experimental noise-correction diagnostic}. It does not make the unobserved model approximation error known exactly, and its square root adds estimation bias.
 
-The different uncertainties are summarized as follows:
+Table~\ref{tab:uncertainty-types} distinguishes the available uncertainty diagnostics and the claims each cannot support:
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.3200\textwidth}L{0.3200\textwidth}L{0.3200\textwidth}@{}}
+\caption{Distinct uncertainty and diagnostic quantities in the SLA-prediction evaluation. The second column identifies the evidence used to compute each quantity; the third states the inference it does not justify. Conditional simulation precision, finite candidate-model dispersion, omitted mixture weight, final-reference noise, designed-world variation and privileged truth diagnostics must not be conflated into a guarantee about actual composed-service compliance.}\label{tab:uncertainty-types}\\
 \toprule
 Quantity & Obtained from & What it does \emph{not} certify \\
 \midrule
@@ -971,10 +985,13 @@ The Phase-5 M3 allocation check uses the archived \path{verify_method_support_v0
 
 \subsubsection*{Audited integrity milestones}
 
+Table~\ref{tab:integrity-milestones} summarizes the archived verification checks and their documented scope.
+
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.4800\textwidth}p{0.4800\textwidth}@{}}
+\caption{Archived B1 provenance and verification milestones. The rows report inventory scope, consistency-check pass counts, source-display hash matches and freeze-manifest backlinks for the pilot, Phase II, subsequent development and retrospective analyses. These checks establish documented internal consistency where performed; they do not independently validate the scientific predictions or reproduce every historical runtime dependency.}\label{tab:integrity-milestones}\\
 \toprule
 Artifact & Verification \\
 \midrule
@@ -1004,14 +1021,21 @@ For a future reproducibility package, the already assembled B1 tools can extract
 \section*{Appendix C. Experimental chronology and method versions}
 \addcontentsline{toc}{section}{Appendix C. Experimental chronology and method versions}
 \phantomsection\label{app:experiment-stages}
+\setcounter{table}{0}
+\renewcommand{\thetable}{C.\arabic{table}}
+\providecommand{\theHtable}{}
+\renewcommand{\theHtable}{C.\arabic{table}}
 
 This appendix distinguishes the \textbf{scientific role} of an experiment from the \textbf{historical implementation identifier} used in the repository. A stage number is not evidence of independent confirmation. In particular, the broad evaluation changed several methods before the final graph reference was inspected, and post-result experiments reused previously examined conditions.
 
-\subsection*{C.1 Experiment chronology (Table C.1)}
-\addcontentsline{toc}{subsection}{C.1 Experiment chronology (Table C.1)}
+\subsection*{C.1 Experiment chronology}
+\addcontentsline{toc}{subsection}{C.1 Experiment chronology}
+
+Table~\ref{tab:experiment-chronology} maps the scientific phases to the historical implementation stages and their evidence roles.
 
 \begingroup\small\setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.21\textwidth}L{0.22\textwidth}p{0.52\textwidth}@{}}
+\caption{Experimental chronology and evidence status. Global Phases I--III denote scientific roles (pilot, expanded evaluation and post-result investigation), whereas repository Phase-1 through Phase-6 and V2/V3b denote historical implementation stages or method versions. Rows distinguish development, frozen predictions, retrospective analyses and later exploratory work; repeated use of an earlier test population is not an independent holdout.}\label{tab:experiment-chronology}\\
 \toprule
 Scientific purpose & Historical repository stage & What was done and what it establishes \\
 \midrule
@@ -1035,13 +1059,16 @@ Separate post-result diagnostic (Phase III) & October P2/G\_PAR and privileged P
 
 The repository chronology and source-level method audits are listed in Appendix B. The global labels Phase I/II/III describe evidence roles; Phase-1 through Phase-6 and V2/V3b identify historical engineering stages or method versions.
 
-\subsection*{C.2 Method-version matrix (Table C.2)}
-\addcontentsline{toc}{subsection}{C.2 Method-version matrix (Table C.2)}
+\subsection*{C.2 Method-version matrix}
+\addcontentsline{toc}{subsection}{C.2 Method-version matrix}
+
+Table~\ref{tab:method-versions} distinguishes the implementations and evidence roles compared across study periods.
 
 \begingroup
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}@{}}
+\caption{Method-version matrix across the pilot, registered Phase II plan, executed Phase II evaluation and later retrospective or I2 development studies. M1 candidate selection, M2 ensemble membership, M3 support and graph simulation budgets differ by version. The evidence-role column indicates whether a row is protocol, frozen pilot, executed evaluation or post-result analysis; numerical outcomes must not be compared as unchanged-method replications.}\label{tab:method-versions}\\
 \toprule
 Period & M1 selection & M2 membership & M3 support & Main M3 graph budget & Evidence role \\
 \midrule
