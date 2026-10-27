@@ -4,6 +4,10 @@
 
 The Phase-4 pilot had 48 candidate provider models per provider, KL-Gibbs weights (lambda 30), a Top14 joint-model support and a budget of 1,400 graph trajectories. Phase-5 FULL343 instead used 7 fitted provider models per provider. This experiment checks the original-style **method class** on the 12 existing Phase-5 eligible cases. It is **not a bit-for-bit replay** of Phase-4 candidate parameters: the new provider configurations require new public-I1-specific candidate reconstruction, using the frozen Phase-5 V2 LHS design and search domains.
 
+## Pilot selection-policy transfer (new experiment, not yet evaluated)
+
+The existing v1 runner below fixed lambda=30 and K=14 and used the frozen Phase-II M1 domain registry. A **separate isolated test** of the original pilot *procedural rules* is now implemented in [PILOT_POLICY_TRANSFER_V1.md](PILOT_POLICY_TRANSFER_V1.md). It derives candidate domains from public metadata using the original pilot formula, repeats public-I1 CV for lambda, and chooses K by the 99.9% cumulative-mass rule. It preserves B1400 and stops if the adaptive K is infeasible. Its outputs are isolated, and no new graph-level result is claimed until local execution and audit.
+
 ## Scientific design
 
 1. Reconstruct 48 candidates per provider using the original declared nonadaptive LHS design, the frozen public I1 cards and independent 100-run local rescore bank. Do not use hidden provider parameters or graph white-box outcomes.
