@@ -494,13 +494,13 @@ M0 produced estimates for only 1,776 of the 6,660 prediction queries, whereas M1
 
 **Why compare composition graphs?** The pilot evaluated one parallel composition. In a parallel composition, end-to-end latency depends on the slowest required branch, so errors in faster providers can be partly masked. In a sequence, provider latencies add, potentially making those errors more visible. Before examining the expanded-evaluation results, we therefore specified a hypothesis: *for the same provider world and prediction method, would the sequential graph produce larger prediction errors than the parallel graph?* We recorded the comparison as the difference between their mean absolute errors (MAE):
 
-$
+$$
 \Delta_P^M =
 \operatorname{MAE}_M(P,G_{\mathrm{SEQ}})
 -
 \operatorname{MAE}_M(P,G_{\mathrm{PAR}}).
 \tag{17}
-$
+$$
 
 Here $\operatorname{MAE}_M(P,G)$ is the average absolute difference between the SLA-satisfaction probabilities predicted by method $M$ and the white-box reference for provider world $P$ and composition graph $G$. A **positive** $\Delta_P^M$ means that the sequential graph had higher average prediction error in the evaluated queries; a **negative** value means that the parallel graph had higher error. The original hypothesis anticipated a positive difference.
 
