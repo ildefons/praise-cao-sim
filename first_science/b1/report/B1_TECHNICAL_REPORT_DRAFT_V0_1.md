@@ -492,17 +492,21 @@ M0 produced estimates for only 1,776 of the 6,660 prediction queries, whereas M1
 
 ## 7.3 Topology and provider-world effects
 
-The prospectively specified topology statistic for each method and provider world was
+**Why compare composition graphs?** The pilot evaluated one parallel composition. In a parallel composition, end-to-end latency depends on the slowest required branch, so errors in faster providers can be partly masked. In a sequence, provider latencies add, potentially making those errors more visible. Before examining the expanded-evaluation results, we therefore specified a hypothesis: *for the same provider world and prediction method, would the sequential graph produce larger prediction errors than the parallel graph?* We recorded the comparison as the difference between their mean absolute errors (MAE):
 
-$$
+$
 \Delta_P^M =
 \operatorname{MAE}_M(P,G_{\mathrm{SEQ}})
 -
 \operatorname{MAE}_M(P,G_{\mathrm{PAR}}).
 \tag{17}
-$$
+$
 
-The original directional masking hypothesis anticipated $\Delta_P^M>0$. The completed analysis did **not** yield that sign consistently across the eligible worlds: P1 differed in sign from P3/P4 for the examined contrast. It is therefore not supported as a universal or robust rule by this evaluation. A second registered heterogeneous-minus-symmetric contrast required P2 and was **not estimable** after Step-0 exclusion. The two other graph ASTs offer mechanistic triangulation but do not constitute a clean factorial manipulation separating workload shift from aggregation structure.
+Here $\operatorname{MAE}_M(P,G)$ is the average absolute difference between the SLA-satisfaction probabilities predicted by method $M$ and the white-box reference for provider world $P$ and composition graph $G$. A **positive** $\Delta_P^M$ means that the sequential graph had higher average prediction error in the evaluated queries; a **negative** value means that the parallel graph had higher error. The original hypothesis anticipated a positive difference.
+
+The results did not show a consistent direction. For M3 FULL343, $\Delta_P^M$ was $-0.0448$ in P1, $+0.0563$ in P3 and $+0.0196$ in P4. Sequential composition therefore had lower observed MAE in P1 but higher observed MAE in P3 and P4. These differences do not establish that sequence is generally harder to predict. In addition, Step-0 selected SLA query conditions separately for each world-by-graph case, so this comparison does not isolate the effect of graph structure alone.
+
+A second planned comparison would have contrasted the topology differences between the more symmetric provider worlds (P1/P3) and the unequal-load worlds (P2/P4). It could **not be completed** because all P2 cases were excluded by Step-0. The two mixed graphs, G_SEQPAR and G_PARSEQ, provide additional observations, but they also do not separate the effect of graph structure from changes in workload reaching each provider.
 
 The 6,660 measurements reuse simulation trajectories across SLA conditions and time horizons, so they are not independent experiments. They cannot be treated as 6,660 independent physical deployments when assessing variation across provider configurations. A WB-reference bootstrap resamples the **complete trajectory/seed index** jointly across horizons, queries and shared-seed cells, keeping method predictions fixed. It addresses finite-$N_{\mathrm{WB}}$ reference fluctuation, **not model-selection uncertainty or future-world robustness**.
 
