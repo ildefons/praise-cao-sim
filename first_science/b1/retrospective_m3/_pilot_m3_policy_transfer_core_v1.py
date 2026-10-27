@@ -985,4 +985,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(
+        "Internal engine only. Run "
+        "first_science/b1/retrospective_m3/run_pilot_m3_policy_transfer_v1.py"
+    )
