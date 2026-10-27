@@ -445,7 +445,7 @@ A retrospective analysis compared the actual provider parameters used in the sim
 
 ## 7.1 Eligibility and exact prediction population
 
-[Phase-5](#appendix-c-experimental-chronology-and-method-versions) planned 16 physical world-by-graph cells. Under the Step-0 eligibility/confirmation protocol, the four cells in world P2 failed. The remaining **12** cells cover worlds P1, P3, P4 across G_PAR, G_SEQ, G_SEQPAR and G_PARSEQ. Each has 15 frozen SLA queries, evaluated at 37 horizons; each has a distinct fresh $N_{\mathrm{WB}}=1000$ graph reference.
+[Phase-5](#appendix-c-experimental-chronology-and-method-versions) planned 16 physical world-by-graph cells. As described in [Section 5.2](#52-experimental-design), Step-0 used preliminary simulations of the underlying provider models to select informative SLA conditions and confirm each cell's eligibility. All four P2 cells failed this check and were excluded without replacement. The remaining **12** cells cover worlds P1, P3, P4 across G_PAR, G_SEQ, G_SEQPAR and G_PARSEQ. Each has 15 frozen SLA queries, evaluated at 37 horizons; each has a distinct fresh $N_{\mathrm{WB}}=1000$ graph reference.
 
 There is **no estimate for the preregistered P2 component of the [Phase-5](#appendix-c-experimental-chronology-and-method-versions) directional heterogeneity contrast**. The later induced-public-region P2 study used a different query design and cannot be substituted into this missing prospective cohort.
 

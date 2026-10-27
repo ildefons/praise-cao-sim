@@ -385,6 +385,7 @@ G\_PARSEQ & none & none & B & $A\parallel(B\to C)$ \\
 The simulator can also represent device power consumption and the quality of a service's output. In this evaluation, the power-consumption parameter (WATT) is set to zero for every simulated device. AICon can vary output quality according to the fraction of an application's required instructions that are executed, but here each module executes its full instruction demand, so this mechanism does not introduce quality variation. Although the SLA objective includes latency, cost and quality $(L,C,Q)$, the experiments primarily investigate latency and cost, not changes in energy consumption or output quality.
 
 \subsection*{5.2 Experimental design}
+\phantomsection\label{sec:experimental-design}
 
 To evaluate the prediction methods under different conditions, we considered four provider configurations (P1--P4) and the four service-composition graphs introduced in Section 5.1, giving 16 planned test cases. For each case, preliminary simulations using the underlying provider models were used to select SLA requirements suitable for evaluating prediction accuracy. This preliminary selection, called Step-0, was intended to avoid test conditions that were insufficiently informative. All four cases involving provider configuration P2 failed this selection and were excluded without replacement, leaving 12 cases for evaluation.
 
@@ -510,7 +511,7 @@ A retrospective analysis compared the actual provider parameters used in the sim
 
 \subsection*{7.1 Eligibility and exact prediction population}
 
-\hyperref[app:experiment-stages]{Phase-5} planned 16 physical world-by-graph cells. Under the Step-0 eligibility/confirmation protocol, the four cells in world P2 failed. The remaining \textbf{12} cells cover worlds P1, P3, P4 across G\_PAR, G\_SEQ, G\_SEQPAR and G\_PARSEQ. Each has 15 frozen SLA queries, evaluated at 37 horizons; each has a distinct fresh $N_{\mathrm{WB}}=1000$ graph reference.
+\hyperref[app:experiment-stages]{Phase-5} planned 16 physical world-by-graph cells. As described in \hyperref[sec:experimental-design]{Section~5.2}, Step-0 used preliminary simulations of the underlying provider models to select informative SLA conditions and confirm each cell's eligibility. All four P2 cells failed this check and were excluded without replacement. The remaining \textbf{12} cells cover worlds P1, P3, P4 across G\_PAR, G\_SEQ, G\_SEQPAR and G\_PARSEQ. Each has 15 frozen SLA queries, evaluated at 37 horizons; each has a distinct fresh $N_{\mathrm{WB}}=1000$ graph reference.
 
 There is \textbf{no estimate for the preregistered P2 component of the \hyperref[app:experiment-stages]{Phase-5} directional heterogeneity contrast}. The later induced-public-region P2 study used a different query design and cannot be substituted into this missing prospective cohort.
 
