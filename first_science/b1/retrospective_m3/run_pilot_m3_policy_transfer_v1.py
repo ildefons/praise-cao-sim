@@ -88,8 +88,10 @@ def configuration():
         raise RuntimeError("Rank-specific graph seed stride too small")
     if cfg["top14_seed_base"] < 9000000 or cfg["top1_seed_base"] < 9000000:
         raise RuntimeError("Graph seed banks must be new, disjoint banks")
-    if abs(cfg["top14_seed_base"] - cfg["top1_seed_base"]) < 140000:
-        raise RuntimeError("Graph seed banks overlap")
+    # Even if the adaptive support fills the entire B1400 allocation, its
+    # rank-specific seed prefixes cannot intersect the separately sampled Top1.
+    if cfg["top1_seed_base"] <= cfg["top14_seed_base"] + cfg["graph_budget"] * cfg["seed_stride"]:
+        raise RuntimeError("TopK and Top1 graph seed namespaces could overlap")
     expected_grid = core.read_json(PILOT_CV)["lambda_grid"]
     if list(map(float, cfg["lambda_grid"])) != list(map(float, expected_grid)):
         raise RuntimeError("Pilot lambda CV grid has changed")
@@ -323,9 +325,24 @@ def prepare_world(cfg, world, *, workers, benchmark_candidates=0):
     with core._world_prepare_lock(world):
         for provider in PROVIDERS:
             meta = OUT / "candidates" / world / provider / "provider_manifest.json"
+            cv_started = (base / "cv_selection.json").is_file()
+            if cv_started:
+                design = candidate_design(cfg, world, provider)
+                curve_root = meta.parent / "surfaces"
+                if all((curve_root / (cid + ".csv")).is_file()
+                       for cid in design["candidate_id"].astype(str)):
+                    print(f"CV checkpoint found for {world}/{provider}: "
+                          "all 48 local curves preserved; skip provisional reweighting")
+                    continue
+                raise RuntimeError(
+                    f"{world}/{provider}: CV was already selected but candidate "
+                    "surfaces are incomplete; do not silently repair the frozen bank"
+                )
             if meta.exists() and core.read_json(meta).get("status") == "B1_PILOT_POLICY_CV_PROVIDER_FROZEN":
-                print(f"CV-FROZEN provider {world}/{provider}: skipped local rescoring")
-                continue
+                raise RuntimeError(
+                    f"{world}/{provider}: final provider weights exist without a "
+                    "matching world CV selection manifest"
+                )
             ok = core.prepare_provider(
                 cfg, world, provider, workers=workers,
                 limit_candidates=benchmark_candidates
