@@ -42,7 +42,7 @@ We define the evaluated quantity as $\sigma_G(A,H;\rho)=\Pr[c_G(A,H)\ge\rho]$, w
 
 \textbf{First, the controlled pilot (\hyperref[app:experiment-stages]{Phase I})} tested the original three-provider parallel graph. The original controlled pilot was promising. Against a fresh white-box reference ($N_{\mathrm{WB}}=200$: 200 new simulation runs using the true underlying model), across 555 related measurements (15 SLA conditions, each evaluated at 37 time horizons using shared simulation runs), the mean absolute errors (MAE) of a single reconstructed model (M1), a 27-member equal-weight ensemble (M2), and a Gibbs-weighted pilot M3 with 14 propagated joint models were respectively \textbf{0.18517, 0.06815 and 0.03037}. However, a retrospective cost-matched support audit found a Top1 estimator with MAE \textbf{0.02878}, slightly below the weighted Top14 estimator in that fixed pilot. The pilot therefore did not establish that multi-model averaging was necessary.
 
-\textbf{Next, the expanded evaluation (\hyperref[app:experiment-stages]{Phase II})} evaluated generalization across multiple provider configurations and composition graphs. Sixteen evaluation cases were planned (four provider configurations combined with four composition graphs). The four cases involving configuration P2 did not meet the predefined criteria for informative SLA test conditions, so they were excluded without replacement. On the remaining 12 cells, with independent $N_{\mathrm{WB}}=1000$ final white-box trajectories per cell and 6,660 related measurements (555 per case) per fully applicable method, the executed \hyperref[app:experiment-stages]{Phase-5 V3b} algorithms produced MAE \textbf{0.15702} (M1), \textbf{0.13395} (M2), and \textbf{0.12189} (M3 FULL343). M3 retained the best aggregate ranking, but hard conditions still had substantial errors. Its algorithm and candidate support also changed from the pilot and from the initially registered \hyperref[app:experiment-stages]{Phase-5} method. Accordingly these numbers cannot be treated as direct replications of the original 14-member method.
+\textbf{Next, the expanded evaluation (\hyperref[app:experiment-stages]{Phase II})} evaluated generalization across multiple provider configurations and composition graphs. Sixteen evaluation cases were planned (four provider configurations combined with four composition graphs). The four cases involving configuration P2 did not meet the predefined criteria for informative SLA test conditions, so they were excluded without replacement. On the remaining 12 cells, with independent $N_{\mathrm{WB}}=1000$ final white-box trajectories per cell and 6,660 related measurements (555 per case) for each of M1--M3, the executed \hyperref[app:experiment-stages]{Phase-5 V3b} algorithms produced MAE \textbf{0.15702} (M1), \textbf{0.13395} (M2), and \textbf{0.12189} (M3 FULL343). M3 retained the best aggregate ranking, but hard conditions still had substantial errors. Its algorithm and candidate support also changed from the pilot and from the initially registered \hyperref[app:experiment-stages]{Phase-5} method. Accordingly these numbers cannot be treated as direct replications of the original 14-member method.
 
 \textbf{Finally, the retrospective investigation (\hyperref[app:experiment-stages]{Phase III})} investigates that gap, including an original-style M3 comparison, without creating a new independent holdout. Reconstructing 48 public-I1-scored candidates/provider and propagating Top14 at B=1400 on the same 12 cells gave \textbf{MAE 0.15416} (separately simulated Top1, \textbf{0.16228}), versus \textbf{0.12189} for executed V3b FULL343. Although Top14 retained at least \textbf{99.64\%} of inferred joint-model weight in P1, P3 and P4, FULL343 outperformed it in \textbf{11 of 12} cells. These post-result comparisons do not isolate member count or constitute a fresh holdout.
 
@@ -137,7 +137,7 @@ The numerical methods compute $\widehat\sigma_G^{(I,M)}(A,H;\rho)$, and the hidd
 
 \textbf{What do we estimate?} An SLA prediction query $(A,H;\rho)$ specifies an admissibility region $A$ (latency, cost and quality limits), an observation horizon $H$, and a required fraction $\rho$ of decided requests that must comply with $A$ by $H$. For a known composition graph $G$, Equation (4) defines $\sigma_G(A,H;\rho)$, the probability that the composed service meets this requirement. The integrator does not know the providers' hidden stochastic execution models. It has only the information each provider discloses through interface $I$. Integration method $M$ uses those disclosures and the known graph to produce the end-to-end prediction $\widehat\sigma_G^{(I,M)}(A,H;\rho)$. \textbf{The scientific task is to assess the accuracy and limits of this probability prediction.}
 
-\textbf{How do we evaluate it?} In the simulator, the true provider models can be used to generate an independent finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}(A,H;\rho)$. We compare each method's prediction with this reference across the tested SLA queries, horizons, provider worlds and graph topologies. The hidden provider models used for final reference generation are not supplied to the methods being evaluated. Because the reference is computed from a finite number of stochastic runs, it is itself an estimate of $\sigma_G$, not an exact value. Numerical simulation error and reconstruction error must therefore be distinguished (Section 9 and Appendix A).
+\textbf{How do we evaluate it?} In the simulator, the true provider models can be used to generate an independent finite white-box reference $\widehat\sigma_G^{\mathrm{WB}}(A,H;\rho)$. We compare each method's prediction with this reference across the tested SLA queries, horizons, provider worlds and graph topologies. The hidden provider models used for final reference generation are not supplied to the methods being evaluated. In the results tables, a \emph{scored prediction query} is a complete query $(A,H;\rho)$ for which a method returns a numerical probability estimate and is compared with the white-box reference. Queries without a numerical prediction are not included in that method's error average. Because the reference is computed from a finite number of stochastic runs, it is itself an estimate of $\sigma_G$, not an exact value. Numerical simulation error and reconstruction error must therefore be distinguished (Section 9 and Appendix A).
 
 \section*{3. Provider disclosures}
 \addcontentsline{toc}{section}{3. Provider disclosures}
@@ -201,7 +201,7 @@ These limits apply to a request only if all required providers respect their adv
 
 For the frozen \hyperref[app:experiment-stages]{Phase-I} pilot, Source $\to$ Fpre $\to$ $(A\parallel B\parallel C)$ $\to$ Fpost, three network-data hops contribute $0.001001$ s each, a completion-control message contributes $0.001$ s, and Fpre and Fpost contribute $0.005$ s each. Thus the additional latency is $3(0.001001)+0.001+2(0.005)=0.014003$ s. The two fixed services add $0.015+0.015=0.03$ cost units, while network costs are zero. The resulting limits are $\ell_G^{M0}=0.014003+\max_i\ell_i$, $c_G^{M0}=0.03+\sum_i c_i$ and $q_G^{M0}=\min_i q_i$. These constants come from the simulator configuration and must be recalculated for other graph configurations.
 
-Applying these rules to the advertised I1 regions gives the M0-induced region $A_G^{I1+M0}$, which need not equal the requested graph-level SLA region $A_G$. For example, M0 may calculate an $80$ ms latency limit while the requested SLA allows $100$ ms. M0 makes a prediction only when $A_G^{I1+M0}\subseteq A_G$: its calculated maximum latency and cost do not exceed the requested maxima, and its minimum quality meets the requested minimum. Otherwise it reports \textbf{not applicable}, which does not mean the service will fail. Provided the required I1 values are available, the prediction is
+Applying these rules to the advertised I1 regions gives the M0-induced region $A_G^{I1+M0}$, which need not equal the requested graph-level SLA region $A_G$. For example, M0 may calculate an $80$ ms latency limit while the requested SLA allows $100$ ms. M0 makes a prediction only when $A_G^{I1+M0}\subseteq A_G$: its calculated maximum latency and cost do not exceed the requested maxima, and its minimum quality meets the requested minimum. Otherwise M0 returns \textbf{not applicable} instead of a numerical prediction. This status means M0 cannot estimate that prediction query; it does not mean the requested admissibility region is invalid or that the service will fail. Provided the required I1 values are available, the prediction is
 
 \begin{equation*}
 \widehat\sigma_G^{M0}(A_G,H;\rho)
@@ -444,16 +444,16 @@ Table~\ref{tab:pilot-prediction-errors} compares the prediction errors of the fo
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}@{}}
-\caption{Phase I pilot graph-level prediction errors against a fresh white-box reference ($N_{\mathrm{WB}}=200$), on one fixed parallel graph and provider world. The pilot comprises 15 query conditions at 37 horizons (555 related points); M0 is applicable to only 333 points. Graph trajectories count composed-service simulation runs per method. MAE is mean absolute error; RMSE is root mean squared error; positive signed bias denotes overprediction. M0 RMSE is not reported.}\label{tab:pilot-prediction-errors}\\
+\caption{Phase I pilot graph-level prediction errors against a fresh white-box reference ($N_{\mathrm{WB}}=200$), on one fixed parallel graph and provider world. The pilot comprises 15 query conditions at 37 horizons (555 related points); M0 returns numerical estimates for only 333 of the 555 prediction queries. Graph trajectories count composed-service simulation runs per method. MAE is mean absolute error; RMSE is root mean squared error; positive signed bias denotes overprediction. M0 RMSE is not reported.}\label{tab:pilot-prediction-errors}\\
 \toprule
-Method, pilot & Graph trajectories & Applicable points & MAE & RMSE & Signed bias \\
+Method, pilot & Graph trajectories & Scored queries & MAE & RMSE & Signed bias \\
 \midrule
 \endfirsthead
 \toprule
-Method, pilot & Graph trajectories & Applicable points & MAE & RMSE & Signed bias \\
+Method, pilot & Graph trajectories & Scored queries & MAE & RMSE & Signed bias \\
 \midrule
 \endhead
-M0, applicable subset & 0 & 333 & 0.57204 & Not reported & -0.57204 \\
+M0 & 0 & 333 & 0.57204 & Not reported & -0.57204 \\
 M1 & 100 & 555 & 0.18517 & 0.23074 & +0.18517 \\
 M2, 27 equal members & 2,700 & 555 & 0.06815 & 0.09414 & +0.04737 \\
 M3 pilot Top14, $B=1400$ & 1,400 & 555 & \textbf{0.03037} & 0.03578 & +0.02824 \\
@@ -462,7 +462,7 @@ M3 pilot Top14, $B=2000$ & 2,000 & 555 & \textbf{0.02755} & 0.03306 & +0.02447 \
 \end{longtable}
 \endgroup
 
-\emph{MAE, RMSE and bias are computed against the WB reference. Positive bias means optimistic prediction. M0 could produce predictions for only 9 of the 15 SLA conditions (333 of 555 measurements). For the other six SLA conditions, M0 could not provide a prediction because the required latency and cost limits were tighter than those it calculated from the providers' advertised information. This does not imply that the service would fail those conditions. Its prediction errors are therefore not directly comparable with those of the other methods, which were evaluated on all 15 conditions. M3 used 1,400 simulations of the composed service, compared with 2,700 for M2. However, these counts exclude the computational cost of reconstructing the provider models, so they do not establish which method is less expensive overall.}
+\emph{MAE, RMSE and bias are computed against the WB reference. Positive bias means optimistic prediction. M0 returned numerical predictions for 9 of the 15 query conditions (333 of the 555 complete prediction queries). For the other six query conditions, M0 returned not applicable because the required latency and cost limits were tighter than those it calculated from the providers' advertised information. This does not imply that the service would fail those conditions. Its aggregate error is based on fewer prediction queries than those of the other methods, which were evaluated on all 555 queries. M3 used 1,400 simulations of the composed service, compared with 2,700 for M2. However, these counts exclude the computational cost of reconstructing the provider models, so they do not establish which method is less expensive overall.}
 
 Besides measuring probability errors, the pilot also examined whether the methods made the same yes/no decision as the WB reference. The quantity being predicted, defined in Eq.~(4), is the probability that at least a fraction $\rho$ of decided requests meets the SLA. For this additional analysis, we used an illustrative probability threshold $\beta=0.90$:
 
@@ -533,16 +533,16 @@ The \hyperref[app:experiment-stages]{Phase-5} evaluation used V3b-selected candi
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}L{0.1500\textwidth}@{}}
-\caption{Phase II aggregate prediction errors for executed Phase-5 V3b methods on 12 Step-0-eligible provider-world-by-graph cells (P1, P3 and P4 across four graphs). Each fully applicable method is scored on 6,660 related query-horizon points, using a separate fresh white-box reference with $N_{\mathrm{WB}}=1000$ per cell; M0 is applicable to only 1,776 points. Graph simulation budgets differ (M1: 100, M2: 2,700, M3: 1,400 per cell). MAE, RMSE and signed bias are relative to the white-box reference; positive bias indicates overprediction. These are not cost-matched methods.}\label{tab:phase5-v3b-errors}\\
+\caption{Phase II aggregate prediction errors for executed Phase-5 V3b methods on 12 Step-0-eligible provider-world-by-graph cells (P1, P3 and P4 across four graphs). Each of M1--M3 is scored on 6,660 related prediction queries, using a separate fresh white-box reference with $N_{\mathrm{WB}}=1000$ per cell; M0 returns numerical predictions for only 1,776 of those queries. Graph simulation budgets differ (M1: 100, M2: 2,700, M3: 1,400 per cell). MAE, RMSE and signed bias are relative to the white-box reference; positive bias indicates overprediction. These are not cost-matched methods.}\label{tab:phase5-v3b-errors}\\
 \toprule
-\hyperref[app:experiment-stages]{Phase-5} executed V3b & Evaluated points & Graph trajectories/cell & MAE & RMSE & Signed bias \\
+\hyperref[app:experiment-stages]{Phase-5} executed V3b & Scored queries & Graph trajectories/cell & MAE & RMSE & Signed bias \\
 \midrule
 \endfirsthead
 \toprule
-\hyperref[app:experiment-stages]{Phase-5} executed V3b & Evaluated points & Graph trajectories/cell & MAE & RMSE & Signed bias \\
+\hyperref[app:experiment-stages]{Phase-5} executed V3b & Scored queries & Graph trajectories/cell & MAE & RMSE & Signed bias \\
 \midrule
 \endhead
-M0 on applicable subset & 1,776 & 0 & 0.41874 & 0.45392 & -0.41808 \\
+M0 & 1,776 & 0 & 0.41874 & 0.45392 & -0.41808 \\
 M1 & 6,660 & 100 & 0.15702 & 0.22588 & +0.14968 \\
 M2 & 6,660 & 2,700 & 0.13395 & 0.19045 & +0.10094 \\
 \textbf{M3 FULL343} & \textbf{6,660} & \textbf{1,400} & \textbf{0.12189} & \textbf{0.18081} & \textbf{+0.06511} \\
@@ -553,14 +553,14 @@ M2 & 6,660 & 2,700 & 0.13395 & 0.19045 & +0.10094 \\
 \begin{figure}[htbp]
 \centering
 \input{figures/phase5_aggregate.tex}
-\caption{\hyperref[app:experiment-stages]{Phase-5} aggregate MAE from verified frozen V3b pointwise results. The full 12-cell eligible battery contains 6,660 related SLA measurements (across conditions and time horizons) per model. Different graph budgets apply: M1 100, M2 2,700 and M3 1,400 trajectories per cell. M0 is omitted because its applicable subset is different.}
+\caption{\hyperref[app:experiment-stages]{Phase-5} aggregate MAE from verified frozen V3b pointwise results. The full 12-cell eligible battery contains 6,660 related SLA measurements (across conditions and time horizons) per model. Different graph budgets apply: M1 100, M2 2,700 and M3 1,400 trajectories per cell. M0 is omitted because it returns numerical predictions for only 1,776 of the 6,660 prediction queries.}
 \end{figure}
 
 Table~\ref{tab:phase5-v3b-errors} reports errors in the estimated end-to-end SLA satisfaction probability. M3 FULL343 has the lowest aggregate MAE among M1--M3, at 0.12189 over 6,660 related query-horizon points. This corresponds to an average absolute difference of about 12.2 percentage points between M3's predictions and the finite white-box reference. M1, M2 and M3 have positive aggregate signed biases, indicating that they overpredicted SLA satisfaction on average.
 
 The expanded evaluation covers 12 eligible cases across three provider configurations and four composition graphs, providing broader evidence than the single-graph pilot. However, an average error over the full evaluation does not show how prediction accuracy varies across composition graphs, SLA requirements, or observation horizons. This matters for management decisions: an inaccurate estimate near an admission threshold may lead to accepting a service that should have been rejected, or vice versa. The result therefore motivates further investigation of how to select evaluation scenarios, determine simulation budgets, and measure errors and uncertainties at the level of individual decisions, rather than relying only on aggregate accuracy.
 
-Because M0 is defined on a smaller and selected applicable set, its aggregate MAE cannot be directly compared to the all-query rows. Moreover M1/M2/M3 have sharply different graph simulation budgets, so the aggregate ranking does not isolate simulation efficiency at equal cost, nor does the pre-WB change from Top14 to FULL343 permit a direct unchanged-algorithm replication of the September pilot.
+M0 produced estimates for only 1,776 of the 6,660 prediction queries, whereas M1, M2 and M3 were evaluated on all 6,660. Their aggregate errors therefore refer to different sets of queries and cannot be compared directly. Moreover M1/M2/M3 have sharply different graph simulation budgets, so the aggregate ranking does not isolate simulation efficiency at equal cost, nor does the pre-WB change from Top14 to FULL343 permit a direct unchanged-algorithm replication of the September pilot.
 
 \subsection*{7.3 Topology and provider-world effects}
 
@@ -1087,7 +1087,7 @@ Phase-4 pilot & Historical TPE single fit/provider & 3 diverse/provider; M1 anch
 Phase-5 registered V2 & Frozen TPE/domain policies & Separate diversity/compatibility policy & Originally Top14 & Planned 1,400 & Protocol, not final executed version \\
 Phase-5 executed V3b & Best common-$N100$ RMSE of seven & RMSE ranks 1–3; includes M1 anchor & All 7/provider $\to$ FULL343 & 1,400 & 12-cell final-WB evaluation \\
 October retrospective M3 & V3b remains comparator & Not re-estimated & 48/provider Top14 and Top1 & 1,400 each & Post-result same-WB comparison \\
-Phase-6 matched & Strong I1 or I2-specific loss and 256-trial search & Top3/provider, 27 equal weights & \textbf{Not evaluated} & Not applicable & Post-Phase5 development \\
+Phase-6 matched & Strong I1 or I2-specific loss and 256-trial search & Top3/provider, 27 equal weights & \textbf{Not evaluated} & No M3 evaluation & Post-Phase5 development \\
 \bottomrule
 \end{longtable}
 \endgroup
