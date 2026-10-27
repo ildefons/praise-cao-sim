@@ -375,8 +375,10 @@ def prepare_provider(cfg, world, provider, workers=1, limit_candidates=0):
         "weights_sha256": sha256_file(file),
         "public_card_json_sha256": record["card_json_sha256"],
         "public_sigma_surface_sha256": record["sigma_surface_sha256"],
-        "domain_registry_sha256": sha256_file(
-            P5/"results"/"03_reconstruction"/"phase5_m1_domain_registry.csv"),
+        "pilot_domain_contract_sha256": sha256_file(
+            FIRST/"phase3"/("config_phase3_m1_contract_v2_providerC_expanded_v1.json"
+                             if provider == "ProviderC" else
+                             "config_phase3_m1_contract_v2.json")),
         "config_sha256": sha256_file(CONFIG),
         "local_rescore_n": 100,
         "no_graph_whitebox_read": True,
