@@ -388,18 +388,23 @@ def _matched_trajectory(original, fresh, *, rank, seed):
 
 
 def full_graph(*, max_trajectories=0):
-    """Native ORIGINAL G0 replay, full B1400 seed bank, isolated per-seed checkpoints."""
+    """Full pilot B1400 reproduction with NEW G_PAR engine and original seeds."""
     for name in ("deterministic", "local_replay", "archived_scoring", "graph_smoke"):
         if not (OUT / (name + ".json")).exists():
             raise RuntimeError("Run --stage " + name.replace("_", "-") + " first")
-    from m1_graph_simulator_v2 import (
-        GraphProviderSurrogate, execute_one_m1_graph_trajectory,
-    )
+    from m1_graph_simulator_v2 import GraphProviderSurrogate
+    from phase5_graph_simulator_v2 import execute_one_phase5_graph_trajectory
     design = pd.read_csv(PILOT / "m3_v4_dominant_design.csv").sort_values("rank")
     weights = pd.read_csv(CVROOT / "m3_v3_provider_weights.csv")
-    graph_spec = read(P3 / "config_phase3_m0_contract_v1.json")[
-        "phase1_benchmark_adapter"
-    ]
+    # Reproduce the ORIGINAL pilot with the NEW composition engine, not
+    # with the exact old G0 function that generated the archived ledgers.
+    # D9 established matched-gauge G_PAR and old G0 engine parity on subsets.
+    phase5 = read(P5 / "config_phase5_recoverability_battery_v2.json")
+    graph = next(g for g in phase5["graphs"] if g["id"] == "G_PAR")
+    family = phase5["provider_family"]
+    graph_invariants = dict(phase5["graph_invariants"])
+    graph_invariants["effective_IPT"] = float(family["effective_IPT"])
+    graph_invariants["cost_rate"] = float(family["cost_rate"])
     legacy_contract = read(P3 / "config_phase3_m1_contract_v2.json")
     c = legacy_contract["fixed_closure_conventions"]
     sim = read(PILOT_CORE)["simulation_budget"]
@@ -450,9 +455,11 @@ def full_graph(*, max_trajectories=0):
                     raise RuntimeError(f"Pilot archived trajectory missing: rank={rank}, seed={seed}")
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", FutureWarning)
-                    new = execute_one_m1_graph_trajectory(
-                        provider_surrogates=local, graph_spec=graph_spec,
-                        workload_period=period, stop_time=stop, trajectory_seed=seed,
+                    new, _ = execute_one_phase5_graph_trajectory(
+                        graph_id="G_PAR", graph_ast=graph["ast"],
+                        graph_invariants=graph_invariants,
+                        provider_surrogates=local, workload_period=period,
+                        stop_time=stop, trajectory_seed=seed,
                         canonical_ipt=float(c["canonical_IPT"]),
                         execution_fraction=float(legacy_contract["pilot_scope"]["execution_fraction"]),
                     )
@@ -463,7 +470,7 @@ def full_graph(*, max_trajectories=0):
                     "archived_rank_ledger_sha256": source_hash,
                     "pilot_graph_contract_sha256": digest(PILOT_CORE),
                     "reproduction_runner_sha256": digest(Path(__file__)),
-                    "matched_original_native_G0": True,
+                    "matched_original_native_G0_with_new_G_PAR_runtime": True,
                 }
                 tmp = checkpoint.with_suffix(".json.tmp")
                 tmp.write_text(json.dumps(payload, indent=2) + "\n")
@@ -478,7 +485,7 @@ def full_graph(*, max_trajectories=0):
         raise RuntimeError(f"Full native pilot reproduction incomplete: {done}/1400")
     freeze("full_graph", {
         "replayed_native_trajectories": done, "n_joint_models": 14,
-        "matched_archived_pilot_G0": True,
+        "matched_archived_pilot_G0_with_new_G_PAR_runtime": True,
         "graph_seed_base": 3600000,
         "graph_ip_t": float(c["canonical_IPT"]),
         "pilot_retained_mass": float(design["joint_weight"].sum()),
