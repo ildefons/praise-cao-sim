@@ -381,6 +381,7 @@ def require_reproduced_pilot_gate():
         ("transfer_contract_sha256", CONFIG),
         ("transfer_code_sha256", HERE / "run_pilot_m3_policy_transfer_v1.py"),
         ("transfer_core_sha256", HERE / "_pilot_m3_policy_transfer_core_v1.py"),
+        ("reproduction_runner_sha256", HERE / "run_pilot_m3_reproduction_gate_v1.py"),
         ("pilot_graph_contract_sha256", P4 / "config_phase4_m3_v4_dominant_mass_graph_v1.json"),
         ("pilot_cv_contract_sha256", PILOT_CV),
     ):
