@@ -522,7 +522,7 @@ def seal():
         "transfer_code_sha256": digest(TRANSFER_CODE),
         "reproduction_runner_sha256": digest(Path(__file__)),
         "transfer_core_sha256": digest(TRANSFER_CORE),
-        "scope": "exact archived pilot design/CV/support/scoring and matched-seed native G0",
+        "scope": "original pilot candidate scoring/CV/support and G_PAR-to-archived-G0 matched-seed replay",
         "not_a_new_test_of_battery_accuracy": True,
     })
     print("B1_PILOT_M3_REPRODUCTION_GATE_PASS")
