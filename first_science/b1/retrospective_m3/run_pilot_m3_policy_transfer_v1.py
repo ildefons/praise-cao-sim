@@ -372,7 +372,7 @@ def require_reproduced_pilot_gate():
         raise RuntimeError(
             "Original pilot reproduction gate is not passed. "
             "First run run_pilot_m3_reproduction_gate_v1.py on PILOT cases only, "
-            "through deterministic, archived-scoring, graph-smoke, full-graph and seal."
+            "through deterministic, local-replay, archived-scoring, graph-smoke, full-graph and seal."
         )
     record = core.read_json(gate)
     if record.get("status") != "B1_PILOT_REPRODUCTION_GATE_PASS" or record.get("decision") != "PASS":
@@ -392,7 +392,7 @@ def require_reproduced_pilot_gate():
         if not stagefile.is_file() or sha(stagefile) != expected_sha:
             raise RuntimeError(f"Pilot reproduction stage checkpoint differs: {stage}")
     if set(record.get("pilot_stages_sha256", {})) != {
-        "deterministic", "archived_scoring", "graph_smoke", "full_graph"
+        "deterministic", "local_replay", "archived_scoring", "graph_smoke", "full_graph"
     }:
         raise RuntimeError("Incomplete pilot reproduction checks")
     print("B1_PILOT_M3_REPRODUCTION_GATE_CONFIRMED")
