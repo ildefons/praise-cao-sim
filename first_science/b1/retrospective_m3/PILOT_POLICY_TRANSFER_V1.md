@@ -50,6 +50,22 @@ Next reproduce the original **100-trajectory local scoring** of the same 144 pro
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage local-replay --max-candidates 3
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage local-replay
 
+**Optional four-worker acceleration for the remaining candidates.** The independent
+`run_pilot_m3_local_replay_parallel_v1.py` is a scheduling adapter that keeps the
+original reproduction-gate source untouched, so existing original-format SHA-checked
+candidate checkpoints remain reusable. It uses the original simulator, seed bank,
+archived comparison keys, numerical tolerance and final canonical serial verifier.
+First replay four additional candidates (first seven total), then the rest:
+
+    python -m py_compile first_science/b1/retrospective_m3/run_pilot_m3_local_replay_parallel_v1.py
+    time python first_science/b1/retrospective_m3/run_pilot_m3_local_replay_parallel_v1.py --workers 4 --max-candidates 7
+    time python first_science/b1/retrospective_m3/run_pilot_m3_local_replay_parallel_v1.py --workers 4
+
+Do not run serial and parallel local replay simultaneously. If any cached checkpoint
+or freshly replayed candidate differs from the archive, the adapter fails rather
+than overwriting it. The canonical `LOCAL_REPLAY_PASS` is written only after
+all 144 candidates are verified. Parallelism does not alter the scientific budget.
+
 Then independently regenerate the 555 original pilot graph predictions from its archived B1400 graph ledgers and run the small matched-native-G0 smoke:
 
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage archived-scoring
