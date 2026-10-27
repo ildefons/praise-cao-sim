@@ -45,7 +45,12 @@ From the existing praise-cao environment:
 
 The deterministic check reconstructs **all 144 original pilot candidate proposals**, re-runs the **original five-fold public-I1 CV**, and verifies that lambda=30, the ordered Top14 weight support, and the integer B1400 allocations agree with the frozen pilot.
 
-Then verify all archived 555 pilot graph prediction values without new simulation, and run a small matched-native-G0 smoke:
+Next reproduce the original **100-trajectory local scoring** of the same 144 provider models, comparing each complete public-I1 probability curve with its original archive. This is a larger experiment (14,400 provider-local trajectories) and is checkpointed per candidate. Begin with a bounded sample of three original candidates, then run the full local replay:
+
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage local-replay --max-candidates 3
+    python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage local-replay
+
+Then independently regenerate the 555 original pilot graph predictions from its archived B1400 graph ledgers and run the small matched-native-G0 smoke:
 
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage archived-scoring
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage graph-smoke
@@ -59,7 +64,7 @@ If the subset passes and full reproduction is warranted:
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage full-graph
     python first_science/b1/retrospective_m3/run_pilot_m3_reproduction_gate_v1.py --stage seal
 
-Only a successful seal prints `B1_PILOT_M3_REPRODUCTION_GATE_PASS` and creates the local `first_science/b1/local_audit/pilot_m3_reproduction_gate_v1/gate.json`. That artifact checks the frozen transfer code and contracts. All subsequent battery execution stages fail closed if the gate is missing or stale. The gate is a verification of fidelity to the original pilot, **not** evidence of generalization.
+Only a successful seal prints `B1_PILOT_M3_REPRODUCTION_GATE_PASS` and creates the local `first_science/b1/local_audit/pilot_m3_reproduction_gate_v1/gate.json`. That artifact checks the frozen transfer code and contracts. All subsequent battery execution stages fail closed if the gate is missing or stale. The gate checks original candidate generation, **actual local stochastic simulation**, CV, support, graph scoring and full native graph simulation. It is a verification of fidelity to the original pilot, **not** evidence of generalization.
 
 ## Execute locally
 
