@@ -492,7 +492,7 @@ M0 produced estimates for only 1,776 of the 6,660 prediction queries, whereas M1
 
 ## 7.3 Topology and provider-world effects
 
-**Why compare composition graphs?** The pilot evaluated one parallel composition. In a parallel composition, end-to-end latency depends on the slowest required branch, so errors in faster providers can be partly masked. In a sequence, provider latencies add, potentially making those errors more visible. Before examining the expanded-evaluation results, we therefore specified a hypothesis: *for the same provider world and prediction method, would the sequential graph produce larger prediction errors than the parallel graph?* We recorded the comparison as the difference between their mean absolute errors (MAE):
+**Why compare composition graphs?** The pilot evaluated one parallel composition. For an individual request, a parallel join finishes when its slowest required branch finishes. An inaccuracy in estimating the execution time of a faster branch need not change the predicted join latency if that branch remains faster than the slowest branch. In a sequence, the latencies of all required providers add, so inaccuracies in their estimated execution times can influence the total. This reasoning concerns latency; whether it leads to higher error in the predicted graph-level SLA satisfaction probability, which also depends on cost and quality, must be tested. Before examining the expanded-evaluation results, we therefore specified a hypothesis: *for the same provider world and prediction method, would the sequential graph produce larger prediction errors than the parallel graph?* We recorded the comparison as the difference between their mean absolute errors (MAE):
 
 $$
 \Delta_P^M =
