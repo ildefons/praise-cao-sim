@@ -23,6 +23,23 @@ def make_snapshot(full: str) -> str:
     if full.count(CUT) != 1:
         raise ValueError("Exactly one Section 8.2 boundary required")
     before, suffix = full.split(CUT, 1)
+    # Ship the review snapshot with portable fonts and pdfLaTeX, so the
+    # recipient can import it in Overleaf without choosing a compiler.
+    xelatex_preamble = (
+        r"\usepackage{fontspec}" + "\n"
+        + r"\setmainfont{DejaVu Serif}" + "\n"
+        + r"\setsansfont{DejaVu Sans}"
+    )
+    pdftex_preamble = (
+        r"\usepackage[T1]{fontenc}" + "\n"
+        + r"\usepackage[utf8]{inputenc}" + "\n"
+        + r"\usepackage{lmodern}"
+    )
+    if before.count(xelatex_preamble) != 1:
+        raise ValueError("Unexpected fontspec preamble in canonical source")
+    before = before.replace(xelatex_preamble, pdftex_preamble, 1)
+    if "fontspec" in before or "setmainfont" in before or "setsansfont" in before:
+        raise ValueError("Non-default compiler dependency remains")
     if not before.startswith(r"\documentclass") or r"\end{document}" in before:
         raise ValueError("Invalid source document boundaries")
     if "8.1 Original-style M3 transfer" not in before:
@@ -88,18 +105,19 @@ def main() -> None:
             "Sections after 8.1 and Appendices A-D contain titles only. "
             "This project is for internal review, not public release.\n\n"
             "Import the entire ZIP into Overleaf. Select main.tex as the main "
-            "file and XeLaTeX as compiler. The compiled PDF is included.\n\n"
+            "file. Overleaf default pdfLaTeX works without compiler settings. "
+            "The compiled PDF is included.\n\n"
             f"Canonical source SHA256: {hashlib.sha256(source).hexdigest()}\n"
         )
         (project / "README.md").write_text(readme, encoding="utf-8")
         result = subprocess.run(
-            ["latexmk", "-xelatex", "-interaction=nonstopmode", "-halt-on-error",
+            ["latexmk", "-pdf", "-interaction=nonstopmode", "-halt-on-error",
              "-file-line-error", "main.tex"],
             cwd=project, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
         if result.returncode:
             print(result.stdout[-7000:])
-            raise SystemExit("Snapshot XeLaTeX compilation failed")
+            raise SystemExit("Snapshot pdfLaTeX compilation failed")
         pdf = project / "main.pdf"
         if not pdf.exists() or pdf.stat().st_size < 1000:
             raise SystemExit("Missing compiled PDF")
