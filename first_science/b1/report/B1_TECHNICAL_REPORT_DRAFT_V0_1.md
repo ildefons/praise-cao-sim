@@ -537,8 +537,8 @@ The discrepancy between each candidate's simulated I1 probabilities and the publ
 | Method | Scored queries | Pilot MAE | Battery MAE | MAE difference | Battery RMSE | Battery bias |
 |:--|--:|--:|--:|--:|--:|--:|
 | Executed V3b FULL343 | 6,660 | n/a | **0.121890** | n/a | **0.180806** | +0.065105 |
-| Retrospective original Top14 | 6,660 | 0.03037 | 0.154155 | +0.12379 | 0.212843 | +0.044867 |
-| Retrospective original Top1 | 6,660 | 0.02878 | 0.162280 | +0.13350 | 0.225373 | +0.054562 |
+| Retrospective original Top14 | 6,660 | 0.03037 | 0.154155 | +0.1238 | 0.212843 | +0.044867 |
+| Retrospective original Top1 | 6,660 | 0.02878 | 0.162280 | +0.1335 | 0.225373 | +0.054562 |
 
 Both original-style estimators had substantially higher observed MAE on the expanded battery than on the single-graph pilot. These are results from different provider configurations and SLA test conditions, not a within-configuration replication. The Top1 pilot value was itself obtained in the retrospective pilot support comparison of Section 6.3. The contrast motivates the audit in Section 8.2, but does not by itself identify why prediction accuracy changed.
 
