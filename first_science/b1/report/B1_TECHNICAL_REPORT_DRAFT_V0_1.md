@@ -528,19 +528,21 @@ The investigation has three parts. Section 8.1 applies key rules of the original
 
 **What was reconstructed?** For each provider, the original-style method generated **48 candidate stochastic models** by Latin hypercube sampling (LHS), a nonadaptive way to spread proposals across the parameter ranges. Each candidate was simulated for **100 provider-local trajectories** to estimate its I1 SLA-probability curve, which was compared with the provider's publicly disclosed probabilities. The public I1 information, provider-model family and M3 weighting rules are described in [Section 3.1](#31-public-interface-i1), [Section 4.2](#42-m1-one-reconstructed-provider-process-per-provider) and [Section 4.4](#44-m3-public-evidence-weighted-finite-reconstruction), respectively. The resulting smoothed KL discrepancies were converted into Gibbs weights ($\lambda=30$); multiplying provider weights gave $48^3=110{,}592$ possible joint models. For each configuration, the **14 highest-weight models (Top14)** shared a budget of $B=1400$ graph trajectories, allocated according to the original variance-bound rule. The highest-weight model alone (**Top1**) was separately evaluated with the same budget. The resulting predictions were recorded before the retrospective evaluation read the saved white-box reference. The Phase II FULL343 predictions were kept unchanged. This is a reconstruction of the original-style rules, not an exact replay of the pilot.
 
-**Overall results.** [Table 6](#table-6-retrospective-m3-overall) distinguishes the original pilot MAEs, the **FULL343 result produced during Phase II**, and the **Top14 and Top1 results produced retrospectively in Phase III**. The pilot and battery differ in provider configurations and SLA conditions, so differences between their MAEs are descriptive rather than controlled estimates of generalization loss.
+**Results by evaluation stage.** [Table 6](#table-6-retrospective-m3-overall) presents the pilot and expanded-battery results as *separate experiments*, identifying when each estimate was obtained. In particular, the last two rows are the **Phase III retrospective evaluation** of the original-style Top14 and Top1 methods on the Phase II test cases.
 
 <a id="table-6-retrospective-m3-overall"></a>
 
-**Table 6.** Pilot and expanded-battery prediction errors. The pilot used one parallel graph (555 related queries); the battery used 12 configurations (6,660 related queries per method). FULL343 was executed in Phase II, while original-style Top14 and Top1 were evaluated on the battery retrospectively in Phase III. Each uses B=1400 graph simulations per configuration. MAE difference is battery minus pilot; positive bias denotes overprediction. The pilot Top1 value comes from the later support analysis in Section 6.3.
+**Table 6.** Prediction errors shown in chronological experimental groups. The pilot results use one parallel composition with 555 related prediction queries (Top1 was added in a later analysis of that pilot; Section 6.3). The Phase II and III rows use the same 12 eligible provider-world-by-graph configurations, with 6,660 related queries per method and the same Phase II white-box reference. All estimators used B=1400 graph trajectories per configuration. Signed bias above zero indicates overprediction. The pilot and expanded battery have different test conditions, so their errors are not directly matched.
 
-| Estimator (battery phase) | Pilot MAE | Battery MAE | MAE difference | Battery RMSE | Battery bias |
-|:--|--:|--:|--:|--:|--:|
-| V3b FULL343 (Phase II) | n/a | **0.121890** | n/a | **0.180806** | +0.065105 |
-| Original Top14 (**Phase III**) | 0.03037 | 0.154155 | +0.1238 | 0.212843 | +0.044867 |
-| Original Top1 (**Phase III**) | 0.02878 | 0.162280 | +0.1335 | 0.225373 | +0.054562 |
+| Evaluation stage | Estimator | Tested scope (queries) | MAE | RMSE | Signed bias |
+|:--|:--|:--|--:|--:|--:|
+| Pilot (Phase I) | Original weighted Top14 | 1 graph (555) | 0.030370 | 0.035780 | +0.028240 |
+| Pilot follow-up | Original Top1 | 1 graph (555) | 0.028780 | 0.034060 | +0.024980 |
+| Expanded (Phase II) | V3b FULL343 | 12 cases (6,660) | **0.121890** | **0.180806** | +0.065105 |
+| **Retrospective (Phase III)** | Original-style Top14 | 12 cases (6,660) | 0.154155 | 0.212843 | +0.044867 |
+| **Retrospective (Phase III)** | Original-style Top1 | 12 cases (6,660) | 0.162280 | 0.225373 | +0.054562 |
 
-On the expanded battery, FULL343 had the lowest overall MAE (0.12189), followed by retrospective Top14 (0.15416) and retrospective Top1 (0.16228). Both original-style estimators had considerably higher errors than in the single-graph pilot. The higher battery errors cannot be assigned to one cause because the tested systems, SLA conditions and aspects of the method implementation differ.
+On the expanded battery, FULL343 had the lowest overall MAE (0.12189), followed by retrospective Top14 (0.15416) and Top1 (0.16228). For the original-style Top14 estimator, MAE was 0.03037 on the pilot and 0.15416 on the battery, an observed difference of approximately +0.1238. For Top1, it was 0.02878 and 0.16228, respectively (+0.1335). These are **comparisons across different provider configurations and SLA conditions**, not controlled measures of how either method would generalize under unchanged experimental conditions.
 
 **Variation across configurations.** [Tables 7](#table-7-retrospective-m3-worlds) and [8](#table-8-retrospective-m3-graphs) show the battery errors separately by provider world and composition graph.
 
