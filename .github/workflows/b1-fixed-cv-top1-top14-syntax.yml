@@ -33,6 +33,11 @@ jobs:
           assert "K_FIXED = 14" in text and "BUDGET = 1400" in text
           assert 'top14_predictions.csv' in text and 'top1_predictions.csv' in text
           assert 'policy.require_reproduced_pilot_gate()' in text
+          # Use the active original-pilot procedural controller, not the
+          # superseded legacy core.configuration() guard.
+          assert 'cfg, contracts = policy.configuration()' in text
+          assert 'policy.preflight(cfg)' in text
+          assert 'core.configuration()' not in text
           assert 'core._execute_balanced_graph_jobs' in text
           assert 'freeze_all(cfg)' in ast.get_source_segment(text, defs["evaluate"])
           assert 'core.WB_ROOT' not in text[:text.index("def evaluate(cfg):")]
