@@ -35,9 +35,21 @@ def make_snapshot(full: str) -> str:
         + r"\usepackage[utf8]{inputenc}" + "\n"
         + r"\usepackage{lmodern}"
     )
-    if before.count(xelatex_preamble) != 1:
-        raise ValueError("Unexpected fontspec preamble in canonical source")
-    before = before.replace(xelatex_preamble, pdftex_preamble, 1)
+    # Older canonical reports used XeLaTeX fonts; the current canonical
+    # report already uses portable pdfLaTeX fonts. Accept either source
+    # preamble, but require exactly one recognized choice, and always
+    # publish an Overleaf project that uses default pdfLaTeX.
+    fontspec_count = before.count(xelatex_preamble)
+    pdftex_count = before.count(pdftex_preamble)
+    if fontspec_count == 1 and pdftex_count == 0:
+        before = before.replace(xelatex_preamble, pdftex_preamble, 1)
+    elif fontspec_count == 0 and pdftex_count == 1:
+        pass  # Current canonical source needs no conversion.
+    else:
+        raise ValueError(
+            "Expected exactly one supported font preamble "
+            "(original fontspec or portable pdfLaTeX)"
+        )
     if "fontspec" in before or "setmainfont" in before or "setsansfont" in before:
         raise ValueError("Non-default compiler dependency remains")
     if not before.startswith(r"\documentclass") or r"\end{document}" in before:
