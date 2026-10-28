@@ -112,7 +112,7 @@ def read_frozen_inputs(cfg, world):
 
 def preflight(cfg):
     policy.require_reproduced_pilot_gate()
-    core.preflight(cfg)
+    policy.preflight(cfg)
     require(cfg["eligible_worlds"] == list(WORLDS)
             and set(cfg["graphs"]) == set(GRAPHS)
             and int(cfg["graph_budget"]) == BUDGET
@@ -426,7 +426,7 @@ def main():
     require(1 <= args.workers <= 16, "--workers must be between 1 and 16")
     require(args.cell is None or args.stage == "predict",
             "--cell applies only to --stage predict")
-    cfg, contracts = core.configuration()
+    cfg, contracts = policy.configuration()
     with execution_lock():
         preflight(cfg)
         if args.stage in ("prepare", "all"):
