@@ -1,0 +1,40 @@
+name: Validate fixed-CV Top1/Top14 battery runner
+
+on:
+  push:
+    branches: [praise-identifiability-feasibility]
+    paths:
+      - .github/workflows/b1-fixed-cv-top1-top14-syntax.yml
+      - first_science/b1/retrospective_m3/run_fixed_cv_top1_top14_battery_v1.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile Python and validate frozen policy guardrails
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile first_science/b1/retrospective_m3/run_fixed_cv_top1_top14_battery_v1.py
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          f = Path("first_science/b1/retrospective_m3/run_fixed_cv_top1_top14_battery_v1.py")
+          tree = ast.parse(f.read_text(encoding="utf-8"))
+          defs = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+          assert {"preflight", "prepare_one", "read_frozen_inputs", "run_cell",
+                  "verify_cell", "freeze_all", "evaluate", "main"} <= set(defs)
+          text = f.read_text(encoding="utf-8")
+          assert "K_FIXED = 14" in text and "BUDGET = 1400" in text
+          assert 'top14_predictions.csv' in text and 'top1_predictions.csv' in text
+          assert 'policy.require_reproduced_pilot_gate()' in text
+          assert 'core._execute_balanced_graph_jobs' in text
+          assert 'freeze_all(cfg)' in ast.get_source_segment(text, defs["evaluate"])
+          assert 'core.WB_ROOT' not in text[:text.index("def evaluate(cfg):")]
+          print("B1_FIXED_CV_RUNNER_STATIC_PREFLIGHT_PASS")
+          PY
