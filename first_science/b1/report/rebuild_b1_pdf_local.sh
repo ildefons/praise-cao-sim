@@ -87,7 +87,7 @@ print("Section 4.1 PDF text verification passed.")
 # Avoid checking full table-cell phrases: pdftotext -layout can interleave
 # neighboring columns or insert breaks inside narrow cells.
 table6_checks = [
-    "Prediction errors shown in chronological experimental groups",
+    "Prediction errors by experimental stage and estimator specification",
     "Pilot follow-up",
     "Original weighted Top14",
     "0.030370",
@@ -96,6 +96,10 @@ table6_checks = [
     "Original-style Top14",
     "0.154155",
     "0.162280",
+    "0.160948",
+    "0.192105",
+    "Fixed-CV Top14",
+    "Fixed-CV Top1",
 ]
 for phrase in table6_checks:
     if canonical(phrase) not in rendered:
