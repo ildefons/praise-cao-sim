@@ -632,8 +632,6 @@ Later Phase III & Fixed-CV Top1 & 12 cases (6,660) & 0.192105 & 0.251045 & +0.05
 
 \textbf{What do the results establish?} Original-style Top14 MAE rose from 0.03037 in the pilot to 0.15416 on the battery (Top1: 0.02878 to 0.16228). Even for parallel graphs, Top14 MAE reached 0.2447 in P1 and 0.2511 in P3, so adding sequential graphs alone cannot explain the gap. Limited simulator replays agreed, public-provider fitting errors were not uniformly worse, and Top14 retained more than 99.6\% of the weight assigned within its candidate bank. The observed problem is that reconstructions fitted to individual providers' disclosures did not reliably predict the composed service under the new conditions. \textbf{No single cause has been established}; the changes were not isolated experimentally (Section 8.2).
 
-\textbf{Lesson for paper 2.} A good pilot, provider-level fit or high ensemble weight coverage does not validate the end-to-end behavior of a hierarchical management or prediction method. The transferable recommendation is to specify the full procedure and its tuning rules in advance; evaluate across provider worlds, graph structures and SLA regimes on fresh cases; and report both prediction errors and downstream decisions by configuration. Controlled comparisons that change one factor at a time are needed before attributing failures to a particular algorithmic choice.
-
 \textbf{Variation across configurations.} Tables~\ref{tab:retrospective-m3-by-world} and \ref{tab:retrospective-m3-by-graph} show the earlier original-style ($\lambda=30$) battery results separately by provider world and composition graph. The later fixed-CV results, computed from different candidate weights and supports, are reported below.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
@@ -674,7 +672,56 @@ FULL343 had a lower MAE than Top14 in \textbf{11 of the 12 configurations}; Top1
 These results also do not establish that using 343 joint models is intrinsically better than using 14. The original-style and V3b implementations differ in how provider candidates are generated, selected and weighted, even though their graph-simulation budgets match; their total reconstruction costs are not matched. Moreover, this comparison reused previously examined test cases and is not a new independent validation. The saved retrospective archive passed 316 numerical and SHA-256 consistency checks, including consistency of frozen predictions, model weights, selected support and reported errors. However, missing raw member curves and simulation ledgers prevent a complete independent replay. Section 8.2 investigates the documented pilot-to-battery changes in more detail.
 
 
-\textbf{Exact pilot-procedure transfer (additional retrospective feasibility check).} Reproducing the original pilot established that its favorable result was computationally reproducible. Applying the same selection procedure to the expanded validation battery revealed a different limitation: the required model support exceeded the prescribed simulation budget in every additional provider world. Specifically, retaining 99.9\% of the inferred joint-model probability weight required 14,267, 5,441 and 8,446 model combinations in P1, P3 and P4, respectively, whereas the fixed budget of 1,400 graph trajectories could not simulate each selected combination even once. Thus, even exact reproduction of a successful pilot does not establish the applicability of the method across heterogeneous configurations. This finding illustrates why validation must assess not only predictive accuracy, but also the feasibility and coverage of a method under diverse operating conditions.
+\textbf{Exact pilot-policy transfer and feasibility.} A later reproduction gate verified the original pilot's candidate proposals, public-I1 cross-validation selection, archived predictions and native graph trajectories. Its favorable result was therefore computationally reproducible. Reapplying the pilot's procedure to newly reconstructed provider banks selected $\lambda=3$ for P1 and $\lambda=5$ for P3 and P4. Retaining 99.9\% of the inferred joint-model weight, however, required 14,267 (P1), 5,441 (P3) and 8,446 (P4) models. The fixed budget of $B=1400$ graph trajectories could not simulate each retained model even once. Consequently the exact adaptive policy produced \emph{no battery predictions}. This is a feasibility result, not a measured prediction error. The new CV values are specific to these reconstructed candidate banks and are distinct from the earlier inherited-$\lambda=30$ comparison and the historical diagnostic in Section 8.2.
+
+\textbf{Fixed-support follow-up.} To test predictive accuracy under $B=1400$, we used these frozen public-I1-selected weights but deliberately replaced the infeasible adaptive support with the highest-weight 14 joint models (fixed-CV Top14), or the single highest-weight joint model (fixed-CV Top1). Each estimator received its own $B=1400$ graph trajectories per configuration. Predictions for all 12 cases were frozen before consulting the existing Phase II white-box reference. Overall MAE was 0.16095 for fixed-CV Top14 and 0.19211 for fixed-CV Top1, versus 0.12189 for the unchanged V3b FULL343 (Table~\ref{tab:retrospective-m3-overall}). These feasible fixed-support estimators do \emph{not} implement the original 99.9\%-mass rule.
+
+\textbf{By provider world.} Table~\ref{tab:fixed-cv-m3-by-world} reports the fixed-support errors and inferred weight coverage. Top14 was substantially more accurate than Top1 in P3, reducing MAE from 0.22203 to 0.10627 (approximately 52\%). It was slightly worse in P1 and P4. Moreover, fixed Top14 retained only 16.39\%, 28.43\% and 9.67\% of the inferred joint-model weight in P1, P3 and P4, respectively. These percentages are specific to the new CV-weighted banks and must not be conflated with the greater than 99.6\% retained mass of the earlier original-style retrospective Top14 results.
+
+\begingroup\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}p{0.13\textwidth}rrrrr@{}}
+\caption{Later fixed-support CV-selected comparison by provider world (2,220 related SLA queries per world). Retained mass is the fraction of the inferred joint-model weight captured by the 14 highest-weight combinations, \emph{not} a validated probability of correct prediction. The FULL343 column reuses the Phase II results.}\label{tab:fixed-cv-m3-by-world}\\
+\toprule
+World & $\lambda$ & \shortstack{Top14\\mass} & \shortstack{Top1\\MAE} & \shortstack{Top14\\MAE} & \shortstack{FULL343\\MAE} \\
+\midrule\endfirsthead
+\toprule
+World & $\lambda$ & \shortstack{Top14\\mass} & \shortstack{Top1\\MAE} & \shortstack{Top14\\MAE} & \shortstack{FULL343\\MAE} \\
+\midrule\endhead
+P1 & 3 & 0.163904 & 0.20187 & 0.20635 & 0.17326 \\
+P3 & 5 & 0.284312 & 0.22203 & 0.10627 & 0.07169 \\
+P4 & 5 & 0.096675 & 0.15242 & 0.17022 & 0.12073 \\
+\bottomrule
+\end{longtable}\endgroup
+
+\textbf{By configuration.} The aggregate advantage of fixed-CV Top14 was largely driven by P3, where it improved on Top1 for all four composition graphs. Across all worlds, Top14 improved on Top1 in only \textbf{5 of 12} configurations, namely the four P3 graphs and P1/G\_SEQPAR. FULL343 had lower MAE than fixed-CV Top14 in \textbf{11 of 12} configurations. The exception was P3/G\_SEQ (Top14: 0.07313; FULL343: 0.11633); on P3/G\_PAR, the ranking reversed strongly (Top14: 0.18083; FULL343: 0.06001). Table~\ref{tab:fixed-cv-m3-by-cell} makes these differences visible rather than relying only on the overall average.
+
+\begingroup\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}p{0.25\textwidth}rrr@{}}
+\caption{Later fixed-CV Top1 and Top14 versus unchanged V3b FULL343, MAE by the 12 eligible Phase II world-by-graph configurations (555 related SLA queries per configuration). All methods are scored against the existing Phase II white-box reference.}\label{tab:fixed-cv-m3-by-cell}\\
+\toprule
+World / graph & FULL343 & Fixed-CV Top14 & Fixed-CV Top1 \\
+\midrule\endfirsthead
+\toprule
+World / graph & FULL343 & Fixed-CV Top14 & Fixed-CV Top1 \\
+\midrule\endhead
+P1 / G\_PAR & 0.23813 & 0.32681 & 0.31846 \\
+P1 / G\_PARSEQ & 0.14497 & 0.15304 & 0.14118 \\
+P1 / G\_SEQ & 0.19331 & 0.19744 & 0.19483 \\
+P1 / G\_SEQPAR & 0.11662 & 0.14811 & 0.15303 \\
+P3 / G\_PAR & 0.06001 & 0.18083 & 0.23680 \\
+P3 / G\_PARSEQ & 0.06378 & 0.09796 & 0.26857 \\
+P3 / G\_SEQ & 0.11633 & 0.07313 & 0.18804 \\
+P3 / G\_SEQPAR & 0.04662 & 0.07316 & 0.19470 \\
+P4 / G\_PAR & 0.10944 & 0.16389 & 0.14312 \\
+P4 / G\_PARSEQ & 0.12173 & 0.17021 & 0.15057 \\
+P4 / G\_SEQ & 0.12907 & 0.17266 & 0.15492 \\
+P4 / G\_SEQPAR & 0.12267 & 0.17412 & 0.16106 \\
+\bottomrule
+\end{longtable}\endgroup
+
+\textbf{Interpretation and limitations.} Inferred model-weight coverage and composed-service predictive accuracy are different quantities. The three new provider worlds do not isolate whether coverage caused the variation in accuracy. Nor do these comparisons establish that 343 joint models are intrinsically better than 14: candidate generation, weighting and other procedures differ. The fixed-support evaluation reused previously examined Phase II configurations, so it is not an independent holdout. Its prediction freeze and scoring are documented in \path{first_science/b1/retrospective_m3/run_fixed_cv_top1_top14_battery_v1.py}.
+
+\textbf{Methodological conclusion.} Reproducing a favorable pilot establishes neither transfer feasibility nor predictive reliability. Here the original adaptive support rule could not operate within the prescribed budget, while deliberately feasible Top1/Top14 alternatives produced heterogeneous errors, without a consistent Top14 advantage. Validation of hierarchical prediction and management methods should therefore assess the applicability and cost of the \emph{complete selected procedure}, alongside prediction accuracy across fresh, diverse configurations. Controlled comparisons are needed before attributing the observed differences to any specific algorithmic choice.
 
 \subsection*{8.2 Pilot--battery divergence tracing}
 
