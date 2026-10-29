@@ -721,7 +721,15 @@ P4 / G\_SEQPAR & 0.12267 & 0.17412 & 0.16106 \\
 
 \textbf{Interpretation and limitations.} Inferred model-weight coverage and composed-service predictive accuracy are different quantities. The three new provider worlds do not isolate whether coverage caused the variation in accuracy. Nor do these comparisons establish that 343 joint models are intrinsically better than 14: candidate generation, weighting and other procedures differ. The fixed-support evaluation reused previously examined Phase II configurations, so it is not an independent holdout. Its prediction freeze and scoring are documented in \path{first_science/b1/retrospective_m3/run_fixed_cv_top1_top14_battery_v1.py}.
 
-\textbf{Methodological conclusion.} Reproducing a favorable pilot establishes neither transfer feasibility nor predictive reliability. Here the original adaptive support rule could not operate within the prescribed budget, while deliberately feasible Top1/Top14 alternatives produced heterogeneous errors, without a consistent Top14 advantage. Validation of hierarchical prediction and management methods should therefore assess the applicability and cost of the \emph{complete selected procedure}, alongside prediction accuracy across fresh, diverse configurations. Controlled comparisons are needed before attributing the observed differences to any specific algorithmic choice.
+\textbf{Lessons for future validation studies.} The results suggest six practical recommendations:
+\begin{itemize}
+\item \textbf{Freeze the complete procedure.} Specify candidate generation, public-data tuning, support selection, simulation allocation and budget before examining graph-level reference results.
+\item \textbf{Check feasibility first.} Verify that the support selected by the prescribed rule fits the available simulation budget; report infeasible cases as such, not as prediction errors.
+\item \textbf{Label simplified alternatives separately.} Fixed Top1 or Top14 is not the original 99.9\%-mass method. Record its retained weight, simulation cost and prediction error.
+\item \textbf{Test diverse cases and report individual outcomes.} Evaluate multiple provider worlds, composition graphs and SLA conditions; aggregate accuracy can conceal reversals between configurations.
+\item \textbf{Distinguish inferred weight from predictive accuracy.} Good provider-level fit or high weight coverage within a reconstructed mixture does not guarantee accurate composed-service predictions.
+\item \textbf{Validate explanations on new cases.} Treat post-result comparisons as diagnostics; use fresh configurations and controlled, single-factor changes before attributing causes.
+\end{itemize}
 
 \subsection*{8.2 Pilot--battery divergence tracing}
 
