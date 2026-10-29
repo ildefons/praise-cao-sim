@@ -1006,28 +1006,7 @@ These questions are \textbf{future hypotheses} about the specific SLA-prediction
 \section*{Appendix A. Mathematical and numerical interpretation}
 \addcontentsline{toc}{section}{Appendix A. Mathematical and numerical interpretation}
 
-\subsection*{A.1 Finite-portfolio admission envelopes}
-
-\noindent\fcolorbox{green!50!black}{green!23}{%
-\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
-\textbf{\textcolor{green!30!black}{REVISIT APPENDIX A.1 WHEN REVIEWING THIS SECTION.}}\\
-The historical $\beta$-based admission-envelope interpretation below is retained provisionally. Decide whether to remove it or describe the finite-model extrema as a range of SLA-satisfaction predictions. Do not treat $\beta$ as part of the contracted SLA.%
-}%
-}
-
-For a specified, finite method-generated set $\mathcal M_M$ of joint stochastic models, define
-
-\begin{equation*}
-\sigma^{-}_{G,M}(A,H;\rho)=\min_{\vartheta\in\mathcal M_M}
-\sigma_G(A,H;\rho\mid\vartheta),\qquad
-\sigma^{+}_{G,M}(A,H;\rho)=\max_{\vartheta\in\mathcal M_M}
-\sigma_G(A,H;\rho\mid\vartheta).
-\tag{A1}
-\end{equation*}
-
-If $\beta\le\sigma^-_{G,M}$ then \emph{all enumerated models} accept under their own ideal probabilities; if $\beta>\sigma^+_{G,M}$ all reject; otherwise there is disagreement among the finite set. This is a direct statement about the chosen set, \textbf{not} a calibrated confidence set, structural-identifiability theorem or SLA truth guarantee. Estimates of the extrema from finite graph simulations add MC error that is absent from this idealized algebra.
-
-\subsection*{A.2 Conditional numerical precision and model spread}
+\subsection*{A.1 Conditional numerical precision and model spread}
 
 The general covariance identity (18) holds for fixed finite weights. M2's paired common-seed bootstrap captures cross-model covariance; M3's independent-member variance bound (15) is conditional on the model bank, fixed weights and allocation. For member success probabilities $p_j$, independence across members and trajectories gives the exact conditional identity
 
@@ -1042,7 +1021,7 @@ For a positive normalized weight vector, Cauchy--Schwarz gives $\sum_j\alpha_j^2
 \begin{equation*}
 \Pr\bigl(|\widehat p-p_\alpha|\ge\varepsilon\bigr)
 \le 2\exp\left(-\frac{2\varepsilon^2}{\sum_j\alpha_j^2/N_j}\right),
-\tag{A2}
+\tag{A1}
 \end{equation*}
 
 yielding a fixed-sample half-width
@@ -1050,14 +1029,14 @@ yielding a fixed-sample half-width
 \begin{equation*}
 \varepsilon_\delta=
 \sqrt{\frac12\ln(2/\delta)\sum_j\frac{\alpha_j^2}{N_j}}.
-\tag{A3}
+\tag{A2}
 \end{equation*}
 
 This is included as an \emph{analytical consequence of standard bounded-variable concentration}, \textbf{not} a newly tested method or a bound on $|p_\alpha-\sigma_G|$. It is not automatically anytime-valid if sample sizes are chosen by repeatedly observing the outcomes.
 
 The historical noise-adjusted model-spread quantities and white-box correction (19)–(21) are expectation-based diagnostics. Positive-part corrections may be convenient but must not be described as exact interval widths for physical model misspecification.
 
-\subsection*{A.3 Numerical-width scaling}
+\subsection*{A.2 Numerical-width scaling}
 
 The historical precision appendix extrapolated mean \textbf{pointwise interval width} approximately as $\overline W(B)=c/\sqrt B$, holding support, allocation and the simulation experiment fixed, so that a target width $w^\star$ corresponds formally to $B^\star\approx(c/w^\star)^2$. The pilot anchors were approximately M1 B100/width 0.0375; M2 B2700/width 0.0563 (not independently reproduced here from per-seed paired bootstrap arrays); M3 Top14 B1400/width 0.0493 and B2000/width 0.0425, using \textbf{interval clipping to [0,1]} for the reported M3 widths. These are illustrative numerical precision projections, \textbf{not evaluated accuracy-versus-budget forecasts}, and they exclude provider reconstruction expense and persistent model bias.
 
