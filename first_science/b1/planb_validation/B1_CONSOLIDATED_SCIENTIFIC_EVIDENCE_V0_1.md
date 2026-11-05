@@ -19,16 +19,16 @@ An evaluation action reveals the archived mean absolute error (MAE) for **one pr
 
 Let $A$ contain seven algorithms and $C$ twelve eligible conditions. Denote the frozen MAE for algorithm $a$ in condition $c$ by $Y_{ac}$, and define
 
-$
+$$
   \mu_a=\frac{1}{12}\sum_{c\in C}Y_{ac},
   \qquad a^\star=\operatorname*{arg\,min}_{a\in A}\mu_a .
-$
+$$
 
 With total budget $B$, each policy observes exactly $B$ *distinct* entries of $Y$ and recommends $\hat a_B$. Its terminal **simple regret**, the primary endpoint, is
 
-$
+$$
   r_B=\mu_{\hat a_B}-\mu_{a^\star}\geq 0 .
-$
+$$
 
 The secondary endpoint is whether $\hat a_B=a^\star$. The study optimizes **which algorithm to recommend given limited validation observations**, not the underlying algorithms' predictive accuracies.
 
@@ -58,9 +58,9 @@ Here **M3_FULL343** is the reference-best algorithm, followed by M2 (mean-MAE ga
 
 **Common estimator.** All strategies use the *same* fixed additive Gaussian regression model, fitted separately for each algorithm:
 
-$
+$$
   Y_{a,w,g}=\alpha_a+\beta_{a,w}+\gamma_{a,g}+\varepsilon_{a,w,g}.
-$
+$$
 
 The design vector contains an intercept, three provider-world indicators and four graph indicators. Prior means are 0.17 for each intercept and zero for effects. Prior standard deviations are 0.12 (intercept), 0.07 (world effects) and 0.045 (graph effects); assumed observation standard deviation is **0.055**. These are **heuristic fixed hyperparameters**, inherited from earlier development rather than externally calibrated uncertainty intervals. The posterior mean of the *equal-cell average* gives each algorithm's current estimated performance. At the terminal budget, the algorithm with the lowest posterior average is recommended; deterministic method order resolves an exact terminal tie. **No additional simulator observation noise is sampled during these replay episodes.**
 
@@ -75,26 +75,26 @@ The design vector contains an intercept, three provider-world indicators and fou
 
 For exact reproduction, Balanced scores each available action $(a,w,g)$ by
 
-$
+$$
   s_{\rm bal}=-100n_a-10n_{a,w}-2n_{a,g},
-$
+$$
 
 where $n_a$ is the number already observed for algorithm $a$, and $n_{a,w}$ and $n_{a,g}$ are the corresponding world and graph counts.
 
 Let $x_c$ be the regression design vector for cell $c$, $v$ the average of all twelve design vectors, $\Sigma_a$ algorithm $a$'s posterior covariance, $m_a$ its posterior equal-cell mean, and $u_a=v^\top\Sigma_a v$. The estimated variance reduction from evaluating $(a,c)$ is
 
-$
+$$
   G(a,c)=
   \frac{(v^\top\Sigma_a x_c)^2}
        {0.055^2+x_c^\top\Sigma_a x_c}.
-$
+$$
 
 **Informed** selects the available $(a,c)$ maximizing
 
-$
+$$
   G(a,c)\sum_{b\ne a}
   \exp\!\left[-\frac{(m_a-m_b)^2}{2(u_a+u_b)}\right].
-$
+$$
 
 **Top2**, after its coverage phase, maximizes $G(a,c)$ over available cells **of its two current lowest-posterior-mean algorithms only**. Its *additional-evaluation* schedule is:
 
@@ -133,10 +133,10 @@ Lower is better. Each value averages **240 terminal episodes**.
 
 The budget-aware strategy had lower mean regret than Balanced at **all five** tested budgets; it also had the lowest mean regret of all four policies at every budget in this archive. The predeclared *equal-weight, across-budget* Top2−Balanced contrast is
 
-$
+$$
   \overline{\Delta}_{\text{Top2−Balanced}}
   =-0.0027652163 \text{ MAE units},
-$
+$$
 
 with stratified episode-bootstrap nominal 95% percentile interval **[−0.0036000084, −0.0018984935]**. Relative to Balanced's mean regret of 0.0099098, this is **27.9% lower regret**. The interval measures replay-episode variability on the same historical 84-action matrix.
 
