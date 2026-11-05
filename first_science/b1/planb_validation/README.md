@@ -126,6 +126,29 @@ It searches existing *project-local* log files and reads original/fixed-CV predi
 
 ---
 
+## Sixth: prospective provider-world and Step-0 design (DRAFT ONLY)
+
+**Scientific review draft:** [B1_PROSPECTIVE_WORLD_STEP0_DESIGN_V0_1.md](B1_PROSPECTIVE_WORLD_STEP0_DESIGN_V0_1.md)  
+**Proposed ranges and recruitment contract:** [B1_WORLD_GENERATOR_DRAFT_V0_1.json](B1_WORLD_GENERATOR_DRAFT_V0_1.json)  
+**Dry-run generator:** [preview_new_worlds_v0_1.py](preview_new_worlds_v0_1.py).
+
+This sampler changes **nothing** in frozen B1 v1. It only materializes a deterministic, isolated preview of *unassessed* physical Gamma provider-world candidates under three role strata and a four-graph-eligibility policy. It does not call Phase-5 I1, Step-0, reconstruction, graph simulation, WB or any acquisition policy. Its output contains **private** generating parameters, never to be exposed to the controller.
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull --ff-only origin praise-identifiability-feasibility
+python -m unittest discover -s first_science/b1/planb_validation \
+  -p 'test_preview_new_worlds_v0_1.py' -v
+
+python first_science/b1/planb_validation/preview_new_worlds_v0_1.py \
+  --repo . \
+  --out ~/praise/planb_b1_newworld_preview_v0_1
+```
+
+The script refuses to overwrite an existing output directory. Review `PREVIEW_ONLY.md`, `PRIVATE_world_candidates.csv`, and `dry_run_manifest.json`. The preview contains 3 proposed batteries × 3 roles × up to 4 attempts = 36 *NOT_RUN* candidates; these are **not** 36 accepted worlds or a confirmatory sample size. Before *any* new simulations, the independently versioned Phase-5 new-world adapter, Step-0 eligibility and attrition rules, and confirmatory sample-size/cost plan must be reviewed and frozen.
+
+---
+
 ## Interpretation
 
 The fixed 12-cell PRAISE archive has only three distinct provider worlds. Replaying randomized allocation many times is essential for estimating sequence variability, but does **not** create new independent worlds. This is a **retrospective methodology development test**, not a prospective generalization result. Evaluation-count budgets do **not** imply equal runtime cost among algorithms. We deliberately do not tune policy switching fractions to the current archive's observed performance.
