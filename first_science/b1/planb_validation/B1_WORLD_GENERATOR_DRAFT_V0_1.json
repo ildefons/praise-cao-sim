@@ -1,0 +1,116 @@
+{
+  "status": "DRAFT_ONLY_NOT_FROZEN_NOT_AUTHORIZED_FOR_SIMULATION",
+  "version": "B1_NEW_WORLD_GENERATOR_PROPOSAL_V0_1",
+  "purpose": "Local within-family provider-world transfer, conditional on passing all four unchanged Phase-5 Step-0 graph-cell gates; not generalization to other provider families",
+  "source_world_contract": "first_science/phase5/config_phase5_recoverability_battery_v2.json",
+  "source_step0_script": "first_science/phase5/run_phase5_step0_v2.py",
+  "source_b1_policy": "first_science/b1/planb_validation/b1_budget_comparison_v1.py",
+  "sampling": {
+    "algorithm": "Python random.Random using independent SHA-256-derived per-(preview_seed,battery,role,attempt) seeds; integer D, delta rounded to 6 decimals",
+    "preview_seed": 20261105,
+    "preview_batteries": 3,
+    "max_attempts_per_role": 4,
+    "role_order": [
+      "P1",
+      "P3",
+      "P4"
+    ],
+    "role_distributions": {
+      "P1": {
+        "interpretation": "lower-load homogeneous",
+        "D_million_uniform": [
+          320,
+          340
+        ],
+        "delta_uniform": null,
+        "delta_fixed": 0
+      },
+      "P3": {
+        "interpretation": "higher-load homogeneous",
+        "D_million_uniform": [
+          350,
+          370
+        ],
+        "delta_uniform": null,
+        "delta_fixed": 0
+      },
+      "P4": {
+        "interpretation": "higher-load heterogeneous",
+        "D_million_uniform": [
+          350,
+          362
+        ],
+        "delta_uniform": [
+          0.06,
+          0.095
+        ],
+        "delta_fixed": null
+      }
+    },
+    "physical_preconditions": {
+      "positive_mean_instructions": true,
+      "max_approx_utilization": 0.995,
+      "max_approx_utilization_rule": "D*(1+delta)/(IPT*period), with IPT=1e9 and period=0.2; no clipping or post-draw repair"
+    },
+    "disallow_exact_original_world_coordinates": true
+  },
+  "eligibility": {
+    "unchanged_step0": true,
+    "all_four_graphs_required": [
+      "G_PAR",
+      "G_PARSEQ",
+      "G_SEQ",
+      "G_SEQPAR"
+    ],
+    "calibration_n_per_cell": 200,
+    "confirmation_n_per_cell": 200,
+    "rho_query_values": [
+      0.95,
+      0.975,
+      0.9833333333333333,
+      0.99,
+      0.995
+    ],
+    "regions": {
+      "Easy": [
+        0.95,
+        1
+      ],
+      "Mid": [
+        0.75,
+        0.9
+      ],
+      "Stress": [
+        0.4,
+        0.75
+      ]
+    },
+    "minimum_adjacent_mean_sigma_gap": 0.1,
+    "strict_scale_order": "Stress < Mid < Easy",
+    "frozen_scale_grid": [
+      0.5,
+      2,
+      0.01
+    ],
+    "acceptance": "first candidate in each role with all four graph cells FROZEN_PHASE5_STEP0_PASS_V2, no repairs or query reselection",
+    "failure_policy": "record every attempted world and per-graph failure; if any role lacks eligible candidate by cap, whole battery INCOMPLETE; no discretionary replacement",
+    "target_population": "role-stratified distribution conditional on the randomized finite-N Step-0 gate and predeclared attempt cap",
+    "never_report_as_unconditional_world_generalization": true
+  },
+  "outcome_firewall": {
+    "param_drafts_private": true,
+    "never_expose_hidden_generating_parameters_to_sequential_policy": true,
+    "strict_new_battery_output_namespace": true,
+    "new_seeds_disjoint_across_independent_batteries": true,
+    "preserve_within_battery_CRN_conventions": true,
+    "all_method_predictions_frozen_before_final_WB": true
+  },
+  "execution_authorized": false,
+  "requires_separate_approval": [
+    "world distribution and attrition scheme",
+    "isolated Phase-5 adapter and seed registry for new worlds",
+    "cost and eligibility yield gate",
+    "prospective confirmatory sample size and stopping rule",
+    "B1 seven-method scorer and replay validated on distinct batteries"
+  ]
+}
