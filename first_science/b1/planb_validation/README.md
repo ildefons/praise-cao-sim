@@ -85,6 +85,25 @@ Outputs appear only under the chosen `--out` directory: `WB_REFERENCE_ROBUSTNESS
 
 ---
 
+## Fourth: source and local cost-feasibility inventory (no fresh simulations)
+
+**Source findings:** [B1_INDEPENDENT_WORLD_COST_SOURCE_AUDIT_2026-11-05.md](B1_INDEPENDENT_WORLD_COST_SOURCE_AUDIT_2026-11-05.md). New world generation is **not authorized** by this audit; the original four worlds were fixed design points.
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull --ff-only origin praise-identifiability-feasibility
+python -m unittest discover -s first_science/b1/planb_validation \
+  -p 'test_audit_independent_world_cost_v0_1.py' -v
+
+python first_science/b1/planb_validation/audit_independent_world_cost_v0_1.py \
+  --repo . \
+  --out ~/praise/planb_b1_world_cost_feasibility_v0_1
+```
+
+Review `WORLD_COST_FEASIBILITY_AUDIT.md`, `historical_stage_cost_summary.csv`, `historical_manifest_costs.csv` and `audit_manifest.json`. The source-contract trajectory floor is 129,600 graph trajectories for a complete 7×12 battery including WB. Local stage manifests provide elapsed time only where explicitly recorded; missing original-style/fixed-CV method-specific times are **unknown**, not zero. Do not interpret summed parallel stage durations as full-project makespan.
+
+---
+
 ## Interpretation
 
 The fixed 12-cell PRAISE archive has only three distinct provider worlds. Replaying randomized allocation many times is essential for estimating sequence variability, but does **not** create new independent worlds. This is a **retrospective methodology development test**, not a prospective generalization result. Evaluation-count budgets do **not** imply equal runtime cost among algorithms. We deliberately do not tune policy switching fractions to the current archive's observed performance.
