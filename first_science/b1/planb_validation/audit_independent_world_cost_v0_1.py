@@ -16,7 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]  # <repo>/first_science
 WORLD_CONFIG = "first_science/phase5/config_phase5_recoverability_battery_v2.json"
 GRAPH_CONFIG = "first_science/phase5/config_phase5_graph_prediction_v3b_fullsupport.json"
 ORIGINAL_CONFIG = "first_science/b1/retrospective_m3/config_pilot_m3_generalization_v1.json"
-SOURCE_FILES = (WORLD_CONFIG, GRAPH_CONFIG, ORIGINAL_CONFIG,
+POLICY_CONFIG = "first_science/b1/retrospective_m3/config_pilot_m3_policy_transfer_v1.json"
+SOURCE_FILES = (WORLD_CONFIG, GRAPH_CONFIG, ORIGINAL_CONFIG, POLICY_CONFIG,
     "first_science/phase5/config_phase5_execution_contract_v2.json",
     "first_science/phase5/config_phase5_final_wb_v3b_fullsupport.json",
     "first_science/phase5/run_phase5_step0_v2.py",
@@ -61,6 +62,7 @@ def inspect_contracts(repo):
     world=read(repo/WORLD_CONFIG)
     graph=read(repo/GRAPH_CONFIG)
     original=read(repo/ORIGINAL_CONFIG)
+    policy=read(repo/POLICY_CONFIG)
     if len(world["provider_worlds"])!=4 or len(world["graphs"])!=4:
         raise ValueError("Historical Phase-5 world/graph structure changed")
     if [w["id"] for w in world["provider_worlds"]] != ["P1","P2","P3","P4"]:
@@ -102,6 +104,12 @@ def inspect_contracts(repo):
     counts=[{"method":k,"trajectories_per_cell":v,"trajectories_12_cells":12*v}
             for k,v in pred.items()]
     counts.append({"method":"FINAL_WB","trajectories_per_cell":wb_n,"trajectories_12_cells":12*wb_n})
+    # Three independent accounting categories: graph, Step-0, provider-local.
+    # Parse contractual counts rather than estimating execution hours from them.
+    step0_n=int(world["step0"]["calibration_n"])+int(world["step0"]["confirmation_n"])
+    i1_n=int(world["public_I1"]["region_evidence_n"])+int(world["public_I1"]["sigma_evidence_n"])
+    local_original=3*3*int(original["n_candidates_per_provider"])*int(original["local_rescore_n"])
+    local_fixedcv=3*3*int(policy["n_candidates_per_provider"])*int(policy["local_rescore_n"])
     cost={
         "unit":"native graph trajectory, not elapsed CPU hour and not equal marginal cost across methods",
         "count_by_method":counts,
@@ -111,11 +119,11 @@ def inspect_contracts(repo):
         "total_graph_trajectories_per_complete_12_cell_battery":12*(sum(pred.values())+wb_n),
         "original_PhaseII_M1_M2_M3_plus_WB_graph_count":12*(100+2700+1400+1000),
         "ratio_graph_count_vs_original_phaseII":12*(sum(pred.values())+wb_n)/(12*(100+2700+1400+1000)),
-        "step0_calibration_and_confirmation_per_cell":400,
-        "step0_trajectories_for_12_cells_if_every_calibration_passes":12*400,
-        "I1_graph_trajectories_for_three_new_worlds":3*200,
-        "original_style_provider_local_candidate_trajectories_for_three_worlds":3*3*48*100,
-        "fixed_cv_provider_local_candidate_trajectories_for_three_worlds":3*3*48*100,
+        "step0_calibration_and_confirmation_per_cell":step0_n,
+        "step0_trajectories_for_12_cells_if_every_calibration_passes":12*step0_n,
+        "I1_graph_trajectories_for_three_new_worlds":3*i1_n,
+        "original_style_provider_local_candidate_trajectories_for_three_worlds":local_original,
+        "fixed_cv_provider_local_candidate_trajectories_for_three_worlds":local_fixedcv,
         "provider_local_count_notes":"Separate reconstructed candidate banks are used by the original-style and fixed-CV branches. They are provider-local simulations, NOT interchangeable with graph trajectories. Current historical caches do not transfer to unseen world parameters.",
         "excluded":"Other V3/V3b provider reconstruction, failures/retakes, query scoring and I/O, wall-time overlap, installation/setup, parallel contention",
         "new_battery_wall_hours":"NOT_ESTIMABLE from trajectory counts alone",
