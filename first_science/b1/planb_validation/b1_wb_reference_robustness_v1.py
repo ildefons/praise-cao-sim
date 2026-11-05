@@ -135,6 +135,45 @@ def cell_maes(pred, sigma):
     return np.abs(pred-sigma[None,:]).reshape(7,12,Q).mean(axis=2)
 
 
+def validated_frozen_probabilities(aligned, path, cell, name):
+    """Return bounded probabilities; only numerical roundoff may be clipped."""
+    values = aligned.sigma_hat.to_numpy(float)
+    if len(values) != Q:
+        raise ValueError(f"Prediction alignment changed row count: {path}")
+    missing = ~np.isfinite(values)
+    if missing.any():
+        examples = aligned.loc[missing, ["query_id", "H"]].head(5).to_dict("records")
+        raise ValueError(
+            f"Nonfinite or unmatched frozen probabilities: {path}; "
+            f"n_bad={int(missing.sum())}, sample_keys={examples}"
+        )
+    # M3 sums 343 normalized floating-point weights; its mathematically
+    # bounded mixture can differ from 0 or 1 by machine round-off.
+    # Accept ONLY errors <= 1e-12; larger violations still fail closed.
+    bad = (values < -1e-12) | (values > 1.0 + 1e-12)
+    if bad.any():
+        ix = np.flatnonzero(bad)[:5]
+        examples = [(str(aligned.iloc[int(i)].query_id),
+                     float(aligned.iloc[int(i)].H),
+                     float(values[i])) for i in ix]
+        raise ValueError(
+            f"Out-of-range frozen probabilities: {path}; "
+            f"n_bad={int(bad.sum())}, min={float(values.min()):.17g}, "
+            f"max={float(values.max()):.17g}, sample={examples}"
+        )
+    tiny = (values < 0.0) | (values > 1.0)
+    if tiny.any():
+        print(
+            f"FROZEN_PROBABILITY_ROUNDOFF_ONLY {cell} {name} "
+            f"count={int(tiny.sum())} "
+            f"min={float(values.min()):.17g} "
+            f"max={float(values.max()):.17g}",
+            flush=True
+        )
+        values = np.clip(values, 0.0, 1.0)
+    return values
+
+
 def load_predictions(repo, meta, original_matrix):
     pred = np.empty((7,12*Q), dtype=float)
     hashes = {}
@@ -155,40 +194,7 @@ def load_predictions(repo, meta, original_matrix):
             frame["query_id"] = frame.query_id.astype(str)
             aligned = left.merge(frame[["query_id","H","sigma_hat"]],
                                  on=["query_id","H"], validate="one_to_one", how="left", sort=False)
-            values = aligned.sigma_hat.to_numpy(float)
-            if len(values) != Q:
-                raise ValueError(f"Prediction alignment changed row count: {path}")
-            missing = ~np.isfinite(values)
-            if missing.any():
-                examples = aligned.loc[missing, ["query_id", "H"]].head(5).to_dict("records")
-                raise ValueError(
-                    f"Nonfinite or unmatched frozen probabilities: {path}; "
-                    f"n_bad={int(missing.sum())}, sample_keys={examples}"
-                )
-            # M3 sums 343 normalized floating-point weights; its mathematically
-            # bounded mixture can differ from 0 or 1 by machine round-off.
-            # Accept ONLY errors <= 1e-12; larger violations still fail closed.
-            bad = (values < -1e-12) | (values > 1.0 + 1e-12)
-            if bad.any():
-                ix = np.flatnonzero(bad)[:5]
-                examples = [(str(aligned.iloc[int(i)].query_id),
-                             float(aligned.iloc[int(i)].H),
-                             float(values[i])) for i in ix]
-                raise ValueError(
-                    f"Out-of-range frozen probabilities: {path}; "
-                    f"n_bad={int(bad.sum())}, min={float(values.min()):.17g}, "
-                    f"max={float(values.max()):.17g}, sample={examples}"
-                )
-            tiny = (values < 0.0) | (values > 1.0)
-            if tiny.any():
-                print(
-                    f"FROZEN_PROBABILITY_ROUNDOFF_ONLY {cell} {name} "
-                    f"count={int(tiny.sum())} "
-                    f"min={float(values.min()):.17g} "
-                    f"max={float(values.max()):.17g}",
-                    flush=True
-                )
-                values = np.clip(values, 0.0, 1.0)
+            values = validated_frozen_probabilities(aligned, path, cell, name)
             pred[a,c*Q:(c+1)*Q] = values
             hashes[str(path.relative_to(repo))] = b1.digest(path)
     actual = cell_maes(pred, meta.sigma_wb.to_numpy(float))
