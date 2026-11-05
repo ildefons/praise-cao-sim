@@ -2,6 +2,8 @@
 
 **Design freeze:** [B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md](B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md)  
 **Executable-policy freeze:** [B1_EXECUTABLE_POLICY_FREEZE_V1.md](B1_EXECUTABLE_POLICY_FREEZE_V1.md)  
+**WB robustness result freeze:** [B1_WB_ROBUSTNESS_RESULT_FREEZE_2026-11-05.md](B1_WB_ROBUSTNESS_RESULT_FREEZE_2026-11-05.md)  
+**Independent-world validation scope:** [B1_INDEPENDENT_WORLD_VALIDATION_SCOPE_V0_1.md](B1_INDEPENDENT_WORLD_VALIDATION_SCOPE_V0_1.md)  
 **Main script:** [b1_budget_comparison_v1.py](b1_budget_comparison_v1.py)  
 **Synthetic-only tests:** [test_b1_budget_comparison_v1.py](test_b1_budget_comparison_v1.py)
 
