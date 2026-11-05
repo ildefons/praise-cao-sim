@@ -10,6 +10,10 @@ Source: [B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md](B1_SEQUENTIAL_VALIDATION_
 
 The target is **terminal decision quality under a finite number of nonrepeated algorithm×cell evaluations**. It is neither the optimization of underlying predictors nor proof that a particular prediction method is universally best.
 
+## Separate pinned baseline snapshot
+
+A separate branch, `b1-v1-seven-method-randomized-bootstrap-frozen`, has been created at the exact historical commit **`318380f53f891f7ca4d825e1af37e0c842e891fa`**. Its B1 replay source has the identical Git blob hash **`b433e7d01da10dcad3448eedeea544ba7cefb33c`** as the working branch. **Do not commit changes onto, reset, or force-push this snapshot branch**; future studies belong on other versioned branches. A Git branch is a named pinned reference but is technically movable by repository administrators; preserving the full commit hash and blob hash provides the durable identification of the original code. This snapshot includes the source and tests, not the user's locally generated replay-output directory.
+
 ## Immutable B1 v1 experimental reference
 
 - Seven methods: `M1`, `M2`, `M3_FULL343`, `ORIGINAL_TOP14_B1400`, `ORIGINAL_TOP1_B1400`, `FIXED_CV_TOP14`, `FIXED_CV_TOP1`.
