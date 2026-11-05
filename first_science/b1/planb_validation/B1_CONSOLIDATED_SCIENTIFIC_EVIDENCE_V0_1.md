@@ -146,6 +146,14 @@ $$
 
 with stratified episode-bootstrap nominal 95% percentile interval **[−0.0036000084, −0.0018984935]**. Relative to Balanced's mean regret of 0.0099098, this is **27.9% lower regret**. The interval measures replay-episode variability on the same historical 84-action matrix.
 
+### Five-strategy visualization, including the supplementary Knowledge Gradient benchmark
+
+The original B1 v1 study contains **four** strategies; the subsequently defined **one-step KG** benchmark is included below solely for an evidence-complete visual comparison. It did **not** belong to the original four-policy freeze. Its retrospective outcome and uncertainty are documented separately in [the KG supplement](B1_KG_SUPPLEMENTARY_DEVELOPMENT_RESULT_V1.md).
+
+![Mean terminal simple regret against evaluation budget for Random, Balanced, Informed, Budget-aware Top2 and Knowledge Gradient, with 95% bootstrap error bars](figures/b1_five_policy_regret_vs_budget_ci_v1.svg)
+
+*Figure: terminal simple regret versus the number of nonrepeatable algorithm–condition evaluations.* Each point averages **240 seeded decision episodes** at a given budget and strategy; vertical error bars are the original **95% stratified percentile-bootstrap intervals (2,000 resamples) for that strategy's mean regret**. The four original B1 strategies and the later, separately specified one-step Knowledge Gradient (KG) comparator use the **same frozen 84-action evaluation matrix**, five budgets and terminal estimator. The intervals describe randomness of **episodes within the historical archive**, **not sampling uncertainty across new provider worlds**. They are not confidence intervals for paired between-strategy contrasts (which are tabulated separately). Full-precision plotted values: [figure source data](figures/b1_five_policy_regret_with_bootstrap_ci_v1.csv).
+
 ### Paired comparisons against Balanced
 
 Negative differences favor the named strategy. All numbers are MAE regret units; intervals are nominal 95% episode-bootstrap percentile intervals.
