@@ -1,6 +1,6 @@
 # B1 v0.1 — Complete numeric appendix for the consolidated scientific evidence
 
-**Status:** Frozen B1 v1 retrospective development outputs; **all values transcribed from uploaded, SHA-256-verified** \`budget_summary.csv\` and \`paired_regret_contrasts.csv\`. No new bootstrap draws, tuning, hypothesis tests or independent-world inference. This appendix provides the full per-strategy intervals so the concise [scientific report](B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md) does not omit any decision strategy's reported uncertainty.
+**Status:** Frozen B1 v1 retrospective development outputs; **all values transcribed from uploaded, SHA-256-verified** `budget_summary.csv` and `paired_regret_contrasts.csv`. No new bootstrap draws, tuning, hypothesis tests or independent-world inference. This appendix provides the full per-strategy intervals so the concise [scientific report](B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md) does not omit any decision strategy's reported uncertainty.
 
 ## A. Per-budget outcomes, including bootstrap intervals for every strategy
 
@@ -58,12 +58,12 @@ Difference is **named strategy minus Balanced**; negative values favor the named
 
 ## C. Data integrity and scope
 
-The user-uploaded original \`run_manifest.json\` contains SHA-256 output hashes, verified against the five supplied CSVs. In particular:
+The user-uploaded original `run_manifest.json` contains SHA-256 output hashes, verified against the five supplied CSVs. In particular:
 
-- \`budget_summary.csv\`: \`12a163b488266119f68391e96c8c63cebb4576516a312d3e48b5d4e77c657c80\`.
-- \`paired_regret_contrasts.csv\`: \`2354d52108d076340100c22d97ddd966526f865753345d2493b607d099451238\`.
-- \`terminal_episodes.csv\`: \`c219b700d55683899867051f3cf1f154cea54655853026c47fda814c887d9f12\`.
-- \`seven_method_matrix.csv\`: \`0b58b7b6ff7489aec169a36c88a166fdb75b88e5089f14b1a610721581bb314d\`.
+- `budget_summary.csv`: `12a163b488266119f68391e96c8c63cebb4576516a312d3e48b5d4e77c657c80`.
+- `paired_regret_contrasts.csv`: `2354d52108d076340100c22d97ddd966526f865753345d2493b607d099451238`.
+- `terminal_episodes.csv`: `c219b700d55683899867051f3cf1f154cea54655853026c47fda814c887d9f12`.
+- `seven_method_matrix.csv`: `0b58b7b6ff7489aec169a36c88a166fdb75b88e5089f14b1a610721581bb314d`.
 
 **Do not treat these CIs as independent-world uncertainty.** All four methods are evaluated fairly on the **same fixed archive**, with the **same episode counts and bootstrap protocol**, but the policies' random action sequences need not match. WB reference-uncertainty checks are a separate experiment and are reported separately in the main report and WB freeze.
 
@@ -72,9 +72,9 @@ The user-uploaded original \`run_manifest.json\` contains SHA-256 output hashes,
 
 ## D. Post-result action-allocation and wrong-decision diagnostics
 
-**Status: descriptive audit only.** These figures were calculated from the **original** \`episode_action_history.csv\`, \`terminal_episodes.csv\` and \`seven_method_matrix.csv\` without rerunning the B1 policies, changing any parameters or drawing another bootstrap sample. The input files were verified against the output SHA-256 values in the original \`run_manifest.json\`. Source fingerprints for the two detailed files are \`a9412c9e07cb52e35aa6ac09e6aedd66837fca9034aabb5bb6716ac7e52d1195\` (actions) and \`c219b700d55683899867051f3cf1f154cea54655853026c47fda814c887d9f12\` (terminal decisions).
+**Status: descriptive audit only.** These figures were calculated from the **original** `episode_action_history.csv`, `terminal_episodes.csv` and `seven_method_matrix.csv` without rerunning the B1 policies, changing any parameters or drawing another bootstrap sample. The input files were verified against the output SHA-256 values in the original `run_manifest.json`. Source fingerprints for the two detailed files are `a9412c9e07cb52e35aa6ac09e6aedd66837fca9034aabb5bb6716ac7e52d1195` (actions) and `c219b700d55683899867051f3cf1f154cea54655853026c47fda814c887d9f12` (terminal decisions).
 
-**Retrospective share of additional observations going to the true two lowest-mean-MAE algorithms, M3_FULL343 and M2.** All four policies receive the same first seven evaluations, so those seven actions are excluded from these fractions. The denominators pool \`240 × (B−7)\` non-initial actions per policy/budget.
+**Retrospective share of additional observations going to the true two lowest-mean-MAE algorithms, M3_FULL343 and M2.** All four policies receive the same first seven evaluations, so those seven actions are excluded from these fractions. The denominators pool `240 × (B−7)` non-initial actions per policy/budget.
 
 | Budget | Random | Balanced | Informed | Budget-aware Top2 |
 |---:|---:|---:|---:|---:|
@@ -99,7 +99,7 @@ Because correct decisions have zero simple regret, the average for each policy i
 
 **Recalculation from the original frozen output files (analysis only):**
 
-\`\`\`python
+```python
 import pandas as pd
 actions = pd.read_csv("episode_action_history.csv")
 terminal = pd.read_csv("terminal_episodes.csv")
@@ -113,6 +113,6 @@ for policy, sample in terminal[terminal.budget == 20].groupby("policy"):
     print("B20_errors", policy, len(failures),
           "conditional_regret", failures.simple_regret.mean(),
           "M2_rate", (sample.recommended == "M2").mean())
-\`\`\`
+```
 
 Run this from the archived B1 replay output directory, **read-only**. This code computes no new simulation, policy run or bootstrap. The two sets of diagnostics were selected *after* viewing the original outcomes, so they are **explanatory observations, not independent tests of the hypothesized mechanism**.
