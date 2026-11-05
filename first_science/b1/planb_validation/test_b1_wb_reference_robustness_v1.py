@@ -64,12 +64,18 @@ class ReferenceTests(unittest.TestCase):
 
     def test_frozen_probability_numeric_roundoff_vs_real_error(self):
         # M3 mixtures of normalized weights can exceed 1 by last-bit roundoff.
+        values=np.full(wb.Q,0.5)
+        values[0]=0.0
+        values[1]=1.0+2e-15
         frame=pd.DataFrame({
-            "query_id":["q1","q2","q3"],"H":[60.,65.,70.],
-            "sigma_hat":[0.,1.0+2e-15,0.5],
+            "query_id":[f"q{i}" for i in range(wb.Q)],
+            "H":[60.+5.*(i%37) for i in range(wb.Q)],
+            "sigma_hat":values,
         })
         recovered=wb.validated_frozen_probabilities(frame,Path("frozen.csv"),"P1__G_PARSEQ","M3_FULL343")
-        np.testing.assert_array_equal(recovered,[0.,1.,0.5])
+        expected=values.copy()
+        expected[1]=1.0
+        np.testing.assert_array_equal(recovered,expected)
         frame.loc[1,"sigma_hat"]=1.0001
         with self.assertRaisesRegex(ValueError,"Out-of-range"):
             wb.validated_frozen_probabilities(frame,Path("frozen.csv"),"P1__G_PARSEQ","M3_FULL343")
