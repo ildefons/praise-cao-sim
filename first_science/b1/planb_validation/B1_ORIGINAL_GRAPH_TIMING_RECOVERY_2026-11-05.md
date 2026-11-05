@@ -32,3 +32,7 @@ The previously recorded 48.546109 hours is a *sum of measured but incomplete his
 Run [recover_graph_timing_from_logs_v1.py](recover_graph_timing_from_logs_v1.py) against the historical *project-only* logs. It extracts explicit `time` records and progress markers, separately inventories frozen manifest completions, and does **not** run any graph or provider simulation. Interpret the resulting fixed-CV evidence before estimating independent-battery cost.
 
 **Frozen B1 algorithms, acquisition policy, five budgets, archived metrics and WB reference remain unchanged.**
+
+## Follow-up: measured graph-stage times recovered from preserved progress logs
+
+[Second-pass graph-stage timing audit (2026-11-05)](B1_GRAPH_STAGE_TIMING_RECOVERY_REVIEW_2026-11-05.md) supersedes the earlier statement that the **fixed-CV graph stage itself is wholly unmeasured**. Complete runner `time.perf_counter()` observations yield **308.0 minutes Top14 + 288.3 minutes Top1 = 596.3 minutes (9.9383 hours)** across all 12 fixed-CV cells, excluding ledger merging, prediction scoring and other command overhead. No shell `real` marker or exact full fixed-CV command duration was found. The frozen scientific results are unchanged.
