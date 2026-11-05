@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 import statistics
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[2]  # <repo>/first_science
 WORLD_CONFIG = "first_science/phase5/config_phase5_recoverability_battery_v2.json"
 GRAPH_CONFIG = "first_science/phase5/config_phase5_graph_prediction_v3b_fullsupport.json"
 ORIGINAL_CONFIG = "first_science/b1/retrospective_m3/config_pilot_m3_generalization_v1.json"
@@ -83,7 +83,7 @@ def inspect_contracts(repo):
     if "BUDGET = 1400" not in fixed_source or "METHODS = ((TOP14" not in fixed_source:
         raise ValueError("Fixed-CV production budget no longer matches source")
     wb=read(repo/"first_science/phase5/config_phase5_final_wb_v3b_fullsupport.json")
-    wb_n=int(wb["execution"]["n_trajectories_per_eligible_physical_cell"]) if "execution" in wb else 1000
+    wb_n=int(wb["whitebox_generation"]["n_trajectories_per_eligible_physical_cell"])
     if wb_n!=1000:raise ValueError("WB trajectory budget changed")
     if sum(pred.values())!=9800:
         raise ValueError("Historical 9,800 prediction graph trajectories/cell changed")
@@ -226,7 +226,7 @@ def report(repo,out,world,cost,rows,summary):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--repo",type=Path,default=ROOT.parent.parent)
+    p.add_argument("--repo",type=Path,default=ROOT.parent)
     p.add_argument("--out",type=Path,default=Path.home()/"praise/planb_b1_world_cost_feasibility_v0_1")
     args=p.parse_args()
     repo=args.repo.expanduser().resolve()
