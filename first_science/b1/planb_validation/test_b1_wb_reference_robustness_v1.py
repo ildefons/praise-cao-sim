@@ -62,6 +62,21 @@ class ReferenceTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,"changed since freeze"):
                 wb.verify_curve(repo,"phaseII","P1__G_PAR","m1_predictions.csv")
 
+    def test_frozen_probability_numeric_roundoff_vs_real_error(self):
+        # M3 mixtures of normalized weights can exceed 1 by last-bit roundoff.
+        frame=pd.DataFrame({
+            "query_id":["q1","q2","q3"],"H":[60.,65.,70.],
+            "sigma_hat":[0.,1.0+2e-15,0.5],
+        })
+        recovered=wb.validated_frozen_probabilities(frame,Path("frozen.csv"),"P1__G_PARSEQ","M3_FULL343")
+        np.testing.assert_array_equal(recovered,[0.,1.,0.5])
+        frame.loc[1,"sigma_hat"]=1.0001
+        with self.assertRaisesRegex(ValueError,"Out-of-range"):
+            wb.validated_frozen_probabilities(frame,Path("frozen.csv"),"P1__G_PARSEQ","M3_FULL343")
+        frame.loc[1,"sigma_hat"]=np.nan
+        with self.assertRaisesRegex(ValueError,"Nonfinite or unmatched"):
+            wb.validated_frozen_probabilities(frame,Path("frozen.csv"),"P1__G_PARSEQ","M3_FULL343")
+
     def test_disjoint_reference_affects_scoring_not_training(self):
         training=np.full((7,12),.45)
         training[0]=.02
