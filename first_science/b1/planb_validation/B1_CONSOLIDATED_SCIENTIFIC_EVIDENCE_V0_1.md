@@ -185,6 +185,30 @@ The reference-best algorithm is **M3_FULL343** on the frozen full 12-cell MAE ma
 
 At **B=20**, Informed has the highest correct-winner proportion (67.5% versus Top2's 63.8%), but **Top2 has lower mean regret** (0.006917 versus 0.008455). Consequently, the principal result is a **decision-loss** result, not a claim of uniformly highest exact-winner frequency.
 
+### Why did Top2 perform better in this archive? A descriptive check
+
+**Mechanism implied by the fixed rules.** Balanced aims to distribute observations widely, independently of which algorithms currently appear best. Informed reacts to posterior uncertainty across *all* candidate pairs but does not explicitly switch from coverage to a two-algorithm shortlist. Top2, by construction, preserves Balanced's early coverage and then redirects its remaining observations toward the **two current posterior leaders**. This changes *where* the limited budget is spent, not the terminal estimator or the number of evaluations. It provides a plausible route to lower **terminal selection regret**, but the policy comparison alone cannot identify which part of this hybrid rule is causally responsible.
+
+**Observed action allocation (post-result trace diagnostic).** From the frozen `episode_action_history.csv`, the fraction of evaluations **after the common first seven** allocated to the two algorithms that *retrospectively* have the lowest full-domain MAEs (M3_FULL343 and M2) is:
+
+| Budget | Random | Balanced | Informed | **Top2** |
+|---:|---:|---:|---:|---:|
+| 10 | 30.0% | 29.3% | 26.1% | **38.2%** |
+| 15 | 27.4% | 28.4% | 27.9% | **40.9%** |
+| 20 | 29.4% | 28.2% | 28.7% | **40.4%** |
+| 30 | 28.7% | 28.4% | 27.2% | **47.8%** |
+| 40 | 28.6% | 28.5% | 28.0% | **54.2%** |
+
+These percentages pool the 240 episodes within each policy/budget and use the archived complete matrix **only to label the actual top two afterward**. No acquisition policy saw their true ranking. They demonstrate a measurable difference in allocation behavior, not a stand-alone causal test of the schedule or proof of transfer to other worlds.
+
+**Why the primary endpoint is regret, not simply correct-winner frequency.** At (B=20), Informed recommends the true best algorithm in **67.5%** of episodes, more often than Top2 (**63.8%**). But when each strategy is wrong, the *mean loss conditional on being wrong* is **0.02601** MAE for Informed versus **0.01908** for Top2 (78 versus 87 incorrect episodes, respectively). Top2 recommends the second-best M2 in **25.4%** of all B=20 episodes, versus **13.3%** for Informed. Thus Top2's lower mean regret at B=20 reflects **less costly mistakes**, even though its exact-winner rate is lower. In general,
+
+$
+  E[r_B]=P(\hat a_B\ne a^\star)\ E[r_B\mid \hat a_B\ne a^\star].
+$
+
+This conditional-error decomposition and the action-allocation shares are **descriptive post hoc calculations** from frozen episode histories, with no additional experiments, fitted parameters, or bootstrap intervals. They clarify how the reported performance differs; they **do not establish** that greater concentration would improve outcomes for arbitrary algorithm rankings, service distributions, or misspecified posteriors.
+
 ### Within-archive heterogeneity
 
 The original post-result diagnostic found lower average regret for Top2 than Balanced for **11 of 12 starting cells**, when averaged across the five budgets; the remaining cell had a small positive difference. By starting provider-world *stratum*, the observed contrasts were P1 **−0.003031**, P3 **−0.001716**, P4 **−0.003549**. These are descriptive within-archive contrasts—not three independent world-level statistical tests or evidence of broad generalization.
