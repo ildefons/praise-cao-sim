@@ -64,14 +64,20 @@ $$
 
 The design vector contains an intercept, three provider-world indicators and four graph indicators. Prior means are 0.17 for each intercept and zero for effects. Prior standard deviations are 0.12 (intercept), 0.07 (world effects) and 0.045 (graph effects); assumed observation standard deviation is **0.055**. These are **heuristic fixed hyperparameters**, inherited from earlier development rather than externally calibrated uncertainty intervals. The posterior mean of the *equal-cell average* gives each algorithm's current estimated performance. At the terminal budget, the algorithm with the lowest posterior average is recommended; deterministic method order resolves an exact terminal tie. **No additional simulator observation noise is sampled during these replay episodes.**
 
-### The four selection strategies
+### The four selection strategies: roles and expected tradeoffs
 
-| Strategy | Rule after the common seven observations |
-|---|---|
-| **Random** | Uniformly sample one unobserved algorithm–cell pair, without replacement. |
-| **Balanced** | Favor algorithms with fewer evaluations; then favor coverage of underrepresented provider worlds and graphs. Break exactly tied scores randomly. |
-| **Informed** | Select the unobserved action expected, under the fixed Gaussian model, to reduce uncertainty about close algorithm comparisons. It does not explicitly schedule exploration according to the final budget. Break tied scores randomly. |
-| **Budget-aware Top2** | Allocate approximately half of the *additional* $B-7$ evaluations to Balanced coverage, then focus on the two currently lowest posterior-mean algorithms, selecting an observation that most reduces uncertainty in their estimated cell-average performance. Reidentify the current top two after each new observation. Break ties randomly. |
+The baselines test **different reasons why an allocation policy might succeed**, rather than different final estimators. All four strategies reveal the same kind of cell-MAE observation, start with the same seven evaluations, use the same Gaussian terminal recommendation, and spend exactly the same budget. **Only the choice of subsequent evaluations differs.**
+
+| Strategy | Exact allocation idea | What it controls for; potential weakness |
+|---|---|---|
+| **Random** (uninformed control) | After the seven common evaluations, uniformly draw an unobserved algorithm–cell pair without replacement. | Measures how far one can get **without exploiting evaluation history** to direct acquisition. It may spend scarce observations on algorithms already unlikely to win; randomization is deliberate, not a defective implementation. |
+| **Balanced** (structured-coverage control) | Give priority to algorithms with fewer evaluations; within an algorithm, favor less-observed provider worlds and graphs using a fixed hierarchical coverage score. Break tied scores randomly. | Tests whether **breadth and fair representation alone** suffice. It protects against premature commitment but continues allocating substantial effort to less promising algorithms even when the decision is between a small number of contenders. |
+| **Informed** (adaptive information control) | For each possible observation, score its Gaussian posterior reduction in the algorithm's estimated mean uncertainty, weighted by its uncertainty-adjusted proximity to **every competing algorithm**. Choose the highest score; break ties randomly. | Tests whether **adaptive uncertainty reduction without budget-dependent switching** suffices. It can allocate to any algorithm with a competitive pairwise score; it is not constrained to a small current shortlist, and does not explicitly reserve time for broad coverage or final discrimination. |
+| **Budget-aware Top2** (studied strategy) | Use Balanced for the first $\lceil(B-7)/2\rceil$ *additional* observations, then restrict acquisition to the two current lowest-posterior-mean algorithms and choose the observation maximizing posterior reduction of that algorithm's estimated mean variance. Recompute the shortlist after each observation; break ties randomly. | Tests whether **coverage first, targeted discrimination later**, with a schedule fixed by the available budget, improves the *final* decision. It may fail when early rankings are misleading or the shared Gaussian model is poorly specified. |
+
+**Why Balanced is the main comparator.** Random measures an uninformed reference, but Balanced is a stronger practical alternative: it systematically represents all algorithms and operating conditions without looking at emerging winners. **Why Informed matters.** It separates *using a posterior* from *using a budget-dependent exploration-to-discrimination schedule*. If Top2 improves on Informed as well as Balanced, the comparison suggests more than a generic advantage of information-based acquisition. However, the strategies differ in **both** restriction to top-two candidates and the coverage schedule; their separate causal contributions are **not isolated** by this four-policy experiment.
+
+The policies are deliberately simple, transparent internal controls. This experiment **does not compare against every established best-arm-identification algorithm** or show that any baseline is optimal.
 
 For exact reproduction, Balanced scores each available action $(a,w,g)$ by
 
