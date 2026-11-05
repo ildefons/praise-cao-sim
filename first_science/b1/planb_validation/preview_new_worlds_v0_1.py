@@ -179,16 +179,20 @@ def classify_four_graphs(graph_statuses: dict) -> str:
     return "ELIGIBLE_ALL4" if statuses == {PASS} else "INELIGIBLE_ALL4"
 
 
-def first_eligible_attempts(candidates: list[dict], evidence: dict) -> dict:
-    """Pure policy-independent recruitment rule; no simulator or file access.
+def first_eligible_attempts(candidates: list[dict], evidence: dict, battery_id: str) -> dict:
+    """Pure, battery-scoped recruitment rule; no simulator or file access.
 
-    evidence maps candidate_id to a four-graph status dict. An earlier
-    unexamined candidate blocks selection of a later one, preventing skipping.
+    evidence maps candidate_id to exact four-graph Step-0 status dictionaries.
+    An earlier unexamined candidate blocks a later success; no outcome-guided
+    or selective skipping. This is NOT called by the dry-run sampler.
     """
     chosen = {}
     for role in ROLES:
-        options = sorted((c for c in candidates if c["role"] == role),
+        options = sorted((c for c in candidates if c["role"] == role
+                          and c["battery_id"] == battery_id),
                          key=lambda c: c["attempt"])
+        if not options or [c["attempt"] for c in options] != list(range(1,len(options)+1)):
+            raise ValueError(f"{battery_id}/{role}: missing/nonsequential candidate attempts")
         for c in options:
             uid = c["candidate_id"]
             if uid not in evidence:
