@@ -48,6 +48,39 @@ Outputs in the requested directory:
 - `paired_regret_contrasts.csv`: paired bootstrap difference summaries
 - `run_manifest.json`: code/protocol settings, input file hashes and output file hashes
 
+## Third: white-box reference uncertainty (no policy changes)
+
+**Frozen protocol:** [B1_WB_REFERENCE_ROBUSTNESS_PROTOCOL_V1.md](B1_WB_REFERENCE_ROBUSTNESS_PROTOCOL_V1.md)  
+**Script:** [b1_wb_reference_robustness_v1.py](b1_wb_reference_robustness_v1.py)  
+**Tests:** [test_b1_wb_reference_robustness_v1.py](test_b1_wb_reference_robustness_v1.py)
+
+Do not rerun or change B1 v1 policy settings. With the existing completed seven-method replay outputs:
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull --ff-only origin praise-identifiability-feasibility
+python -m unittest discover -s first_science/b1/planb_validation -p 'test_b1_wb_reference_robustness_v1.py' -v
+
+python first_science/b1/planb_validation/b1_wb_reference_robustness_v1.py \
+  --repo . \
+  --b1-outputs ~/praise/planb_b1_fixed_budget_v1 \
+  --out ~/praise/planb_b1_wb_robustness_v1 \
+  --reference-reps 300 \
+  --split-pairs 4 \
+  --split-repeats 2
+```
+
+The audit expects the binary outcomes and metadata created by the existing Phase-5 reference bootstrap at:
+`first_science/phase5/results/06_evaluation_v3b_fullsupport/bootstrap_reference/` (files `wb_primary_trajectory_outcomes.npz` and `wb_primary_outcome_columns.csv`). If this cache is missing, **append `--reconstruct-outcomes`** to derive those files from the frozen white-box ledgers **outside the repository**, without simulation or overwriting existing results.
+
+The script validates all seven original pointwise prediction files using frozen SHA-256 manifests; independently reconstructs 84 cell MAEs; and resamples entire WB trajectories, never individual correlated query rows. In the split stress test it reruns the **unchanged** B1 policies, giving half the WB trajectories to the allocation decisions and scoring on the disjoint half.
+
+Outputs appear only under the chosen `--out` directory: `WB_REFERENCE_ROBUSTNESS_REPORT.md`, `reference_winner_frequency.csv`, `reference_sensitivity_by_budget.csv`, `disjoint_half_paired_regret.csv`, and a hashed `audit_manifest.json`.
+
+**Interpretation:** this tests finite-white-box-reference uncertainty *within the same 12 historical cases*. It is neither a new provider-world experiment nor a new claim about algorithm novelty. A positive screening outcome justifies planning independent-world validation; **no new simulations** are authorized by this stage.
+
+---
+
 ## Interpretation
 
 The fixed 12-cell PRAISE archive has only three distinct provider worlds. Replaying randomized allocation many times is essential for estimating sequence variability, but does **not** create new independent worlds. This is a **retrospective methodology development test**, not a prospective generalization result. Evaluation-count budgets do **not** imply equal runtime cost among algorithms. We deliberately do not tune policy switching fractions to the current archive's observed performance.
