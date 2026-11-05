@@ -201,7 +201,7 @@ At **B=20**, Informed has the highest correct-winner proportion (67.5% versus To
 
 These percentages pool the 240 episodes within each policy/budget and use the archived complete matrix **only to label the actual top two afterward**. No acquisition policy saw their true ranking. They demonstrate a measurable difference in allocation behavior, not a stand-alone causal test of the schedule or proof of transfer to other worlds.
 
-**Why the primary endpoint is regret, not simply correct-winner frequency.** At (B=20), Informed recommends the true best algorithm in **67.5%** of episodes, more often than Top2 (**63.8%**). But when each strategy is wrong, the *mean loss conditional on being wrong* is **0.02601** MAE for Informed versus **0.01908** for Top2 (78 versus 87 incorrect episodes, respectively). Top2 recommends the second-best M2 in **25.4%** of all B=20 episodes, versus **13.3%** for Informed. Thus Top2's lower mean regret at B=20 reflects **less costly mistakes**, even though its exact-winner rate is lower. In general,
+**Why the primary endpoint is regret, not simply correct-winner frequency.** At $B=20$, Informed recommends the true best algorithm in **67.5%** of episodes, more often than Top2 (**63.8%**). But when each strategy is wrong, the *mean loss conditional on being wrong* is **0.02601** MAE for Informed versus **0.01908** for Top2 (78 versus 87 incorrect episodes, respectively). Top2 recommends the second-best M2 in **25.4%** of all B=20 episodes, versus **13.3%** for Informed. Thus Top2's lower mean regret at B=20 reflects **less costly mistakes**, even though its exact-winner rate is lower. In general,
 
 $
   E[r_B]=P(\hat a_B\ne a^\star)\ E[r_B\mid \hat a_B\ne a^\star].
@@ -249,26 +249,26 @@ A subsequent role-stratified *new-world generator draft* is **not approved** and
 
 - [Design freeze](B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md) and [executable policy freeze](B1_EXECUTABLE_POLICY_FREEZE_V1.md).
 - [Exact replay implementation](b1_budget_comparison_v1.py) and [synthetic regression tests](test_b1_budget_comparison_v1.py).
-- Preserved source snapshot branch **\`b1-v1-seven-method-randomized-bootstrap-frozen\`** at commit **\`318380f53f891f7ca4d825e1af37e0c842e891fa\`**. Replay source blob Git SHA-1 **\`b433e7d01da10dcad3448eedeea544ba7cefb33c\`**.
+- Preserved source snapshot branch **`b1-v1-seven-method-randomized-bootstrap-frozen`** at commit **`318380f53f891f7ca4d825e1af37e0c842e891fa`**. Replay source blob Git SHA-1 **`b433e7d01da10dcad3448eedeea544ba7cefb33c`**.
 - [Full result verification and earlier interpretation](B1_FIVE_BUDGET_DEVELOPMENT_RESULTS_REVIEW_V1.md).
 - [WB robustness protocol](B1_WB_REFERENCE_ROBUSTNESS_PROTOCOL_V1.md) and [WB outcome freeze](B1_WB_ROBUSTNESS_RESULT_FREEZE_2026-11-05.md).
 - [Preservation and research-question boundary](B1_BASELINE_PRESERVATION_AND_AGENDA_BOUNDARY_2026-11-05.md).
 
 ### Raw evidence and integrity
 
-The seven-method archive was assembled from **three frozen source evaluations**: Phase-II V3b for M1/M2/M3_FULL343, original-style retrospective evaluation for the two original Top variants, and fixed-CV evaluation for the two fixed-CV Top variants. The replay's original local output directory was \`~/praise/planb_b1_fixed_budget_v1\`; do not overwrite it.
+The seven-method archive was assembled from **three frozen source evaluations**: Phase-II V3b for M1/M2/M3_FULL343, original-style retrospective evaluation for the two original Top variants, and fixed-CV evaluation for the two fixed-CV Top variants. The replay's original local output directory was `~/praise/planb_b1_fixed_budget_v1`; do not overwrite it.
 
 | Frozen artifact | Purpose | Recorded SHA-256 |
 |---|---|---|
-| \`seven_method_matrix.csv\` | Complete 7 × 12 MAE matrix | \`0b58b7b6ff7489aec169a36c88a166fdb75b88e5089f14b1a610721581bb314d\` |
-| \`terminal_episodes.csv\` | 4,800 complete terminal decisions | \`c219b700d55683899867051f3cf1f154cea54655853026c47fda814c887d9f12\` |
-| \`episode_action_history.csv\` | 110,400 revealed actions, with order | \`a9412c9e07cb52e35aa6ac09e6aedd66837fca9034aabb5bb6716ac7e52d1195\` |
-| \`budget_summary.csv\` | Per-policy/budget regret, correct-selection probability, bootstraps | \`12a163b488266119f68391e96c8c63cebb4576516a312d3e48b5d4e77c657c80\` |
-| \`paired_regret_contrasts.csv\` | Budget-wise and aggregate policy comparisons | \`2354d52108d076340100c22d97ddd966526f865753345d2493b607d099451238\` |
+| `seven_method_matrix.csv` | Complete 7 × 12 MAE matrix | `0b58b7b6ff7489aec169a36c88a166fdb75b88e5089f14b1a610721581bb314d` |
+| `terminal_episodes.csv` | 4,800 complete terminal decisions | `c219b700d55683899867051f3cf1f154cea54655853026c47fda814c887d9f12` |
+| `episode_action_history.csv` | 110,400 revealed actions, with order | `a9412c9e07cb52e35aa6ac09e6aedd66837fca9034aabb5bb6716ac7e52d1195` |
+| `budget_summary.csv` | Per-policy/budget regret, correct-selection probability, bootstraps | `12a163b488266119f68391e96c8c63cebb4576516a312d3e48b5d4e77c657c80` |
+| `paired_regret_contrasts.csv` | Budget-wise and aggregate policy comparisons | `2354d52108d076340100c22d97ddd966526f865753345d2493b607d099451238` |
 
-The replay \`run_manifest.json\` also records the upstream source-metrics and manifest hashes, evaluation budgets, policy labels, seed, starting-cell count and bootstrap count.
+The replay `run_manifest.json` also records the upstream source-metrics and manifest hashes, evaluation budgets, policy labels, seed, starting-cell count and bootstrap count.
 
-**Independent reconciliation for this report.** The five CSVs available as uploaded evidence were SHA-256-checked against \`run_manifest.json\`. The 84 matrix rows, 4,800 episodes, 110,400 action rows, exact budget length, seven shared initial actions on one starting cell, and absence of within-episode duplicated actions were independently checked. Per-episode terminal regrets were recomputed directly from the 84 archived MAEs (maximum numerical disagreement below \`1e-15\`). Recomputed overall Top2−Balanced regret = **−0.0027652163267556703**, matching the frozen reported contrast. Original 2,000-replicate bootstrap bounds are read from the frozen \`paired_regret_contrasts.csv\`, not freshly resampled or retuned.
+**Independent reconciliation for this report.** The five CSVs available as uploaded evidence were SHA-256-checked against `run_manifest.json`. The 84 matrix rows, 4,800 episodes, 110,400 action rows, exact budget length, seven shared initial actions on one starting cell, and absence of within-episode duplicated actions were independently checked. Per-episode terminal regrets were recomputed directly from the 84 archived MAEs (maximum numerical disagreement below `1e-15`). Recomputed overall Top2−Balanced regret = **−0.0027652163267556703**, matching the frozen reported contrast. Original 2,000-replicate bootstrap bounds are read from the frozen `paired_regret_contrasts.csv`, not freshly resampled or retuned.
 
 Reproducing the **finite-archive replay** requires the exact seven-method matrix and the pinned B1 script, not rerunning the service simulator. Reproducing the **full predictive pipeline** additionally requires its historical I1, Step-0, reconstruction, graph-simulation and WB source artifacts, frozen contracts, code/dependencies, and random-seed registries. Reproducing the **WB robustness study** requires the 1,000 trajectory-level WB references, the original method pointwise predictions, and the frozen WB robustness audit program and outputs. These are distinct reproduction scopes.
 
