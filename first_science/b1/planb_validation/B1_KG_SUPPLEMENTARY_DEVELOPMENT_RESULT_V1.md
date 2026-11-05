@@ -27,6 +27,14 @@
 
 The equal-budget KG mean is **0.00559351309** MAE regret, versus original Balanced **0.0099098** and Top2 **0.0071446**. KG yields **43.6% lower** five-budget mean regret than Balanced, and **21.7% lower** than Top2. **The original Top2−Balanced 27.9% result is not replaced or altered.**
 
+### All five regret–budget curves with 95% bootstrap error bars
+
+![Random, Balanced, Informed, Top2 and one-step Knowledge Gradient: mean terminal regret by evaluation budget with 95% bootstrap error bars](figures/b1_five_policy_regret_vs_budget_ci_v1.svg)
+
+*Figure: regret–budget comparison of the frozen four-policy B1 development study plus the separately specified one-step KG benchmark.* Each curve has five points at evaluation budgets **10, 15, 20, 30 and 40**. Every mean uses **240 seeded decision episodes**; vertical error bars are that policy's **95% within-archive stratified percentile-bootstrap interval (2,000 draws)**. The 7×12 MAE matrix, terminal estimator and evaluated budgets are identical across policies. Error bars are **not** independent-world confidence intervals and **not** KG-versus-Top2 paired difference intervals. See the [25-row plotting data](figures/b1_five_policy_regret_with_bootstrap_ci_v1.csv).
+
+KG has lower mean regret at every budget on this archive. The **paired** comparisons and their own intervals are shown next; visually overlapping marginal intervals alone must not be used to infer pairwise significance.
+
 ### KG versus the frozen Top2 heuristic (paired episode bootstrap)
 
 | Budget | KG − Top2 mean regret | Nominal 95% bootstrap interval |
