@@ -4,6 +4,8 @@
 **Executable-policy freeze:** [B1_EXECUTABLE_POLICY_FREEZE_V1.md](B1_EXECUTABLE_POLICY_FREEZE_V1.md)  
 **WB robustness result freeze:** [B1_WB_ROBUSTNESS_RESULT_FREEZE_2026-11-05.md](B1_WB_ROBUSTNESS_RESULT_FREEZE_2026-11-05.md)  
 **Independent-world validation scope:** [B1_INDEPENDENT_WORLD_VALIDATION_SCOPE_V0_1.md](B1_INDEPENDENT_WORLD_VALIDATION_SCOPE_V0_1.md)  
+**Independent-world and cost source audit:** [B1_INDEPENDENT_WORLD_COST_SOURCE_AUDIT_2026-11-05.md](B1_INDEPENDENT_WORLD_COST_SOURCE_AUDIT_2026-11-05.md)  
+**Local read-only cost inventory:** [audit_independent_world_cost_v0_1.py](audit_independent_world_cost_v0_1.py)  
 **Main script:** [b1_budget_comparison_v1.py](b1_budget_comparison_v1.py)  
 **Synthetic-only tests:** [test_b1_budget_comparison_v1.py](test_b1_budget_comparison_v1.py)
 
