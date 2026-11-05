@@ -7,9 +7,9 @@
 
 ## First: audit and complete the 7×12 matrix
 
-Run in the existing PRAISE Python environment, on branch \`praise-identifiability-feasibility\`:
+Run in the existing PRAISE Python environment, on branch `praise-identifiability-feasibility`:
 
-\`\`\`bash
+```bash
 cd ~/praise/praise-cao-sim
 git pull --ff-only origin praise-identifiability-feasibility
 
@@ -20,33 +20,33 @@ python first_science/b1/planb_validation/b1_budget_comparison_v1.py \
 
 python first_science/b1/planb_validation/verify_seven_method_matrix_v1.py \
   --repo . --out ~/praise/planb_b1_fixed_budget_v1
-\`\`\`
+```
 
-The verifier checks exactly **84 frozen atomic results**, source manifests and file hashes, and published aggregate MAE values. It writes \`seven_method_matrix.csv\` and \`matrix_provenance.json\` **outside the repository**. If anything is missing or inconsistent, it fails instead of silently substituting a five-method or rounded-table experiment. A missing \`b1_pilot_m3_retrospective_v1/evaluation/metrics_retrospective.csv\` is a missing archival source; do not rerun simulator code just to satisfy this gate.
+The verifier checks exactly **84 frozen atomic results**, source manifests and file hashes, and published aggregate MAE values. It writes `seven_method_matrix.csv` and `matrix_provenance.json` **outside the repository**. If anything is missing or inconsistent, it fails instead of silently substituting a five-method or rounded-table experiment. A missing `b1_pilot_m3_retrospective_v1/evaluation/metrics_retrospective.csv` is a missing archival source; do not rerun simulator code just to satisfy this gate.
 
 ## Second: five predetermined budget comparisons
 
 Only after the seven-method matrix verifies:
 
-\`\`\`bash
+```bash
 python first_science/b1/planb_validation/b1_budget_comparison_v1.py \
   --repo . --mode all \
   --repeats-per-cell 20 --bootstrap 2000 \
   --out ~/praise/planb_b1_fixed_budget_v1
-\`\`\`
+```
 
 This runs independent, budget-conditioned episodes for **B = 10, 15, 20, 30, 40** and all four policies: uniform random after common initialization, balanced coverage, previous informed allocation, and the simple budget-aware coverage/top-two policy. With 12 starting cells and 20 independent repetitions per starting cell, there are **240 episodes per policy per budget**.
 
 The final decision is scored with **terminal simple regret** (primary), reference-best selection probability, and regret distribution. Separate per-budget comparisons and a prespecified across-budget contrast against balanced allocation are saved. No simulation is launched, and frozen evidence is not modified.
 
 Outputs in the requested directory:
-- \`seven_method_matrix.csv\`: 84 archived cell MAEs
-- \`matrix_provenance.json\`: verified frozen sources (matrix stage)
-- \`terminal_episodes.csv\`: one terminal decision per independent episode
-- \`episode_action_history.csv\`: full revealed-action sequence, retained for later continuation experiments
-- \`budget_summary.csv\`: regret, accuracy, tail and bootstrap intervals for every B and policy
-- \`paired_regret_contrasts.csv\`: paired bootstrap difference summaries
-- \`run_manifest.json\`: code/protocol settings, input file hashes and output file hashes
+- `seven_method_matrix.csv`: 84 archived cell MAEs
+- `matrix_provenance.json`: verified frozen sources (matrix stage)
+- `terminal_episodes.csv`: one terminal decision per independent episode
+- `episode_action_history.csv`: full revealed-action sequence, retained for later continuation experiments
+- `budget_summary.csv`: regret, accuracy, tail and bootstrap intervals for every B and policy
+- `paired_regret_contrasts.csv`: paired bootstrap difference summaries
+- `run_manifest.json`: code/protocol settings, input file hashes and output file hashes
 
 ## Interpretation
 
