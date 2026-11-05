@@ -105,6 +105,8 @@ Review `WORLD_COST_FEASIBILITY_AUDIT.md`, `historical_stage_cost_summary.csv`, `
 
 ---
 
+**Second-pass measured graph-stage recovery:** [B1_GRAPH_STAGE_TIMING_RECOVERY_REVIEW_2026-11-05.md](B1_GRAPH_STAGE_TIMING_RECOVERY_REVIEW_2026-11-05.md). The archived logs contain `time.perf_counter()` elapsed readings for **all 24 fixed-CV Top14/Top1 graph execution stages**, totaling **596.3 minutes (9.9383 h)**. This is **not** the fixed-CV full-command wall time: merging and postprocessing are excluded. The initial v1 log extractor found zero *shell* `real` markers but kept these stage timings in `log_timing_evidence.csv`.  
+
 ## Fifth: recover historical Top14/Top1 graph timings (no simulations)
 
 **Recovered original-style terminal measurements:** [B1_ORIGINAL_GRAPH_TIMING_RECOVERY_2026-11-05.md](B1_ORIGINAL_GRAPH_TIMING_RECOVERY_2026-11-05.md). The original-style Top14+Top1 combined graph battery required **14h57m39.671s measured across three invocations** (two cells separately, then a replay reusing them); this is not a CPU-hour value. Fixed-CV combined wall time has **not yet been measured**.
