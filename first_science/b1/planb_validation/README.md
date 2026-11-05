@@ -1,3 +1,9 @@
+# PRAISE Plan B — sequential validation
+
+**B1 experimental protocol (frozen v1):** [B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md](B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md). The six agreed principles govern the next budget-conditioned comparison. The B1.2 diagnostic below predates this freeze and is development evidence, not the frozen budget-aware evaluation.
+
+---
+
 # PRAISE Plan B — Gate B1.2 early-budget diagnostic
 
 This read-only diagnostic reconstructs the Gate 1 policies' selected `(algorithm, world, graph)` actions and tests whether their early validation accuracy is associated with world/graph coverage. It uses the existing five-method replay results; it **does not run simulations or change frozen evidence**.
