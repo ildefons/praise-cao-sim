@@ -83,6 +83,39 @@ class ReferenceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"Nonfinite or unmatched"):
             wb.validated_frozen_probabilities(frame,Path("frozen.csv"),"P1__G_PARSEQ","M3_FULL343")
 
+    def test_robustness_screening_manifest_json_serialization(self):
+        # Regression: np.quantile emits numpy floats whose comparisons may
+        # yield np.bool_, which cannot be serialized by json.dumps.
+        ref_rows=[]
+        for k in range(50):
+            record={
+                "winner":"M3_FULL343",
+                "original_winner_still_best":1,
+                "mu_M2":0.135,
+                "mu_M3_FULL343":0.12,
+                "primary_diff_mean_5B":-0.0028,
+            }
+            for B in wb.b1.BUDGETS:
+                record[f"B{B}_top2_minus_balanced"]=-0.0028
+            ref_rows.append(record)
+        split_rows=[]
+        for B in wb.b1.BUDGETS:
+            for policy in wb.b1.POLICIES:
+                split_rows.append({
+                    "split":0,"direction":0,"budget":B,
+                    "start":0,"replicate":0,"policy":policy,
+                    "terminal_regret":0.001 if policy=="budgeted_top2" else 0.005,
+                    "correct":1,"reference_best":"M3_FULL343",
+                })
+        with tempfile.TemporaryDirectory() as tmp:
+            gates=wb.write_results(
+                Path(tmp),pd.DataFrame(ref_rows),pd.DataFrame(split_rows),
+                np.array([.157,.135,.120,.154,.162,.161,.192]),50,1)
+            self.assertTrue(all(type(v) is bool for v in gates.values()))
+            self.assertTrue(all(gates.values()))
+            self.assertIsInstance(json.dumps({"screening_gate":gates}),str)
+            self.assertTrue((Path(tmp)/"WB_REFERENCE_ROBUSTNESS_REPORT.md").exists())
+
     def test_disjoint_reference_affects_scoring_not_training(self):
         training=np.full((7,12),.45)
         training[0]=.02
