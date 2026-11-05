@@ -5,6 +5,8 @@
 **Status:** Complete *retrospective development* result on the frozen seven-method, twelve-condition archive, with separately completed white-box reference-robustness checks. **Not an independent-world confirmation or a novelty claim.**  
 **Purpose:** A minimal-narrative, evidence-first scientific record. This document introduces **no new methods, experiments, simulations, outcome definitions or tuning**.
 
+**Complete numeric companion:** [all four policies' bootstrap intervals and every paired comparison](B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md).
+
 ### Abstract
 
 We study a finite-budget decision problem: when several service-compliance prediction algorithms must be compared across different provider configurations and service-composition graphs, which algorithm should be selected after observing only a limited number of algorithm–condition evaluations? Seven frozen algorithms were compared on twelve historical PRAISE conditions, yielding 84 possible observations. Four allocation strategies—uniform random, balanced coverage, a posterior-informed heuristic and a budget-aware coverage/Top2 heuristic—were tested at five separately initialized budgets of 10, 15, 20, 30 and 40 observations. Each strategy was evaluated in 20 seeded repetitions from each of twelve common starting cells, giving 4,800 terminal decisions; every strategy received 2,000 stratified bootstrap resamples. Across budgets, the budget-aware strategy reduced mean terminal simple regret from **0.0099098** (balanced) to **0.0071446**, a **27.9% relative reduction**. The predeclared aggregate paired contrast was **−0.0027652 MAE units** (95% *within-archive episode-bootstrap* interval **[−0.0036000, −0.0018985]**). The advantage was negative at each of the five budgets and passed separate white-box reference-sensitivity screens. These results establish a positive conditional development result, not generalization to independently sampled provider worlds or computational-hour savings.
@@ -15,20 +17,20 @@ We study a finite-budget decision problem: when several service-compliance predi
 
 An evaluation action reveals the archived mean absolute error (MAE) for **one prediction algorithm in one provider-world/graph condition**. Decisions are made sequentially: the policy sees only the values it has already chosen to reveal, and must finish by recommending one algorithm. The full archive is consulted by the replay harness only to return a selected observation and to score the final recommendation.
 
-Let \(A\) contain seven algorithms and \(C\) twelve eligible conditions. Denote the frozen MAE for algorithm \(a\) in condition \(c\) by \(Y_{ac}\), and define
+Let $A$ contain seven algorithms and $C$ twelve eligible conditions. Denote the frozen MAE for algorithm $a$ in condition $c$ by $Y_{ac}$, and define
 
-\[
+$
   \mu_a=\frac{1}{12}\sum_{c\in C}Y_{ac},
   \qquad a^\star=\operatorname*{arg\,min}_{a\in A}\mu_a .
-\]
+$
 
-With total budget \(B\), each policy observes exactly \(B\) *distinct* entries of \(Y\) and recommends \(\hat a_B\). Its terminal **simple regret**, the primary endpoint, is
+With total budget $B$, each policy observes exactly $B$ *distinct* entries of $Y$ and recommends $\hat a_B$. Its terminal **simple regret**, the primary endpoint, is
 
-\[
+$
   r_B=\mu_{\hat a_B}-\mu_{a^\star}\geq 0 .
-\]
+$
 
-The secondary endpoint is whether \(\hat a_B=a^\star\). The study optimizes **which algorithm to recommend given limited validation observations**, not the underlying algorithms' predictive accuracies.
+The secondary endpoint is whether $\hat a_B=a^\star$. The study optimizes **which algorithm to recommend given limited validation observations**, not the underlying algorithms' predictive accuracies.
 
 ### Archived problem instance
 
@@ -52,13 +54,13 @@ Here **M3_FULL343** is the reference-best algorithm, followed by M2 (mean-MAE ga
 
 ## 2. Frozen experimental procedure
 
-**Budget and initialization.** The predetermined action budgets were \(B\in\{10,15,20,30,40\}\), counting *observed algorithm–cell MAEs*, **not** simulation trajectories or computational hours. Every episode begins by observing **all seven algorithms on one and the same starting cell**, using seven of its \(B\) evaluations. The starting cell cycles through all twelve possibilities. Actions are never repeated within an episode; the remaining \(B-7\) actions depend on the allocation strategy. Each budget is a **new episode from initialization**, not continuation of a previous smaller-budget run.
+**Budget and initialization.** The predetermined action budgets were $B\in\{10,15,20,30,40\}$, counting *observed algorithm–cell MAEs*, **not** simulation trajectories or computational hours. Every episode begins by observing **all seven algorithms on one and the same starting cell**, using seven of its $B$ evaluations. The starting cell cycles through all twelve possibilities. Actions are never repeated within an episode; the remaining $B-7$ actions depend on the allocation strategy. Each budget is a **new episode from initialization**, not continuation of a previous smaller-budget run.
 
 **Common estimator.** All strategies use the *same* fixed additive Gaussian regression model, fitted separately for each algorithm:
 
-\[
+$
   Y_{a,w,g}=\alpha_a+\beta_{a,w}+\gamma_{a,g}+\varepsilon_{a,w,g}.
-\]
+$
 
 The design vector contains an intercept, three provider-world indicators and four graph indicators. Prior means are 0.17 for each intercept and zero for effects. Prior standard deviations are 0.12 (intercept), 0.07 (world effects) and 0.045 (graph effects); assumed observation standard deviation is **0.055**. These are **heuristic fixed hyperparameters**, inherited from earlier development rather than externally calibrated uncertainty intervals. The posterior mean of the *equal-cell average* gives each algorithm's current estimated performance. At the terminal budget, the algorithm with the lowest posterior average is recommended; deterministic method order resolves an exact terminal tie. **No additional simulator observation noise is sampled during these replay episodes.**
 
@@ -69,34 +71,34 @@ The design vector contains an intercept, three provider-world indicators and fou
 | **Random** | Uniformly sample one unobserved algorithm–cell pair, without replacement. |
 | **Balanced** | Favor algorithms with fewer evaluations; then favor coverage of underrepresented provider worlds and graphs. Break exactly tied scores randomly. |
 | **Informed** | Select the unobserved action expected, under the fixed Gaussian model, to reduce uncertainty about close algorithm comparisons. It does not explicitly schedule exploration according to the final budget. Break tied scores randomly. |
-| **Budget-aware Top2** | Allocate approximately half of the *additional* \(B-7\) evaluations to Balanced coverage, then focus on the two currently lowest posterior-mean algorithms, selecting an observation that most reduces uncertainty in their estimated cell-average performance. Reidentify the current top two after each new observation. Break ties randomly. |
+| **Budget-aware Top2** | Allocate approximately half of the *additional* $B-7$ evaluations to Balanced coverage, then focus on the two currently lowest posterior-mean algorithms, selecting an observation that most reduces uncertainty in their estimated cell-average performance. Reidentify the current top two after each new observation. Break ties randomly. |
 
-For exact reproduction, Balanced scores each available action \((a,w,g)\) by
+For exact reproduction, Balanced scores each available action $(a,w,g)$ by
 
-\[
+$
   s_{\rm bal}=-100n_a-10n_{a,w}-2n_{a,g},
-\]
+$
 
-where \(n_a\) is the number already observed for algorithm \(a\), and \(n_{a,w}\) and \(n_{a,g}\) are the corresponding world and graph counts.
+where $n_a$ is the number already observed for algorithm $a$, and $n_{a,w}$ and $n_{a,g}$ are the corresponding world and graph counts.
 
-Let \(x_c\) be the regression design vector for cell \(c\), \(v\) the average of all twelve design vectors, \(\Sigma_a\) algorithm \(a\)'s posterior covariance, \(m_a\) its posterior equal-cell mean, and \(u_a=v^\top\Sigma_a v\). The estimated variance reduction from evaluating \((a,c)\) is
+Let $x_c$ be the regression design vector for cell $c$, $v$ the average of all twelve design vectors, $\Sigma_a$ algorithm $a$'s posterior covariance, $m_a$ its posterior equal-cell mean, and $u_a=v^\top\Sigma_a v$. The estimated variance reduction from evaluating $(a,c)$ is
 
-\[
+$
   G(a,c)=
   \frac{(v^\top\Sigma_a x_c)^2}
        {0.055^2+x_c^\top\Sigma_a x_c}.
-\]
+$
 
-**Informed** selects the available \((a,c)\) maximizing
+**Informed** selects the available $(a,c)$ maximizing
 
-\[
+$
   G(a,c)\sum_{b\ne a}
   \exp\!\left[-\frac{(m_a-m_b)^2}{2(u_a+u_b)}\right].
-\]
+$
 
-**Top2**, after its coverage phase, maximizes \(G(a,c)\) over available cells **of its two current lowest-posterior-mean algorithms only**. Its *additional-evaluation* schedule is:
+**Top2**, after its coverage phase, maximizes $G(a,c)$ over available cells **of its two current lowest-posterior-mean algorithms only**. Its *additional-evaluation* schedule is:
 
-| Total budget \(B\) | Common initialization | Further Balanced evaluations | Further Top2 evaluations |
+| Total budget $B$ | Common initialization | Further Balanced evaluations | Further Top2 evaluations |
 |---:|---:|---:|---:|
 | 10 | 7 | 2 | 1 |
 | 15 | 7 | 4 | 4 |
@@ -110,7 +112,7 @@ This is a frozen **simple heuristic**, not a claim to an optimal acquisition rul
 
 For **each** of the four strategies at **each** budget, there are **12 starting cells × 20 seeded repetitions = 240 terminal episodes**. In total: **4 × 5 × 240 = 4,800 episodes**, generating **110,400 individual action-history rows**.
 
-The random seeds are deterministically separated by \((B,\text{starting cell},\text{repetition},\text{policy})\), from root seed **20261105**. Random chooses actions randomly; Balanced, Informed and Top2 mainly depend on randomized tie-breaking. Therefore the four strategies are **equally replicated and bootstrapped**, but they do *not* have identical degrees of behavioral randomness or shared action-level RNG streams.
+The random seeds are deterministically separated by $(B,\text{starting cell},\text{repetition},\text{policy})$, from root seed **20261105**. Random chooses actions randomly; Balanced, Informed and Top2 mainly depend on randomized tie-breaking. Therefore the four strategies are **equally replicated and bootstrapped**, but they do *not* have identical degrees of behavioral randomness or shared action-level RNG streams.
 
 For every strategy and budget the study used **2,000 percentile-bootstrap resamples**, stratified by the twelve fixed starting cells, to obtain intervals for mean terminal regret and reference-best selection frequency. For each comparison with Balanced, **matched starting-cell/repetition indices** were resampled to obtain a regret-difference interval; the primary across-budget contrast uses corresponding bootstrap indices across the five budgets. This is pairing by experimental design strata and indices, **not** identical random draws or identical action histories for the policies. The resampling quantifies **episode variability conditional on this archive**, not new-world uncertainty.
 
@@ -131,10 +133,10 @@ Lower is better. Each value averages **240 terminal episodes**.
 
 The budget-aware strategy had lower mean regret than Balanced at **all five** tested budgets; it also had the lowest mean regret of all four policies at every budget in this archive. The predeclared *equal-weight, across-budget* Top2−Balanced contrast is
 
-\[
+$
   \overline{\Delta}_{\text{Top2−Balanced}}
   =-0.0027652163 \text{ MAE units},
-\]
+$
 
 with stratified episode-bootstrap nominal 95% percentile interval **[−0.0036000084, −0.0018984935]**. Relative to Balanced's mean regret of 0.0099098, this is **27.9% lower regret**. The interval measures replay-episode variability on the same historical 84-action matrix.
 
