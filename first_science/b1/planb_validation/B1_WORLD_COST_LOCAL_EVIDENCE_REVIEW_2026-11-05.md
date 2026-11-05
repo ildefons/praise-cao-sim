@@ -50,3 +50,7 @@ A complete finite reference 84-cell matrix is needed to calculate terminal regre
 5. **Preserve frozen B1.** No changes to seven algorithms, acquisition controller, five budgets, Gaussian terminal estimator, or historical results. Additional-budget continuation remains deferred.
 
 **Decision:** positive B1 development and reference-uncertainty results stand, but **independent-world execution remains blocked**. Next cheapest evidence: retrieve existing nested I1 timings and original/fixed-CV logs **read-only**, plus draft a role-stratified world-generator contract for review. No new simulation needed for either action.
+
+## Subsequent I1 timing recovery (2026-11-05)
+
+The I1 missing-duration note above describes the *original top-level-manifest inventory* and is superseded for acquisition phases by [B1_I1_ACQUISITION_TIMING_RECOVERY_2026-11-05.md](B1_I1_ACQUISITION_TIMING_RECOVERY_2026-11-05.md). A read-only extraction of the nested region/sigma evidence manifests returned **0.150902 h (P1), 0.189828 h (P3), and 0.171576 h (P4)**, totaling **0.512306 h**. Adding these recorded acquisition-stage durations changes the historical *incomplete* stage-duration sum from **48.033803 h** to **48.546109 h**. This does not include I1 public-card assembly or the missing four Top14/Top1 variant runtimes and is not a new-world battery estimate.
