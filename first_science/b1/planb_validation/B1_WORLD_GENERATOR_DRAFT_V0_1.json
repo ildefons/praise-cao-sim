@@ -50,7 +50,7 @@
     "physical_preconditions": {
       "positive_mean_instructions": true,
       "max_approx_utilization": 0.995,
-      "max_approx_utilization_rule": "D*(1+delta)/(IPT*period), with IPT=1e9 and period=0.2; no clipping or post-draw repair"
+      "max_approx_utilization_rule": "D*(1+delta)*execution_fraction_x/(effective_IPT*period), with x=0.5, IPT=1e9 and period=0.2; no clipping or post-draw repair"
     },
     "disallow_exact_original_world_coordinates": true
   },
