@@ -105,6 +105,25 @@ Review `WORLD_COST_FEASIBILITY_AUDIT.md`, `historical_stage_cost_summary.csv`, `
 
 ---
 
+## Fifth: recover historical Top14/Top1 graph timings (no simulations)
+
+**Recovered original-style terminal measurements:** [B1_ORIGINAL_GRAPH_TIMING_RECOVERY_2026-11-05.md](B1_ORIGINAL_GRAPH_TIMING_RECOVERY_2026-11-05.md). The original-style Top14+Top1 combined graph battery required **14h57m39.671s measured across three invocations** (two cells separately, then a replay reusing them); this is not a CPU-hour value. Fixed-CV combined wall time has **not yet been measured**.
+
+Use only the read-only log extractor:
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull --ff-only origin praise-identifiability-feasibility
+python -m unittest discover -s first_science/b1/planb_validation \
+  -p 'test_recover_graph_timing_from_logs_v1.py' -v
+python first_science/b1/planb_validation/recover_graph_timing_from_logs_v1.py \
+  --repo . --out ~/praise/planb_b1_archival_graph_timing_v1
+```
+
+It searches existing *project-local* log files and reads original/fixed-CV prediction manifests, without executing any scientific simulation. For a historical log stored elsewhere, append `--log /absolute/path/to/log`. It records exact measured shell-time markers separately from progress reports and completion-time gaps. The output `ARCHIVAL_TIMING_RECOVERY.md` summarizes what the logs actually support; `log_timing_evidence.csv` contains exact source lines and `manifest_completion_gaps_NOT_RUNTIME.csv` contains explicitly **non-measured** completion gaps. If a fixed-CV log contains no timestamp or `time` output, it cannot establish fixed-CV elapsed hours on its own. Do not use filesystem modification times as measurements.
+
+---
+
 ## Interpretation
 
 The fixed 12-cell PRAISE archive has only three distinct provider worlds. Replaying randomized allocation many times is essential for estimating sequence variability, but does **not** create new independent worlds. This is a **retrospective methodology development test**, not a prospective generalization result. Evaluation-count budgets do **not** imply equal runtime cost among algorithms. We deliberately do not tune policy switching fractions to the current archive's observed performance.
