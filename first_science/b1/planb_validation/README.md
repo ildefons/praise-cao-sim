@@ -1,5 +1,6 @@
 # PRAISE Plan B — fixed-budget sequential validation
 
+**Fixed-budget best-arm / active-model-selection literature:** [B1_FIXED_BUDGET_BAI_LITERATURE_POSITIONING_2026-11-05.md](B1_FIXED_BUDGET_BAI_LITERATURE_POSITIONING_2026-11-05.md)  
 **Consolidated scientific evidence report:** [B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md](B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md)  
 **Complete four-policy numerical appendix:** [B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md](B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md)  
 **B1 baseline-preservation decision:** [B1_BASELINE_PRESERVATION_AND_AGENDA_BOUNDARY_2026-11-05.md](B1_BASELINE_PRESERVATION_AND_AGENDA_BOUNDARY_2026-11-05.md)  
