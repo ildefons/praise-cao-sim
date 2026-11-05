@@ -6,6 +6,7 @@
 **Complete four-policy numerical appendix:** [B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md](B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md)  
 **Knowledge Gradient benchmark freeze:** [B1_KG_ONE_STEP_SPECIFICATION_V1.md](B1_KG_ONE_STEP_SPECIFICATION_V1.md)  
 **KG implementation / synthetic tests:** [b1_kg_one_step_v1.py](b1_kg_one_step_v1.py), [test_b1_kg_one_step_v1.py](test_b1_kg_one_step_v1.py)  
+**All five regret–budget curves with 95% bootstrap error bars:** [figure and provenance](figures/README.md); [vector plot](figures/b1_five_policy_regret_vs_budget_ci_v1.svg); [verified plotting data](figures/b1_five_policy_regret_with_bootstrap_ci_v1.csv); [read-only plotting script](plot_b1_regret_five_policies_v1.py)  
 **Audited retrospective KG result:** [B1_KG_SUPPLEMENTARY_DEVELOPMENT_RESULT_V1.md](B1_KG_SUPPLEMENTARY_DEVELOPMENT_RESULT_V1.md)  
 **B1 baseline-preservation decision:** [B1_BASELINE_PRESERVATION_AND_AGENDA_BOUNDARY_2026-11-05.md](B1_BASELINE_PRESERVATION_AND_AGENDA_BOUNDARY_2026-11-05.md)  
 **Design freeze:** [B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md](B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md)  
