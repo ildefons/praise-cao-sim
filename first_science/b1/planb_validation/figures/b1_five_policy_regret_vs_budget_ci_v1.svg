@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="660" viewBox="0 0 1120 660" role="img" aria-labelledby="plot-title plot-description">
+<title id="plot-title">B1 mean terminal simple regret versus evaluation budget: five decision policies and 95 percent bootstrap intervals</title>
+<desc id="plot-description">Five curves for Random, Balanced, Informed, Budget-aware Top2, Knowledge Gradient at budgets 10, 15, 20, 30, 40. Each mean is based on 240 decision episodes. Error bars are 95 percent within-archive stratified percentile bootstrap intervals with 2000 resamples. Knowledge Gradient has the lowest mean regret at every budget.</desc>
+<rect width="1120" height="660" fill="#ffffff"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#1e293b">
+<text x="560" y="49" text-anchor="middle" font-weight="700" font-size="27">Terminal regret versus evaluation budget</text>
+<text x="130" y="95" font-size="15">PRAISE B1 · 7 algorithms × 12 conditions · 240 episodes per policy and budget</text>
+</g>
+<line x1="130" y1="525.00" x2="990" y2="525.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="530.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0000</text>
+<line x1="130" y1="480.00" x2="990" y2="480.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="485.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0025</text>
+<line x1="130" y1="435.00" x2="990" y2="435.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="440.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0050</text>
+<line x1="130" y1="390.00" x2="990" y2="390.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="395.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0075</text>
+<line x1="130" y1="345.00" x2="990" y2="345.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="350.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0100</text>
+<line x1="130" y1="300.00" x2="990" y2="300.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="305.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0125</text>
+<line x1="130" y1="255.00" x2="990" y2="255.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="260.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0150</text>
+<line x1="130" y1="210.00" x2="990" y2="210.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="215.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0175</text>
+<line x1="130" y1="165.00" x2="990" y2="165.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="117" y="170.00" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#334155">0.0200</text>
+<line x1="130" y1="120" x2="130" y2="525" stroke="#334155" stroke-width="1.4"/>
+<line x1="130" y1="525" x2="990" y2="525" stroke="#334155" stroke-width="1.4"/>
+<line x1="130.00" y1="525" x2="130.00" y2="532" stroke="#334155" stroke-width="1.5"/><text x="130.00" y="554" font-family="Arial,Helvetica,sans-serif" text-anchor="middle" font-size="15" fill="#334155">10</text>
+<line x1="273.33" y1="525" x2="273.33" y2="532" stroke="#334155" stroke-width="1.5"/><text x="273.33" y="554" font-family="Arial,Helvetica,sans-serif" text-anchor="middle" font-size="15" fill="#334155">15</text>
+<line x1="416.67" y1="525" x2="416.67" y2="532" stroke="#334155" stroke-width="1.5"/><text x="416.67" y="554" font-family="Arial,Helvetica,sans-serif" text-anchor="middle" font-size="15" fill="#334155">20</text>
+<line x1="703.33" y1="525" x2="703.33" y2="532" stroke="#334155" stroke-width="1.5"/><text x="703.33" y="554" font-family="Arial,Helvetica,sans-serif" text-anchor="middle" font-size="15" fill="#334155">30</text>
+<line x1="990.00" y1="525" x2="990.00" y2="532" stroke="#334155" stroke-width="1.5"/><text x="990.00" y="554" font-family="Arial,Helvetica,sans-serif" text-anchor="middle" font-size="15" fill="#334155">40</text>
+<text x="560" y="594" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="#1e293b">Evaluation budget (number of algorithm–condition measurements)</text>
+<text x="30" y="322.5" transform="rotate(-90 30 322.5)" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="#1e293b">Mean terminal simple regret (MAE units; lower is better)</text>
+<polyline fill="none" stroke="#1f77b4" stroke-width="2.7" stroke-linejoin="round" stroke-linecap="round" points="130.00,211.73 273.33,222.38 416.67,290.21 703.33,342.14 990.00,396.52"/>
+<g><title>Random · budget 10 · mean 0.017404 · 95% CI [0.015573, 0.019298]</title>
+<line x1="130.00" y1="177.64" x2="130.00" y2="244.69" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="124.50" y1="177.64" x2="135.50" y2="177.64" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="124.50" y1="244.69" x2="135.50" y2="244.69" stroke="#1f77b4" stroke-width="1.5"/>
+<circle cx="130.00" cy="211.73" r="5.4" fill="#1f77b4" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Random · budget 15 · mean 0.016812 · 95% CI [0.014890, 0.018711]</title>
+<line x1="273.33" y1="188.21" x2="273.33" y2="256.97" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="267.83" y1="188.21" x2="278.83" y2="188.21" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="267.83" y1="256.97" x2="278.83" y2="256.97" stroke="#1f77b4" stroke-width="1.5"/>
+<circle cx="273.33" cy="222.38" r="5.4" fill="#1f77b4" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Random · budget 20 · mean 0.013044 · 95% CI [0.010989, 0.014929]</title>
+<line x1="416.67" y1="256.28" x2="416.67" y2="327.19" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="411.17" y1="256.28" x2="422.17" y2="256.28" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="411.17" y1="327.19" x2="422.17" y2="327.19" stroke="#1f77b4" stroke-width="1.5"/>
+<circle cx="416.67" cy="290.21" r="5.4" fill="#1f77b4" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Random · budget 30 · mean 0.010159 · 95% CI [0.008498, 0.011890]</title>
+<line x1="703.33" y1="310.99" x2="703.33" y2="372.03" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="697.83" y1="310.99" x2="708.83" y2="310.99" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="697.83" y1="372.03" x2="708.83" y2="372.03" stroke="#1f77b4" stroke-width="1.5"/>
+<circle cx="703.33" cy="342.14" r="5.4" fill="#1f77b4" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Random · budget 40 · mean 0.007138 · 95% CI [0.005721, 0.008709]</title>
+<line x1="990.00" y1="368.24" x2="990.00" y2="422.03" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="984.50" y1="368.24" x2="995.50" y2="368.24" stroke="#1f77b4" stroke-width="1.5"/>
+<line x1="984.50" y1="422.03" x2="995.50" y2="422.03" stroke="#1f77b4" stroke-width="1.5"/>
+<circle cx="990.00" cy="396.52" r="5.4" fill="#1f77b4" stroke="#fff" stroke-width="1.2"/></g>
+<polyline fill="none" stroke="#ff7f0e" stroke-width="2.7" stroke-linejoin="round" stroke-linecap="round" points="130.00,191.71 273.33,309.04 416.67,346.49 703.33,426.24 990.00,459.63"/>
+<g><title>Balanced · budget 10 · mean 0.018516 · 95% CI [0.016572, 0.020404]</title>
+<line x1="130.00" y1="157.73" x2="130.00" y2="226.70" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="124.50" y1="157.73" x2="135.50" y2="157.73" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="124.50" y1="226.70" x2="135.50" y2="226.70" stroke="#ff7f0e" stroke-width="1.5"/>
+<rect x="124.70" y="186.41" width="10.6" height="10.6" fill="#ff7f0e" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Balanced · budget 15 · mean 0.011998 · 95% CI [0.010120, 0.013863]</title>
+<line x1="273.33" y1="275.47" x2="273.33" y2="342.84" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="267.83" y1="275.47" x2="278.83" y2="275.47" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="267.83" y1="342.84" x2="278.83" y2="342.84" stroke="#ff7f0e" stroke-width="1.5"/>
+<rect x="268.03" y="303.74" width="10.6" height="10.6" fill="#ff7f0e" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Balanced · budget 20 · mean 0.009917 · 95% CI [0.008186, 0.011734]</title>
+<line x1="416.67" y1="313.78" x2="416.67" y2="377.65" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="411.17" y1="313.78" x2="422.17" y2="313.78" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="411.17" y1="377.65" x2="422.17" y2="377.65" stroke="#ff7f0e" stroke-width="1.5"/>
+<rect x="411.37" y="341.19" width="10.6" height="10.6" fill="#ff7f0e" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Balanced · budget 30 · mean 0.005487 · 95% CI [0.004366, 0.006603]</title>
+<line x1="703.33" y1="406.14" x2="703.33" y2="446.40" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="697.83" y1="406.14" x2="708.83" y2="406.14" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="697.83" y1="446.40" x2="708.83" y2="446.40" stroke="#ff7f0e" stroke-width="1.5"/>
+<rect x="698.03" y="420.94" width="10.6" height="10.6" fill="#ff7f0e" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Balanced · budget 40 · mean 0.003632 · 95% CI [0.002624, 0.004693]</title>
+<line x1="990.00" y1="440.53" x2="990.00" y2="477.77" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="984.50" y1="440.53" x2="995.50" y2="440.53" stroke="#ff7f0e" stroke-width="1.5"/>
+<line x1="984.50" y1="477.77" x2="995.50" y2="477.77" stroke="#ff7f0e" stroke-width="1.5"/>
+<rect x="984.70" y="454.33" width="10.6" height="10.6" fill="#ff7f0e" stroke="#fff" stroke-width="1.2"/></g>
+<polyline fill="none" stroke="#2ca02c" stroke-width="2.7" stroke-linejoin="round" stroke-linecap="round" points="130.00,188.57 273.33,235.43 416.67,372.82 703.33,414.83 990.00,496.35"/>
+<g><title>Informed · budget 10 · mean 0.018690 · 95% CI [0.017188, 0.020182]</title>
+<line x1="130.00" y1="161.72" x2="130.00" y2="215.62" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="124.50" y1="161.72" x2="135.50" y2="161.72" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="124.50" y1="215.62" x2="135.50" y2="215.62" stroke="#2ca02c" stroke-width="1.5"/>
+<path d="M 130.00 182.27 L 123.70 193.87 L 136.30 193.87 Z" fill="#2ca02c" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Informed · budget 15 · mean 0.016087 · 95% CI [0.014096, 0.018024]</title>
+<line x1="273.33" y1="200.56" x2="273.33" y2="271.27" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="267.83" y1="200.56" x2="278.83" y2="200.56" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="267.83" y1="271.27" x2="278.83" y2="271.27" stroke="#2ca02c" stroke-width="1.5"/>
+<path d="M 273.33 229.13 L 267.03 240.73 L 279.63 240.73 Z" fill="#2ca02c" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Informed · budget 20 · mean 0.008455 · 95% CI [0.006935, 0.010139]</title>
+<line x1="416.67" y1="342.50" x2="416.67" y2="400.17" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="411.17" y1="342.50" x2="422.17" y2="342.50" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="411.17" y1="400.17" x2="422.17" y2="400.17" stroke="#2ca02c" stroke-width="1.5"/>
+<path d="M 416.67 366.52 L 410.37 378.12 L 422.97 378.12 Z" fill="#2ca02c" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Informed · budget 30 · mean 0.006120 · 95% CI [0.005030, 0.007360]</title>
+<line x1="703.33" y1="392.51" x2="703.33" y2="434.46" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="697.83" y1="392.51" x2="708.83" y2="392.51" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="697.83" y1="434.46" x2="708.83" y2="434.46" stroke="#2ca02c" stroke-width="1.5"/>
+<path d="M 703.33 408.53 L 697.03 420.13 L 709.63 420.13 Z" fill="#2ca02c" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Informed · budget 40 · mean 0.001592 · 95% CI [0.001156, 0.002078]</title>
+<line x1="990.00" y1="487.60" x2="990.00" y2="504.19" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="984.50" y1="487.60" x2="995.50" y2="487.60" stroke="#2ca02c" stroke-width="1.5"/>
+<line x1="984.50" y1="504.19" x2="995.50" y2="504.19" stroke="#2ca02c" stroke-width="1.5"/>
+<path d="M 990.00 490.05 L 983.70 501.65 L 996.30 501.65 Z" fill="#2ca02c" stroke="#fff" stroke-width="1.2"/></g>
+<polyline fill="none" stroke="#d62728" stroke-width="2.7" stroke-linejoin="round" stroke-linecap="round" points="130.00,251.50 273.33,348.62 416.67,400.50 703.33,472.35 990.00,509.01"/>
+<g><title>Budget-aware Top2 · budget 10 · mean 0.015194 · 95% CI [0.013340, 0.016993]</title>
+<line x1="130.00" y1="219.12" x2="130.00" y2="284.88" stroke="#d62728" stroke-width="1.5"/>
+<line x1="124.50" y1="219.12" x2="135.50" y2="219.12" stroke="#d62728" stroke-width="1.5"/>
+<line x1="124.50" y1="284.88" x2="135.50" y2="284.88" stroke="#d62728" stroke-width="1.5"/>
+<path d="M 130.00 244.50 L 123.00 251.50 L 130.00 258.50 L 137.00 251.50 Z" fill="#d62728" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Budget-aware Top2 · budget 15 · mean 0.009799 · 95% CI [0.008178, 0.011357]</title>
+<line x1="273.33" y1="320.57" x2="273.33" y2="377.80" stroke="#d62728" stroke-width="1.5"/>
+<line x1="267.83" y1="320.57" x2="278.83" y2="320.57" stroke="#d62728" stroke-width="1.5"/>
+<line x1="267.83" y1="377.80" x2="278.83" y2="377.80" stroke="#d62728" stroke-width="1.5"/>
+<path d="M 273.33 341.62 L 266.33 348.62 L 273.33 355.62 L 280.33 348.62 Z" fill="#d62728" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Budget-aware Top2 · budget 20 · mean 0.006917 · 95% CI [0.005612, 0.008218]</title>
+<line x1="416.67" y1="377.08" x2="416.67" y2="423.98" stroke="#d62728" stroke-width="1.5"/>
+<line x1="411.17" y1="377.08" x2="422.17" y2="377.08" stroke="#d62728" stroke-width="1.5"/>
+<line x1="411.17" y1="423.98" x2="422.17" y2="423.98" stroke="#d62728" stroke-width="1.5"/>
+<path d="M 416.67 393.50 L 409.67 400.50 L 416.67 407.50 L 423.67 400.50 Z" fill="#d62728" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Budget-aware Top2 · budget 30 · mean 0.002925 · 95% CI [0.002078, 0.003854]</title>
+<line x1="703.33" y1="455.62" x2="703.33" y2="487.60" stroke="#d62728" stroke-width="1.5"/>
+<line x1="697.83" y1="455.62" x2="708.83" y2="455.62" stroke="#d62728" stroke-width="1.5"/>
+<line x1="697.83" y1="487.60" x2="708.83" y2="487.60" stroke="#d62728" stroke-width="1.5"/>
+<path d="M 703.33 465.35 L 696.33 472.35 L 703.33 479.35 L 710.33 472.35 Z" fill="#d62728" stroke="#fff" stroke-width="1.2"/></g>
+<g><title>Budget-aware Top2 · budget 40 · mean 0.000888 · 95% CI [0.000503, 0.001308]</title>
+<line x1="990.00" y1="501.46" x2="990.00" y2="515.95" stroke="#d62728" stroke-width="1.5"/>
+<line x1="984.50" y1="501.46" x2="995.50" y2="501.46" stroke="#d62728" stroke-width="1.5"/>
+<line x1="984.50" y1="515.95" x2="995.50" y2="515.95" stroke="#d62728" stroke-width="1.5"/>
+<path d="M 990.00 502.01 L 983.00 509.01 L 990.00 516.01 L 997.00 509.01 Z" fill="#d62728" stroke="#fff" stroke-width="1.2"/></g>
+<polyline fill="none" stroke="#9467bd" stroke-width="2.7" stroke-linejoin="round" stroke-linecap="round" points="130.00,298.08 273.33,405.85 416.67,417.57 703.33,479.61 990.00,520.48"/>
+<g><title>Knowledge Gradient · budget 10 · mean 0.012607 · 95% CI [0.011040, 0.014170]</title>
+<line x1="130.00" y1="269.94" x2="130.00" y2="326.28" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="124.50" y1="269.94" x2="135.50" y2="269.94" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="124.50" y1="326.28" x2="135.50" y2="326.28" stroke="#9467bd" stroke-width="1.5"/>
+<path d="M 125.00 298.08 H 135.00 M 130.00 293.08 V 303.08" stroke="#9467bd" stroke-width="3" stroke-linecap="round"/></g>
+<g><title>Knowledge Gradient · budget 15 · mean 0.006620 · 95% CI [0.005272, 0.008011]</title>
+<line x1="273.33" y1="380.81" x2="273.33" y2="430.10" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="267.83" y1="380.81" x2="278.83" y2="380.81" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="267.83" y1="430.10" x2="278.83" y2="430.10" stroke="#9467bd" stroke-width="1.5"/>
+<path d="M 268.33 405.85 H 278.33 M 273.33 400.85 V 410.85" stroke="#9467bd" stroke-width="3" stroke-linecap="round"/></g>
+<g><title>Knowledge Gradient · budget 20 · mean 0.005968 · 95% CI [0.004699, 0.007242]</title>
+<line x1="416.67" y1="394.64" x2="416.67" y2="440.41" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="411.17" y1="394.64" x2="422.17" y2="394.64" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="411.17" y1="440.41" x2="422.17" y2="440.41" stroke="#9467bd" stroke-width="1.5"/>
+<path d="M 411.67 417.57 H 421.67 M 416.67 412.57 V 422.57" stroke="#9467bd" stroke-width="3" stroke-linecap="round"/></g>
+<g><title>Knowledge Gradient · budget 30 · mean 0.002522 · 95% CI [0.001777, 0.003301]</title>
+<line x1="703.33" y1="465.59" x2="703.33" y2="493.02" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="697.83" y1="465.59" x2="708.83" y2="465.59" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="697.83" y1="493.02" x2="708.83" y2="493.02" stroke="#9467bd" stroke-width="1.5"/>
+<path d="M 698.33 479.61 H 708.33 M 703.33 474.61 V 484.61" stroke="#9467bd" stroke-width="3" stroke-linecap="round"/></g>
+<g><title>Knowledge Gradient · budget 40 · mean 0.000251 · 95% CI [0.000050, 0.000452]</title>
+<line x1="990.00" y1="516.86" x2="990.00" y2="524.10" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="984.50" y1="516.86" x2="995.50" y2="516.86" stroke="#9467bd" stroke-width="1.5"/>
+<line x1="984.50" y1="524.10" x2="995.50" y2="524.10" stroke="#9467bd" stroke-width="1.5"/>
+<path d="M 985.00 520.48 H 995.00 M 990.00 515.48 V 525.48" stroke="#9467bd" stroke-width="3" stroke-linecap="round"/></g>
+<rect x="769" y="113" width="234" height="168" rx="7" fill="#ffffff" fill-opacity=".96" stroke="#cbd5e1" stroke-width="1"/>
+<line x1="783" y1="138" x2="816" y2="138" stroke="#1f77b4" stroke-width="2.7"/><circle cx="800.00" cy="138.00" r="5.4" fill="#1f77b4" stroke="#fff" stroke-width="1.2"/><text x="828" y="143" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#1e293b">Random</text>
+<line x1="783" y1="169" x2="816" y2="169" stroke="#ff7f0e" stroke-width="2.7"/><rect x="794.70" y="163.70" width="10.6" height="10.6" fill="#ff7f0e" stroke="#fff" stroke-width="1.2"/><text x="828" y="174" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#1e293b">Balanced</text>
+<line x1="783" y1="200" x2="816" y2="200" stroke="#2ca02c" stroke-width="2.7"/><path d="M 800.00 193.70 L 793.70 205.30 L 806.30 205.30 Z" fill="#2ca02c" stroke="#fff" stroke-width="1.2"/><text x="828" y="205" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#1e293b">Informed</text>
+<line x1="783" y1="231" x2="816" y2="231" stroke="#d62728" stroke-width="2.7"/><path d="M 800.00 224.00 L 793.00 231.00 L 800.00 238.00 L 807.00 231.00 Z" fill="#d62728" stroke="#fff" stroke-width="1.2"/><text x="828" y="236" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#1e293b">Budget-aware Top2</text>
+<line x1="783" y1="262" x2="816" y2="262" stroke="#9467bd" stroke-width="2.7"/><path d="M 795.00 262.00 H 805.00 M 800.00 257.00 V 267.00" stroke="#9467bd" stroke-width="3" stroke-linecap="round"/><text x="828" y="267" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#1e293b">Knowledge Gradient</text>
+<g font-family="Arial,Helvetica,sans-serif" font-size="12.5" fill="#475569" text-anchor="middle">
+<text x="560" y="621">Error bars: 95% stratified percentile-bootstrap intervals (2,000 draws), conditional on one fixed archive.</text>
+<text x="560" y="639">KG is a separate retrospective supplementary benchmark; intervals are not independent-world inference.</text>
+</g></svg>
