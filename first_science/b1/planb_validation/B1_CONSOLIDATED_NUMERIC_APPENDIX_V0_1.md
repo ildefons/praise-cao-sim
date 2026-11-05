@@ -68,3 +68,51 @@ The user-uploaded original \`run_manifest.json\` contains SHA-256 output hashes,
 **Do not treat these CIs as independent-world uncertainty.** All four methods are evaluated fairly on the **same fixed archive**, with the **same episode counts and bootstrap protocol**, but the policies' random action sequences need not match. WB reference-uncertainty checks are a separate experiment and are reported separately in the main report and WB freeze.
 
 **No novel simulation, no new data, no changed estimator.**
+
+
+## D. Post-result action-allocation and wrong-decision diagnostics
+
+**Status: descriptive audit only.** These figures were calculated from the **original** \`episode_action_history.csv\`, \`terminal_episodes.csv\` and \`seven_method_matrix.csv\` without rerunning the B1 policies, changing any parameters or drawing another bootstrap sample. The input files were verified against the output SHA-256 values in the original \`run_manifest.json\`. Source fingerprints for the two detailed files are \`a9412c9e07cb52e35aa6ac09e6aedd66837fca9034aabb5bb6716ac7e52d1195\` (actions) and \`c219b700d55683899867051f3cf1f154cea54655853026c47fda814c887d9f12\` (terminal decisions).
+
+**Retrospective share of additional observations going to the true two lowest-mean-MAE algorithms, M3_FULL343 and M2.** All four policies receive the same first seven evaluations, so those seven actions are excluded from these fractions. The denominators pool \`240 × (B−7)\` non-initial actions per policy/budget.
+
+| Budget | Random | Balanced | Informed | Budget-aware Top2 |
+|---:|---:|---:|---:|---:|
+| 10 | 30.00% | 29.31% | 26.11% | **38.19%** |
+| 15 | 27.40% | 28.44% | 27.92% | **40.94%** |
+| 20 | 29.36% | 28.24% | 28.69% | **40.38%** |
+| 30 | 28.66% | 28.39% | 27.19% | **47.75%** |
+| 40 | 28.56% | 28.51% | 27.98% | **54.23%** |
+
+The two best algorithms are identified **with hindsight** from the fixed 84-action archive for auditing purposes only. Top2 **does not** have oracle access to their true identities; it recomputes a posterior shortlist during each episode.
+
+**B=20: how incorrect recommendations affect regret.** Values below condition on the strategy *not* recommending the reference-best algorithm (M3_FULL343). This is **not** a separately predeclared inference or a causal decomposition of the Top2 acquisition strategy.
+
+| Policy | Correct recommendations / 240 | Wrong recommendations / 240 | Mean regret when wrong | Fraction recommending second-best M2 |
+|---|---:|---:|---:|---:|
+| Random | 133 | 107 | 0.02926 | 12.92% |
+| Balanced | 140 | 100 | 0.02380 | 20.83% |
+| Informed | 162 | 78 | 0.02601 | 13.33% |
+| **Top2** | **153** | **87** | **0.01908** | **25.42%** |
+
+Because correct decisions have zero simple regret, the average for each policy is its wrong-decision frequency times its mean regret *conditional on being wrong*. In this B=20 example, Top2 is slightly less likely than Informed to name the exact best, but its errors are less costly, explaining the lower mean simple regret **descriptively**.
+
+**Recalculation from the original frozen output files (analysis only):**
+
+\`\`\`python
+import pandas as pd
+actions = pd.read_csv("episode_action_history.csv")
+terminal = pd.read_csv("terminal_episodes.csv")
+best_two = {"M3_FULL343", "M2"}
+extra = actions[actions.step > 7]
+for (budget, policy), sample in extra.groupby(["budget", "policy"]):
+    fraction = sample.method.isin(best_two).mean()
+    print("extra_to_best_two", budget, policy, round(100*fraction, 2))
+for policy, sample in terminal[terminal.budget == 20].groupby("policy"):
+    failures = sample[sample.correct == 0]
+    print("B20_errors", policy, len(failures),
+          "conditional_regret", failures.simple_regret.mean(),
+          "M2_rate", (sample.recommended == "M2").mean())
+\`\`\`
+
+Run this from the archived B1 replay output directory, **read-only**. This code computes no new simulation, policy run or bootstrap. The two sets of diagnostics were selected *after* viewing the original outcomes, so they are **explanatory observations, not independent tests of the hypothesized mechanism**.
