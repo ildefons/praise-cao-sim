@@ -33,7 +33,7 @@ LOG_COLUMNS=("family","file","sha256","line_number","kind",
 # Recognize measured shell time output (not estimates printed by a simulator).
 BASH_REAL=re.compile(r"^\s*real\s+(?:(?P<h>\d+)h)?(?:(?P<m>\d+)m)?(?P<s>\d+(?:\.\d+)?)s\s*$",re.I)
 POSIX_REAL=re.compile(r"^\s*real\s+(?P<seconds>\d+(?:\.\d+)?)\s*$",re.I)
-GNU_TIME=re.compile(r"Elapsed \(wall clock\) time.*?:\s*(?P<time>(?:\d+:)?\d+:\d+(?:\.\d+)?)\s*$",re.I)
+GNU_TIME=re.compile(r"Elapsed \(wall clock\) time \([^)]*\):\s*(?P<time>(?:\d+:)?\d+:\d+(?:\.\d+)?)\s*$",re.I)
 CELL_RE=re.compile(r"\bP[134]__G_(?:PARSEQ|SEQPAR|PAR|SEQ)\b")
 PROGRESS_RE=re.compile(r"\belapsed=(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>min|s|h)\b",re.I)
 MARKERS=(
