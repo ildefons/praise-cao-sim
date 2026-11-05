@@ -329,10 +329,14 @@ def write_results(out,ref,split,original_means,reps,pairs):
     gap=ref["mu_M2"]-ref["mu_M3_FULL343"]
     gap_lo,gap_hi=np.quantile(gap,[.025,.975])
     # Screening gates were fixed before inspecting these WB robustness results.
+    # np.quantile returns np.float64 and its comparisons can produce np.bool_.
+    # The standard JSON encoder accepts native Python bool, not numpy.bool_.
+    # Explicit conversion preserves the exact scientific screening decisions.
     gates={"seven_method_source_reproduced":True,
-           "reference_best_frequency_ge_0_90":rank_fraction>=.90,
-           "rescored_primary_CI_entirely_negative":hi<0,
-           "disjoint_halves_aggregate_mean_negative":split_difference is not None and split_difference<0}
+           "reference_best_frequency_ge_0_90":bool(rank_fraction>=.90),
+           "rescored_primary_CI_entirely_negative":bool(hi<0),
+           "disjoint_halves_aggregate_mean_negative":bool(
+               split_difference is not None and split_difference<0)}
     passed=all(gates.values())
     report=[
         "# B1 WB-reference uncertainty: results (development only)","",
