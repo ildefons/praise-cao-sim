@@ -6,6 +6,9 @@ import numpy as np
 
 import b1_kg_one_step_v1 as kg
 
+# NumPy <2.0 and >=2.0 compatible trapezoid integration for synthetic tests.
+trap = np.trapezoid if hasattr(np, 'trapezoid') else np.trapz
+
 
 class KGTests(unittest.TestCase):
     def test_one_step_normal_quadrature(self):
@@ -15,7 +18,7 @@ class KGTests(unittest.TestCase):
             z = np.linspace(-10,10,200001)
             phi = np.exp(-z*z/2)/math.sqrt(2*math.pi)
             improvement = base - np.minimum(mean+sd*z,other)
-            integrated = float(np.trapezoid(improvement*phi,z))
+            integrated = float(trap(improvement*phi,z))
             expected=kg.kg_gain(abs(mean-other),sd)
             self.assertAlmostEqual(integrated,expected,delta=2e-8)
 
@@ -54,7 +57,7 @@ class KGTests(unittest.TestCase):
         competitor=min(means[j] for j in range(7) if j!=a)
         shift=float(b.V@covs[a]@x)/q
         z=phi_nodes
-        numer=float(np.trapezoid((min(means[a],competitor)-np.minimum(means[a]+shift*z,competitor))*np.exp(-.5*z*z)/math.sqrt(2*math.pi),z))
+        numer=float(trap((min(means[a],competitor)-np.minimum(means[a]+shift*z,competitor))*np.exp(-.5*z*z)/math.sqrt(2*math.pi),z))
         self.assertAlmostEqual(numer,analytic,delta=1e-7)
 
     def test_eligible_mask_and_deterministic_rng(self):
