@@ -7,6 +7,7 @@
 **Knowledge Gradient benchmark freeze:** [B1_KG_ONE_STEP_SPECIFICATION_V1.md](B1_KG_ONE_STEP_SPECIFICATION_V1.md)  
 **KG implementation / synthetic tests:** [b1_kg_one_step_v1.py](b1_kg_one_step_v1.py), [test_b1_kg_one_step_v1.py](test_b1_kg_one_step_v1.py)  
 **All five regret–budget curves with 95% bootstrap error bars:** [figure and provenance](figures/README.md); [vector plot](figures/b1_five_policy_regret_vs_budget_ci_v1.svg); [verified plotting data](figures/b1_five_policy_regret_with_bootstrap_ci_v1.csv); [read-only plotting script](plot_b1_regret_five_policies_v1.py)  
+**Seven-policy reconstruction plot (read-only, pending local run):** [plot_b1_regret_seven_policies_v1.py](plot_b1_regret_seven_policies_v1.py). Adds KG-uniform and Top2-uniform reconstructed variants to the preserved original five policies. **Not** a verified exact replication of the 6 November ablation; see documented arm-selection differences below.  
 **Audited retrospective KG result:** [B1_KG_SUPPLEMENTARY_DEVELOPMENT_RESULT_V1.md](B1_KG_SUPPLEMENTARY_DEVELOPMENT_RESULT_V1.md)  
 **B1 baseline-preservation decision:** [B1_BASELINE_PRESERVATION_AND_AGENDA_BOUNDARY_2026-11-05.md](B1_BASELINE_PRESERVATION_AND_AGENDA_BOUNDARY_2026-11-05.md)  
 **Design freeze:** [B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md](B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1.md)  
@@ -18,6 +19,28 @@
 **Local read-only cost inventory:** [audit_independent_world_cost_v0_1.py](audit_independent_world_cost_v0_1.py)  
 **Main script:** [b1_budget_comparison_v1.py](b1_budget_comparison_v1.py)  
 **Synthetic-only tests:** [test_b1_budget_comparison_v1.py](test_b1_budget_comparison_v1.py)
+
+## November 6 uniform-condition reconstruction (exploratory; original five policies unchanged)
+
+The repository contains [b1_uniform_condition_replay_v1.py](b1_uniform_condition_replay_v1.py), a separately versioned retrospective replay using the frozen 7×12 matrix and fixed Gaussian posterior. Its two policies sample an unobserved condition uniformly *after* choosing an arm. This is **not** the recovered original November 6 experiment: KG selects its arm by the maximum available condition-wise KG acquisition score; Top2's initial coverage phase balances arm counts, not the original provider–graph coverage score. Accordingly, differences from the original adaptive KG/Top2 baselines combine changes in arm and condition policies and **must not be interpreted as an isolated causal effect of condition adaptivity**.
+
+The 6 November local replay was reported to pass with 2,400 episodes and 55,200 action records. Across five budgets, reconstructed uniform-minus-adaptive mean regret was +0.000942 for KG (95% paired bootstrap interval [0.000187, 0.001737]) and +0.002773 for Top2 ([0.001910, 0.003626]). These are **reconstruction** results, conditional on the historical archive, not independent-world or confirmatory evidence. These summary values are transcribed from the local replay output; the full episode files are not committed.
+
+With existing local sources, render all seven policies with **the same 240 episodes/policy/budget and 2,000-replicate stratified percentile-bootstrap interval procedure**:
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull --ff-only origin praise-identifiability-feasibility
+python first_science/b1/planb_validation/plot_b1_regret_seven_policies_v1.py \
+  --original-summary ~/praise/planb_b1_fixed_budget_v1/budget_summary.csv \
+  --kg-summary ~/praise/planb_b1_kg_reproduced_20261106/kg_budget_summary.csv \
+  --uniform-summary ~/praise/planb_b1_uniform_reproduced_20261106/uniform_budget_summary.csv \
+  --out ~/praise/planb_b1_seven_policy_reconstruction_figures_v1
+```
+
+The plotting script hash-checks the two frozen summaries, verifies all 35 policy/budget rows, refuses overwrites, reads existing bootstrap intervals without recomputing them and emits PNG, SVG, CSV and a provenance manifest. It does not change the five-policy figure or frozen result files. The revised **controlled ablation protocol remains open** until arm-choice behavior can be held fixed or an explicit estimand for the joint two-stage policy is frozen.
+
+---
 
 ## First: audit and complete the 7×12 matrix
 
