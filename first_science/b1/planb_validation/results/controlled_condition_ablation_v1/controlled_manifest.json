@@ -1,0 +1,26 @@
+{
+  "status": "B1_CONTROLLED_TWO_STAGE_CONDITION_ABLATION_V1",
+  "warning": "New matched two-stage policies, not the original joint-acquisition policies",
+  "seed": 20261105,
+  "bootstrap_seed": 20262311,
+  "bootstrap_replicates": 2000,
+  "budgets": [
+    10,
+    15,
+    20,
+    30,
+    40
+  ],
+  "episodes": 4800,
+  "actions": 110400,
+  "input_matrix_sha256": "0b58b7b6ff7489aec169a36c88a166fdb75b88e5089f14b1a610721581bb314d",
+  "code_sha256": "78633ab2ff993f967446add90b3efa0d836adf908c5c278d5c82e1efb1dbe39d",
+  "original_policy_sha256": "11c36f80a6fb0faf2a325a590f29ff48b3f08dc80a34a4ba606e0bc268aac2ac",
+  "kg_policy_sha256": "cd79f4b3c87445cdd020d8b8bbd441432f9ccba5960de34ec5bbf4464d68fb94",
+  "output_sha256": {
+    "controlled_terminal_episodes.csv": "e703db78a1bac4f0cd569c9c56f15f375626a1fb8208905e6018e5bf35f202c1",
+    "controlled_action_history.csv": "3dff7aeb45b999ebf8cdedd4f3f08f47bbf1ada349175be62dfa63ea6e329b0c",
+    "controlled_budget_summary.csv": "60828df1de30af8cb7ce017bde9e3a3d1203ec6e0459042d0859b25ae5f46d7a",
+    "controlled_paired_contrasts.csv": "622d6c8c8f3f5dc23b6aaf2aed2599dea8925cd2052cb88809c241b713b77805"
+  }
+}

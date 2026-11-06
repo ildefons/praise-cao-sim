@@ -1,0 +1,32 @@
+{
+  "status": "B1_CONTROLLED_TWO_STAGE_FIGURES_V1",
+  "inputs_sha256": {
+    "original": "12a163b488266119f68391e96c8c63cebb4576516a312d3e48b5d4e77c657c80",
+    "kg": "38deebbc19fc371817b5e7a5f9d9e2457a773de217010fb1da7ffb4e83cb792f",
+    "controlled": "60828df1de30af8cb7ce017bde9e3a3d1203ec6e0459042d0859b25ae5f46d7a"
+  },
+  "controlled_policies": [
+    "random",
+    "balanced",
+    "informed",
+    "kg_two_stage_adaptive",
+    "kg_two_stage_uniform",
+    "top2_two_stage_adaptive",
+    "top2_two_stage_uniform"
+  ],
+  "historical_refs": [
+    "kg_one_step",
+    "budgeted_top2"
+  ],
+  "bootstrap_replicates": 2000,
+  "new_bootstraps": 0,
+  "new_simulations": 0,
+  "outputs_sha256": {
+    "b1_controlled_seven_policy_regret_vs_budget_ci_v1.svg": "7e011336f5b92ba21ebab9e33698ac7568f8f376360805bfb5ce7239548f023e",
+    "b1_nine_policy_with_historical_refs_ci_v1.png": "207f965a8fdca34d8a614eb690f9315ac75e220c396622751b612f49ad628c06",
+    "b1_controlled_seven_policy_regret_vs_budget_ci_v1.png": "5fe4926961a5f9d715c72e3d30042326a8e2c350564346a5de39cd146f12831c",
+    "b1_nine_policy_with_historical_refs_ci_v1.svg": "c28a9d87e71a613f2c42ce7b247cc67cd646d3d7b4b7302991ef0b152a614277",
+    "b1_nine_policy_with_historical_refs_ci_v1.csv": "e0c1e58ce733a07063153357a81094c663001537cb083fa64e5c0d6335343572",
+    "b1_controlled_seven_policy_regret_vs_budget_ci_v1.csv": "7add7814a2ffbf77b4d84b9854766bb9537d8fc427a507fac6dc2487393d16b4"
+  }
+}
