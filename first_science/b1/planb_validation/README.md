@@ -1,5 +1,8 @@
 # PRAISE Plan B — fixed-budget sequential validation
 
+**G1 literature and theoretical novelty audit — completed 6 November 2026:** [B1_G1_NOVELTY_GAP_AUDIT_2026-11-06_V1.md](B1_G1_NOVELTY_GAP_AUDIT_2026-11-06_V1.md). **Decision: REDIRECT** — the present KG/Top2 and adaptive condition-selection results do not constitute a demonstrated new BAI algorithm. A precise bounded misspecification problem is worth testing as G2; an applied empirical methodology route remains possible if independently sampled worlds and measured computational costs support it. The original [roadmap v1](B1_RESEARCH_AGENDA_FREEZE_2026-11-06_V1.md) remains frozen and unchanged.  
+
+
 **Frozen seven-direction research roadmap and eight-part strategic agenda (6 November 2026):** [B1_RESEARCH_AGENDA_FREEZE_2026-11-06_V1.md](B1_RESEARCH_AGENDA_FREEZE_2026-11-06_V1.md). Includes prioritized novelty audit, misspecification robustness, independent-world testing, strong BAI baselines, algorithm development, real computation costs, structural/theoretical extensions, and the Route A (empirical methodology) versus Route B (algorithmic contribution) decision. **Next checkpoint: G1, literature/novelty audit.** This freezes the plan, not authorization for new expensive simulations.  
 
 
