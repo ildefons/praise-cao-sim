@@ -52,7 +52,7 @@ python first_science/b1/planb_validation/plot_b1_condition_selection_controlled_
 
 The main seven-policy plot contains the **three other original benchmarks** (Random, Balanced, Informed), plus the four new matched KG/Top2 variants. The nine-policy reference plot additionally shows the **two original joint-action KG/Top2 policies** as separate dotted reference curves, not as members of the matched ablation. Each curve has the same bootstrap interval design: 240 episodes per policy/budget, 2,000 stratified percentile draws. Original reference summaries remain hash-checked and untouched.
 
-**Status:** scripts committed; numerical outcomes and plots pending local execution and review. All evidence is within a historical fixed 7×12 matrix, not independent-world confirmation.
+**Status (6 November 2026):** local execution completed; summaries, paired contrasts, SVG figures and provenance manifests committed at `results/controlled_condition_ablation_v1/`. [Reviewed scientific interpretation](B1_CONTROLLED_CONDITION_SELECTION_RESULTS_2026-11-06.md). This remains retrospective evidence on a historical fixed 7×12 matrix, not independent-world confirmation; episode-level and action-history CSVs remain outside Git and are recorded by hashes in the committed manifest.
 
 ---
 
