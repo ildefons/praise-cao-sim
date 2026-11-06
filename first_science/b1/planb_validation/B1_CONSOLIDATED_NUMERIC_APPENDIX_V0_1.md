@@ -116,3 +116,36 @@ for policy, sample in terminal[terminal.budget == 20].groupby("policy"):
 ```
 
 Run this from the archived B1 replay output directory, **read-only**. This code computes no new simulation, policy run or bootstrap. The two sets of diagnostics were selected *after* viewing the original outcomes, so they are **explanatory observations, not independent tests of the hypothesized mechanism**.
+
+
+---
+
+## Supplementary numerical appendix — matched two-stage condition selection (6 November 2026)
+
+**Separate experiment; not a reanalysis of the frozen four-policy primary contrast.** The exact full-precision, 20-policy/budget summary is [controlled_budget_summary.csv](results/controlled_condition_ablation_v1/controlled_budget_summary.csv); the paired contrasts and interval endpoints are [controlled_paired_contrasts.csv](results/controlled_condition_ablation_v1/controlled_paired_contrasts.csv). The [dedicated methods/results report](B1_CONTROLLED_CONDITION_SELECTION_RESULTS_2026-11-06.md) defines the new two-stage arm selectors and distinguishes them from the original joint-action KG and Top2 policies.
+
+| Evaluation budget | KG two-stage adaptive | KG two-stage uniform | Top2 two-stage adaptive | Top2 two-stage uniform |
+|---:|---:|---:|---:|---:|
+| 10 | 0.015545 | 0.014109 | 0.013893 | 0.015741 |
+| 15 | 0.006605 | 0.011537 | 0.009811 | 0.011136 |
+| 20 | 0.005245 | 0.009470 | 0.006362 | 0.009822 |
+| 30 | 0.001839 | 0.003957 | 0.002938 | 0.005085 |
+| 40 | 0.000151 | 0.000917 | 0.000503 | 0.001621 |
+| **Mean over budgets** | **0.005877** | **0.007998** | **0.006701** | **0.008681** |
+
+**Paired uniform minus adaptive regret** (positive favors adaptive):
+
+| Budget | KG mean difference [95% interval] | Top2 mean difference [95% interval] |
+|---:|---|---|
+| 10 | −0.001436 [−0.003847, 0.000851] | 0.001848 [−0.000111, 0.003719] |
+| 15 | 0.004931 [0.002624, 0.007201] | 0.001325 [−0.000937, 0.003549] |
+| 20 | 0.004225 [0.002397, 0.006171] | 0.003460 [0.001431, 0.005529] |
+| 30 | 0.002118 [0.000936, 0.003263] | 0.002147 [0.000868, 0.003345] |
+| 40 | 0.000766 [0.000302, 0.001280] | 0.001119 [0.000486, 0.001806] |
+| **Mean over five budgets** | **0.002121 [0.001281, 0.002960]** | **0.001980 [0.001202, 0.002819]** |
+
+The primary plotted series and all bounds come from the archived CSVs. Every budget/policy uses 240 episodes (12 starts × 20 repetitions), with 2,000 **within-archive, stratified percentile-bootstrap** draws for marginal and paired intervals. No independent-world resampling, multiplicity correction, or new physical simulation was performed. Original KG/Top2 joint-acquisition results cannot be used as matched condition-choice counterfactuals.
+
+![Matched seven-policy figure](results/controlled_condition_ablation_v1/b1_controlled_seven_policy_regret_vs_budget_ci_v1.svg)
+
+The additional [nine-policy reference plot](results/controlled_condition_ablation_v1/b1_nine_policy_with_historical_refs_ci_v1.svg) includes the original joint-action KG/Top2 implementations as distinct historical comparators.
