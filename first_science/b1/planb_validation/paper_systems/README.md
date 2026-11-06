@@ -1,6 +1,6 @@
 # PRAISE systems paper — LaTeX working directory
 
-**Status:** manuscript draft v0.2, 6 November 2026. **Review-first**, not ready for submission.  
+**Status:** manuscript draft v0.3, 6 November 2026. **Review-first**, not ready for submission.  
 **Canonical source:** `main.tex` in this directory. Edits and iterations are committed to the `praise-identifiability-feasibility` branch.  
 **Compilation:** Standard **pdfLaTeX**, no XeLaTeX/LuaLaTeX/fontspec, no shell escape, no bibliography generator, the primary scientific figure is converted locally from a committed frozen SVG by build.sh. Citations use a standard in-file bibliography. The architecture is drawn using LaTeX boxes and text so no image conversion is needed.
 
@@ -18,6 +18,8 @@ bash build.sh
 Output: `main.pdf` in this directory. If no SVG converter is installed, `bash build.sh` explains which lightweight option can be installed (for Ubuntu: `sudo apt-get install librsvg2-bin`). The converted `figures/controlled_seven_policy_regret.pdf` is a **local build artifact**; do not commit it. All substantive manuscript editing goes through GitHub.
 
 If figures were already converted and you only wish to recompile the TeX source, two ordinary `pdflatex` invocations are sufficient.
+
+The manuscript now includes a formal citation to the GitHub-hosted B1 consolidated technical report and its complete numerical appendix. This is clearly labeled an internal repository technical report, not a peer-reviewed publication. GitHub links are branch-specific and should be replaced with immutable commit links or a DOI when the paper is submission-ready.
 
 ## Review protocol
 
