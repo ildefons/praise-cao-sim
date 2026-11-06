@@ -204,3 +204,30 @@ existing provider/graph prediction results
 The episode demonstrates *selection from multiple concrete composition-prediction methods using heterogeneous-condition validation evidence*. It does **not** demonstrate an on-demand provider data API, a new runtime graph-simulation engine inside the selector, a live orchestration adaptation or measured compute-time savings.
 
 **Paper-use guidance:** this is an illustrative architectural trace, chosen using fixed indexing (`B=15, start_index=1, replicate=0`) **before inspecting its outcome**. The population-level evidence remains the full multi-budget, multi-policy aggregate experiment and paired bootstrap contrasts; a successful isolated path cannot replace them.
+
+
+---
+
+## 11. Source-traced I1×method closure (6 November 2026)
+
+**A1's B1-specific interface question is now resolved:** [completed upstream source trace v0.2](B1_A1_I_M_SOURCE_TRACE_2026-11-06_V0_2.md). The seven evaluated B1 predictors **all consume public I1-derived provider evidence**, via either the frozen Phase-5 V3b reconstruction and graph-prediction pipeline or the original-style public-I1/M3 retrospective branch reused by fixed-CV support variants. They differ in provider candidate reconstruction, choice of joint support, weighting and graph-simulation allocation, not in having distinct I interfaces.
+
+The accurate architecture for the evaluated prototype is therefore:
+
+~~~mermaid
+flowchart TB
+  I1["Frozen public I1 provider disclosures"]
+  METHODS["B1 seven predictor variants: M1; M2; M3_FULL343; original Top14/Top1; fixed-CV Top14/Top1"]
+  PRED["Frozen blind graph predictions"]
+  WB["I5 / white-box reference, reference-side only"]
+  LOSS["Evaluated 7 × 12 predictor-condition MAE archive"]
+  ACQ["Offline finite-budget allocation of revealed MAE cells"]
+  DEC["One recommended predictor across the 12-condition domain"]
+  I2["I2a / I2b studies (separate, not in B1)"]
+  I1 --> METHODS --> PRED --> LOSS
+  WB -->|"joined only after predictions frozen"| LOSS
+  LOSS -->|"selected cells only"| ACQ --> DEC
+  I2 -.->|"future optional extension; not tested in B1"| METHODS
+~~~
+
+This clarifies and *supersedes the open question* in Section 9 of this draft for the **seven B1 variants**. Source tracing of every other experimental I×M combination in PRAISE is a separate potential task; it is not needed to state the narrower B1 architecture accurately. The [verified 15-action episode](results/worked_example_v1/worked_episode.md) in Section 10 illustrates the method-selection decision.
