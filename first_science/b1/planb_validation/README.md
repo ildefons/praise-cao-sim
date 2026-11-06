@@ -1,5 +1,8 @@
 # PRAISE Plan B — fixed-budget sequential validation
 
+**Frozen seven-direction research roadmap and eight-part strategic agenda (6 November 2026):** [B1_RESEARCH_AGENDA_FREEZE_2026-11-06_V1.md](B1_RESEARCH_AGENDA_FREEZE_2026-11-06_V1.md). Includes prioritized novelty audit, misspecification robustness, independent-world testing, strong BAI baselines, algorithm development, real computation costs, structural/theoretical extensions, and the Route A (empirical methodology) versus Route B (algorithmic contribution) decision. **Next checkpoint: G1, literature/novelty audit.** This freezes the plan, not authorization for new expensive simulations.  
+
+
 **Literature-method compatibility (KG, BayesGap, UGapE, TTTS, elimination, linear design):** [B1_LITERATURE_METHOD_COMPATIBILITY_AUDIT_V0_1.md](B1_LITERATURE_METHOD_COMPATIBILITY_AUDIT_V0_1.md)  
 **Fixed-budget best-arm / active-model-selection literature:** [B1_FIXED_BUDGET_BAI_LITERATURE_POSITIONING_2026-11-05.md](B1_FIXED_BUDGET_BAI_LITERATURE_POSITIONING_2026-11-05.md)  
 **Consolidated scientific evidence report:** [B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md](B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md)  
