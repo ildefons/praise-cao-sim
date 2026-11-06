@@ -287,3 +287,20 @@ Reproducing the **finite-archive replay** requires the exact seven-method matrix
 ---
 
 **Evidence status:** positive, reproducible, conditional development comparison; preserved WB sensitivity milestone; independent-world and real compute-hour effects not established.
+
+
+---
+
+## Dated supplementary result — controlled condition selection (6 November 2026)
+
+**This section is a post-consolidation addendum.** It does not alter the 5 November original four-policy design freeze, its predeclared Top2-versus-Balanced contrast, or the separately completed original one-step KG supplement. Full definitions, provenance, exact numbers and SVG figures are in the [controlled condition-selection study](B1_CONTROLLED_CONDITION_SELECTION_RESULTS_2026-11-06.md); the [numeric appendix](B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md) includes the associated comparisons.
+
+A new matched **two-stage** acquisition design separated predictor allocation from the choice of provider–graph condition. For each new KG or Top2 family, the *predictor-choice function* is identical conditional on observation history; the condition choice is either adaptive (using its family's within-arm acquisition score) or uniformly random among the predictor's remaining conditions. Histories may diverge, so subsequent predictor choices may also differ. **The policies are not direct replacements or ablations of the original joint-action KG and Top2 policies.**
+
+Across budgets 10, 15, 20, 30 and 40, two-stage KG adaptive/uniform mean terminal simple regrets were **0.005877 / 0.007998**; two-stage Top2 adaptive/uniform were **0.006701 / 0.008681**. The paired *uniform minus adaptive* across-budget mean differences were **+0.002121** (KG; 95% within-archive bootstrap interval **[0.001281, 0.002960]**) and **+0.001980** (Top2; **[0.001202, 0.002819]**). These correspond to approximately **26.5%** and **22.8%** reductions against uniform. KG at budget 10 is an exception in direction, with a paired interval containing zero; Top2 at budgets 10 and 15 also has intervals spanning zero.
+
+![Seven-policy matched condition-selection study](results/controlled_condition_ablation_v1/b1_controlled_seven_policy_regret_vs_budget_ci_v1.svg)
+
+*Figure: Mean terminal simple regret versus distinct-evaluation budget, with 95% stratified percentile bootstrap intervals from 240 episodes/policy/budget and 2,000 resamples. Random, Balanced and Informed are historical reference baselines; the two adaptive/uniform KG and Top2 pairs are new matched two-stage policy definitions. See the [nine-policy contextual figure](results/controlled_condition_ablation_v1/b1_nine_policy_with_historical_refs_ci_v1.svg) for the original joint-action KG and Top2 curves, explicitly separated from the matched ablation.*
+
+**Evidence limits:** 4,800 new decision episodes in the fixed historical matrix (not new provider-world replications); intervals conditional on the 12 fixed starting cells, with no across-world uncertainty or multiplicity adjustment. The two-stage policies' positive results provide development evidence for condition selection as an experimental-design lever, not a best-arm identification novelty or independent-world generalization claim. The original four-policy scientific conclusions and frozen provenance remain unchanged.
