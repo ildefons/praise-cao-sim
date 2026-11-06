@@ -140,3 +140,67 @@ Before freezing Figure 1 for a paper, audit the actual repository code paths imp
 - Provide one worked example: graph G_PARSEQ with a concrete admissible query, three candidate predictors, one warm-start condition, one additional budget action and terminal predictor recommendation; use actual archived values if published, otherwise mark the example schematic.
 - Decide and explicitly define the **system user** (service designer, validation engineer or orchestrator) and the **moment of selection** (offline validation before deployment vs online adaptation). The current evidence supports an *offline validation engineer's method recommendation*.
 - Prepare an architecture figure suitable for a 6–8-page workshop paper after the implementation audit.
+
+---
+
+## 10. Verified end-to-end selection trace — original B1, B=15
+
+**Status: real archived episode, not a synthetic example.** The source episode was replayed and checked against the frozen 7×12 matrix, with the exact action list and terminal posterior reconstructed by [the read-only extractor](b1_extract_worked_episode_v1.py). All four generated artifacts were committed at `results/worked_example_v1/`: [human-readable trace](results/worked_example_v1/worked_episode.md), [15 actions at full precision](results/worked_example_v1/worked_episode_actions.csv), [posterior and reference mean table](results/worked_example_v1/worked_episode_terminal_estimates.csv), [SHA-256 provenance](results/worked_example_v1/episode_manifest.json).
+
+**Decision problem and initialization.** Original `budgeted_top2` policy; 15 *distinct* predictor×condition measurements; common initial condition P1 / G_PARSEQ; repetition index 0. The first seven acquisitions measure **all seven predictor variants at that single condition**, then the policy chooses eight more actions from the remaining 77 candidates. It recommends one predictor **for the entire twelve-condition domain**, rather than one predictor specifically for G_PARSEQ.
+
+### Actual acquisitions
+
+| Step | Predictor | World | Graph | Revealed cell MAE |
+|---:|---|---|---|---:|
+| 1 | M1 | P1 | G_PARSEQ | 0.214634 |
+| 2 | M2 | P1 | G_PARSEQ | 0.177236 |
+| 3 | M3_FULL343 | P1 | G_PARSEQ | 0.144974 |
+| 4 | ORIGINAL_TOP14_B1400 | P1 | G_PARSEQ | 0.198697 |
+| 5 | ORIGINAL_TOP1_B1400 | P1 | G_PARSEQ | 0.201643 |
+| 6 | FIXED_CV_TOP14 | P1 | G_PARSEQ | 0.153043 |
+| 7 | FIXED_CV_TOP1 | P1 | G_PARSEQ | 0.141178 |
+| 8 | M3_FULL343 | P3 | G_SEQ | 0.116330 |
+| 9 | M2 | P3 | G_PAR | 0.098860 |
+| 10 | ORIGINAL_TOP1_B1400 | P4 | G_SEQPAR | 0.131200 |
+| 11 | M1 | P4 | G_SEQ | 0.190858 |
+| 12 | M2 | P4 | G_SEQPAR | 0.120073 |
+| 13 | M3_FULL343 | P4 | G_SEQPAR | 0.122670 |
+| 14 | M3_FULL343 | P4 | G_PAR | 0.109436 |
+| 15 | M2 | P3 | G_SEQ | 0.170681 |
+
+The initial **lowest one-cell MAE** is `FIXED_CV_TOP1` (0.141178), not the reference-best whole-domain predictor `M3_FULL343` (0.144974 at this initial cell). This is a concrete illustration of why a single observed condition need not represent the ranking across the target domain. It should **not** be presented as a controlled comparison against a fully specified single-cell baseline unless that baseline is separately evaluated.
+
+In the original Top2 policy, B=15 means four *additional* balanced coverage acquisitions at steps 8–11, followed by four posterior top-two/variance-reduction acquisitions at steps 12–15. This phase division was pre-specified by the original policy; it is not inferred from the observed path.
+
+### Final posterior decision versus hidden full-domain truth
+
+| Predictor | No. observed | Posterior mean MAE (available to selector) | Actual 12-cell mean (offline scoring only) |
+|---|---:|---:|---:|
+| M1 | 2 | 0.197954 | 0.157015 |
+| M2 | 4 | 0.144384 | 0.133951 |
+| **M3_FULL343** | **4** | **0.126978** | **0.121890** |
+| ORIGINAL_TOP14_B1400 | 1 | 0.189492 | 0.154155 |
+| ORIGINAL_TOP1_B1400 | 2 | 0.166945 | 0.162280 |
+| FIXED_CV_TOP14 | 1 | 0.158482 | 0.160948 |
+| FIXED_CV_TOP1 | 1 | 0.150423 | 0.192105 |
+
+The terminal recommendation minimizes the **posterior** whole-domain MAE: `M3_FULL343` at 0.126978 (versus the next-lowest posterior mean, M2 at 0.144384). Retrospective checking against all twelve archived conditions confirms `M3_FULL343` has true mean MAE 0.121890; its simple regret is **0**. The true means are **not revealed to the policy** and must be represented separately in a publication diagram or table.
+
+### Architectural takeaway — precisely scoped
+
+The implemented system-level decision chain is:
+
+```
+existing provider/graph prediction results
+  -> verified per-method/per-world/per-graph validation MAE catalogue
+  -> 7 shared initial acquisitions on P1 / G_PARSEQ
+  -> 8 sequentially selected additional validation acquisitions
+  -> posterior estimates of whole-domain predictor quality
+  -> one recommended predictor: M3_FULL343
+  -> OFFLINE-ONLY check against full archive: correct / zero regret
+```
+
+The episode demonstrates *selection from multiple concrete composition-prediction methods using heterogeneous-condition validation evidence*. It does **not** demonstrate an on-demand provider data API, a new runtime graph-simulation engine inside the selector, a live orchestration adaptation or measured compute-time savings.
+
+**Paper-use guidance:** this is an illustrative architectural trace, chosen using fixed indexing (`B=15, start_index=1, replicate=0`) **before inspecting its outcome**. The population-level evidence remains the full multi-budget, multi-policy aggregate experiment and paired bootstrap contrasts; a successful isolated path cannot replace them.
