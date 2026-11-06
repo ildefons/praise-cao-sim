@@ -20,6 +20,8 @@
 **Main script:** [b1_budget_comparison_v1.py](b1_budget_comparison_v1.py)  
 **Synthetic-only tests:** [test_b1_budget_comparison_v1.py](test_b1_budget_comparison_v1.py)
 
+**Completed controlled condition-selection results (6 November 2026):** [scientific report, paired contrasts and both archived figures](B1_CONTROLLED_CONDITION_SELECTION_RESULTS_2026-11-06.md). **Main figure:** [seven-policy matched plot](results/controlled_condition_ablation_v1/b1_controlled_seven_policy_regret_vs_budget_ci_v1.svg); **context figure:** [nine policies including the original KG/Top2 references](results/controlled_condition_ablation_v1/b1_nine_policy_with_historical_refs_ci_v1.svg). In the separately defined two-stage families, adaptive vs uniform reduces across-budget mean regret by **26.5% for KG** and **22.8% for Top2**. Paired uniform-minus-adaptive differences: KG +0.002121 [0.001281, 0.002960], Top2 +0.001980 [0.001202, 0.002819] (95% within-archive stratified bootstrap). At B=10, KG's observed difference reverses, with an interval including zero. These are policy-specific retrospective comparisons, **not** an exact isolation of condition sampling in the original joint-acquisition policies. All original frozen outputs remain preserved.  
+
 ## Controlled two-stage KG/Top2 condition-selection ablation (v1)
 
 **Code:** [b1_condition_selection_controlled_v1.py](b1_condition_selection_controlled_v1.py) and [plot_b1_condition_selection_controlled_v1.py](plot_b1_condition_selection_controlled_v1.py).
