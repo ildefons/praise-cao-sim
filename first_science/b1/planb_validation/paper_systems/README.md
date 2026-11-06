@@ -1,29 +1,23 @@
 # PRAISE systems paper — LaTeX working directory
 
-**Status:** manuscript draft v0.1, 6 November 2026. **Review-first**, not ready for submission.  
+**Status:** manuscript draft v0.2, 6 November 2026. **Review-first**, not ready for submission.  
 **Canonical source:** `main.tex` in this directory. Edits and iterations are committed to the `praise-identifiability-feasibility` branch.  
-**Compilation:** Standard **pdfLaTeX**, no XeLaTeX/LuaLaTeX/fontspec, no shell escape, no bibliography generator, no external figures required for this draft. Citations use a standard in-file bibliography. The architecture is drawn using LaTeX boxes and text so no image conversion is needed.
+**Compilation:** Standard **pdfLaTeX**, no XeLaTeX/LuaLaTeX/fontspec, no shell escape, no bibliography generator, the primary scientific figure is converted locally from a committed frozen SVG by build.sh. Citations use a standard in-file bibliography. The architecture is drawn using LaTeX boxes and text so no image conversion is needed.
 
-## Pull and compile
+## Pull and compile (v0.2)
 
-From your local repository:
+The manuscript includes the **existing frozen seven-policy SVG** as its primary results figure. Standard `pdflatex` cannot read SVG directly, so the repository build script converts that exact archived SVG to a local PDF *without regenerating or changing the results*. It detects Inkscape, `rsvg-convert`, or Python `cairosvg`; no XeLaTeX, fontspec or shell escape is required.
 
 ```bash
 cd ~/praise/praise-cao-sim
 git pull --ff-only origin praise-identifiability-feasibility
-
 cd first_science/b1/planb_validation/paper_systems
-pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
-pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
+bash build.sh
 ```
 
-Open `main.pdf` locally. If `latexmk` is already installed, this equivalent one-line build is also supported:
+Output: `main.pdf` in this directory. If no SVG converter is installed, `bash build.sh` explains which lightweight option can be installed (for Ubuntu: `sudo apt-get install librsvg2-bin`). The converted `figures/controlled_seven_policy_regret.pdf` is a **local build artifact**; do not commit it. All substantive manuscript editing goes through GitHub.
 
-```bash
-latexmk -pdf -interaction=nonstopmode -halt-on-error -file-line-error main.tex
-```
-
-No packages should require special engines. If the installed TeX distribution lacks a standard package, report the precise error and we can simplify the source further. Do not commit generated `main.pdf`, `.aux`, `.log`, or `.out` build artifacts.
+If figures were already converted and you only wish to recompile the TeX source, two ordinary `pdflatex` invocations are sufficient.
 
 ## Review protocol
 
