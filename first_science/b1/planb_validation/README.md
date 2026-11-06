@@ -20,6 +20,40 @@
 **Main script:** [b1_budget_comparison_v1.py](b1_budget_comparison_v1.py)  
 **Synthetic-only tests:** [test_b1_budget_comparison_v1.py](test_b1_budget_comparison_v1.py)
 
+## Controlled two-stage KG/Top2 condition-selection ablation (v1)
+
+**Code:** [b1_condition_selection_controlled_v1.py](b1_condition_selection_controlled_v1.py) and [plot_b1_condition_selection_controlled_v1.py](plot_b1_condition_selection_controlled_v1.py).
+
+**New policy definitions, not the original single-stage KG/Top2 implementations.** Both variants within each family use the exact same predictor selection function given the current observed history. For KG, the arm is chosen by the mean one-step KG score over its remaining conditions. For Top2, the frozen 50%-coverage schedule is retained: the coverage-phase arm is one with the fewest observations, then the decision-phase arm is the top-two candidate with the highest mean variance reduction over its remaining conditions. During coverage, adaptive conditions use the original balanced provider/graph score for the chosen arm. For subsequent Top2 allocation and all KG allocations, adaptive conditions maximize the original condition-specific acquisition criterion. Uniform conditions are drawn uniformly without replacement among the selected arm's unevaluated conditions. Both variants retain the original seven initial evaluations, posterior model and posterior-mean final choice.
+
+**Interpretation:** the arm-choice function is identical within a family, but histories can diverge following different condition choices, so later selected arms need not be identical. This is a controlled **whole-policy** condition-choice comparison, not a forced identical-arm-path direct-effect analysis. The original five-policy results and plots remain intact. The 6 November retrospective earlier reconstruction is a different exploratory variant and must not be silently pooled with these results.
+
+Run the controlled experiment locally using the hashed frozen matrix (4 policies × 5 budgets × 240 episodes = **4,800 episodes; 110,400 logged evaluations**) and 2,000 stratified bootstrap resamples:
+
+```bash
+cd ~/praise/praise-cao-sim
+git pull --ff-only origin praise-identifiability-feasibility
+python first_science/b1/planb_validation/b1_condition_selection_controlled_v1.py \
+  --matrix ~/praise/planb_b1_fixed_budget_v1/seven_method_matrix.csv \
+  --out ~/praise/planb_b1_controlled_condition_ablation_v1
+```
+
+After **B1_CONTROLLED_TWO_STAGE_CONDITION_ABLATION_PASS**, generate both figures:
+
+```bash
+python first_science/b1/planb_validation/plot_b1_condition_selection_controlled_v1.py \
+  --original-summary ~/praise/planb_b1_fixed_budget_v1/budget_summary.csv \
+  --kg-summary ~/praise/planb_b1_kg_reproduced_20261106/kg_budget_summary.csv \
+  --controlled-summary ~/praise/planb_b1_controlled_condition_ablation_v1/controlled_budget_summary.csv \
+  --out ~/praise/planb_b1_controlled_condition_figures_v1
+```
+
+The main seven-policy plot contains the **three other original benchmarks** (Random, Balanced, Informed), plus the four new matched KG/Top2 variants. The nine-policy reference plot additionally shows the **two original joint-action KG/Top2 policies** as separate dotted reference curves, not as members of the matched ablation. Each curve has the same bootstrap interval design: 240 episodes per policy/budget, 2,000 stratified percentile draws. Original reference summaries remain hash-checked and untouched.
+
+**Status:** scripts committed; numerical outcomes and plots pending local execution and review. All evidence is within a historical fixed 7×12 matrix, not independent-world confirmation.
+
+---
+
 ## November 6 uniform-condition reconstruction (exploratory; original five policies unchanged)
 
 The repository contains [b1_uniform_condition_replay_v1.py](b1_uniform_condition_replay_v1.py), a separately versioned retrospective replay using the frozen 7×12 matrix and fixed Gaussian posterior. Its two policies sample an unobserved condition uniformly *after* choosing an arm. This is **not** the recovered original November 6 experiment: KG selects its arm by the maximum available condition-wise KG acquisition score; Top2's initial coverage phase balances arm counts, not the original provider–graph coverage score. Accordingly, differences from the original adaptive KG/Top2 baselines combine changes in arm and condition policies and **must not be interpreted as an isolated causal effect of condition adaptivity**.
