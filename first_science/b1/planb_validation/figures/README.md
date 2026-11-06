@@ -32,3 +32,20 @@ The source-input hashes and 25 unique policy/budget combinations must match. Out
 - In this archived B1 matrix, KG has the lowest **observed mean terminal regret** at each of the five budgets. Its one-step value-of-information acquisition score is analytically derived under the frozen Gaussian surrogate; this does **not** establish optimality for a multi-action horizon.
 - The original four-policy result (Top2 vs Balanced) remains frozen and unchanged; KG does not become an original B1 v1 policy retrospectively.
 - The 25 error bars show **marginal episode-bootstrap intervals**. They do **not** certify five independent tests, independent provider-world performance or actual computational-hour savings.
+
+
+---
+
+## New: controlled two-stage condition-selection comparison (6 November 2026)
+
+The original five-policy SVG and its two source hashes above remain **unchanged**. The later matched condition-selection study introduces **four new policies**, within two families: two-stage KG adaptive/uniform and two-stage Top2 adaptive/uniform. They are not the original KG and Top2 implementations with a switch silently toggled; predictor selection uses a separately defined two-stage rule common to each adaptive/uniform pair.
+
+![Seven-policy controlled condition-selection figure](../results/controlled_condition_ablation_v1/b1_controlled_seven_policy_regret_vs_budget_ci_v1.svg)
+
+**Figure caption.** Mean terminal simple regret versus evaluation budget for the original three reference baselines (Random, Balanced, Informed) and matched two-stage KG and Top2 policies with either adaptive or uniform condition selection. Error bars are **95% stratified percentile-bootstrap intervals** from **2,000 resamples** of **240 seeded allocation episodes** per policy and budget, conditional on the fixed 7×12 historical evaluation matrix. Solid adaptive and dashed uniform curves within each new family share the same predictor-selection rule conditional on observed history; histories may diverge and affect later decisions. This is not independent-world generalization.
+
+![Nine-policy figure, with original joint-acquisition historical references](../results/controlled_condition_ablation_v1/b1_nine_policy_with_historical_refs_ci_v1.svg)
+
+**Context caption.** The same seven policies plus the **original joint-acquisition KG and original budget-aware Top2** as dotted historical reference lines, not members of the matched adaptive-vs-uniform contrast. The original curves must not be relabeled as the new two-stage adaptive variants.
+
+**Data, provenance and interpretation:** [controlled summary](../results/controlled_condition_ablation_v1/controlled_budget_summary.csv), [paired contrasts](../results/controlled_condition_ablation_v1/controlled_paired_contrasts.csv), [run manifest](../results/controlled_condition_ablation_v1/controlled_manifest.json), [plot manifest](../results/controlled_condition_ablation_v1/plot_manifest.json), and [full evidence note](../B1_CONTROLLED_CONDITION_SELECTION_RESULTS_2026-11-06.md). The figures were generated locally by [this reproducible plotting script](../plot_b1_condition_selection_controlled_v1.py), and committed without modifying the original five-policy figure.
