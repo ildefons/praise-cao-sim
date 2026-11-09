@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.43 --- 9 November 2026}
+\date{Working manuscript v0.44 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -169,7 +169,7 @@ S_{a,c}^{\mathrm{Inf}}=
 \end{equation}
 Here $m_a$ is the predicted domain-average loss and $q_a$ its posterior variance. A competing method $b$ contributes strongly when the estimated losses are close relative to their combined uncertainty, and weakly when they are clearly separated. The score favors a test with high variance reduction that can help resolve an uncertain ranking; the exponential factor is a heuristic ambiguity weight, not a probability of being best.
 \end{description}
-The fourth strategy, budget-aware Top2, proceeds in two stages: it first spreads evaluations across methods and operating conditions, then uses the performance estimates obtained from those evaluations to identify the two methods with the lowest predicted average losses and concentrates subsequent tests on them.
+The fourth strategy, budget-aware Top2, is a heuristic baseline that combines broad coverage with focused evaluation. It first spreads evaluations across methods and operating conditions, then uses the resulting performance estimates to identify the two methods with the lowest predicted average losses and concentrates subsequent tests on them. The division of the remaining budget between these two phases is a fixed design choice, not a theoretically optimal allocation.
 
 All allocation policies start in the same way: choose one operating condition $c_0$ and evaluate each of the $K$ candidate methods once under that condition. These first $K$ evaluations provide an initial performance observation for every method under identical conditions, using $K$ units of the total budget $B$. The starting condition can differ between experimental runs, but within each run it is shared by all methods. After these initial evaluations, $E=B-K$ units of the budget remain, where $B$ is the total number of evaluations allowed and $K$ is the number of candidate methods. The \emph{original Top2} rule divides these $E$ remaining evaluations into two phases. In the first phase, it allocates $\lceil E/2\rceil$ evaluations (half the remaining budget, rounded up) using the same Balanced selection rule described above. For the remaining acquisitions, after each update choose the current two smallest-posterior-mean predictors $T=\operatorname{Top2}_{\min}\{m_a\}$ and select
 \begin{equation}
