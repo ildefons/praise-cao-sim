@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.22 --- 9 November 2026}
+\date{Working manuscript v0.23 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -106,7 +106,7 @@ To estimate how a method would perform under conditions not yet tested, the sele
 For the experimental protocol, each episode begins by observing every candidate method under one common initial condition, charging these $K$ evaluations against the total budget. The policy then chooses $B-K$ previously unobserved pairs. In the retrospective implementation, the replay harness reveals a selected loss from the archive and reserves the complete table for post-recommendation scoring. The specific model features and calibration constants are given in Section~\ref{sec:case}.
 
 \subsection{Shared acquisition statistics}
-Let $x_c$ be the numerical descriptors of condition $c$, $\beta_a$ the regression coefficients for method $a$, and $v=C^{-1}\sum_c x_c$ the average descriptor vector. The Gaussian model and the information gained from evaluating a previously untested method--condition pair are
+Each condition is encoded by a feature vector $x_c$. In our case study, it contains an intercept and one-hot indicators identifying the provider world and composition graph. Let $\beta_a$ denote the regression coefficients for method $a$, and $v=C^{-1}\sum_c x_c$ the average feature vector. The Gaussian model and the information gained from evaluating a previously untested method--condition pair are
 \begin{equation}
 \begin{aligned}
 Y_{a,c} &\approx x_c^\top\beta_a+\varepsilon_{a,c},
