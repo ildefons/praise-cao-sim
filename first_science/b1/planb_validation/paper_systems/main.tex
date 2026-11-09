@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.5 --- 9 November 2026}
+\date{Working manuscript v0.6 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -37,7 +37,7 @@ The computing continuum spans distributed devices, edge resources, cloud infrast
 
 Validation is therefore itself a resource-allocation problem. With a fixed experimental budget, which method should be tested next, and under which operating condition? The objective is not to maximize the number of tests or to favor configurations that are easy to evaluate. It is to gather evidence that supports a good final decision about the relative performance of the available methods over a defined target domain. This introduces two distinct decisions: \emph{where to spend the remaining validation budget} and \emph{which method to recommend after the budget is exhausted}.
 
-Sequential experimental design, active model testing, and best-arm identification provide established foundations for allocating evaluation effort \cite{hara2024,kossen2021,frazier2008}. Computing-continuum research also includes predictive deployment modeling, adaptive offloading, and selection among service-composition algorithms \cite{pozas2023,stupar2023,sedlak2024}. We investigate how budgeted evidence acquisition can be organized as a validation layer for heterogeneous computing-continuum methods. The layer separates method identity from the conditions in which it is tested, preserves a predefined domain-wide quality target, and compares allocation strategies by the quality of their terminal method recommendation.
+Sequential experimental design, active model testing, and best-arm identification provide established foundations for allocating evaluation effort \cite{hara2024,kossen2021,frazier2008}. Computing-continuum research also includes predictive deployment modeling, adaptive offloading, and selection among service-composition algorithms \cite{pozas2023,stupar2023,sedlak2024}. We investigate how budgeted evidence acquisition can be organized as a validation layer for heterogeneous computing-continuum methods. At each step, the validation procedure chooses both which method to evaluate and the operating condition in which to test it. After the budget is exhausted, it recommends the method estimated to perform best across the full set of target conditions.
 
 We instantiate this approach in a composed-service compliance prediction problem. Provider services disclose limited public information; alternative reconstruction and graph-propagation methods produce predictions of composed-service behavior. Here the \emph{methods being validated are predictors}, and an experimental condition combines a provider world with a composition graph. Seven candidate predictor variants and twelve conditions provide a finite catalogue of 84 method--condition validation outcomes. An offline controller reveals only the outcomes it chooses to acquire and then recommends one predictor across the twelve-condition domain. This concrete instance lets us evaluate budget-allocation decisions while keeping the upstream prediction evidence and reference outcomes separate.
 
