@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.31 --- 9 November 2026}
+\date{Working manuscript v0.32 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -153,7 +153,13 @@ s_{a,c}=\sqrt{\Delta_{a,c}}.
 Here $\Delta_{a,c}$ is a variance reduction, whereas $s_{a,c}$ is the standard deviation of the possible change in the posterior mean $m_a$ after that evaluation. Top2 uses $\Delta_{a,c}$ to prioritize uncertainty reduction; Knowledge Gradient uses $s_{a,c}$ to score expected improvement in the final selection. The policy then selects its next unevaluated method--condition pair, observes its loss, and repeats the updates until the budget is exhausted.
 
 \subsection{Original comparison and budget-aware Top2}
-The baseline comparison comprises Random (uniformly sample an unused predictor--condition pair), Balanced (favor under-evaluated predictors, worlds and graphs), Informed (weight $\Delta_{a,c}$ by the closeness of each predictor to its competitors), and the budget-aware Top2 heuristic.
+The first three allocation strategies provide reference points with increasing use of the evidence already collected:
+\begin{description}
+\item[Random.] Choose uniformly among all method--condition pairs not yet evaluated. Every available test is equally likely, irrespective of its results or previous coverage.
+\item[Balanced.] Prefer evaluating methods that have received fewer tests. Among their available conditions, favor those whose condition types have been sampled less often for that method. In the case study, this means improving coverage of provider worlds and composition graphs; the rule does not use estimated method quality.
+\item[Informed.] Use the Gaussian model to prioritize tests that both reduce uncertainty and help distinguish methods with similar estimated average losses. For a candidate pair $(a,c)$, multiply its variance reduction $\Delta_{a,c}$ by a weight that is largest when method $a$ has an uncertain ranking relative to its competitors. The weight decreases as their estimated performance difference grows relative to posterior uncertainty.
+\end{description}
+The fourth original strategy, budget-aware Top2, combines an initial coverage phase with targeted evaluation of the two currently most promising methods.
 
 The \emph{original Top2} rule first spends the mandatory $K$ observations comparing all methods on a single common starting condition. At budget $B$, let $E=B-K$ be the number of remaining acquisitions. The next $\lceil E/2\rceil$ acquisitions follow the \emph{same joint-action Balanced score} used by the Balanced policy. For the remaining acquisitions, after each update choose the current two smallest-posterior-mean predictors $T=\operatorname{Top2}_{\min}\{m_a\}$ and select
 \begin{equation}
