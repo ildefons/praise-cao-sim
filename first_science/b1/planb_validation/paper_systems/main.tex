@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.16 --- 9 November 2026}
+\date{Working manuscript v0.17 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -83,7 +83,7 @@ The selection policy knows which methods and operating conditions are available 
 
 \section{Sequential Validation Methods}
 \subsection{Decision formulation}
-Computing-continuum systems employ methods for tasks such as service placement, resource scheduling, adaptation, and performance prediction. Several methods may address the same task, yet their effectiveness can vary with workload, infrastructure, and system configuration. Choosing a method therefore requires evidence across the operating conditions in which it will be used. We formulate this validation and selection problem for a set of candidate methods; in our case study, the candidates are performance predictors.
+Sequential validation algorithms address limited evaluation budgets by choosing each new test in light of the evidence collected so far. Different strategies prioritize coverage of the test space, reduction of uncertainty, or improvement of the final method-selection decision. We formulate their common decision problem below, then describe the allocation strategies evaluated in this study.
 
 Let $\mathcal{M}=\{1,\ldots,K\}$ be the candidate methods and $\mathcal{C}=\{1,\ldots,C\}$ the prespecified operating conditions. Let $Y_{a,c}$ denote the validation loss of method $a$ in condition $c$, where lower values are better. A validation action acquires one outcome for a method--condition pair $(a,c)$; in our finite-catalogue setting, each pair can be acquired at most once. The budget $B$ limits the number of acquired outcomes.
 
