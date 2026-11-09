@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.30 --- 9 November 2026}
+\date{Working manuscript v0.31 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -131,11 +131,11 @@ b_a^{\mathrm{new}}&=b_a+k_{a,c}(y-x_c^\top b_a),\\
 The difference $y-x_c^\top b_a$ is the observed loss minus its predicted value. It adjusts the coefficient estimates; the covariance update reduces their uncertainty. Only the model for the evaluated method changes at this step.
 
 \paragraph{2. Update predicted performance.}
-Using the updated coefficient estimate, the predicted loss of method $a$ at any condition $c'$ and its predicted average over the entire target domain are
+Let $v$ be the average feature vector of all $C$ target conditions. Using the updated coefficient estimate $b_a$, we calculate the predicted loss at any condition $c'$ and the predicted domain-average loss as
 \begin{equation}
+v=\frac{1}{C}\sum_{c'=1}^{C}x_{c'},\qquad
 \widehat{Y}_{a,c'}=x_{c'}^\top b_a,\qquad
-m_a=v^\top b_a,\qquad
-v=\frac{1}{C}\sum_{c'=1}^{C}x_{c'}.
+m_a=v^\top b_a.
 \label{eq:posteriorpred}
 \end{equation}
 The value $m_a$ is the current estimate of method $a$'s domain-average loss, including conditions not yet evaluated. The final recommendation chooses the method with the smallest $m_a$.
