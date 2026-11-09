@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.32 --- 9 November 2026}
+\date{Working manuscript v0.33 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -153,7 +153,7 @@ s_{a,c}=\sqrt{\Delta_{a,c}}.
 Here $\Delta_{a,c}$ is a variance reduction, whereas $s_{a,c}$ is the standard deviation of the possible change in the posterior mean $m_a$ after that evaluation. Top2 uses $\Delta_{a,c}$ to prioritize uncertainty reduction; Knowledge Gradient uses $s_{a,c}$ to score expected improvement in the final selection. The policy then selects its next unevaluated method--condition pair, observes its loss, and repeats the updates until the budget is exhausted.
 
 \subsection{Original comparison and budget-aware Top2}
-The first three allocation strategies provide reference points with increasing use of the evidence already collected:
+We first consider three reference strategies that differ in how they use information from previous evaluations: Random, Balanced, and Informed.
 \begin{description}
 \item[Random.] Choose uniformly among all method--condition pairs not yet evaluated. Every available test is equally likely, irrespective of its results or previous coverage.
 \item[Balanced.] Prefer evaluating methods that have received fewer tests. Among their available conditions, favor those whose condition types have been sampled less often for that method. In the case study, this means improving coverage of provider worlds and composition graphs; the rule does not use estimated method quality.
