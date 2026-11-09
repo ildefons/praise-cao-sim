@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.42 --- 9 November 2026}
+\date{Working manuscript v0.43 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -176,7 +176,7 @@ All allocation policies start in the same way: choose one operating condition $c
  (a_t,c_t)\in\arg\max_{\substack{a\in T\\(a,c)\ \mathrm{unobserved}}}\Delta_{a,c}.
  \label{eq:top2}
 \end{equation}
-If all conditions have already been evaluated for both shortlisted methods, no unused method--condition pair remains for them; in that case, select the next evaluation using Balanced instead. In our case study ($K=7$, $B=15$), four extra actions are coverage acquisitions and four are Top2 acquisitions. The two methods are selected by their current estimated average losses, with lower values indicating better predicted performance.
+If all conditions have already been evaluated for both shortlisted methods, no unused method--condition pair remains for them; in that case, select the next evaluation using Balanced instead. For example, with seven candidate methods and a budget of 15 evaluations, the first seven evaluate every method once under the same condition. Of the eight evaluations left, the next four follow Balanced to broaden coverage; the final four focus on the two methods with the lowest currently predicted average losses. The two methods are selected by their current estimated average losses, with lower values indicating better predicted performance.
 
 \subsection{Joint-action Knowledge Gradient (KG)}
 The independently evaluated \emph{one-step joint-action KG} benchmark uses the same Gaussian model but chooses each new unused predictor--condition pair according to the model-conditional expected improvement in the final decision \cite{frazier2008}. Let $h_a=\min_{b\ne a}m_b$ and $d_a=|m_a-h_a|$. With $\phi$ and $\Phi$ denoting the standard normal density and CDF, respectively, its closed-form score is
