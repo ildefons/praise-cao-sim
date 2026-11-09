@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.27 --- 9 November 2026}
+\date{Working manuscript v0.28 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -105,28 +105,52 @@ To estimate how a method would perform under conditions not yet tested, the sele
 
 For the experimental protocol, each episode begins by observing every candidate method under one common initial condition, charging these $K$ evaluations against the total budget. The policy then chooses $B-K$ previously unobserved pairs. In the retrospective implementation, the replay harness reveals a selected loss from the archive and reserves the complete table for post-recommendation scoring. The specific model features and calibration constants are given in Section~\ref{sec:case}.
 
-\subsection{Shared acquisition statistics}
-Each condition is encoded by a feature vector $x_c$. In our case study, it contains an intercept and one-hot indicators identifying the provider world and composition graph. Let $\beta_a$ denote the regression coefficients for method $a$, and $v=C^{-1}\sum_c x_c$ the average feature vector. The Gaussian model and the information gained from evaluating a previously untested method--condition pair are
+\subsection{Evidence updates and acquisition statistics}
+Each condition is encoded by a feature vector $x_c$. In our case study, it contains an intercept and one-hot indicators identifying the provider world and composition graph. For each method $a$, we use the following Gaussian regression model for validation loss:
+\begin{equation}
+Y_{a,c}=x_c^\top\beta_a+\varepsilon_{a,c},
+\qquad
+\beta_a\sim\mathcal{N}(b_0,V_0),
+\qquad
+\varepsilon_{a,c}\sim\mathcal{N}(0,\sigma^2).
+\label{eq:gaussianmodel}
+\end{equation}
+The coefficient vector $\beta_a$ captures how the loss changes across conditions. Initially, its estimated mean is $b_a=b_0$ and its uncertainty is represented by covariance $\Sigma_a=V_0$. We use the Gaussian assumption as a working model for learning from acquired validation losses.
+
+\paragraph{1. Acquire evidence and update the model.}
+Suppose the policy evaluates method $a$ at condition $c$ and observes loss $y=Y_{a,c}$. Define the update weight
+$k_{a,c}=\Sigma_a x_c/(\sigma^2+x_c^\top\Sigma_a x_c)$.
+The current coefficient estimate and covariance are then updated by
 \begin{equation}
 \begin{aligned}
-Y_{a,c} &\approx x_c^\top\beta_a+\varepsilon_{a,c},
-  &\beta_a &\sim\mathcal{N}(b_0,V_0),\\
-\varepsilon_{a,c} &\sim\mathcal{N}(0,\sigma^2),
-  &\Delta_{a,c} &=\frac{(v^\top\Sigma_a x_c)^2}
-  {\sigma^2+x_c^\top\Sigma_a x_c},\\
-s_{a,c} &=\sqrt{\Delta_{a,c}}. &&
+b_a^{\mathrm{new}}&=b_a+k_{a,c}(y-x_c^\top b_a),\\
+\Sigma_a^{\mathrm{new}}&=\Sigma_a-k_{a,c}x_c^\top\Sigma_a.
 \end{aligned}
-\label{eq:gain}
-\end{equation}
-Here $b_0$ and $V_0$ denote the initial coefficient mean and covariance, while $\Sigma_a$ is the coefficient covariance after the observed evaluations. The quantity $\Delta_{a,c}$ measures the reduction in posterior variance of method $a$'s average loss; $s_{a,c}=\sqrt{\Delta_{a,c}}$ is the standard deviation of the corresponding change in its posterior mean. Top2 uses $\Delta_{a,c}$ to favor uncertainty reduction, while Knowledge Gradient uses $s_{a,c}$ to assess the expected improvement in the final recommendation. For each unevaluated method--condition pair, $s_{a,c}$ is calculated from the current regression covariance, the candidate condition's feature vector, and the average feature vector of the target domain. When method $a$ is evaluated at condition $c$, its coefficient covariance is updated by
-\begin{equation}
-\Sigma_a^{\mathrm{new}} =
-\Sigma_a -
-\frac{\Sigma_a x_c x_c^\top \Sigma_a}
-{\sigma^2+x_c^\top\Sigma_a x_c}.
 \label{eq:covupdate}
 \end{equation}
-Initially $\Sigma_a=V_0$ for each method. This update uses the evaluated condition's features and the observation-noise variance; the observed loss also updates the coefficient mean. Covariances of methods not evaluated in this step remain unchanged. Acquisition scores are then recomputed from the updated model.
+The difference $y-x_c^\top b_a$ is the observed loss minus its predicted value. It adjusts the coefficient estimates; the covariance update reduces their uncertainty. Only the model for the evaluated method changes at this step.
+
+\paragraph{2. Update predicted performance.}
+Using the updated coefficient estimate, the predicted loss of method $a$ at any condition $c'$ and its predicted average over the entire target domain are
+\begin{equation}
+\widehat{Y}_{a,c'}=x_{c'}^\top b_a,\qquad
+m_a=v^\top b_a,\qquad
+v=\frac{1}{C}\sum_{c'=1}^{C}x_{c'}.
+\label{eq:posteriorpred}
+\end{equation}
+The value $m_a$ is the current estimate of method $a$'s domain-average loss, including conditions not yet evaluated. The final recommendation chooses the method with the smallest $m_a$.
+
+\paragraph{3. Recompute the next acquisition scores.}
+Before evaluating an unused pair $(a,c)$, the expected reduction in the posterior variance of its domain-average loss is
+\begin{equation}
+\Delta_{a,c}=
+\frac{(v^\top\Sigma_a x_c)^2}
+{\sigma^2+x_c^\top\Sigma_a x_c},
+\qquad
+s_{a,c}=\sqrt{\Delta_{a,c}}.
+\label{eq:gain}
+\end{equation}
+Here $\Delta_{a,c}$ is a variance reduction, whereas $s_{a,c}$ is the standard deviation of the possible change in the posterior mean $m_a$ after that evaluation. Top2 uses $\Delta_{a,c}$ to prioritize uncertainty reduction; Knowledge Gradient uses $s_{a,c}$ to score expected improvement in the final selection. The policy then selects its next unevaluated method--condition pair, observes its loss, and repeats the updates until the budget is exhausted.
 
 \subsection{Original comparison and budget-aware Top2}
 The baseline comparison comprises Random (uniformly sample an unused predictor--condition pair), Balanced (favor under-evaluated predictors, worlds and graphs), Informed (weight $\Delta_{a,c}$ by the closeness of each predictor to its competitors), and the budget-aware Top2 heuristic.
