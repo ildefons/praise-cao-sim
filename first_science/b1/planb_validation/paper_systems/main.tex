@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.29 --- 9 November 2026}
+\date{Working manuscript v0.30 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -106,7 +106,7 @@ To estimate how a method would perform under conditions not yet tested, the sele
 For the experimental protocol, each episode begins by observing every candidate method under one common initial condition, charging these $K$ evaluations against the total budget. The policy then chooses $B-K$ previously unobserved pairs. In the retrospective implementation, the replay harness reveals a selected loss from the archive and reserves the complete table for post-recommendation scoring. The specific model features and calibration constants are given in Section~\ref{sec:case}.
 
 \subsection{Evidence updates and acquisition statistics}
-Each operating condition is represented by a feature vector $x_c$ describing its relevant characteristics. For each candidate method $a$, we use the following Gaussian regression model for validation loss:
+Each operating condition is represented by a feature vector $x_c$ describing its relevant characteristics. For each candidate method $a$, we use Bayesian Gaussian linear regression to model validation loss \cite{bishop2006}:
 \begin{equation}
 Y_{a,c}=x_c^\top\beta_a+\varepsilon_{a,c},
 \qquad
@@ -328,7 +328,8 @@ The PRAISE experience suggests that the choice of \emph{how to predict} a compos
 The public repository contains the frozen seven-method matrix builder, four-policy B1 replay, controlled two-stage condition-choice code and summaries, source-linked systems architecture and literature audit, and one verified complete B=15 episode trace. Source manifests and SHA-256 checks differentiate public-I1 predictions from later WB scoring and distinguish original joint-action from newly defined two-stage policies. The action-level traces for the controlled two-stage experiment are archived locally and hash-recorded, rather than included in the committed summary directory.
 The detailed evidence, complete per-budget numerical appendix, and matched condition-selection study are linked from the GitHub-hosted B1 technical report \cite{praiseB1Report}. This is a versioned repository research record, not a separately peer-reviewed publication. The manuscript's numeric claims are taken from the frozen reports; this draft introduces no new numerical experiments.
 
-\begin{thebibliography}{11}
+\begin{thebibliography}{12}
+\bibitem{bishop2006} C. M. Bishop. 2006. \emph{Pattern Recognition and Machine Learning}, Section 3.3: Bayesian Linear Regression. Springer. \url{https://link.springer.com/book/9780387310732}.
 \bibitem{praiseB1Report} PRAISE research team. 2026. B1: Sequential Evaluation Under Fixed Validation Budgets---Consolidated Scientific Evidence Report, v0.1 (repository technical report, 5 November 2026). \url{https://github.com/ildefons/praise-cao-sim/blob/praise-identifiability-feasibility/first_science/b1/planb_validation/B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md}. Supporting numerical appendix: \url{https://github.com/ildefons/praise-cao-sim/blob/praise-identifiability-feasibility/first_science/b1/planb_validation/B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md}.
 \bibitem{pozas2023} Pozas Garc\'ia et al. 2023. Location-aware scalable service composition. \emph{Software: Practice and Experience}. \url{https://doi.org/10.1002/spe.3260}.
 \bibitem{stupar2023} Stupar and Huljeni\'c. 2023. Model-based cloud service deployment optimisation method for minimisation of application service operational cost. \emph{Journal of Cloud Computing}. \url{https://doi.org/10.1186/s13677-023-00389-8}.
