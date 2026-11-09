@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.10 --- 9 November 2026}
+\date{Working manuscript v0.11 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -43,13 +43,13 @@ We instantiate this approach in a composed-service compliance prediction problem
 
 The study addresses three questions: how to connect heterogeneous method outputs to a common validation decision; how balanced, decision-focused, and Knowledge Gradient acquisition behave under limited budgets; and whether adaptive choice of operating condition improves the final decision compared with uniform condition choice. We examine these questions on a fixed historical archive.
 
-\noindent\textbf{Contributions.}
+We contribute a budget-aware validation framework for computing-continuum systems that allocates limited evaluation resources to support method selection across heterogeneous operating conditions. The contributions are:
+
 \begin{enumerate}
-\item A budget-aware validation architecture that separates candidate methods, heterogeneous operating conditions, reference evidence, sequential acquisition, and the final recommendation.
-\item An executable finite-catalogue formulation in which each method--condition validation result can be acquired once and the terminal objective is domain-average method quality, illustrated through a complete source-verified service-composition case study.
-\item A retrospective comparison of balanced, decision-focused, and Knowledge Gradient policies, including a matched experiment isolating adaptive versus uniform condition selection within two-stage KG and Top2 families.
+\item \textbf{Budget-aware validation methodology.} A sequential framework for comparing and selecting computing-continuum methods under limited evaluation budgets, connecting validation evidence acquisition with a final method recommendation.
+\item \textbf{Method--condition validation algorithms.} A finite-catalogue experimental-design formulation in which each evaluation specifies both a candidate method and an operating condition. We implement established allocation strategies, including Knowledge Gradient, and investigate two-stage variants that separate method choice from adaptive condition choice.
+\item \textbf{Computing-continuum case study and evaluation.} A reproducible implementation using seven composed-service compliance predictors across twelve provider-world--graph conditions. We compare terminal recommendation quality under different budgets and assess adaptive versus uniform condition selection.
 \end{enumerate}
-The general validation problem motivates the methodology; the empirical evidence comes from the defined composed-service prediction case study. The selector operates on archived validation outcomes, not on live control decisions or measured heterogeneous resource costs.
 
 \section{Background and System Boundary}
 \subsection{Composed-service compliance prediction}
