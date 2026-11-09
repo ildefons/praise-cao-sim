@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.12 --- 9 November 2026}
+\date{Working manuscript v0.13 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -51,19 +51,118 @@ We contribute a budget-aware validation framework for computing-continuum system
 \item \textbf{Computing-continuum case study and evaluation.} A reproducible implementation using seven composed-service compliance predictors across twelve provider-world--graph conditions. We compare terminal recommendation quality under different budgets and assess adaptive versus uniform condition selection.
 \end{enumerate}
 
-\section{Background and System Boundary}
-\subsection{Composed-service compliance prediction}
+\section{Budget-Aware Validation Framework}
+We consider a computing-continuum system with several candidate methods and a target domain spanning heterogeneous operating conditions. A method may be a predictor, scheduler, resource-allocation strategy, or other mechanism with measurable quality under a specified condition. The framework addresses the validation decision: which method--condition evaluation should be performed next when exhaustive testing is unaffordable?
+
+Figure~\ref{fig:architecture} summarizes the workflow. A \emph{validation action} selects a candidate method and a condition; an evaluator returns a comparable quality measurement. The evidence accumulated within the budget informs a \emph{final recommendation} of one method for the entire predefined target domain. Conditions determine where evidence is gathered, while the target domain determines how the methods are ultimately compared.
+
+\begin{figure}[t]
+\centering
+\setlength{\fboxsep}{6pt}
+\fbox{\begin{minipage}{0.91\linewidth}
+\centering
+\textbf{Candidate methods and target operating conditions}\\
+Comparable quality criterion; limited validation budget\\[5pt]
+$\downarrow$\\[3pt]
+\fbox{\begin{minipage}{0.83\linewidth}\centering
+\textbf{Sequential validation policy}\\
+Choose method and condition $\rightarrow$ obtain evidence $\rightarrow$ update quality estimates
+\end{minipage}}\\[5pt]
+$\downarrow$\\[3pt]
+\textbf{Recommended method for the target domain}\\
+Quality assessed against the best available reference
+\end{minipage}}
+\caption{General budget-aware method-validation framework. Evaluation outcomes are acquired for selected method--condition pairs; the final recommendation targets method quality across the specified domain, rather than performance on just the sampled conditions.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Components and evidence flow}
+The framework has four roles: the \emph{method portfolio} supplies candidate approaches; the \emph{condition catalogue} defines the environments over which their quality matters; the \emph{evaluator} returns a comparable measure for a requested pair; and the \emph{selection policy} decides subsequent acquisitions and the terminal recommendation. The evaluator may use measurements, simulation, or an independently constructed reference, depending on the application.
+
+A distinction is essential: the policy observes an evaluation outcome only after selecting that pair, even if the evaluation infrastructure stores further results for retrospective analysis. It receives the identities and descriptors of available methods and conditions, its acquired measurements, and its current decision model---not the unobserved measurements or the identity of the actual best method. The next section specifies the resulting decision problem and allocation policies; Section~\ref{sec:case} shows their PRAISE instantiation.
+
+\section{Sequential Validation Methods}
+\subsection{Decision formulation}
+Let $\mathcal{M}=\{1,\ldots,K\}$ be the candidate methods and $\mathcal{C}=\{1,\ldots,C\}$ the prespecified operating conditions. Let $Y_{a,c}$ denote the validation loss of method $a$ in condition $c$, where lower values are better. A validation action acquires one outcome for a method--condition pair $(a,c)$; in our finite-catalogue setting, each pair can be acquired at most once. The budget $B$ limits the number of acquired outcomes.
+
+We fix the domain-average objective independently of the adaptive sampling decisions:
+\begin{equation}
+\mu_a=\frac{1}{C}\sum_{c=1}^{C}Y_{a,c}, \qquad
+a^\star=\arg\min_{a\in\mathcal{M}}\mu_a.
+\label{eq:target}
+\end{equation}
+After $B$ distinct validation actions the algorithm recommends $\widehat{a}_B$. The primary endpoint is \emph{terminal simple regret},
+\begin{equation}
+r_B=\mu_{\widehat{a}_B}-\mu_{a^\star}\geq0.
+\label{eq:regret}
+\end{equation}
+This objective differs from cumulative bandit reward. One method is recommended for the \emph{whole target domain}; this formulation does not optimize a separate recommendation for each condition.
+
+\subsection{Decision model and validation protocol}
+The acquisition policies considered here use a Gaussian regression surrogate to estimate each method's loss across the condition catalogue. An evaluation updates the corresponding posterior; after $B$ acquisitions, the recommendation minimizes the posterior estimate of domain-average loss. The statistical model and its parameters are fixed across compared policies.
+
+For the experimental protocol, each episode begins by observing every candidate method under one common initial condition, charging these $K$ evaluations against the total budget. The policy then chooses $B-K$ previously unobserved pairs. In the retrospective implementation, the replay harness reveals a selected loss from the archive and reserves the complete table for post-recommendation scoring. The specific model features and calibration constants are given in Section~\ref{sec:case}.
+
+\subsection{Shared acquisition statistics}
+Write $m_a$ for the posterior mean of predictor $a$'s average loss across the twelve conditions, $\Sigma_a$ for its Gaussian regression posterior covariance, $x_c$ for the provider--graph feature vector, and $v=C^{-1}\sum_c x_c$. Under observation-noise standard deviation $\sigma$, the reduction in posterior variance of the domain-average loss from evaluating an unused pair $(a,c)$ is
+\begin{equation}
+ \Delta_{a,c}=\frac{(v^\top\Sigma_a x_c)^2}{\sigma^2+x_c^\top\Sigma_a x_c},\qquad s_{a,c}=\sqrt{\Delta_{a,c}}.
+ \label{eq:gain}
+\end{equation}
+The quantity $s_{a,c}$ is also the predicted standard deviation of the \emph{change in the posterior mean} after acquiring $(a,c)$. All policies use the same no-repeat action mask and recommend the smallest posterior domain-average mean after spending the full budget. These quantities describe the assumed surrogate, not calibrated stochastic variation in deterministic archived errors.
+
+\subsection{Original comparison and budget-aware Top2}
+The baseline comparison comprises Random (uniformly sample an unused predictor--condition pair), Balanced (favor under-evaluated predictors, worlds and graphs), Informed (weight $\Delta_{a,c}$ by the closeness of each predictor to its competitors), and the budget-aware Top2 heuristic.
+
+The \emph{original Top2} rule first spends the mandatory $K$ observations comparing all methods on a single common starting condition. At budget $B$, let $E=B-K$ be the number of remaining acquisitions. The next $\lceil E/2\rceil$ acquisitions follow the \emph{same joint-action Balanced score} used by the Balanced policy. For the remaining acquisitions, after each update choose the current two smallest-posterior-mean predictors $T=\operatorname{Top2}_{\min}\{m_a\}$ and select
+\begin{equation}
+ (a_t,c_t)\in\arg\max_{\substack{a\in T\\(a,c)\ \mathrm{unobserved}}}\Delta_{a,c}.
+ \label{eq:top2}
+\end{equation}
+If neither shortlisted predictor has an eligible action, fall back to Balanced. In our case study ($K=7$, $B=15$), four extra actions are coverage acquisitions and four are Top2 acquisitions. This method ranks posterior \emph{means}, not probabilities of being best, and must not be described as top-two Thompson sampling \cite{russo2016}.
+
+\subsection{Joint-action Knowledge Gradient (KG)}
+The independently evaluated \emph{one-step joint-action KG} benchmark uses the same Gaussian model but chooses each new unused predictor--condition pair according to the model-conditional expected improvement in the final decision \cite{frazier2008}. Let $h_a=\min_{b\ne a}m_b$ and $d_a=|m_a-h_a|$. With $\phi$ and $\Phi$ denoting the standard normal density and CDF, respectively, its closed-form score is
+\begin{equation}
+ \operatorname{KG}(a,c)=
+ \begin{cases}
+ s_{a,c}\phi(d_a/s_{a,c})-d_a\Phi(-d_a/s_{a,c}),&s_{a,c}>0,\\
+ 0,&s_{a,c}=0.
+ \end{cases}
+ \label{eq:kg}
+\end{equation}
+At every step, maximize this score \emph{jointly} over all remaining $(a,c)$ pairs, reveal that value, update the posterior, and repeat until budget exhaustion. This is an exact \emph{one-step} Gaussian acquisition calculation under the specified surrogate, not a general finite-horizon optimality theorem.
+
+\subsection{Two-stage KG and Top2: matched condition-choice policies}
+To test the role of \emph{condition choice}, we implemented two new two-stage policy families, each with one adaptive and one uniform-condition variant. These are \emph{not} the original joint-action KG or the original Top2 above. Within each family, adaptive and uniform variants have the \emph{same predictor-selection rule conditional on the current observed history}.
+
+\textbf{Two-stage KG:} first choose a predictor maximizing the \emph{mean} $\operatorname{KG}(a,c)$ over its remaining conditions. The adaptive variant then chooses that predictor's maximum-KG unobserved condition; the uniform variant draws an unobserved condition uniformly.
+
+\textbf{Two-stage Top2:} preserve the $\lceil(B-K)/2\rceil$ initial coverage period. During coverage, choose a least-sampled predictor; adaptive condition choice favors underrepresented provider worlds and graphs, whereas uniform condition choice samples from that predictor's unseen conditions. After coverage, restrict to the two predictors with lowest current posterior means, select the predictor with largest \emph{mean} $\Delta_{a,c}$ across its available conditions, then either choose its maximum-$\Delta$ condition (adaptive) or an available condition uniformly.
+
+Both variants use the same final posterior recommendation and the same full-domain target. Different condition observations may induce different \emph{later predictor choices}. Thus their paired comparison identifies the \emph{whole-policy} effect of changing condition-choice rules, not a direct effect holding future predictor paths fixed.
+
+\section{Case Study: Composed-Service Performance Prediction}
+\label{sec:case}
+The PRAISE case study instantiates the general framework with performance-prediction methods for composed services. Candidate methods reconstruct and combine provider-local behavior from public information; conditions vary both the stochastic provider world and the composition graph. The final decision is which predictor yields the lowest average error over this domain.
+
+
+\subsection{Prediction task and provider evidence}
 Let $G$ be a composition graph of constituent provider services and let $A$ denote admissibility or compliance requirements. For a horizon $H$ and threshold $\rho$, the target $\sigma_G(A,H;\rho)$ is the success probability for the composed service under the specified stochastic provider world. A prediction method $M_a$, given the evidence permitted by its interface $I$, produces $\sighat_{a,G}(A,H;\rho)$.
 
 The PRAISE methodology separates the \emph{information interface} $I$ from the \emph{integration/prediction method} $M$. Interface I1 discloses public provider-local, rho-conditioned cards and admissibility information. Other interfaces, including I2a and I2b, were studied elsewhere in PRAISE; they are \emph{not} candidate information inputs in the seven-method validation experiment presented here. A white-box (WB/I5) simulator supplies reference results only in the later evaluation stage.
 
-\subsection{The seven evaluated prediction variants}
+\subsection{Candidate prediction methods}
 The evaluated portfolio consists of seven variants under \emph{one shared public-I1 provider-information interface}: M1 (one reconstructed model per provider); M2 (three selected models per provider, $3^3=27$ joint graph models); M3\_FULL343 (seven candidates per provider, $7^3=343$ weighted joint members); two original-style, public-I1/M3 reduced-support variants (Top14 and Top1); and two fixed-CV Top14/Top1 variants. The last four differ in reconstruction, joint-support choice, weight handling and/or graph trajectory allocation, not in disclosure level.
 
 The public I1 cards were produced before the blind graph-prediction stage. Phase-5 reconstruction and prediction source code explicitly excludes hidden provider parameters and final WB outcomes as prediction inputs. WB references are joined after the corresponding prediction freeze. Source-level provenance is recorded in the accompanying repository. We do \emph{not} claim this seven-method portfolio exhausts every I$\times$M combination possible in PRAISE.
 
-\section{Architecture: From Provider Evidence to Predictor Choice}
-Figure~\ref{fig:architecture} shows the implemented logical workflow and its separation of public prediction evidence from retrospective reference scoring.
+
+\subsection{Validation conditions and reference losses}
+Our validation catalogue has $K=7$ predictor variants and $C=12$ conditions: three eligible provider worlds (P1, P3, P4) crossed with four composition graphs ($G_{\rm PAR}$, $G_{\rm SEQ}$, $G_{\rm PARSEQ}$, $G_{\rm SEQPAR}$). Each $Y_{a,c}$ is the mean absolute prediction error of method $a$ against independent white-box reference results, aggregated over the same 555 query--horizon points in condition $c$. The target is the equally weighted average of the twelve condition-level errors. The complete $7\times12$ reference table exists in the archived evidence, while an allocation policy may observe only the entries acquired within its budget.
+
+\subsection{Instantiated prediction and validation pipeline}
+Figure~\ref{fig:casepipeline} maps the case study to the general framework of Fig.~\ref{fig:architecture}. Public provider information and the composition request are upstream inputs to the predictor portfolio; comparison with white-box reference outcomes produces the losses subsequently used by the sequential validation policy.
 
 \begin{figure*}[t]
 \centering
@@ -89,84 +188,29 @@ $\downarrow$ \hspace{1.4cm} \textit{Reference WB joined after prediction freeze}
 \end{minipage}}\\[5pt]
 $\downarrow$ \hspace{0.3cm} \textit{reveal one unused cell per action}\\[3pt]
 \fbox{\begin{minipage}{0.81\linewidth}\centering
-\textbf{Offline budget controller and statistical decision model}\\
+\textbf{Sequential validation policy and decision model}\\
 Choose next validation cell $\rightarrow$ update posterior $\rightarrow$ recommend one method
 \end{minipage}}\\[5pt]
 $\downarrow$\\[3pt]
 \textbf{Selected predictor for the entire predefined validation domain}
 \end{minipage}}
-\caption{System-level validation and predictor-selection workflow. The public-I1 reconstruction and blind graph-prediction modules generate candidate outputs; independent WB references are accessed only after their predictions have been frozen. The B1 controller \emph{replays archived per-cell errors}, revealing only selected cells during each episode. A live orchestrator or runtime re-selection loop is not part of the evaluated implementation.}
-\label{fig:architecture}
+\caption{System-level validation and predictor-selection workflow. The public-I1 reconstruction and blind graph-prediction modules generate candidate outputs; independent WB references are accessed only after their predictions have been frozen. The B1 validation procedure replays archived per-cell errors, revealing one chosen outcome at a time to assess its method recommendation.}
+\label{fig:casepipeline}
 \end{figure*}
 
-\subsection{What is actually implemented}
+\subsection{Implementation and evidence-access boundaries}
+
 The upstream pipeline materializes provider-local I1 cards, reconstructs candidate provider models, and evaluates graph-level compliance predictions with independent WB references. These upstream stages were executed to construct immutable evidence files. The validation-selection controller is then evaluated \emph{offline}: it reads one selected archived aggregate loss at a time from the frozen matrix, maintains a statistical model over candidate performance, and recommends a method at the budget limit.
 
 Thus there is a genuine, executable research workflow across the stages, but not an online middleware service that calls graph simulations on demand. A downstream service designer or orchestrator could consume the selected prediction method; that integration remains future work. This boundary is relevant to both the novelty claim and the interpretation of resource costs.
 
-\subsection{System interfaces}
+\paragraph{Input and output contracts.}
 Each predictor must accept the public I1 provider evidence, the relevant graph and query definitions, and produce composed-service compliance estimates. The reference evaluator aggregates the absolute errors of those estimates against WB results into a condition-level MAE. The selector sees only previously acquired MAEs and their known condition descriptors. Crucially, it cannot see unobserved archive entries, future errors, private provider parameters, or reference-best predictor identity.
 
-\section{Finite-Budget Validation and Method Selection}
-\subsection{Decision formulation}
-Let $\mathcal{M}=\{1,\ldots,K\}$ be the candidate prediction methods and $\mathcal{C}=\{1,\ldots,C\}$ the prespecified conditions. In the current evaluation, $K=7$, $C=12$ and the conditions are three eligible provider worlds P1/P3/P4 crossed with four graphs: $G_{\rm PAR}$, $G_{\rm SEQ}$, $G_{\rm PARSEQ}$ and $G_{\rm SEQPAR}$. An element $Y_{a,c}$ is the archived MAE for method $a$ in condition $c$, computed over the same 555 related query--horizon values. All $KC=84$ values exist in the audit archive, but a policy may reveal each value at most once.
 
-We fix the domain-average objective independently of the adaptive sampling decisions:
-\begin{equation}
-\mu_a=\frac{1}{C}\sum_{c=1}^{C}Y_{a,c}, \qquad
-a^\star=\arg\min_{a\in\mathcal{M}}\mu_a.
-\label{eq:target}
-\end{equation}
-After $B$ distinct validation actions the algorithm recommends $\widehat{a}_B$. The primary endpoint is \emph{terminal simple regret},
-\begin{equation}
-r_B=\mu_{\widehat{a}_B}-\mu_{a^\star}\geq0.
-\label{eq:regret}
-\end{equation}
-This objective differs from cumulative bandit reward. One predictor is recommended for the \emph{whole twelve-condition domain}; the current system does not select a different predictor for each graph or live request.
 
-\subsection{Fixed observation model}
-All original B1 policies share a frozen, independent-per-predictor Gaussian regression on an intercept, three provider-world indicators and four graph indicators. The mean of the twelve modeled condition losses defines each predictor's posterior domain-average MAE. The observation-noise parameter and prior variances are fixed development heuristics, not empirically established calibration guarantees. Under an additive model, interactions between worlds and graphs are not modeled explicitly; evaluating robustness to that misspecification is a planned research extension.
-
-An episode initializes by observing \emph{all seven methods} at one common starting condition, charging all seven observations against the total budget. Then the policy chooses $B-7$ additional unused method--condition pairs. The recommendation is the predictor with the lowest posterior domain-average MAE. The hidden complete matrix is accessed by the replay harness solely for revealing a selected observation and for retrospective scoring.
-
-\subsection{Shared acquisition statistics}
-Write $m_a$ for the posterior mean of predictor $a$'s average loss across the twelve conditions, $\Sigma_a$ for its Gaussian regression posterior covariance, $x_c$ for the provider--graph feature vector, and $v=C^{-1}\sum_c x_c$. With the frozen observation-noise parameter $\sigma=0.055$, the reduction in posterior variance of the domain-average loss from evaluating an unused pair $(a,c)$ is
-\begin{equation}
- \Delta_{a,c}=\frac{(v^\top\Sigma_a x_c)^2}{\sigma^2+x_c^\top\Sigma_a x_c},\qquad s_{a,c}=\sqrt{\Delta_{a,c}}.
- \label{eq:gain}
-\end{equation}
-The quantity $s_{a,c}$ is also the predicted standard deviation of the \emph{change in the posterior mean} after acquiring $(a,c)$. All policies use the same no-repeat action mask and recommend the smallest posterior domain-average mean after spending the full budget. These quantities describe the assumed surrogate, not calibrated stochastic variation in deterministic archived errors.
-
-\subsection{Original comparison and budget-aware Top2}
-The original four-policy study comprises Random (uniformly sample an unused predictor--condition pair), Balanced (favor under-evaluated predictors, worlds and graphs), Informed (weight $\Delta_{a,c}$ by the closeness of each predictor to its competitors), and the budget-aware Top2 heuristic.
-
-The \emph{original Top2} rule first spends the mandatory seven observations comparing all predictors on a single common starting condition. At budget $B$, let $E=B-7$ be the number of remaining acquisitions. The next $\lceil E/2\rceil$ acquisitions follow the \emph{same joint-action Balanced score} used by the Balanced policy. For the remaining acquisitions, after each update choose the current two smallest-posterior-mean predictors $T=\operatorname{Top2}_{\min}\{m_a\}$ and select
-\begin{equation}
- (a_t,c_t)\in\arg\max_{\substack{a\in T\\(a,c)\ \mathrm{unobserved}}}\Delta_{a,c}.
- \label{eq:top2}
-\end{equation}
-If neither shortlisted predictor has an eligible action, fall back to Balanced. For $B=15$, four extra actions are coverage acquisitions and four are Top2 acquisitions. This method ranks posterior \emph{means}, not probabilities of being best, and must not be described as top-two Thompson sampling \cite{russo2016}.
-
-\subsection{Joint-action Knowledge Gradient (KG)}
-The independently evaluated \emph{one-step joint-action KG} benchmark uses the same Gaussian model but chooses each new unused predictor--condition pair according to the model-conditional expected improvement in the final decision \cite{frazier2008}. Let $h_a=\min_{b\ne a}m_b$ and $d_a=|m_a-h_a|$. With $\phi$ and $\Phi$ denoting the standard normal density and CDF, respectively, its closed-form score is
-\begin{equation}
- \operatorname{KG}(a,c)=
- \begin{cases}
- s_{a,c}\phi(d_a/s_{a,c})-d_a\Phi(-d_a/s_{a,c}),&s_{a,c}>0,\\
- 0,&s_{a,c}=0.
- \end{cases}
- \label{eq:kg}
-\end{equation}
-At every step, maximize this score \emph{jointly} over all remaining $(a,c)$ pairs, reveal that value, update the posterior, and repeat until budget exhaustion. This is an exact \emph{one-step} Gaussian acquisition calculation under the specified surrogate, not a general finite-horizon optimality theorem.
-
-\subsection{Two-stage KG and Top2: matched condition-choice policies}
-To test the role of \emph{condition choice}, we implemented two new two-stage policy families, each with one adaptive and one uniform-condition variant. These are \emph{not} the original joint-action KG or the original Top2 above. Within each family, adaptive and uniform variants have the \emph{same predictor-selection rule conditional on the current observed history}.
-
-\textbf{Two-stage KG:} first choose a predictor maximizing the \emph{mean} $\operatorname{KG}(a,c)$ over its remaining conditions. The adaptive variant then chooses that predictor's maximum-KG unobserved condition; the uniform variant draws an unobserved condition uniformly.
-
-\textbf{Two-stage Top2:} preserve the $\lceil(B-7)/2\rceil$ initial coverage period. During coverage, choose a least-sampled predictor; adaptive condition choice favors underrepresented provider worlds and graphs, whereas uniform condition choice samples from that predictor's unseen conditions. After coverage, restrict to the two predictors with lowest current posterior means, select the predictor with largest \emph{mean} $\Delta_{a,c}$ across its available conditions, then either choose its maximum-$\Delta$ condition (adaptive) or an available condition uniformly.
-
-Both variants use the same final posterior recommendation and the same full-domain target. Different condition observations may induce different \emph{later predictor choices}. Thus their paired comparison identifies the \emph{whole-policy} effect of changing condition-choice rules, not a direct effect holding future predictor paths fixed.
+\subsection{Statistical surrogate used for allocation}
+All compared policies share a frozen, independent-per-predictor Gaussian regression on an intercept, three provider-world indicators, and four graph indicators. The observation-noise standard deviation is $\sigma=0.055$; the prior and design parameters are fixed throughout replay. The model predicts each method's twelve-condition mean loss without explicit provider--graph interaction terms. Its posterior supports the acquisition statistics of Section~3 and the terminal decision rule of Eq.~\eqref{eq:target}.
 
 \section{Evaluation}
 \subsection{Historical evidence and experimental design}
