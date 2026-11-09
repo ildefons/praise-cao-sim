@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.21 --- 9 November 2026}
+\date{Working manuscript v0.22 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -118,7 +118,7 @@ s_{a,c} &=\sqrt{\Delta_{a,c}}. &&
 \end{aligned}
 \label{eq:gain}
 \end{equation}
-Here $b_0$ and $V_0$ specify the initial estimate and uncertainty of the coefficients; $\Sigma_a$ is their updated covariance after the selected evaluations. Thus $\Delta_{a,c}$ measures how much another test is expected to reduce uncertainty about method $a $s_{a,c}$ is also the predicted standard deviation of the \emph{change in the posterior mean} after acquiring $(a,c)$. All policies use the same no-repeat action mask and recommend the smallest posterior domain-average mean after spending the full budget. These quantities describe the assumed surrogate, not calibrated stochastic variation in deterministic archived errors.
+Here $b_0$ and $V_0$ specify the initial coefficient estimate and its uncertainty, while $\Sigma_a$ denotes the updated coefficient covariance. The quantity $\Delta_{a,c}$ is the expected reduction in uncertainty about the average loss for method $a$, and $s_{a,c}$ describes how much the corresponding estimated average can change after an additional evaluation.
 
 \subsection{Original comparison and budget-aware Top2}
 The baseline comparison comprises Random (uniformly sample an unused predictor--condition pair), Balanced (favor under-evaluated predictors, worlds and graphs), Informed (weight $\Delta_{a,c}$ by the closeness of each predictor to its competitors), and the budget-aware Top2 heuristic.
