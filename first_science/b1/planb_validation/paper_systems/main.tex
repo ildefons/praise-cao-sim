@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.36 --- 9 November 2026}
+\date{Working manuscript v0.37 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -157,7 +157,7 @@ We first consider three reference strategies that differ in how they use informa
 \begin{description}
 \item[Random.] Choose uniformly among all method--condition pairs not yet evaluated. Every available test is equally likely, irrespective of its results or previous coverage.
 \item[Balanced.] Random selection tends toward broad coverage only on average over many runs; with a small budget, one run may repeatedly test some methods or condition types while leaving others scarcely evaluated. Balanced reduces this unevenness by explicitly favoring methods with fewer tests and, within each method, condition types with less coverage. It uses the record of which tests were performed, not their observed performance values.
-\item[Informed.] Prefer evaluations that reduce uncertainty about methods whose estimated average losses are difficult to distinguish. The score for an unused pair $(a,c)$ combines its expected variance reduction $\Delta_{a,c}$ with the ambiguity of the candidate method's ranking:
+\item[Informed.] Prefer evaluations that help determine which method performs better when their predicted average losses are similar or the estimates remain uncertain. The score for an unused pair $(a,c)$ combines its expected variance reduction $\Delta_{a,c}$ with the ambiguity of the candidate method's ranking:
 \begin{equation}
 S_{a,c}^{\mathrm{Inf}}=
 \Delta_{a,c}
