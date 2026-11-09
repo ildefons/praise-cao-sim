@@ -22,12 +22,12 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.4 --- 9 November 2026}
+\date{Working manuscript v0.5 --- 9 November 2026}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-Validating management and prediction methods in the computing continuum is expensive: heterogeneous devices, distributed providers, changing operating conditions, and interacting components multiply the configurations that must be tested. Time, computing infrastructure, physical equipment, and human effort constrain how much evidence can be collected. The resulting challenge is to allocate a limited validation budget where it most improves decisions among alternative methods. We study this challenge as sequential experimental design over method--condition pairs: each acquired validation result updates estimates of method quality, and a final recommendation minimizes estimated error across a specified operating domain. We compare balanced and decision-focused allocation, one-step Knowledge Gradient, and two-stage policies that separate method choice from adaptive condition selection. Our case study evaluates seven predictors of composed-service compliance across twelve provider-world--graph conditions, using a frozen archive of 84 validation results. In retrospective replay, budget-aware Top2 reduces mean terminal simple regret by 27.9\% relative to balanced validation across five budgets; a separate matched comparison finds lower aggregate regret with adaptive than uniform condition choice for both KG and Top2. The results establish a reproducible, budget-aware validation workflow for this case study, with broader computing-continuum management applications motivating its design.
+Validating management and prediction methods in the computing continuum is expensive: heterogeneous devices, distributed providers, changing operating conditions, and interacting components multiply the configurations that must be tested. Time, computing infrastructure, physical equipment, and human effort constrain how much evidence can be collected. The resulting challenge is to allocate a limited validation budget where it most improves decisions among alternative methods. We study this challenge as sequential experimental design over method--condition pairs: each acquired validation result updates estimates of method quality, and a final recommendation minimizes estimated error across a specified operating domain. We compare balanced and decision-focused allocation, one-step Knowledge Gradient, and two-stage policies that separate method choice from adaptive condition selection. Our case study evaluates seven predictors of composed-service compliance across twelve provider-world--graph conditions, using a frozen archive of 84 validation results. In retrospective replay, one-step joint-action Knowledge Gradient has the lowest mean terminal simple regret among five evaluated policies, reducing regret by 43.6\% relative to balanced allocation and 21.7\% relative to budget-aware Top2 across five budgets. In a separate matched two-stage experiment, adaptive condition selection reduces average regret relative to uniform selection within both KG and Top2 policy families. The results establish a reproducible, budget-aware validation workflow for this case study, with broader computing-continuum management applications motivating its design.
 \end{abstract}
 
 \noindent\textbf{Keywords:} computing continuum; resource-constrained validation; sequential experimental design; method selection; service composition; adaptive testing.
@@ -174,28 +174,30 @@ The frozen comparison, documented in the repository's B1 technical evidence repo
 
 Original B1 allocation policies are compared at $B\in\{10,15,20,30,40\}$. For every policy and budget, the evaluation uses twelve distinct initial conditions and twenty seeded episodes per initial condition, yielding 240 decisions per policy/budget and 4,800 terminal decisions overall. Intervals use 2,000 stratified percentile-bootstrap replicates over the randomized episodes, conditional on the \emph{same fixed archive}. These are not independent new provider worlds.
 
-\subsection{Primary selection quality}
-Table~\ref{tab:original} preserves the historical four-policy baseline as contextual evidence, while Fig.~\ref{fig:controlled} foregrounds the newer matched KG and Top2 condition-choice comparison. The table reports the original mean simple regret. The budget-aware Top2 policy has the lowest mean regret in each tested budget among the four original policies. Averaging budgets equally, balanced regret is 0.0099098 versus 0.0071446 for budget-aware Top2, a 27.9\% relative reduction. The prespecified paired Top2-minus-balanced difference is $-0.0027652$ MAE units, with nominal 95\% episode-bootstrap interval $[-0.0036000,-0.0018985]$. The interval characterizes the retrospective randomized replay conditional on the archive, not uncertainty about future provider worlds.
+\subsection{Primary selection quality: joint-action KG and original policies}
+We first compare the original four acquisition policies with the separately frozen one-step \emph{joint-action KG} benchmark. All five operate on the same 84-element archive, use the same seven initial observations, and recommend the minimum-posterior-mean predictor after exhausting each evaluation budget. Table~\ref{tab:original} shows their mean terminal simple regret.
+
+KG has the lowest mean regret at all five budgets. Averaged equally across budgets, KG incurs 0.005594 regret, compared with 0.009910 for Balanced (43.6\% less) and 0.007145 for the original budget-aware Top2 (21.7\% less). The archived paired, equal-budget KG-minus-Top2 difference is $-0.001551$ MAE units (nominal 95\% within-archive bootstrap interval $[-0.002316,-0.000794]$). At the individual budgets $B=10$, $20$, and $30$, the corresponding nominal paired intervals include zero. These observations favor KG on the tested archive without asserting that it dominates on independently sampled provider worlds.
 
 \begin{table}[t]
 \centering
-\caption{Original B1 four-policy baseline: mean terminal simple regret on the fixed historical archive (lower is better). Every entry summarizes 240 episodes.}
+\caption{Historical fixed-archive comparison of the four original B1 policies and the separately specified one-step joint-action KG benchmark: mean terminal simple regret (lower is better; 240 episodes per entry). The two-stage adaptive/uniform policies in Fig.~\ref{fig:controlled} are different policies.}
 \label{tab:original}
 \small
-\begin{tabular}{rcccc}
+\begin{tabular}{rccccc}
 \toprule
-$B$ & Random & Balanced & Informed & Top2 \\
+$B$ & Random & Balanced & Informed & Top2 & KG \\
 \midrule
-10 & 0.017404 & 0.018516 & 0.018690 & 0.015194\\
-15 & 0.016812 & 0.011998 & 0.016087 & 0.009799\\
-20 & 0.013044 & 0.009917 & 0.008455 & 0.006917\\
-30 & 0.010159 & 0.005487 & 0.006120 & 0.002925\\
-40 & 0.007138 & 0.003632 & 0.001592 & 0.000888\\
+10 & 0.017404 & 0.018516 & 0.018690 & 0.015194 & 0.012607\\
+15 & 0.016812 & 0.011998 & 0.016087 & 0.009799 & 0.006620\\
+20 & 0.013044 & 0.009917 & 0.008455 & 0.006917 & 0.005968\\
+30 & 0.010159 & 0.005487 & 0.006120 & 0.002925 & 0.002522\\
+40 & 0.007138 & 0.003632 & 0.001592 & 0.000888 & 0.000251\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The distinction between simple regret and exact best-method identification matters. For example, at $B=20$ the Informed policy identifies the exact best method more often than Top2 (67.5\% versus 63.8\%), but Top2 incurs lower regret because its incorrect recommendations more often choose a near-best method. This is a retrospective descriptive decomposition, not a separately confirmed causal result.
+The distinction between simple regret and exact-best identification also matters. For example, at $B=20$ the original Informed policy identifies the best method more often than original Top2 (67.5\% versus 63.8\%), while Top2 has lower mean regret because its errors more often select a near-best method. This retrospective decomposition illustrates why simple regret, rather than correct-selection frequency alone, is the main outcome.
 
 \subsection{Controlled condition selection}
 A second, separately versioned study investigates the choice of \emph{condition} once a predictor has been selected. Within each of two new two-stage policy families, the arm-selection function is the same conditional on the observed history, while one variant chooses the condition adaptively and the other uniformly from the candidate predictor's remaining conditions. Sequential histories can subsequently diverge, so the comparison estimates a \emph{whole-policy effect}, not an effect under identical realized arm paths.
