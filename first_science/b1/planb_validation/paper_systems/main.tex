@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.28 --- 9 November 2026}
+\date{Working manuscript v0.29 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -106,7 +106,7 @@ To estimate how a method would perform under conditions not yet tested, the sele
 For the experimental protocol, each episode begins by observing every candidate method under one common initial condition, charging these $K$ evaluations against the total budget. The policy then chooses $B-K$ previously unobserved pairs. In the retrospective implementation, the replay harness reveals a selected loss from the archive and reserves the complete table for post-recommendation scoring. The specific model features and calibration constants are given in Section~\ref{sec:case}.
 
 \subsection{Evidence updates and acquisition statistics}
-Each condition is encoded by a feature vector $x_c$. In our case study, it contains an intercept and one-hot indicators identifying the provider world and composition graph. For each method $a$, we use the following Gaussian regression model for validation loss:
+Each operating condition is represented by a feature vector $x_c$ describing its relevant characteristics. For each candidate method $a$, we use the following Gaussian regression model for validation loss:
 \begin{equation}
 Y_{a,c}=x_c^\top\beta_a+\varepsilon_{a,c},
 \qquad
@@ -251,7 +251,7 @@ Each predictor must accept the public I1 provider evidence, the relevant graph a
 
 
 \subsection{Statistical surrogate used for allocation}
-All compared policies share a frozen, independent-per-predictor Gaussian regression on an intercept, three provider-world indicators, and four graph indicators. The observation-noise standard deviation is $\sigma=0.055$; the prior and design parameters are fixed throughout replay. The model predicts each method's twelve-condition mean loss without explicit provider--graph interaction terms. Its posterior supports the acquisition statistics of Section~3 and the terminal decision rule of Eq.~\eqref{eq:target}.
+In this case study, the condition feature vector $x_c$ contains an intercept, three one-hot indicators identifying the provider world, and four one-hot indicators identifying the composition graph. All compared allocation policies use this same independent-per-predictor Gaussian regression model. The observation-noise standard deviation is $\sigma=0.055$; the prior and design parameters are fixed throughout replay. The model predicts each method's twelve-condition mean loss without explicit provider--graph interaction terms. Its posterior supports the acquisition statistics of Section~3 and the terminal decision rule of Eq.~\eqref{eq:target}.
 
 \section{Evaluation}
 \subsection{Historical evidence and experimental design}
