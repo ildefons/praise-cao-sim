@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.18 --- 9 November 2026}
+\date{Working manuscript v0.19 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -98,7 +98,7 @@ After $B$ distinct validation actions the algorithm recommends $\widehat{a}_B$. 
 r_B=\mu_{\widehat{a}_B}-\mu_{a^\star}\geq0.
 \label{eq:regret}
 \end{equation}
-This objective differs from cumulative bandit reward. One method is recommended for the \emph{whole target domain}; this formulation does not optimize a separate recommendation for each condition.
+The objective is to recommend one method that performs well across the entire target domain. Note that, unlike cumulative-reward bandit objectives, which evaluate the rewards obtained during successive actions, terminal simple regret evaluates only the quality of the final recommendation.
 
 \subsection{Decision model and validation protocol}
 The acquisition policies considered here use a Gaussian regression surrogate to estimate each method's loss across the condition catalogue. An evaluation updates the corresponding posterior; after $B$ acquisitions, the recommendation minimizes the posterior estimate of domain-average loss. The statistical model and its parameters are fixed across compared policies.
