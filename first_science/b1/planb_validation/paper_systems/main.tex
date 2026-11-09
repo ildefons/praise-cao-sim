@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.25 --- 9 November 2026}
+\date{Working manuscript v0.26 --- 9 November 2026}
 
 \begin{document}
 \maketitle
@@ -118,7 +118,7 @@ s_{a,c} &=\sqrt{\Delta_{a,c}}. &&
 \end{aligned}
 \label{eq:gain}
 \end{equation}
-Here $b_0$ and $V_0$ denote the initial coefficient mean and covariance, while $\Sigma_a$ is the coefficient covariance after the observed evaluations. The quantity $\Delta_{a,c}$ measures the reduction in posterior variance of method $a$'s average loss; $s_{a,c}=\sqrt{\Delta_{a,c}}$ is the standard deviation of the corresponding change in its posterior mean. Top2 uses $\Delta_{a,c}$ to favor uncertainty reduction, while Knowledge Gradient uses $s_{a,c}$ to assess the expected improvement in the final recommendation.
+Here $b_0$ and $V_0$ denote the initial coefficient mean and covariance, while $\Sigma_a$ is the coefficient covariance after the observed evaluations. The quantity $\Delta_{a,c}$ measures the reduction in posterior variance of method $a$'s average loss; $s_{a,c}=\sqrt{\Delta_{a,c}}$ is the standard deviation of the corresponding change in its posterior mean. Top2 uses $\Delta_{a,c}$ to favor uncertainty reduction, while Knowledge Gradient uses $s_{a,c}$ to assess the expected improvement in the final recommendation. For each unevaluated method--condition pair, $s_{a,c}$ is calculated from the current regression covariance, the candidate condition's feature vector, and the average feature vector of the target domain. After each acquired evaluation, the covariance is updated and the acquisition scores are recomputed.
 
 \subsection{Original comparison and budget-aware Top2}
 The baseline comparison comprises Random (uniformly sample an unused predictor--condition pair), Balanced (favor under-evaluated predictors, worlds and graphs), Informed (weight $\Delta_{a,c}$ by the closeness of each predictor to its competitors), and the budget-aware Top2 heuristic.
