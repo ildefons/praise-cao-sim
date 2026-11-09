@@ -1,6 +1,6 @@
 # PRAISE systems paper — LaTeX working directory
 
-**Status:** manuscript draft v0.4, 9 November 2026. **Review-first**, not ready for submission.  
+**Status:** manuscript draft v0.5, 9 November 2026. **Review-first**, not ready for submission.  
 **Canonical source:** `main.tex` in this directory. Edits and iterations are committed to the `praise-identifiability-feasibility` branch.  
 **Compilation:** Standard **pdfLaTeX**, no XeLaTeX/LuaLaTeX/fontspec, no shell escape, no bibliography generator, the primary scientific figure is converted locally from a committed frozen SVG by build.sh. Citations use a standard in-file bibliography. The architecture is drawn using LaTeX boxes and text so no image conversion is needed.
 
@@ -24,7 +24,7 @@ The manuscript now includes a formal citation to the GitHub-hosted B1 consolidat
 ## Review protocol
 
 - The manuscript is framed around **budget-aware allocation of validation evidence for decisions among computing-continuum methods**. Composed-service predictor selection is the evaluated case study, not the whole problem definition.
-- First priorities for editorial iteration: revised general-to-specific title, abstract and introduction; whether the case-study instantiation follows naturally; Figure 1's scope; and the distinct original versus two-stage comparison families.
+- First priorities for editorial iteration: revised general-to-specific narrative, Figure 1's scope, and the distinct original joint-action KG/Top2 versus two-stage adaptive-condition comparison families. The v0.5 abstract and primary table foreground the verified one-step joint-action KG result; the controlled two-stage figure remains a separate experiment.
 - When proposing edits, refer to section numbers or quote a phrase. The next revision will update `main.tex` in GitHub and provide a new exact pull-and-compile command.
 - Manuscript is **venue-neutral** until the actual workshop/conference format is chosen. Page length and references must be adapted to that venue's template once identified.
 - Author list and affiliations are intentionally left anonymous in this working version; final metadata should be agreed before submission.
