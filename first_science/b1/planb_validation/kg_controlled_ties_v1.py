@@ -61,8 +61,8 @@ def choice(scores, policy, mode, budget, start, rep, step):
               for a in range(scores.shape[0]) if good[a].any()}
     mean_c = {c: float(np.mean(scores[good[:, c], c]))
               for c in range(scores.shape[1]) if good[:, c].any()}
-    a = best(mean_a, mean_a.values(), mode, budget, start, rep, step, "method")
-    c = best(mean_c, mean_c.values(), mode, budget, start, rep, step, "condition")
+    a = best(mean_a, list(mean_a.values()), mode, budget, start, rep, step, "method")
+    c = best(mean_c, list(mean_c.values()), mode, budget, start, rep, step, "condition")
     cs = [i for i in range(scores.shape[1]) if good[a, i]]
     aa = [i for i in range(scores.shape[0]) if good[i, c]]
     method_pair = (a, best(cs, [scores[a, i] for i in cs],
