@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.52 --- 10 November 2026}
+\date{Working manuscript v0.53 --- 10 November 2026}
 
 \begin{document}
 \maketitle
@@ -193,7 +193,7 @@ The score estimates the expected benefit of one more evaluation for selecting th
 At each step, the policy selects the unused method--condition pair $(a,c)$ with the highest KG score, observes its loss, and updates the model. This is an exact one-step calculation under the assumed Gaussian model, not a guarantee of optimality over the entire budget.
 
 \paragraph{Two-stage KG and Top2.}
-Sequential selection of both an alternative and its evaluation condition was studied in response-surface ranking by Hu and Ludkovski \cite{hu2017}. Related work on Bayesian optimization of objectives averaged over costly components provides a particularly close precedent for our domain-average objective \cite{toscano2022}. Covariate-aware KG is another development in this broader literature \cite{ding2022}. Here we construct specific two-stage variants of KG and Top2 to test the effect of condition selection. In each family, the method is chosen first using a defined score across its remaining conditions, and the condition is then selected either adaptively or uniformly. These constructions differ from the original joint-action KG and Top2 rules above. To our knowledge, the specific combination of selecting a method using its average acquisition score across remaining conditions and then selecting its condition adaptively or uniformly has not been previously reported in this matched KG--Top2 comparison. Within each family, the adaptive and uniform variants use the same method-selection rule conditional on the observations collected so far.
+Here we construct two-stage variants of KG and Top2 to investigate the effect of condition selection. To our knowledge, the specific two-stage acquisition rules proposed here, which first select a method using its average acquisition score across remaining conditions and then select a condition adaptively or uniformly, have not been previously reported. Sequential selection of both an alternative and its evaluation condition was studied in response-surface ranking by Hu and Ludkovski \cite{hu2017}. Related work on Bayesian optimization of objectives averaged over costly components provides a particularly relevant precedent for our domain-average objective \cite{toscano2022}. Covariate-aware Knowledge Gradient is another development in this research direction \cite{ding2022}. These two-stage constructions differ from the original joint-action KG and Top2 rules above. Within each family, the adaptive and uniform variants use the same method-selection rule conditional on the observations collected so far.
 
 \emph{Two-stage KG:} first choose a predictor maximizing the \emph{mean} $\operatorname{KG}(a,c)$ over its remaining conditions. The adaptive variant then chooses that predictor's maximum-KG unobserved condition; the uniform variant draws an unobserved condition uniformly.
 
