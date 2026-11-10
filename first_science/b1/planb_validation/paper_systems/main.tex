@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.57 --- 10 November 2026}
+\date{Working manuscript v0.58 --- 10 November 2026}
 
 \begin{document}
 \maketitle
@@ -169,7 +169,7 @@ S_{a,c}^{\mathrm{Inf}}=
 \end{equation}
 Here $m_a$ is the predicted domain-average loss and $q_a$ its posterior variance. A competing method $b$ contributes strongly when the estimated losses are close relative to their combined uncertainty, and weakly when they are clearly separated. The score favors a test with high variance reduction that can help resolve an uncertain ranking; the exponential factor is a heuristic ambiguity weight, not a probability of being best.
 \paragraph{Budget-aware Top2.}
-This heuristic baseline that combines broad coverage with focused evaluation. It first spreads evaluations across methods and operating conditions, then uses the resulting performance estimates to identify the two methods with the lowest predicted average losses and concentrates subsequent tests on them. The division of the remaining budget between these two phases is a fixed design choice, not a theoretically optimal allocation.
+This heuristic baseline combines broad coverage with focused evaluation. It first spreads evaluations across methods and operating conditions, then uses the resulting performance estimates to identify the two methods with the lowest predicted average losses and concentrates subsequent tests on them. The division of the remaining budget between these two phases is a fixed design choice, not a theoretically optimal allocation.
 
 After the common initial evaluations, $E=B-K$ evaluations remain. The \emph{original Top2} rule divides these $E$ remaining evaluations into two phases. In the first phase, it allocates $\lceil E/2\rceil$ evaluations (half the remaining budget, rounded up) using the same Balanced selection rule described above. For the remaining acquisitions, after each update choose the current two smallest-posterior-mean predictors $T=\operatorname{Top2}_{\min}\{m_a\}$ and select
 \begin{equation}
