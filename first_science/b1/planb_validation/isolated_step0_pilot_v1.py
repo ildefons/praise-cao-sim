@@ -36,6 +36,7 @@ COPY_NAMES = (
 EXPECTED_STATUS = "B1_NEW_WORLD_DRY_RUN_ONLY_NOT_STEP0_ELIGIBILITY"
 DEFAULT_CANDIDATE = "B0001_P1_A01"
 DEFAULT_GRAPH = "G_PAR"
+ALLOWED_CANDIDATES = {"B0001_P1_A01": 1, "B0001_P1_A02": 2}
 # Phase-1 / Phase-5 providers derive native seeds as trajectory_seed * 100 + ordinal.
 # Keep all derived seeds inside legacy NumPy RandomState's unsigned 32-bit range.
 SEED_NAMESPACE = 20_000_000
@@ -70,13 +71,13 @@ def validated_candidate(preview_file, candidate_id, graph_id):
             preview.get("execution_authorized") is not False or
             preview.get("provider_simulations_generated") != 0):
         raise ValueError("Input must be the unassessed V0.1 dry-run preview")
-    if candidate_id != DEFAULT_CANDIDATE or graph_id != DEFAULT_GRAPH:
-        raise ValueError("V1 pilot is restricted to B0001_P1_A01 / G_PAR")
+    if candidate_id not in ALLOWED_CANDIDATES or graph_id != DEFAULT_GRAPH:
+        raise ValueError("V1 pilot permits only B0001_P1_A01 or B0001_P1_A02 on G_PAR")
     rows = [r for r in preview["candidates"] if r["candidate_id"] == candidate_id]
     if len(rows) != 1:
         raise ValueError("Candidate not found or duplicated")
     candidate = rows[0]
-    if (candidate["battery_id"], candidate["role"], candidate["attempt"]) != ("B0001", "P1", 1):
+    if (candidate["battery_id"], candidate["role"], candidate["attempt"]) != ("B0001", "P1", ALLOWED_CANDIDATES[candidate_id]):
         raise ValueError("Unexpected candidate origin")
     if candidate["step0_status"] != "NOT_RUN":
         raise ValueError("Pilot candidate is not unassessed")
@@ -102,7 +103,7 @@ def validated_candidate(preview_file, candidate_id, graph_id):
 
 def seed_blocks(candidate_id):
     # Assign stage-disjoint and old-bank-disjoint consecutive 100/200 seed ranges.
-    # Deterministic unique namespace for this single proof-of-concept candidate.
+    # Deterministic isolated seed namespaces for the two authorized attempts.
     h = int(hashlib.sha256(candidate_id.encode()).hexdigest()[:8], 16)
     offset = SEED_NAMESPACE + (h % 10_000) * 1_000
     if offset + 599 > MAX_TRAJECTORY_SEED:
@@ -128,6 +129,11 @@ def contract_workspace(root, candidate, preview_file, graph_id):
         "approx_utilization": candidate["approx_utilization"],
     })
     blocks = seed_blocks(candidate["candidate_id"])
+    # The attempts have independent provider and graph trajectory banks.
+    other_id = next(cid for cid in ALLOWED_CANDIDATES if cid != candidate["candidate_id"])
+    other = seed_blocks(other_id)
+    if set(range(blocks["region"]["start"], blocks["confirmation"]["end_inclusive"]+1)) & set(range(other["region"]["start"],other["confirmation"]["end_inclusive"]+1)):
+        raise AssertionError("Candidate seed namespace collision")
     seeds["public_I1"]["P1"]["region"] = blocks["region"]
     seeds["public_I1"]["P1"]["sigma"] = blocks["sigma"]
     seeds["step0"]["calibration_WB"] = blocks["calibration"]
