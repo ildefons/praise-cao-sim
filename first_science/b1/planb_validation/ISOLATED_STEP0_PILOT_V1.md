@@ -24,7 +24,7 @@ The pilot runs:
    if calibration passes; if calibration fails, Step-0 confirmation records
    the gate failure without simulation
 
-Seed banks are four disjoint, SHA-derived subranges above 130 million.
+Seed banks are four disjoint, SHA-derived subranges between 20 and 30 million. The adapter checks the native simulator's `trajectory_seed * 100 + provider_ordinal + 1` derived seeds fit in NumPy's legacy 32-bit `RandomState` range.
 Original Phase-5 scientific bank seeds and private historical world
 parameters are not reused. Candidate generating parameters remain in
 `isolated_contracts` and must not be passed to acquisition policies.
@@ -92,3 +92,34 @@ report failures and preserve outcome firewalls.
 
 Do not run historical Phase-5 CLI on the new-world config or write its
 results under `first_science/phase5/results`.
+
+
+## Seed-range correction after initial dry-run failure
+
+The first pilot attempt used trajectory seeds around 803 million; the
+Phase-1 provider simulator multiplies trajectory seeds by 100 when seeding
+gamma distributions. NumPy's legacy `RandomState` rejects such derived
+seeds above `2**32 - 1`. The pilot stopped at its first I1 trajectory;
+it did not produce calibration or confirmation evidence.
+
+The corrected adapter bounds both trajectory seeds and **derived**
+provider-gamma seeds; this is now checked in `--verify`.
+
+**Do not resume the old output directory**, as its private contract and
+provenance intentionally preserve the failed seed allocation. Instead
+retain it for the engineering audit and use a new output directory:
+
+```bash
+python first_science/b1/planb_validation/isolated_step0_pilot_v1.py \\
+  --verify \\
+  --preview ~/praise/planb_b1_newworld_preview_v0_1/PRIVATE_world_candidates.json
+
+python first_science/b1/planb_validation/isolated_step0_pilot_v1.py \\
+  --run \\
+  --preview ~/praise/planb_b1_newworld_preview_v0_1/PRIVATE_world_candidates.json \\
+  --out ~/praise/planb_b1_isolated_step0_pilot_v1_seedfix
+```
+
+The `--resume` option continues a workspace with the **same**
+already-written contract only; it does not repair scientific seed
+contracts in place.
