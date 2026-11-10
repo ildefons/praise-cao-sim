@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.58 --- 10 November 2026}
+\date{Working manuscript v0.59 --- 10 November 2026}
 
 \begin{document}
 \maketitle
@@ -207,18 +207,18 @@ Both variants recommend a method using the same final decision rule and the same
 
 \section{Case Study: Composed-Service Performance Prediction}
 \label{sec:case}
-The PRAISE case study instantiates the general framework with performance-prediction methods for composed services. Candidate methods reconstruct and combine provider-local behavior from public information; conditions vary both the stochastic provider world and the composition graph. The final decision is which predictor yields the lowest average error over this domain.
+We evaluate the framework on a composed-service performance-prediction problem. A composed service executes multiple provider services connected by a specified composition structure. Each provider exposes only limited information about its behavior, so several prediction methods must estimate whether the composed service will satisfy a requested performance requirement. We validate these methods under different provider behaviors and composition structures, aiming to select the predictor with the lowest average error across all tested conditions.
 
 
 \subsection{Prediction task and provider evidence}
 Let $G$ be a composition graph of constituent provider services and let $A$ denote admissibility or compliance requirements. For a horizon $H$ and threshold $\rho$, the target $\sigma_G(A,H;\rho)$ is the success probability for the composed service under the specified stochastic provider world. A prediction method $M_a$, given the evidence permitted by its interface $I$, produces $\sighat_{a,G}(A,H;\rho)$.
 
-The PRAISE methodology separates the \emph{information interface} $I$ from the \emph{integration/prediction method} $M$. Interface I1 discloses public provider-local, rho-conditioned cards and admissibility information. Other interfaces, including I2a and I2b, were studied elsewhere in PRAISE; they are \emph{not} candidate information inputs in the seven-method validation experiment presented here. A white-box (WB/I5) simulator supplies reference results only in the later evaluation stage.
+The prediction setup separates two choices: the \emph{provider information available to a predictor} (interface $I$) and the \emph{method used to combine that information into a composed-service prediction} ($M$). All seven predictors evaluated here use the same public-information interface, denoted I1, which provides provider-level information conditioned on the requested threshold $\rho$ and the admissibility requirements. Other information interfaces are outside this experiment. A \emph{white-box} (WB) simulator, with access to the provider's full internal specification, supplies reference results for scoring predictions; its private information is not available to the candidate predictors.
 
 \subsection{Candidate prediction methods}
 The evaluated portfolio consists of seven variants under \emph{one shared public-I1 provider-information interface}: M1 (one reconstructed model per provider); M2 (three selected models per provider, $3^3=27$ joint graph models); M3\_FULL343 (seven candidates per provider, $7^3=343$ weighted joint members); two original-style, public-I1/M3 reduced-support variants (Top14 and Top1); and two fixed-CV Top14/Top1 variants. The last four differ in reconstruction, joint-support choice, weight handling and/or graph trajectory allocation, not in disclosure level.
 
-The public I1 cards were produced before the blind graph-prediction stage. Phase-5 reconstruction and prediction source code explicitly excludes hidden provider parameters and final WB outcomes as prediction inputs. WB references are joined after the corresponding prediction freeze. Source-level provenance is recorded in the accompanying repository. We do \emph{not} claim this seven-method portfolio exhausts every I$\times$M combination possible in PRAISE.
+The public provider-information records were produced before the predictors generated graph-level results. The archived reconstruction and prediction code excludes private provider parameters and white-box reference outcomes from its inputs. Reference outcomes were paired with predictions only after the predictions were frozen; the accompanying repository records this separation. The seven variants form a defined comparison portfolio rather than an exhaustive set of possible information-interface and prediction-method combinations.
 
 
 \subsection{Validation conditions and reference losses}
@@ -257,7 +257,7 @@ Choose next validation cell $\rightarrow$ update posterior $\rightarrow$ recomme
 $\downarrow$\\[3pt]
 \textbf{Selected predictor for the entire predefined validation domain}
 \end{minipage}}
-\caption{System-level validation and predictor-selection workflow. The public-I1 reconstruction and blind graph-prediction modules generate candidate outputs; independent WB references are accessed only after their predictions have been frozen. The B1 validation procedure replays archived per-cell errors, revealing one chosen outcome at a time to assess its method recommendation.}
+\caption{Case-study prediction and validation workflow. All candidate methods use the same public provider information. Their graph-level predictions are compared with independent white-box references only after prediction results are frozen. The validation procedure subsequently reveals one archived method--condition error at a time to evaluate its final recommendation.}
 \label{fig:casepipeline}
 \end{figure*}
 
@@ -277,9 +277,9 @@ In this case study, the condition feature vector $x_c$ contains an intercept, th
 
 \section{Evaluation}
 \subsection{Historical evidence and experimental design}
-The frozen comparison, documented in the repository's B1 technical evidence report \cite{praiseB1Report}, has seven predictors $\times$ twelve physical conditions, with P2 excluded by the prior eligibility gate. Three archival groups supply the seven methods: the Phase-5 full-support evaluation (M1, M2, M3\_FULL343); an original-style M3 retrospective evaluation (Top14, Top1); and a fixed-CV support evaluation (Top14, Top1). Their provenance checks include exact method/condition coverage, fixed point counts, source file hashes and WB reference separation.
+The frozen comparison, documented in the accompanying technical evidence report \cite{praiseB1Report}, includes seven predictors across twelve operating conditions; an additional candidate provider world, P2, was excluded by the study's predefined eligibility criterion. Three archival groups supply the seven methods: the Phase-5 full-support evaluation (M1, M2, M3\_FULL343); an original-style M3 retrospective evaluation (Top14, Top1); and a fixed-CV support evaluation (Top14, Top1). Their provenance checks include exact method/condition coverage, fixed point counts, source file hashes and WB reference separation.
 
-Original B1 allocation policies are compared at $B\in\{10,15,20,30,40\}$. For every policy and budget, the evaluation uses twelve distinct initial conditions and twenty seeded episodes per initial condition, yielding 240 decisions per policy/budget and 4,800 terminal decisions overall. Intervals use 2,000 stratified percentile-bootstrap replicates over the randomized episodes, conditional on the \emph{same fixed archive}. These are not independent new provider worlds.
+The original allocation policies are compared at $B\in\{10,15,20,30,40\}$. For every policy and budget, the evaluation uses twelve distinct initial conditions and twenty seeded episodes per initial condition, yielding 240 decisions per policy/budget and 4,800 terminal decisions overall. Intervals use 2,000 stratified percentile-bootstrap replicates over the randomized episodes, conditional on the \emph{same fixed archive}. These are not independent new provider worlds.
 
 \subsection{Primary selection quality: joint-action KG and original policies}
 We first compare the original four acquisition policies with the separately frozen one-step \emph{joint-action KG} benchmark. All five operate on the same 84-element archive, use the same seven initial observations, and recommend the minimum-posterior-mean predictor after exhausting each evaluation budget. Table~\ref{tab:original} shows their mean terminal simple regret.
@@ -288,7 +288,7 @@ KG has the lowest mean regret at all five budgets. Averaged equally across budge
 
 \begin{table}[t]
 \centering
-\caption{Historical fixed-archive comparison of the four original B1 policies and the separately specified one-step joint-action KG benchmark: mean terminal simple regret (lower is better; 240 episodes per entry). The two-stage adaptive/uniform policies in Fig.~\ref{fig:controlled} are different policies.}
+\caption{Historical fixed-archive comparison of the four original allocation policies and the separately specified one-step joint-action KG benchmark: mean terminal simple regret (lower is better; 240 episodes per entry). The two-stage adaptive/uniform policies in Fig.~\ref{fig:controlled} are different policies.}
 \label{tab:original}
 \small
 \begin{tabular}{rccccc}
@@ -344,11 +344,11 @@ A potential reviewer objection is that this is active model selection under a ne
 \textbf{Development reuse.} Several policy variants were developed or assessed on the same fixed archive. Comparative effects remain retrospective and should not be treated as independent confirmatory claims. The separate two-stage study preserves its own protocol and terminology.
 
 \section{Conclusion}
-The PRAISE experience suggests that the choice of \emph{how to predict} a composed service deserves an explicit validation decision in addition to the usual choice of the composed service itself. We implemented an I1-based predictor portfolio and an offline, budgeted validation layer that selectively reveals predictor--condition error evidence before recommending a domain-level method. The fixed historical benchmark shows promising reductions in terminal simple regret and illustrates why heterogeneous-condition validation can matter. The next systems milestone is an independently specified provider-world and cost study; a separate algorithmic track may investigate robustness under structured misspecification. Neither is claimed as complete here.
+This composed-service study shows why selecting \emph{how to predict} service performance merits its own validation decision, distinct from selecting or configuring the composed service itself. We implemented an I1-based predictor portfolio and an offline, budgeted validation layer that selectively reveals predictor--condition error evidence before recommending a domain-level method. The fixed historical benchmark shows promising reductions in terminal simple regret and illustrates why heterogeneous-condition validation can matter. The next systems milestone is an independently specified provider-world and cost study; a separate algorithmic track may investigate robustness under structured misspecification. Neither is claimed as complete here.
 
 \section*{Artifact and Reproducibility Statement}
-The public repository contains the frozen seven-method matrix builder, four-policy B1 replay, controlled two-stage condition-choice code and summaries, source-linked systems architecture and literature audit, and one verified complete B=15 episode trace. Source manifests and SHA-256 checks differentiate public-I1 predictions from later WB scoring and distinguish original joint-action from newly defined two-stage policies. The action-level traces for the controlled two-stage experiment are archived locally and hash-recorded, rather than included in the committed summary directory.
-The detailed evidence, complete per-budget numerical appendix, and matched condition-selection study are linked from the GitHub-hosted B1 technical report \cite{praiseB1Report}. This is a versioned repository research record, not a separately peer-reviewed publication. The manuscript's numeric claims are taken from the frozen reports; this draft introduces no new numerical experiments.
+The public repository contains the frozen seven-method matrix builder, four-policy validation replay, controlled two-stage condition-choice code and summaries, source-linked systems architecture and literature audit, and one verified complete B=15 episode trace. Source manifests and SHA-256 checks differentiate public-I1 predictions from later WB scoring and distinguish original joint-action from newly defined two-stage policies. The action-level traces for the controlled two-stage experiment are archived locally and hash-recorded, rather than included in the committed summary directory.
+The detailed evidence, complete per-budget numerical appendix, and matched condition-selection study are linked from the accompanying technical report \cite{praiseB1Report}. This is a versioned repository research record, not a separately peer-reviewed publication. The manuscript's numeric claims are taken from the frozen reports; this draft introduces no new numerical experiments.
 
 \begin{thebibliography}{16}
 \bibitem{bishop2006} C. M. Bishop. 2006. \emph{Pattern Recognition and Machine Learning}, Section 3.3: Bayesian Linear Regression. Springer. \url{https://link.springer.com/book/9780387310732}.
