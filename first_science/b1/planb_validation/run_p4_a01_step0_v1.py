@@ -28,7 +28,7 @@ def candidate_for(preview_path):
             preview.get("execution_authorized") is not False or
             preview.get("provider_simulations_generated")!=0):
         raise ValueError("Not the predeclared simulation-free preview")
-    if tuple(preview["world_roles"])!=("P1","P4","P4"):
+    if tuple(preview["world_roles"])!=("P1","P3","P4"):
         raise ValueError("World-role order differs from draft")
     if set(preview["graph_ids"])!=set(GRAPHS):
         raise ValueError("Four graph IDs differ from preview")
@@ -47,7 +47,7 @@ def candidate_for(preview_path):
             draft["sampling"]["physical_preconditions"]["max_approx_utilization"]):
         raise ValueError("Candidate exceeds physical utilization cap")
     historical={w["id"]:w for w in old["provider_worlds"]}
-    if set(historical)!={"P1","P2","P4","P4"}:
+    if set(historical)!={"P1","P2","P3","P4"}:
         raise ValueError("Unexpected provider-world contract")
     if (c["D_instructions"]==historical[ROLE]["D_instructions"] and
             c["delta"]==historical[ROLE]["delta"]):
