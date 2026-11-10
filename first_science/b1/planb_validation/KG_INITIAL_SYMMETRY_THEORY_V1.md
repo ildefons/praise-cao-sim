@@ -77,8 +77,8 @@ Thus any remaining condition is characterized by whether it shares the
 initial world and whether it shares the initial graph. Within each category
 the acquisition score is identical by symmetry.
 
-There are 3 other-world/same-graph choices? NO: 2 other worlds times 1
-initial graph = 2. There are 3 same-world/other-graph choices.
+There are 2 other-world/same-graph choices and 3
+same-world/other-graph choices.
 The other-world/other-graph group contains `2*3 = 6` conditions.
 The already observed same-world/same-graph condition is unavailable for
 every method.
