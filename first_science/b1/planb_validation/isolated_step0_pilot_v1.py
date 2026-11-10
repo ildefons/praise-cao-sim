@@ -189,16 +189,30 @@ def run_stage(root,stage,func):
         raise
 
 
-def do_run(root,preview_file,candidate_id,graph_id):
+def do_run(root,preview_file,candidate_id,graph_id,resume=False):
     candidate=validated_candidate(preview_file,candidate_id,graph_id)
     resolved = root.resolve()
     if REPO==resolved or REPO in resolved.parents or PHASE5 in resolved.parents:
         raise ValueError("Pilot output must be outside source repository")
-    if resolved.exists():
-        raise FileExistsError("Refusing existing output: "+str(resolved))
-    resolved.mkdir(parents=True)
-    contract_workspace(resolved,candidate,preview_file,graph_id)
-    phase = resolved/"isolated_contracts"
+    if resume:
+        if not resolved.is_dir():
+            raise FileNotFoundError("Resume output not found: "+str(resolved))
+        provenance_path=resolved/"pilot_provenance_PRIVATE.json"
+        provenance=read(provenance_path)
+        if (provenance.get("candidate_id") != candidate_id or
+                provenance.get("graph_id") != graph_id or
+                provenance.get("preview_sha256") != sha(preview_file)):
+            raise ValueError("Resume origin mismatch")
+        phase=resolved/"isolated_contracts"
+        for name in COPY_NAMES:
+            if sha(phase/name) != provenance["isolated_contract_sha256"][name]:
+                raise ValueError("Isolated contract changed during pilot: "+name)
+    else:
+        if resolved.exists():
+            raise FileExistsError("Refusing existing output: "+str(resolved))
+        resolved.mkdir(parents=True)
+        contract_workspace(resolved,candidate,preview_file,graph_id)
+        phase=resolved/"isolated_contracts"
     verify_patched_contracts(phase,candidate)
     # All scientific execution uses original modules, with ONLY the contract
     # lookup directory and the I1-card lookup directory redirected.
@@ -217,15 +231,33 @@ def do_run(root,preview_file,candidate_id,graph_id):
             i1.run_world("P1",result_root=public_root,reset_world=False)
             return {"status":"FROZEN_PHASE5_I1_COMPLETE_V2",
                     "freeze_manifest_sha256":sha(public_root/"P1"/"i1_freeze_manifest.json")}
-        run_stage(resolved,"i1",stage_i1)
+        frozen_i1=public_root/"P1"/"i1_freeze_manifest.json"
+        if frozen_i1.is_file():
+            frozen=read(frozen_i1)
+            contracts=verify_patched_contracts(phase,candidate)
+            if (frozen.get("status")!="FROZEN_PHASE5_I1_COMPLETE_V2"
+                    or frozen.get("battery_config_sha256")!=sha(phase/COPY_NAMES[0])
+                    or frozen.get("seed_registry_sha256")!=sha(phase/COPY_NAMES[1])):
+                raise ValueError("Existing I1 freeze is not this isolated contract")
+            print("PILOT_STAGE_REUSED i1 freeze verified",flush=True)
+        else:
+            run_stage(resolved,"i1",stage_i1)
 
-        from phase5_runtime_v2 import read_json
-        calibration=run_stage(resolved,"step0_calibration",
-            lambda:step0._run_calibration_cell("P1",graph_id,str(step0_root)))
+        calib_manifest=step0_root/f"P1__{graph_id}"/"step0_calibration_manifest.json"
+        if calib_manifest.is_file() and read(calib_manifest).get("status")=="GATE_FAILED_STEP0_CALIBRATION":
+            print("PILOT_STAGE_REUSED calibration already rejected",flush=True)
+        else:
+            run_stage(resolved,"step0_calibration",
+                lambda:step0._run_calibration_cell("P1",graph_id,str(step0_root)))
         # Even a calibration rejection is a measured/valid pilot result;
         # original confirmation freezes the rejection without simulation.
-        run_stage(resolved,"step0_confirmation",
-            lambda:step0._run_confirmation_cell("P1",graph_id,str(step0_root)))
+        confirmation_path=step0_root/f"P1__{graph_id}"/"step0_confirmation_manifest.json"
+        if confirmation_path.is_file() and read(confirmation_path).get("status") in (
+                "FROZEN_PHASE5_STEP0_PASS_V2","GATE_FAILED_STEP0"):
+            print("PILOT_STAGE_REUSED confirmation freeze verified",flush=True)
+        else:
+            run_stage(resolved,"step0_confirmation",
+                lambda:step0._run_confirmation_cell("P1",graph_id,str(step0_root)))
         calibration_manifest=read(step0_root/f"P1__{graph_id}"/"step0_calibration_manifest.json")
         confirmation_manifest=read(step0_root/f"P1__{graph_id}"/"step0_confirmation_manifest.json")
         summary={
@@ -234,8 +266,13 @@ def do_run(root,preview_file,candidate_id,graph_id):
             "calibration_status":calibration_manifest["status"],
             "confirmation_status":confirmation_manifest["status"],
             "eligibility":confirmation_manifest["status"]=="FROZEN_PHASE5_STEP0_PASS_V2",
-            "stage_wall_seconds":{s:read(resolved/f"stage_{s}.json")["wall_seconds"]
-                        for s in ("i1","step0_calibration","step0_confirmation")},
+            "stage_wall_seconds":{
+                s:(read(resolved/f"stage_{s}.json")["wall_seconds"]
+                   if (resolved/f"stage_{s}.json").is_file() else None)
+                for s in ("i1","step0_calibration","step0_confirmation")},
+            "native_i1_wall_seconds":read(frozen_i1).get("python_wall_seconds"),
+            "native_calibration_wall_seconds":calibration_manifest.get("python_wall_seconds"),
+            "native_confirmation_wall_seconds":confirmation_manifest.get("python_wall_seconds"),
             "new_world_and_graph_simulation":True,
             "confirmatory_evidence":False,
             "private_world_parameters_in_isolated_contract_only":True,
@@ -257,6 +294,8 @@ def main():
                       help="No simulator imports, no new outputs")
     mode.add_argument("--run",action="store_true",
                       help="Explicitly launch fresh I1 + Step0 simulation")
+    mode.add_argument("--resume",action="store_true",
+                      help="Resume exact isolated pilot after verifying previous workspace")
     p.add_argument("--preview",type=Path,required=True)
     p.add_argument("--out",type=Path,help="New scratch output directory, required with --run")
     p.add_argument("--candidate",default=DEFAULT_CANDIDATE)
@@ -287,8 +326,8 @@ def main():
         print("NO_SIMULATIONS_NO_PERSISTENT_OUTPUTS")
         return
     if args.out is None:
-        p.error("--out is required with --run")
-    do_run(args.out.expanduser(),preview,args.candidate,args.graph)
+        p.error("--out is required with --run or --resume")
+    do_run(args.out.expanduser(),preview,args.candidate,args.graph,resume=bool(args.resume))
 
 
 if __name__=="__main__":
