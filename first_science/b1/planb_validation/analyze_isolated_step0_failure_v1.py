@@ -19,6 +19,7 @@ import pandas as pd
 
 REPO = Path(__file__).resolve().parents[3]
 PHASE5 = REPO/"first_science"/"phase5"
+PHASE1 = REPO/"first_science"/"phase1"
 EXPECTED_CANDIDATE = "B0001_P1_A01"
 EXPECTED_GRAPH = "G_PAR"
 CELL = "P1__G_PAR"
@@ -158,7 +159,7 @@ def audit(pilot,out,n_boot,seed):
     if n_boot:
         if n_boot < 50 or n_boot > 10000:
             raise ValueError("--bootstrap requires 50..10000 replicates")
-        sys.path.insert(0,str(PHASE5))
+        sys.path.insert(0,str(PHASE1))
         from sla_compliance_analysis import (
             SlaComplianceDefinition, calculate_empirical_sla_sigma_from_ledgers,
         )
