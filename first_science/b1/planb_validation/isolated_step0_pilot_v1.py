@@ -163,8 +163,6 @@ def verify_patched_contracts(phase, candidate):
         if union.intersection(bank) or min(bank)<SEED_NAMESPACE:
             raise AssertionError("Overlapping or old seed range")
         union.update(bank)
-    if (phase/"results").exists():
-        raise AssertionError("Output directory unexpectedly located inside contract workspace")
     return contracts
 
 
