@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.47 --- 10 November 2026}
+\date{Working manuscript v0.48 --- 10 November 2026}
 
 \begin{document}
 \maketitle
@@ -193,7 +193,7 @@ The score estimates the expected benefit of one more evaluation for selecting th
 At each step, the policy selects the unused method--condition pair $(a,c)$ with the highest KG score, observes its loss, and updates the model. This is an exact one-step calculation under the assumed Gaussian model, not a guarantee of optimality over the entire budget.
 
 \paragraph{Two-stage KG and Top2.}
-To test the role of \emph{condition choice}, we implemented two new two-stage policy families, each with one adaptive and one uniform-condition variant. These are \emph{not} the original joint-action KG or the original Top2 above. Within each family, adaptive and uniform variants have the \emph{same predictor-selection rule conditional on the current observed history}.
+To investigate how the choice of operating conditions affects validation performance, we compare two-stage variants of KG and Top2. For each strategy, we consider an adaptive condition-selection rule and a uniform-selection alternative. These are \emph{not} the original joint-action KG or the original Top2 above. Within each family, adaptive and uniform variants have the \emph{same predictor-selection rule conditional on the current observed history}.
 
 \emph{Two-stage KG:} first choose a predictor maximizing the \emph{mean} $\operatorname{KG}(a,c)$ over its remaining conditions. The adaptive variant then chooses that predictor's maximum-KG unobserved condition; the uniform variant draws an unobserved condition uniformly.
 
