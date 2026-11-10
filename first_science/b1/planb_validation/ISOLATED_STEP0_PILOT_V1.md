@@ -74,8 +74,7 @@ Output includes:
 - `pilot_summary.json`: eligibility and per-stage measured costs, suitable
   for discussing the next gate
 
-If a scientific stage fails, the wrapper records its exception with stage
-time and traceback. Do not delete or edit pilot evidence merely because of a
+If a scientific stage is interrupted, resume the exact same workspace with:\n\n```bash\npython first_science/b1/planb_validation/isolated_step0_pilot_v1.py \\\n  --resume \\\n  --preview ~/praise/planb_b1_newworld_preview_v0_1/PRIVATE_world_candidates.json \\\n  --out ~/praise/planb_b1_isolated_step0_pilot_v1\n```\n\nResume checks the stored private provenance and contract hashes, reuses a verified\nI1 freeze, and uses native Step-0 per-trajectory checkpoints. Stage wall times\nmay be split across interrupted invocations; native manifests report their\nrecorded execution times.\n\nIf a scientific stage fails, the wrapper records its exception with stage\ntime and traceback. Do not delete or edit pilot evidence merely because of a
 gate failure. Treat an actual Step-0 rejection as a valid eligibility
 observation, not an implementation problem.
 
