@@ -36,7 +36,11 @@ COPY_NAMES = (
 EXPECTED_STATUS = "B1_NEW_WORLD_DRY_RUN_ONLY_NOT_STEP0_ELIGIBILITY"
 DEFAULT_CANDIDATE = "B0001_P1_A01"
 DEFAULT_GRAPH = "G_PAR"
-SEED_NAMESPACE = 130_000_000
+# Phase-1 / Phase-5 providers derive native seeds as trajectory_seed * 100 + ordinal.
+# Keep all derived seeds inside legacy NumPy RandomState's unsigned 32-bit range.
+SEED_NAMESPACE = 20_000_000
+MAX_NATIVE_SEED = 2**32 - 1
+MAX_TRAJECTORY_SEED = (MAX_NATIVE_SEED - 3) // 100
 
 
 def read(path):
@@ -100,7 +104,9 @@ def seed_blocks(candidate_id):
     # Assign stage-disjoint and old-bank-disjoint consecutive 100/200 seed ranges.
     # Deterministic unique namespace for this single proof-of-concept candidate.
     h = int(hashlib.sha256(candidate_id.encode()).hexdigest()[:8], 16)
-    offset = SEED_NAMESPACE + (h % 1_000_000) * 1_000
+    offset = SEED_NAMESPACE + (h % 10_000) * 1_000
+    if offset + 599 > MAX_TRAJECTORY_SEED:
+        raise AssertionError("Derived native provider seeds would exceed uint32")
     def block(start, count):
         return dict(start=offset+start, end_inclusive=offset+start+count-1, n=count)
     return dict(region=block(0,100), sigma=block(100,100),
@@ -162,6 +168,8 @@ def verify_patched_contracts(phase, candidate):
     for bank in banks:
         if union.intersection(bank) or min(bank)<SEED_NAMESPACE:
             raise AssertionError("Overlapping or old seed range")
+        if max(bank)>MAX_TRAJECTORY_SEED or max(bank)*100+3>MAX_NATIVE_SEED:
+            raise AssertionError("Derived native gamma seed outside uint32")
         union.update(bank)
     return contracts
 
@@ -318,7 +326,7 @@ def main():
             if (testroot/"step0").exists():
                 raise AssertionError("Verification launched unexpected simulation")
             print("ISOLATION_CHECK original_contracts_unchanged=YES isolated_world_present=YES")
-            print("ISOLATION_CHECK new_seed_blocks_disjoint=YES simulation_outputs=NONE")
+            print("ISOLATION_CHECK new_seed_blocks_disjoint=YES native_gamma_uint32_safe=YES simulation_outputs=NONE")
         print("ISOLATED_STEP0_ADAPTER_VERIFY_PASS",
               "candidate",candidate["candidate_id"],"graph",args.graph)
         print("NO_SIMULATIONS_NO_PERSISTENT_OUTPUTS")
