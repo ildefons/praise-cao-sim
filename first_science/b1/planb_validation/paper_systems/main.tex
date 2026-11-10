@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.48 --- 10 November 2026}
+\date{Working manuscript v0.49 --- 10 November 2026}
 
 \begin{document}
 \maketitle
@@ -193,7 +193,7 @@ The score estimates the expected benefit of one more evaluation for selecting th
 At each step, the policy selects the unused method--condition pair $(a,c)$ with the highest KG score, observes its loss, and updates the model. This is an exact one-step calculation under the assumed Gaussian model, not a guarantee of optimality over the entire budget.
 
 \paragraph{Two-stage KG and Top2.}
-To investigate how the choice of operating conditions affects validation performance, we compare two-stage variants of KG and Top2. For each strategy, we consider an adaptive condition-selection rule and a uniform-selection alternative. These are \emph{not} the original joint-action KG or the original Top2 above. Within each family, adaptive and uniform variants have the \emph{same predictor-selection rule conditional on the current observed history}.
+Selecting which method to evaluate and which operating condition to use are established decisions in sequential experimental design with covariates, including KG-based selection \cite{ding2022}; we do not claim to introduce this separation. Here we construct specific two-stage variants of KG and Top2 to test the effect of condition selection. In each family, the method is chosen first using a defined score across its remaining conditions, and the condition is then selected either adaptively or uniformly. These constructions differ from the original joint-action KG and Top2 rules above; we do not claim that their particular combination is a previously unreported algorithm. The contribution examined here is the matched comparison: within each family, the adaptive and uniform variants use the same method-selection rule conditional on the observations collected so far.
 
 \emph{Two-stage KG:} first choose a predictor maximizing the \emph{mean} $\operatorname{KG}(a,c)$ over its remaining conditions. The adaptive variant then chooses that predictor's maximum-KG unobserved condition; the uniform variant draws an unobserved condition uniformly.
 
@@ -346,7 +346,7 @@ The PRAISE experience suggests that the choice of \emph{how to predict} a compos
 The public repository contains the frozen seven-method matrix builder, four-policy B1 replay, controlled two-stage condition-choice code and summaries, source-linked systems architecture and literature audit, and one verified complete B=15 episode trace. Source manifests and SHA-256 checks differentiate public-I1 predictions from later WB scoring and distinguish original joint-action from newly defined two-stage policies. The action-level traces for the controlled two-stage experiment are archived locally and hash-recorded, rather than included in the committed summary directory.
 The detailed evidence, complete per-budget numerical appendix, and matched condition-selection study are linked from the GitHub-hosted B1 technical report \cite{praiseB1Report}. This is a versioned repository research record, not a separately peer-reviewed publication. The manuscript's numeric claims are taken from the frozen reports; this draft introduces no new numerical experiments.
 
-\begin{thebibliography}{12}
+\begin{thebibliography}{13}
 \bibitem{bishop2006} C. M. Bishop. 2006. \emph{Pattern Recognition and Machine Learning}, Section 3.3: Bayesian Linear Regression. Springer. \url{https://link.springer.com/book/9780387310732}.
 \bibitem{praiseB1Report} PRAISE research team. 2026. B1: Sequential Evaluation Under Fixed Validation Budgets---Consolidated Scientific Evidence Report, v0.1 (repository technical report, 5 November 2026). \url{https://github.com/ildefons/praise-cao-sim/blob/praise-identifiability-feasibility/first_science/b1/planb_validation/B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md}. Supporting numerical appendix: \url{https://github.com/ildefons/praise-cao-sim/blob/praise-identifiability-feasibility/first_science/b1/planb_validation/B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md}.
 \bibitem{pozas2023} Pozas Garc\'ia et al. 2023. Location-aware scalable service composition. \emph{Software: Practice and Experience}. \url{https://doi.org/10.1002/spe.3260}.
@@ -356,6 +356,7 @@ The detailed evidence, complete per-budget numerical appendix, and matched condi
 \bibitem{guerron2026} Guerron et al. 2026. Building and validating deep learning models for forecasting the quality of cloud services. \emph{Automated Software Engineering}. \url{https://doi.org/10.1007/s10515-026-00630-z}.
 \bibitem{hara2024} Hara et al. 2024. Active model selection: A variance minimization approach. \emph{Machine Learning}. \url{https://doi.org/10.1007/s10994-024-06603-1}.
 \bibitem{kossen2021} Kossen, Farquhar, Gal, and Rainforth. 2021. Active Testing: Sample-Efficient Model Evaluation. \emph{ICML}. \url{https://proceedings.mlr.press/v139/kossen21a.html}.
+\bibitem{ding2022} Ding, L., Hong, L. J., Shen, H., and Zhang, X. 2022. Technical note---Knowledge gradient for selection with covariates: Consistency and computation. \emph{Naval Research Logistics} 69(3):496--507. \url{https://doi.org/10.1002/nav.22028}.
 \bibitem{frazier2008} Frazier, Powell, and Dayanik. 2008. A Knowledge-Gradient Policy for Sequential Information Collection. \emph{SIAM Journal on Control and Optimization}. \url{https://doi.org/10.1137/070693424}.
 \bibitem{russo2016} Russo. 2016. Simple Bayesian Algorithms for Best Arm Identification. \emph{COLT}. \url{https://proceedings.mlr.press/v49/russo16.html}.
 \bibitem{fiez2019} Fiez, Jain, Jamieson, and Ratliff. 2019. Sequential Experimental Design for Transductive Linear Bandits. \emph{NeurIPS}. \url{https://papers.neurips.cc/}.
