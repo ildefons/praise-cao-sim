@@ -15,6 +15,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 import time
 import traceback
 from datetime import datetime, timezone
@@ -264,9 +265,26 @@ def main():
     preview=args.preview.expanduser().resolve()
     candidate=validated_candidate(preview,args.candidate,args.graph)
     if args.verify:
+        original_hashes = {name: sha(PHASE5/name) for name in COPY_NAMES}
+        with tempfile.TemporaryDirectory(prefix="praise_step0_isolation_verify_") as temp:
+            testroot=Path(temp)
+            contract_workspace(testroot,candidate,preview,args.graph)
+            phase=testroot/"isolated_contracts"
+            contracts=verify_patched_contracts(phase,candidate)
+            if read(PHASE5/COPY_NAMES[0])["provider_worlds"][0]["D_instructions"] == candidate["D_instructions"]:
+                raise AssertionError("Historical P1 was unexpectedly modified")
+            for name in COPY_NAMES:
+                if sha(PHASE5/name)!=original_hashes[name]:
+                    raise AssertionError("Historical contract changed: "+name)
+            if not (testroot/"pilot_provenance_PRIVATE.json").exists():
+                raise AssertionError("Isolated provenance absent")
+            if (testroot/"step0").exists():
+                raise AssertionError("Verification launched unexpected simulation")
+            print("ISOLATION_CHECK original_contracts_unchanged=YES isolated_world_present=YES")
+            print("ISOLATION_CHECK new_seed_blocks_disjoint=YES simulation_outputs=NONE")
         print("ISOLATED_STEP0_ADAPTER_VERIFY_PASS",
               "candidate",candidate["candidate_id"],"graph",args.graph)
-        print("NO_SIMULATIONS_NO_OUTPUTS")
+        print("NO_SIMULATIONS_NO_PERSISTENT_OUTPUTS")
         return
     if args.out is None:
         p.error("--out is required with --run")
