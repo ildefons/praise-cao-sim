@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.56 --- 10 November 2026}
+\date{Working manuscript v0.57 --- 10 November 2026}
 
 \begin{document}
 \maketitle
@@ -203,7 +203,7 @@ To our knowledge, the specific two-stage acquisition rules proposed here---selec
 
 \emph{Two-stage Top2:} As in the original Top2 heuristic, after the first $K$ evaluations (one per method under the common starting condition), use half of the remaining $B-K$ evaluations, rounded up, to improve coverage across methods and conditions. This corresponds to $\lceil(B-K)/2\rceil$ additional evaluations. In this coverage phase, first choose a method that has been evaluated the fewest times. Then choose an unevaluated condition for it: the adaptive variant favors condition types tested less often for that method, whereas the uniform variant samples among its remaining conditions at random. For all subsequent evaluations, restrict attention to the two methods with the lowest currently predicted average losses. First choose the method with the highest average $\Delta_{a,c}$ over its remaining conditions; then choose either its condition with the largest $\Delta_{a,c}$ (adaptive) or one of its remaining conditions uniformly (uniform).
 
-Both variants use the same final posterior recommendation and the same full-domain target. Different condition observations may induce different \emph{later predictor choices}. Thus their paired comparison identifies the \emph{whole-policy} effect of changing condition-choice rules, not a direct effect holding future predictor paths fixed.
+Both variants recommend a method using the same final decision rule and the same full-domain objective. Their comparison measures how the choice of evaluation conditions affects the final recommendation. Because different conditions produce different observations, the two variants may also choose different methods to evaluate later. The comparison therefore captures these subsequent changes as well as the initial condition choices.
 
 \section{Case Study: Composed-Service Performance Prediction}
 \label{sec:case}
