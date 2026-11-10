@@ -156,56 +156,84 @@ def audit(pilot,out,n_boot,seed):
     }
 
     if n_boot:
-        if n_boot < 50 or n_boot > 2000:
-            raise ValueError("--bootstrap requires 50..2000 replicates")
+        if n_boot < 50 or n_boot > 10000:
+            raise ValueError("--bootstrap requires 50..10000 replicates")
         sys.path.insert(0,str(PHASE5))
-        from run_phase5_step0_v2 import _query_curve, AdmissibilityBoundary
-        # Graph-level validation is already complete. Resampling whole
-        # trajectories preserves within-trajectory dependence over requests
-        # and horizons, unlike bootstrapping 37 H values independently.
-        boundaries=pd.read_csv(selected_path).set_index("query_id")
-        rec=boundaries.loc[failed.query_id]
-        boundary=AdmissibilityBoundary(
-            l_max=float(rec.A_G_l_max),c_max=float(rec.A_G_c_max),
-            q_min=float(rec.A_G_q_min))
+        from sla_compliance_analysis import (
+            SlaComplianceDefinition, calculate_empirical_sla_sigma_from_ledgers,
+        )
+        # The original scorer is evaluated ONCE for each 200-trajectory ledger.
+        # Its returned per-trajectory sla_compliant indicators are the exact
+        # sufficient statistics for the frozen mean-over-horizons estimand:
+        # mean_trajectory(mean_H(sla_compliant)).
+        # Resampling complete trajectory statistics preserves dependence
+        # among the 37 horizon readouts and costs O(B*N), not O(B*full ledger).
+        rec=selected.set_index("query_id").loc[failed.query_id]
         rng=np.random.default_rng(seed)
-        stats={}
-        for label,ledger_path in (("calibration",calib_ledger_path),
-                                  ("confirmation",confirm_ledger_path)):
+        statistics={}
+        for label,ledger_path,reference in (
+                ("calibration",calib_ledger_path,float(failed[calibration_col])),
+                ("confirmation",confirm_ledger_path,float(failed[confirmation_col]))):
+            print("BOOTSTRAP_PRECOMPUTE",label,"loading ledger",flush=True)
             ledger=pd.read_csv(ledger_path)
-            if "trajectory" not in ledger:
-                raise ValueError("Ledger missing trajectory column")
-            groups=[g.copy() for _,g in ledger.groupby("trajectory",sort=True)]
-            if len(groups)!=200:
-                raise ValueError(f"{label}: expected 200 independent trajectories, found {len(groups)}")
-            values=[]
-            for _ in range(n_boot):
-                indices=rng.integers(0,len(groups),size=len(groups))
-                resampled=[]
-                for i,j in enumerate(indices):
-                    block=groups[int(j)].copy()
-                    block["trajectory"]=i
-                    resampled.append(block)
-                boot=pd.concat(resampled,ignore_index=True)
-                bcurve=_query_curve(boot,boundary=boundary,rho=float(failed.rho),
-                                    horizons=list(HORIZONS),column="sigma_boot")
-                values.append(float(bcurve.sigma_boot.mean()))
-            stats[label]=np.asarray(values)
-        diffs=stats["confirmation"]-stats["calibration"]
+            sigma, trajectory_curves, _ = calculate_empirical_sla_sigma_from_ledgers(
+                ledger,
+                latency_threshold=float(rec.A_G_l_max),
+                cost_threshold=float(rec.A_G_c_max),
+                quality_threshold=float(rec.A_G_q_min),
+                horizons=list(HORIZONS),
+                stop_time=240.0,
+                sla_definition=SlaComplianceDefinition(
+                    rho=float(failed.rho),
+                    accounting_origin=0.0,
+                    zero_decision_compliance=1.0,
+                ),
+            )
+            matrix=trajectory_curves.pivot(
+                index="trajectory",columns="horizon",values="sla_compliant",
+            ).reindex(columns=list(HORIZONS))
+            if matrix.shape!=(200,37) or matrix.isna().any().any():
+                raise ValueError(f"{label}: expected complete 200x37 trajectory grid")
+            values=matrix.to_numpy(dtype=float)
+            if not np.isin(values,[0.,1.]).all():
+                raise ValueError(f"{label}: nonbinary SLA compliance")
+            # Invariant: the aggregate reconstructed by the original scorer
+            # must match BOTH the frozen full-horizon curve and the saved mean.
+            recovered=float(values.mean())
+            aggregate=float(sigma.sigma.mean())
+            if not (abs(recovered-reference)<=2e-9 and
+                    abs(aggregate-reference)<=2e-9):
+                raise AssertionError(
+                    f"{label} original-scorer invariant failed: "
+                    f"saved={reference:.12g}, recovered={recovered:.12g}, "
+                    f"aggregate={aggregate:.12g}")
+            means=values.mean(axis=1)
+            print("BOOTSTRAP_PRECOMPUTE_PASS",label,
+                  "trajectories",len(means),"mean",recovered,flush=True)
+            # Vectorized, low-memory resampling; chunking permits progress.
+            draws=np.empty(n_boot,dtype=float)
+            chunk_size=250
+            for start in range(0,n_boot,chunk_size):
+                end=min(start+chunk_size,n_boot)
+                indices=rng.integers(0,len(means),size=(end-start,len(means)))
+                draws[start:end]=means[indices].mean(axis=1)
+                print("BOOTSTRAP_PROGRESS",label,end,"/",n_boot,flush=True)
+            statistics[label]=draws
+        diffs=statistics["confirmation"]-statistics["calibration"]
         result["bootstrap"]={
-            "method":"independent within-stage trajectory-cluster resampling, frozen query",
+            "method":"exact per-trajectory horizon-averaged SLA indicators, frozen query; bootstrap trajectory indices",
             "replicates":n_boot,"seed":seed,
-            "calibration_95_percentile_interval":np.quantile(stats["calibration"],[.025,.975]).tolist(),
-            "confirmation_95_percentile_interval":np.quantile(stats["confirmation"],[.025,.975]).tolist(),
+            "calibration_95_percentile_interval":np.quantile(statistics["calibration"],[.025,.975]).tolist(),
+            "confirmation_95_percentile_interval":np.quantile(statistics["confirmation"],[.025,.975]).tolist(),
             "difference_95_percentile_interval":np.quantile(diffs,[.025,.975]).tolist(),
             "confirmation_below_easy_lower_empirical_fraction":float(
-                np.mean(stats["confirmation"]<REGIMES["Easy"][0])),
-            "caution":"These are descriptive bootstrap intervals conditional on the frozen scale; they do not undo the calibration selection or certify eligibility."
+                np.mean(statistics["confirmation"]<REGIMES["Easy"][0])),
+            "caution":"Descriptive bootstrap conditional on the frozen query; calibration-based scale selection is not accounted for."
         }
         with (out/"failed_query_bootstrap_samples.csv").open("w",newline="") as f:
             w=csv.writer(f);w.writerow(["replicate","calibration","confirmation","difference"])
             for i in range(n_boot):
-                w.writerow([i,float(stats["calibration"][i]),float(stats["confirmation"][i]),float(diffs[i])])
+                w.writerow([i,float(statistics["calibration"][i]),float(statistics["confirmation"][i]),float(diffs[i])])
     (out/"analysis.json").write_text(json.dumps(result,indent=2)+"\n",encoding="utf-8")
     report=[
         "# Independent Step-0 failure: read-only scientific analysis",
