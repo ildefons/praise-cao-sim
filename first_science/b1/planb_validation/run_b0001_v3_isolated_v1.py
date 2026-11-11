@@ -196,7 +196,11 @@ def verify_setup(a,preflight_result):
 
 
 def original_runner():
-    sys.path.insert(0,str(PHASE5))
+    # The original Phase-5 runner imports Phase-2 public-I1 helpers and
+    # Phase-3 fitting helpers; direct import of the former happens here.
+    for phase in (PHASE5.parent/"phase2",PHASE5.parent/"phase3",PHASE5.parent/"phase4",PHASE5):
+        if str(phase) not in sys.path:
+            sys.path.insert(0,str(phase))
     from i1_rho_conditioned_card import load_rho_conditioned_i1_provider_card
     import run_phase5_provider_reconstruction_v3 as v3
     from run_phase5_m2_reconstruction_v2 import _bounds
@@ -354,6 +358,10 @@ def main():
             setup(a,check)
         else:
             verify_setup(a,check)
+        # Import every scientific dependency in read-only mode, so missing
+        # paths/packages fail before launching the costly fitting stage.
+        original_runner()
+        print("B0001_V3_SCIENTIFIC_IMPORTS_PASS no simulations launched",flush=True)
         return
     require(a.out.exists(),"Run --check before --run")
     run(a,check)
