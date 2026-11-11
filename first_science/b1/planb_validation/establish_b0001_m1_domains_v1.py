@@ -269,8 +269,10 @@ def audit_domains(out,staging,preflight):
                 lo=float(bounds[field+"_lower"])
                 hi=float(bounds[field+"_upper"])
                 x=float(values[field])
-                require(0<lo<hi and lo<=x<=hi,
-                        "Final M1 domain does not contain fitted parameter")
+                valid_domain=(0.0<=lo<hi if field=="service_cv" else 0.0<lo<hi)
+                require(valid_domain and lo<=x<=hi,
+                        f"Final M1 domain invalid for {role}/{provider}/{field}: "
+                        f"value={x!r}, bounds=[{lo!r},{hi!r}]")
                 row[field+"_lower"]=lo
                 row[field+"_upper"]=hi
                 row["selected_"+field]=x
