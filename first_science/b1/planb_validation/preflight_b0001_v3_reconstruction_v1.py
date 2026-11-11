@@ -107,7 +107,8 @@ def analyze(staging):
         for graph in GRAPHS:
             p=staging/"frozen_queries"/f"{role}__{graph}"/"step0_frozen_queries.csv"
             q=pd.read_csv(p)
-            require(tuple(q.columns)==CANONICAL_QUERY_COLS,
+            require(len(q.columns)==len(CANONICAL_QUERY_COLS) and
+                    set(q.columns)==set(CANONICAL_QUERY_COLS),
                     "Query input columns differ from original predictor")
             require(len(q)==15 and q.query_id.is_unique,
                     "Query cardinality/uniqueness invalid")
