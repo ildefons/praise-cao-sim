@@ -352,6 +352,10 @@ def smoke(a,pre):
 def scientific(a,pre,workers):
     require(a.out.exists(),"Run engineering --smoke before scientific --run")
     validate_workspace(a,pre)
+    # Fail closed: no scientific simulations (or allocation writes) before
+    # the separate, simulation-free final execution audit has passed.
+    from audit_b0001_graph_execution_v1 import verify_execution_gate
+    verify_execution_gate(a)
     stage_scientific_allocations(a,pre)
     smoke_path=a.out/"engineering_smoke"/"b0001_graph_smoke.json"
     require(smoke_path.is_file(),"Engineering smoke not complete")
