@@ -170,6 +170,9 @@ def audit(a):
                 n3+=len(seeds)
             require(n3==1400 and len(rank_seeds)==1400,
                     "M3 full343 total allocation not 1400 for "+role)
+            require(set(adapter.ENGINEERING_SEEDS).isdisjoint(cseeds)
+                    and set(adapter.ENGINEERING_SEEDS).isdisjoint(rank_seeds),
+                    "Engineering smoke seeds overlap scientific prediction: "+role)
             require(int(allocation["n_trajectories"].sum())==1400
                     and np.isclose(m3[0]["joint_weight"],
                                    float(allocation.iloc[0]["joint_weight"]),
