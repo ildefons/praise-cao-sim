@@ -224,8 +224,10 @@ def patched(predictor,a,pre):
                     "M1_M2":f"{common['start']}..{common['end_inclusive']}",
                     "M3":f"rank r: {m3['seed_base']}+(r-1)*{m3['seed_block_stride']}+k, frozen world-specific N_r"
                 }
-                mf["b0001_preflight_sha256"] = sha(\n                    a.preflight/"b0001_graph_prediction_preflight.json")
-                mf["b0001_v3b_selection_sha256"] = sha(\n                    a.v3b/"b0001_v3b_selection_audit_freeze.json")
+                mf["b0001_preflight_sha256"] = sha(
+                    a.preflight/"b0001_graph_prediction_preflight.json")
+                mf["b0001_v3b_selection_sha256"] = sha(
+                    a.v3b/"b0001_v3b_selection_audit_freeze.json")
                 mf["final_WB_read"]=False
                 return mf
             predictor._cell_manifest=cell_manifest
