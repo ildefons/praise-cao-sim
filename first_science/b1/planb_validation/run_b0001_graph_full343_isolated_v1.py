@@ -197,6 +197,29 @@ def validate_workspace(a,pre):
     return seed_file
 
 
+
+def stage_scientific_allocations(a,pre):
+    """Place hash-verified allocations where the ORIGINAL _m3_variants reads.
+
+    This is an idempotent repair for workspaces created by adapter v1.
+    Never rewrite or silently repair a differing scientific allocation.
+    """
+    target=a.out/"scientific"/"_preexecution"
+    target.mkdir(parents=True,exist_ok=True)
+    for role in ROLES:
+        name=f"m3_fullsupport_allocation_{role}.csv"
+        original=a.out/"_preexecution"/name
+        expected=pre["allocation_sha256"][role]
+        require(original.is_file() and sha(original)==expected,
+                "Frozen B0001 allocation source invalid: "+role)
+        destination=target/name
+        if not destination.exists():
+            destination.write_bytes(original.read_bytes())
+        require(destination.is_file() and sha(destination)==expected,
+                "Original M3 runner allocation path/hash invalid: "+role)
+    print("B0001_GRAPH_M3_ALLOCATION_PATHS_PASS 3 frozen worlds",flush=True)
+
+
 def patched(predictor,a,pre):
     """Redirect original graph predictor module bindings, process-local only."""
     class Redirect:
@@ -242,6 +265,7 @@ def smoke(a,pre):
     if not a.out.exists():
         prepare_workspace(a,pre)
     validate_workspace(a,pre)
+    stage_scientific_allocations(a,pre)
     require(not (a.out/"engineering_smoke"/"b0001_graph_smoke.json").exists(),
             "Engineering smoke already frozen; do not overwrite")
     predictor=original_module()
@@ -328,6 +352,7 @@ def smoke(a,pre):
 def scientific(a,pre,workers):
     require(a.out.exists(),"Run engineering --smoke before scientific --run")
     validate_workspace(a,pre)
+    stage_scientific_allocations(a,pre)
     smoke_path=a.out/"engineering_smoke"/"b0001_graph_smoke.json"
     require(smoke_path.is_file(),"Engineering smoke not complete")
     sm=load(smoke_path)
