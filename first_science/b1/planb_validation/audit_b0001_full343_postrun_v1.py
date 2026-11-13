@@ -134,7 +134,7 @@ def ledger_audit(cell,manifest,allocation,seed_common,label):
         if i<28:
             seeds=list(seed_common)
         else:
-            r=i-28
+            r=i-27
             a=allocation.iloc[r-1]
             check(int(a["rank"])==r,label+" allocation rank")
             seeds=list(range(int(a.seed_start),int(a.seed_end_inclusive)+1))
@@ -305,8 +305,9 @@ def audit(args):
     check(len(seed_common)==100 and
           seed_common==list(range(35000000,35000100)),
           "B0001 frozen common M1/M2 seed bank")
-    check(digest(seed_file)==frozen.get("seed_registry_sha256",
-          digest(seed_file)),"seed registry digest")
+    preexec=read(args.workspace/"_preexecution"/"b0001_graph_adapter_preexecution.json")
+    check(digest(seed_file)==preexec["scientific_seed_sha256"],
+          "frozen scientific seed registry digest")
     expected={f"{r}__{g}" for r in ROLES for g in GRAPHS}
     check(set(global_doc["prediction_manifest_sha256_by_cell"])==expected,
           "global freeze physical-cell set")
@@ -326,6 +327,23 @@ def audit(args):
         check(digest(root/"_preexecution"/f"m3_fullsupport_allocation_{role}.csv")==
               frozen["allocation_sha256"][role],
               role+" allocation preflight hash")
+        world_freeze=read(v3b/role/"world_selection_freeze_manifest.json")
+        check(digest(v3b/role/"world_selection_freeze_manifest.json")==
+              selection["world_manifest_sha256"][role],
+              role+" selected-world freeze hash")
+        for name,key in (("m2_joint_support_27.csv","m2_support_sha256"),
+                         ("m3_joint_support_343.csv","m3_support_sha256"),
+                         ("m3_joint_support_top14.csv","m3_top14_sha256")):
+            check(digest(v3b/role/name)==
+                  frozen["world_support_sha256_and_allocation"][role][key],
+                  role+"/"+name+" frozen support hash")
+        for provider in PROVIDERS:
+            prov=frozen["provider_selection_sha256_and_ids"][role+"/"+provider]
+            for name,key in (("m1_provider_model.csv","m1_model_sha256"),
+                             ("m2_provider_models.csv","m2_model_sha256"),
+                             ("m3_provider_models.csv","m3_model_sha256")):
+                check(digest(v3b/role/provider/name)==prov[key],
+                      role+"/"+provider+"/"+name+" frozen model hash")
         for graph in GRAPHS:
             cell_id=f"{role}__{graph}"
             cell=root/cell_id
