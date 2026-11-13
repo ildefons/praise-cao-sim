@@ -39,8 +39,10 @@ def run(a):
     predicted=a.graph/"scientific"/"b0001_full343_global_prediction_freeze.json"
     blind=gate.load(predicted)
     gate.require(reference["postrun_prediction_audit_sha256"]==
-                 blind["source_graph_preflight_sha256"] if False else True,
-                 "unused")
+                 gate.load(a.authorization/
+                     "b0001_final_wb_authorization_freeze.json")[
+                     "postrun_integrity_audit_sha256"],
+                 "Reference source audit does not match authorization")
     authorization=a.authorization/"b0001_final_wb_authorization_freeze.json"
     auth=gate.load(authorization)
     gate.require(audit["final_reference_authorization_sha256"]==gate.sha(authorization)
@@ -49,9 +51,8 @@ def run(a):
                  gate.sha(authorization),
                  "Blind-to-reference freeze chain changed")
     gate.require(gate.sha(PHASE5/"config_phase5_evaluation_v3b_fullsupport.json")==
-                 auth.get("evaluation_contract_sha256",
-                          gate.sha(PHASE5/"config_phase5_evaluation_v3b_fullsupport.json")),
-                 "Evaluation contract changed")
+                 auth["evaluation_contract_sha256"],
+                 "Evaluation contract changed after reference authorization")
     contract=gate.load(PHASE5/"config_phase5_evaluation_v3b_fullsupport.json")
     gate.require(contract["status"]==
                  "FROZEN_PHASE5_V3B_FULLSUPPORT_EVALUATION_CONTRACT"
