@@ -166,6 +166,10 @@ def verify(a):
             sha(root/"run_phase5_final_wb_v3b_fullsupport.py"),
         "original_reference_audit_sha256":
             sha(root/"audit_phase5_final_wb_v3b_fullsupport.py"),
+        "evaluation_contract_sha256":
+            sha(root/"config_phase5_evaluation_v3b_fullsupport.json"),
+        "evaluation_runner_sha256":
+            sha(root/"run_phase5_evaluation_v3b_fullsupport.py"),
         "selected_worlds":selected,
         "cells":12,
         "queries_per_cell":15,
