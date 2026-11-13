@@ -51,8 +51,10 @@ def run(a):
                  gate.sha(authorization),
                  "Blind-to-reference freeze chain changed")
     gate.require(gate.sha(PHASE5/"config_phase5_evaluation_v3b_fullsupport.json")==
-                 auth["evaluation_contract_sha256"],
-                 "Evaluation contract changed after reference authorization")
+                 auth["evaluation_contract_sha256"]
+                 and gate.sha(PHASE5/"run_phase5_evaluation_v3b_fullsupport.py")==
+                 auth["evaluation_runner_sha256"],
+                 "Registered evaluation contract or scorer changed after authorization")
     contract=gate.load(PHASE5/"config_phase5_evaluation_v3b_fullsupport.json")
     gate.require(contract["status"]==
                  "FROZEN_PHASE5_V3B_FULLSUPPORT_EVALUATION_CONTRACT"
