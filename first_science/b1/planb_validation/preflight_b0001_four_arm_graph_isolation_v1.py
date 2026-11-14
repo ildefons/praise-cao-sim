@@ -191,9 +191,10 @@ def allocations(a,w):
             t1=BASE[family]["top1"]
             require(t1+BUDGET-1<=MAX_NATIVE,
                     "Native Top1 seed bound invalid")
-            reserved += [(family+" Top14 ranks",BASE[family]["top14"],
-                           BASE[family]["top14"]+13*RANK_STRIDE+BUDGET-1),
-                         (family+" Top1",t1,t1+BUDGET-1)]
+            # Seed ranges are intentionally shared by the P1/P3/P4 worlds
+            # (and their four graphs) for matched common-random-number
+            # comparisons. Reserve each method/family namespace only ONCE.
+            # Repeated world reservations are not scientific collisions.
             results[key]={"top14_support_path":str(table_path),
                          "top14_support_sha256":digest(table_path),
                          "support_manifest_sha256":digest(mpath),
@@ -203,6 +204,15 @@ def allocations(a,w):
                          "methods":list(ARM_IDS[family]),
                          "allocation_per_method":BUDGET,
                          "same_world_graphs_share_CRN":True}
+    for family in FAMILIES:
+        reserved.extend([
+            (family+" Top14 ranks",BASE[family]["top14"],
+             BASE[family]["top14"]+13*RANK_STRIDE+BUDGET-1),
+            (family+" Top1",BASE[family]["top1"],
+             BASE[family]["top1"]+BUDGET-1),
+        ])
+    # Only compare independent method/family namespaces. The same bank is
+    # deliberately reused across worlds and graphs, never double-counted.
     for i,(name,lo,hi) in enumerate(reserved):
         for other,lo2,hi2 in reserved[i+1:]:
             require(hi<lo2 or hi2<lo,
@@ -211,7 +221,7 @@ def allocations(a,w):
     # frozen local candidate scoring 38.0M..38.12M (both no overlap).
     require(all(lo>39_000_010 and hi<=MAX_NATIVE for _,lo,hi in reserved),
             "Graph stream may overlap prior science / native overflow")
-    require(len(results)==6 and len(reserved)==12,
+    require(len(results)==6 and len(reserved)==4,
             "Unexpected four-arm seed group count")
     return results,reserved
 
