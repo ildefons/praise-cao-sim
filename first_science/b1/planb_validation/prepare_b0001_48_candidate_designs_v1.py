@@ -179,8 +179,8 @@ def main():
         designs["original",world,provider].iloc[:,1:].to_numpy(),
         designs["fixed_cv",world,provider].iloc[:,1:].to_numpy()
     ) for world in ROLES for provider in PROVIDERS)
-    print("B0001_48_LHS_DESIGN_CHECK_PASS",len(designs),"provider-family banks",
-          "432 candidates per family? NO, 432 total per family? NO: 9x48x2=864 total",
+    print("B0001_48_LHS_DESIGN_CHECK_PASS",len(designs),
+          "provider-family banks; 48 candidates each; 864 candidate records total",
           flush=True)
     print("B0001_ORIGINAL_VS_PILOT_DESIGN_DIFFERENCES",distinct,"of 9 providers",
           flush=True)
