@@ -125,11 +125,18 @@ def inputs(a):
             gate["n_method_cell_observations_missing"] == 48 and
             gate["worlds"] == list(WORLDS) and gate["graphs"] == list(GRAPHS),
             "Unexpected scientific experiment cardinality")
+    staging = read(stage_file)
+    require(staging["status"] == "B0001_PUBLIC_PREDICTION_INPUTS_STAGED_NOT_EXECUTABLE" and
+            staging["hidden_world_parameters_copied"] is False and
+            staging["calibration_or_confirmation_values_copied"] is False,
+            "Public-only staging firewall invalid")
+    query_hashes = {entry["path"]: entry["staged_sha256"]
+                    for entry in staging["staged_files"]}
     return {"gate": digest(gate_file), "weights": digest(weight_file),
-            "staging": digest(stage_file), "smoke": digest(smoke_file)}, gate
+            "staging": digest(stage_file), "smoke": digest(smoke_file)}, gate, query_hashes
 
 
-def specification(a, gate, fingerprints):
+def specification(a, gate, fingerprints, query_hashes):
     rows = []
     for family in FAMILIES:
         for world in WORLDS:
@@ -154,7 +161,10 @@ def specification(a, gate, fingerprints):
             require(len(ranks) == 14, "Missing Top14 reserved seed blocks")
             for graph in GRAPHS:
                 query = a.staging / "frozen_queries" / f"{world}__{graph}" / "step0_frozen_queries.csv"
-                require(query.is_file() and len(pd.read_csv(query)) == 15,
+                rel_query = f"frozen_queries/{world}__{graph}/step0_frozen_queries.csv"
+                require(query.is_file() and rel_query in query_hashes and
+                        digest(query) == query_hashes[rel_query] and
+                        len(pd.read_csv(query)) == 15,
                         "Missing public graph query: " + str(query))
                 for kind, method in (("top14", METHODS[family][0]),
                                      ("top1", METHODS[family][1])):
@@ -315,8 +325,8 @@ def main():
     args = parser.parse_args()
     for name in ("gate", "weights", "staging", "smoke", "out"):
         setattr(args, name, getattr(args, name).expanduser().resolve())
-    fingerprints, gate = inputs(args)
-    plan = specification(args, gate, fingerprints)
+    fingerprints, gate, query_hashes = inputs(args)
+    plan = specification(args, gate, fingerprints, query_hashes)
     plan_file = args.out / "b0001_four_arm_science_execution_plan.json"
     print("B0001_FOUR_ARM_SCIENCE_PREFLIGHT_PASS 48 method cells; 67200 trajectories planned",
           flush=True)
