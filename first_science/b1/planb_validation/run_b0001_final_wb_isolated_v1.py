@@ -2,8 +2,8 @@
 """Isolated B0001 final reference N=1000 per cell: ORIGINAL Phase5 simulation.
 
 Uses the frozen P1_A02/P3_A01/P4_A01 physical worlds from B0001 Step-0,
-and preauthorized fresh final reference seeds. All blind predictions are
-frozen, rehashed before each cell, and NEVER read to generate reference data.
+and preauthorized fresh final reference seeds. All seven algorithms' blind
+predictions are hash-checked before each cell and NEVER used to generate reference data.
 Reference predictions/accuracy are not computed here.
 
 --check: no private-world parameters or WB outcomes read, no writes.
@@ -20,6 +20,7 @@ from pathlib import Path
 import pandas as pd
 
 import preflight_b0001_final_wb_v1 as gate
+import b0001_seven_arm_blind_reference_guard_v1 as seven_guard
 
 HERE=Path(__file__).resolve().parent
 PHASE5=HERE.parents[1]/"phase5"
@@ -36,8 +37,18 @@ def inputs(a):
     gate.require(auth["status"]==gate.STATUS
                  and auth["reference_execution_authorized"] is True
                  and auth["analysis_authorized"] is False
-                 and auth["final_WB_outcomes_read"] is False,
+                 and auth["final_WB_outcomes_read"] is False
+                 and auth.get("all_seven_algorithms_blind_before_reference") is True,
                  "Final reference authorization altered")
+    gate.require(auth.get("seven_arm_reference_adapter_source_sha256")==
+                 gate.sha(Path(__file__)),
+                 "Final reference adapter changed after seven-arm authorization")
+    seven=seven_guard.verify(
+        original_audit=a.audit, graph=a.graph, four_arm=a.four_arm,
+        seven_arm=a.seven_arm, wb_seed_start=gate.WB_START,
+        wb_seed_n=gate.WB_N, deep=False)
+    gate.require(seven==auth.get("seven_arm_blind_evidence"),
+                 "Seven-arm blind evidence changed after reference authorization")
     gate.require(auth["postrun_integrity_audit_sha256"]==
                  gate.sha(a.audit/"b0001_full343_postrun_integrity_audit.json")
                  and auth["blind_global_freeze_sha256"]==
@@ -69,9 +80,12 @@ def inputs(a):
                  and seed["end_inclusive"]==gate.WB_START+999
                  and seed["n"]==1000,
                  "Final WB seed bank differs from B0001 freeze")
-    gate.require(a.out != a.graph and a.graph not in a.out.parents
-                 and a.out!=a.authorization and a.authorization not in a.out.parents,
-                 "Reference output cannot overlap frozen input")
+    for frozen_input in (a.graph,a.four_arm,a.seven_arm,a.audit,
+                         a.staging,a.authorization):
+        gate.require(a.out!=frozen_input and
+                     frozen_input not in a.out.parents and
+                     a.out not in frozen_input.parents,
+                     "Reference output cannot overlap frozen input")
     return auth
 
 
@@ -211,8 +225,11 @@ def main():
     mx.add_argument("--run",action="store_true")
     for name in ("authorization","audit","graph","staging","eligibility","out"):
         p.add_argument("--"+name,required=True,type=Path)
+    p.add_argument("--seven-arm",dest="seven_arm",required=True,type=Path)
+    p.add_argument("--four-arm",dest="four_arm",required=True,type=Path)
     a=p.parse_args()
-    for name in ("authorization","audit","graph","staging","eligibility","out"):
+    for name in ("authorization","audit","graph","staging","eligibility",
+                 "seven_arm","four_arm","out"):
         setattr(a,name,getattr(a,name).expanduser().resolve())
     auth=inputs(a)
     if a.check:
