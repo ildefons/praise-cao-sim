@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """B0001 final-WB authorization and preflight (NO WHITE-BOX OUTCOMES READ).
 
-This gate binds independently audited blind predictions to the 12 selected
-B0001 physical graph cells; validates the original reference contract, immutable
+This gate binds all seven independently audited blind predictors (84 method-
+condition values) to the 12 selected B0001 physical graph cells; validates the original reference contract, immutable
 source-world provenance, public query hashes, and fresh stage-disjoint N=1000
 reference seeds. It reads ONLY frozen eligibility metadata and SHA-256 hashes
 of private-world contract files; not generating parameters or any WB curves.
 
-The resulting authorization is irrevocably bound to the supplied audit digest.
+The resulting authorization is bound to BOTH the original three-arm audit and
+the frozen seven-arm evidence, including all supplementary prediction hashes.
 It permits ONLY the independent reference execution, not accuracy analysis.
 """
 from __future__ import annotations
@@ -16,6 +17,7 @@ import hashlib
 import json
 from pathlib import Path
 import pandas as pd
+import b0001_seven_arm_blind_reference_guard_v1 as seven_guard
 
 ROLES=("P1","P3","P4")
 GRAPHS=("G_PAR","G_PARSEQ","G_SEQ","G_SEQPAR")
@@ -152,6 +154,13 @@ def verify(a):
             and pre["v3b_selection_freeze_sha256"]==
             audit["v3b_selection_sha256"],
             "Source V3b provider selection provenance mismatch")
+    # The original authorization covered M1/M2/M3 only. The independent
+    # seven-arm freeze is now mandatory before final WB can be authorized.
+    seven=seven_guard.verify(
+        original_audit=a.audit, graph=a.graph, four_arm=a.four_arm,
+        seven_arm=a.seven_arm, wb_seed_start=WB_START, wb_seed_n=WB_N,
+        deep=True,
+    )
     return {
         "status":STATUS,
         "reference_execution_authorized":True,
@@ -185,6 +194,10 @@ def verify(a):
         "final_WB_outcomes_read":False,
         "new_simulations_run":0,
         "prediction_files_mutable":False,
+        "seven_arm_blind_evidence":seven,
+        "all_seven_algorithms_blind_before_reference":True,
+        "seven_arm_reference_adapter_source_sha256":
+            sha(Path(__file__).with_name("run_b0001_final_wb_isolated_v1.py")),
     }
 
 
@@ -192,18 +205,22 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for name in ("audit","graph","staging","preflight","eligibility","out"):
         p.add_argument("--"+name,required=True,type=Path)
+    p.add_argument("--seven-arm",dest="seven_arm",required=True,type=Path)
+    p.add_argument("--four-arm",dest="four_arm",required=True,type=Path)
     a=p.parse_args()
-    for name in ("audit","graph","staging","preflight","eligibility","out"):
+    for name in ("audit","graph","staging","preflight","eligibility",
+                 "seven_arm","four_arm","out"):
         setattr(a,name,getattr(a,name).expanduser().resolve())
-    require(a.out not in a.graph.parents and
-            a.out!=a.graph and a.graph not in a.out.parents,
-            "Reference preflight output must not overlap prediction workspace")
+    for source in (a.graph,a.four_arm,a.seven_arm,a.audit,a.preflight,a.staging):
+        require(a.out!=source and a.out not in source.parents
+                and source not in a.out.parents,
+                "Reference preflight output must not overlap frozen inputs")
     result=verify(a)
     path=a.out/"b0001_final_wb_authorization_freeze.json"
     save(path,result)
     print("B0001_FINAL_WB_PREFLIGHT_PASS 12 cells N=1000 each",flush=True)
     print("B0001_FINAL_WB_SEEDS_FRESH",WB_START,WB_START+WB_N-1,flush=True)
-    print("BLIND_PREDICTIONS_IMMUTABLE / REFERENCE_ONLY",flush=True)
+    print("SEVEN_ALGORITHMS_84_PREDICTIONS_FROZEN / REFERENCE_ONLY",flush=True)
     print("FREEZE",path,flush=True)
 
 
