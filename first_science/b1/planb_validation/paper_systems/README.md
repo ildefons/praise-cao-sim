@@ -1,6 +1,6 @@
 # PRAISE systems paper — LaTeX working directory
 
-**Status:** manuscript draft v0.59, 10 November 2026. **Review-first**, not ready for submission.  
+**Status:** manuscript draft v0.61, 18 November 2026. **Review-first**, not ready for submission.  
 **Canonical source:** `main.tex` in this directory. Edits and iterations are committed to the `praise-identifiability-feasibility` branch.  
 **Compilation:** Standard **pdfLaTeX**, no XeLaTeX/LuaLaTeX/fontspec, no shell escape, no bibliography generator, the primary scientific figure is converted locally from a committed frozen SVG by build.sh. Citations use a standard in-file bibliography. The architecture is drawn using LaTeX boxes and text so no image conversion is needed.
 
@@ -24,7 +24,7 @@ The manuscript now includes a formal citation to the GitHub-hosted B1 consolidat
 ## Review protocol
 
 - The manuscript is framed around **budget-aware allocation of validation evidence for decisions among computing-continuum methods**. Composed-service predictor selection is the evaluated case study, not the whole problem definition.
-- Current review structure: Section 2 presents the general validation framework; Section 3 specifies the decision model and all validation allocation strategies within Section 3.4; Section 4 introduces the composed-service case study from first principles, including the seven predictors, 12 conditions, provenance, statistical surrogate and pipeline; Section 5 presents the frozen evaluation. Joint-action KG remains distinct from the matched two-stage condition-choice experiment.
+- Current review structure: Section 2 presents the general validation framework; Section 3 specifies the protocol (3.2), the per-method additive Bayesian performance model (3.3), posterior updating (3.4), and validation allocation strategies (3.5); Section 4 introduces the composed-service case study from first principles, including the seven predictors, 12 conditions, provenance, statistical surrogate and pipeline; Section 5 presents the frozen evaluation. Joint-action KG remains distinct from the matched two-stage condition-choice experiment.
 - When proposing edits, refer to section numbers or quote a phrase. The next revision will update `main.tex` in GitHub and provide a new exact pull-and-compile command.
 - Manuscript is **venue-neutral** until the actual workshop/conference format is chosen. Page length and references must be adapted to that venue's template once identified.
 - Working author list and affiliations appear in the manuscript; verify the final metadata before submission.
