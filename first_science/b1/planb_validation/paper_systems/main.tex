@@ -22,7 +22,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.60 --- 10 November 2026}
+\date{Working manuscript v0.61 --- 18 November 2026}
 
 \begin{document}
 \maketitle
@@ -100,22 +100,48 @@ r_B=\mu_{\widehat{a}_B}-\mu_{a^\star}\geq0.
 \end{equation}
 The objective is to recommend one method that performs well across the entire target domain. Note that, unlike cumulative-reward bandit objectives, which evaluate the rewards obtained during successive actions, terminal simple regret evaluates only the quality of the final recommendation.
 
-\subsection{Decision model and validation protocol}
-To estimate how a method would perform under conditions not yet tested, the selection procedure fits a simple statistical model to the validation results obtained so far. Each condition is represented by numerical descriptors, and the model combines them to predict its validation loss. We use Gaussian regression: its coefficients are uncertain, and each new evaluation refines their estimates. All allocation strategies share the same model and recommend the method with the lowest estimated average loss after $B$ evaluations.
+\subsection{Validation protocol}
+Every allocation policy uses the same statistical model specification and the same terminal decision rule, but maintains a separate posterior for each candidate method. Its observations consist only of the validation outcomes it has acquired; unobserved method--condition losses are inferred rather than consulted.
 
-For the experimental protocol, each episode begins by observing every candidate method under one common initial condition, charging these $K$ evaluations against the total budget. The policy then chooses $B-K$ previously unobserved pairs. In the retrospective implementation, the replay harness reveals a selected loss from the archive and reserves the complete table for post-recommendation scoring. The specific model features and calibration constants are given in Section~\ref{sec:case}.
+Each episode begins by evaluating every candidate method under one common initial condition, charging these $K$ evaluations against the total budget. The policy then chooses $B-K$ previously unobserved pairs. In the retrospective implementation, the replay harness reveals a selected loss from the archive and reserves the complete table for post-recommendation scoring.
 
-\subsection{Evidence updates and acquisition statistics}
-Each operating condition is represented by a feature vector $x_c$ describing its relevant characteristics. For each candidate method $a$, we use Bayesian Gaussian linear regression to model validation loss \cite{bishop2006}:
+\subsection{Per-method performance model and information sharing across conditions}
+\label{sec:performance-model}
+A candidate method is not itself a statistical model. The candidate method $a$ is an algorithm whose validation loss varies with the operating condition; the \emph{performance model} is a surrogate used by the selection policy to infer its unobserved losses. We fit one surrogate per candidate method, not one surrogate per method--condition pair.
+
+For our case study, a condition $c=(w,g)$ consists of a provider world $w\in\{\mathrm{P1},\mathrm{P3},\mathrm{P4}\}$ and a composition graph $g\in\{\mathrm{PAR},\mathrm{PARSEQ},\mathrm{SEQ},\mathrm{SEQPAR}\}$. We use the additive Gaussian model
 \begin{equation}
-Y_{a,c}=x_c^\top\beta_a+\varepsilon_{a,c},
-\qquad
-\beta_a\sim\mathcal{N}(b_0,V_0),
-\qquad
-\varepsilon_{a,c}\sim\mathcal{N}(0,\sigma^2).
+\begin{aligned}
+Y_{a,(w,g)}
+  &=\alpha_a+u_{a,w}+v_{a,g}+\varepsilon_{a,(w,g)}
+   =x_{(w,g)}^\top\beta_a+\varepsilon_{a,(w,g)},\\
+\beta_a&\sim\mathcal{N}(b_0,V_0),\qquad
+\varepsilon_{a,(w,g)}\sim\mathcal{N}(0,\sigma^2).
+\end{aligned}
 \label{eq:gaussianmodel}
 \end{equation}
-The coefficient vector $\beta_a$ captures how the loss changes across conditions. Initially, its estimated mean is $b_a=b_0$ and its uncertainty is represented by covariance $\Sigma_a=V_0$. We use the Gaussian assumption as a working model for learning from acquired validation losses.
+Here $\alpha_a$ is a condition-independent intercept; $u_{a,w}$ and $v_{a,g}$ are, respectively, the world-specific and graph-specific adjustments \emph{within method $a$}. The feature vector $x_{(w,g)}$ has an intercept and one-hot indicators for the three worlds and four graph types. For example, with the coefficient ordering
+\[
+\beta_a=(\alpha_a,u_{a,\mathrm{P1}},u_{a,\mathrm{P3}},
+u_{a,\mathrm{P4}},v_{a,\mathrm{PAR}},v_{a,\mathrm{PARSEQ}},
+v_{a,\mathrm{SEQ}},v_{a,\mathrm{SEQPAR}})^\top,
+\]
+the condition $(\mathrm{P1},\mathrm{PAR})$ has
+$x_{(\mathrm{P1},\mathrm{PAR})}=(1,1,0,0,1,0,0,0)^\top$.
+
+These coefficients are \emph{reused} across conditions. The losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; the losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$. Consequently, observing one cell changes posterior predictions for other cells \emph{of the same method}. The seven method-specific parameter vectors have independent priors and posteriors: evaluating method $a$ does not directly update the coefficients of another method.
+
+For seven methods, this produces seven performance models, each predicting twelve condition losses, rather than 84 independent statistical models. Each model stores eight coefficients, but the one-hot encoding with an intercept is redundant: only $1+(3-1)+(4-1)=6$ coefficient directions are identified by the likelihood. The proper Gaussian prior makes the posterior well-defined; individual intercept and effect coefficients should not be interpreted as uniquely identified physical quantities. In particular, the intercept $\alpha_a$ is not the domain-average loss $\mu_a$ in Eq.~\eqref{eq:target}. The model-implied average over the balanced $3\times4$ domain is
+\begin{equation}
+\overline{f}_a
+=\alpha_a+\frac{1}{3}\sum_w u_{a,w}
++\frac{1}{4}\sum_g v_{a,g}.
+\label{eq:additive-average}
+\end{equation}
+This additive sharing is an assumption, not a discovered relationship: the model does not represent world--graph interaction effects or cross-method correlations. Section~\ref{sec:case} describes the concrete predictor portfolio and fixed prior hyperparameters.
+
+\subsection{Posterior updating and acquisition statistics}
+Given Eq.~\eqref{eq:gaussianmodel}, the posterior for method $a$ is Gaussian with coefficient mean $b_a$ and covariance $\Sigma_a$. Initially, $b_a=b_0$ and $\Sigma_a=V_0$. Acquired condition-level losses sequentially update this posterior; the working residual variance $\sigma^2$ represents regression discrepancy, not an independently sampled new simulator result on each replay.
 
 \paragraph{1. Acquire evidence and update the model.}
 Suppose the policy evaluates method $a$ at condition $c$ and observes loss $y=Y_{a,c}$. Define the update weight
@@ -273,7 +299,7 @@ Each predictor must accept the public I1 provider evidence, the relevant graph a
 
 
 \subsection{Statistical surrogate used for allocation}
-In this case study, the condition feature vector $x_c$ contains an intercept, three one-hot indicators identifying the provider world, and four one-hot indicators identifying the composition graph. All compared allocation policies use this same independent-per-predictor Gaussian regression model. The observation-noise standard deviation is $\sigma=0.055$; the prior and design parameters are fixed throughout replay. The model predicts each method's twelve-condition mean loss without explicit provider--graph interaction terms. Its posterior supports the acquisition statistics of Section~3 and the terminal decision rule of Eq.~\eqref{eq:target}.
+We instantiate the per-method additive Gaussian model of Section~\ref{sec:performance-model} for the three provider worlds and four graph types. All allocation policies use the same fixed prior: intercept mean $0.17$ and standard deviation $0.12$; zero-mean world effects with standard deviation $0.07$; and zero-mean graph effects with standard deviation $0.045$. The coefficients are a priori independent within and across methods. The working residual standard deviation is $\sigma=0.055$. These hyperparameters are heuristic and were held fixed throughout retrospective replay; their posterior variances are not validated uncertainty intervals for the actual condition-level MAEs. The resulting posterior estimates support the acquisition statistics of Section~3 and the terminal rule of Eq.~\eqref{eq:target}.
 
 \section{Evaluation}
 \subsection{Historical evidence and experimental design}
