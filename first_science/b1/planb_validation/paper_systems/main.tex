@@ -122,14 +122,23 @@ Y_{a,(w,g)}
 \end{equation}
 Here $\alpha_a$ is a condition-independent intercept; $u_{a,w}$ and $v_{a,g}$ are, respectively, the world-specific and graph-specific adjustments \emph{within method $a$}. The feature vector $x_{(w,g)}$ has an intercept and one-hot indicators for the three worlds and four graph types. For example, with the coefficient ordering
 \[
-\beta_a=(\alpha_a,u_{a,\mathrm{P1}},u_{a,\mathrm{P3}},
-u_{a,\mathrm{P4}},v_{a,\mathrm{PAR}},v_{a,\mathrm{PARSEQ}},
-v_{a,\mathrm{SEQ}},v_{a,\mathrm{SEQPAR}})^\top,
+\begin{aligned}
+\beta_a=\bigl(&\alpha_a,u_{a,\mathrm{P1}},u_{a,\mathrm{P3}},
+u_{a,\mathrm{P4}},\\[-2pt]
+&v_{a,\mathrm{PAR}},v_{a,\mathrm{PARSEQ}},
+v_{a,\mathrm{SEQ}},v_{a,\mathrm{SEQPAR}}\bigr)^\top,
+\end{aligned}
 \]
 the condition $(\mathrm{P1},\mathrm{PAR})$ has
 $x_{(\mathrm{P1},\mathrm{PAR})}=(1,1,0,0,1,0,0,0)^\top$.
 
-These coefficients are \emph{reused} across conditions. The losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; the losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$. Consequently, observing one cell changes posterior predictions for other cells \emph{of the same method}. The seven method-specific parameter vectors have independent priors and posteriors: evaluating method $a$ does not directly update the coefficients of another method.
+These coefficients are \emph{reused} across conditions. The losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; the losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$. Consequently, observing one cell changes posterior predictions for other cells \emph{of the same method}. This transfer is represented by the posterior covariance between their latent predicted losses,
+\begin{equation}
+\operatorname{Cov}\!\bigl(f_a(c),f_a(c')\mid\mathcal{D}\bigr)
+=x_c^\top\Sigma_a x_{c'},
+\label{eq:condition-covariance}
+\end{equation}
+where $f_a(c)=x_c^\top\beta_a$, $\mathcal{D}$ denotes acquired evaluations, and $\Sigma_a$ is the current posterior coefficient covariance. The seven method-specific parameter vectors have independent priors and posteriors: evaluating method $a$ does not directly update the coefficients of another method.
 
 For seven methods, this produces seven performance models, each predicting twelve condition losses, rather than 84 independent statistical models. Each model stores eight coefficients, but the one-hot encoding with an intercept is redundant: only $1+(3-1)+(4-1)=6$ coefficient directions are identified by the likelihood. The proper Gaussian prior makes the posterior well-defined; individual intercept and effect coefficients should not be interpreted as uniquely identified physical quantities. In particular, the intercept $\alpha_a$ is not the domain-average loss $\mu_a$ in Eq.~\eqref{eq:target}. The model-implied average over the balanced $3\times4$ domain is
 \begin{equation}
