@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.69 --- 19 November 2026}
+\date{Working manuscript v0.70 --- 19 November 2026}
 
 \begin{document}
 \maketitle
@@ -272,7 +272,7 @@ The public provider-information records were produced before the predictors gene
 
 
 \subsection{Validation conditions and reference losses}
-Our validation catalogue has $K=7$ predictor variants and $C=12$ conditions: three eligible provider worlds (P1, P3, P4) crossed with four composition graphs ($G_{\rm PAR}$, $G_{\rm SEQ}$, $G_{\rm PARSEQ}$, $G_{\rm SEQPAR}$). Each $Y_{a,c}$ is the mean absolute prediction error of method $a$ against independent white-box reference results, aggregated over the same 555 query--horizon points in condition $c$. The target is the equally weighted average of the twelve condition-level errors. The complete $7\times12$ reference table exists in the archived evidence, while an allocation policy may observe only the entries acquired within its budget.
+Our validation catalogue has $K=7$ predictor variants and $C=12$ conditions: three eligible provider worlds (P1, P3, P4) crossed with four composition graphs ($G_{\rm PAR}$, $G_{\rm SEQ}$, $G_{\rm PARSEQ}$, $G_{\rm SEQPAR}$). Provider world P2 was excluded under the predefined eligibility criterion. Each $Y_{a,c}$ is the mean absolute prediction error of method $a$ against independent white-box reference results, aggregated over the same 555 query--horizon points in condition $c$. The target is the equally weighted average of the twelve condition-level errors. The complete $7\times12$ reference table exists in the archived evidence, while an allocation policy may observe only the entries acquired within its budget.
 
 \subsection{Instantiated prediction and validation pipeline}
 Figure~\ref{fig:casepipeline} maps the case study to the general framework of Fig.~\ref{fig:architecture}. Public provider information and the composition request are upstream inputs to the predictor portfolio; comparison with white-box reference outcomes produces the losses subsequently used by the sequential validation policy.
@@ -329,9 +329,7 @@ We instantiate the per-method additive Gaussian model of Section~\ref{sec:perfor
 
 \section{Evaluation}
 \subsection{Archives, reference integrity, and extended protocol}
-We examine the same $K=7$ predictors and $C=12$ conditions on two separate frozen error matrices, termed the \emph{historical development archive} and the \emph{fresh-reference archive}. The historical development archive combines the Phase-5 full-support evaluation (M1, M2, M3\_FULL343), the original-style M3 retrospective Top14/Top1 evaluation, and the fixed-CV Top14/Top1 evaluation \cite{praiseB1Report}. Provider world P2 was excluded by the predefined eligibility criterion. Provenance checks cover method--condition completeness, point counts, input hashes, and white-box separation.
-
-For the fresh-reference archive, all predictor outputs and the reference contract were frozen before generating new white-box results. The archive uses 1,000 independently seeded trajectories per condition (12,000 trajectories total); a mechanical audit reconciles all twelve cells, and an independent raw-ledger reconstruction verifies all 8,820 scored reference quantities \cite{praiseB0001}. Its independence concerns \emph{reference trajectories for the same provider worlds and graphs}, not newly sampled worlds. The allocation policies consume only the resulting frozen $7\times12$ matrix, one revealed error at a time, with no new physical simulations during policy replay.
+We evaluate the seven candidate predictors across twelve conditions using two complete error matrices. The historical development archive provides the original reference errors \cite{praiseB1Report}; the fresh-reference archive evaluates the same frozen predictor outputs against independently generated white-box trajectories (1,000 per condition) \cite{praiseB0001}. Both matrices were audited for completeness and separation between predictions and reference evidence. The fresh-reference evaluation provides an independent reference for the same provider worlds and composition graphs, rather than validation on new operating environments.
 
 The complete budget grid is
 \[
