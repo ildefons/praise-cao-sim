@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.71 --- 19 November 2026}
+\date{Working manuscript v0.72 --- 19 November 2026}
 
 \begin{document}
 \maketitle
@@ -427,9 +427,7 @@ full joint uncertainty propagation nor robustness to changes in the
 operating-condition catalogue.
 
 \subsection{One verified system trace}
-A predetermined historical episode ($B=15$, original budget-aware Top2, starting condition P1/$G_{\rm PARSEQ}$, repetition 0) illustrates what the selector observes. The seven initial cell MAEs place FIXED\_CV\_TOP1 at 0.141178 and M3\_FULL343 at 0.144974; thus the lowest observed single-cell error does \emph{not} identify the best method over the entire domain. Eight subsequent acquisitions include P3 and P4 and several graph types. After fifteen acquisitions, the posterior mean domain errors for M3\_FULL343 and M2 are 0.126978 and 0.144384, respectively; the system recommends M3\_FULL343. The independent full archive later confirms that its mean MAE is 0.121890 and that it is the best of the seven, giving zero simple regret in this \emph{one} episode.
-
-The example is included to make the workflow concrete, not to imply that fifteen validations always suffice or that the acquisition policy proved superiority over a separately specified single-condition control. Full action-by-action values and a SHA-256 provenance manifest are available in the repository.
+A historical Top2 episode with a budget of fifteen evaluations illustrates why selecting a predictor from one condition can be misleading. The lowest error among the seven initial evaluations belongs to FIXED\_CV\_TOP1, but eight additional evaluations across other conditions lead Top2 to recommend M3\_FULL343---the best predictor over the complete twelve-condition domain. This recommendation achieves zero terminal simple regret in the illustrative episode. Aggregate results, rather than a single trace, establish comparative policy performance.
 
 \FloatBarrier
 \section{Discussion}
