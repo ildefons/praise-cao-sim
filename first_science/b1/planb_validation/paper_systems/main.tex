@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.70 --- 19 November 2026}
+\date{Working manuscript v0.71 --- 19 November 2026}
 
 \begin{document}
 \maketitle
@@ -346,7 +346,7 @@ Figures~\ref{fig:historical13} and \ref{fig:fresh13} show all nine policies acro
 \centering
 % Crop only the SVG-generated title strip; the curves and axes are untouched.
 \includegraphics[width=\linewidth,trim=0 0 0 24bp,clip]{figures/historical_nine_policy_13_budget_regret.pdf}
-\caption{Historical development archive: nine original validation policies over thirteen evaluation budgets. Mean terminal simple regret (lower is better) with nominal 95\% stratified episode-bootstrap intervals. The vertical axis is identical to Fig.~\ref{fig:fresh13}. Joint-action KG and original Top2 are reference policies, not matched condition-choice controls.}
+\caption{Historical archive: mean terminal simple regret of nine validation policies across thirteen budgets. Error bars show nominal 95\% stratified episode-bootstrap intervals; lower is better.}
 \label{fig:historical13}
 \end{figure}
 
@@ -354,15 +354,15 @@ Figures~\ref{fig:historical13} and \ref{fig:fresh13} show all nine policies acro
 \centering
 % The frozen source filename retains its internal dataset ID for provenance.
 \includegraphics[width=\linewidth,trim=0 0 0 24bp,clip]{figures/b0001_nine_policy_13_budget_regret.pdf}
-\caption{Fresh-reference archive, based on independently regenerated white-box trajectories for the same twelve conditions: nine validation policies over thirteen budgets, with the \emph{same} $[0,0.025]$ vertical range as Fig.~\ref{fig:historical13}. Error bars are nominal 95\% stratified \emph{episode} bootstrap intervals, conditional on its frozen accuracy matrix.}
+\caption{Fresh-reference archive: mean terminal simple regret for the same policies and budgets, evaluated against an independently regenerated reference for the same operating conditions. Error bars show nominal 95\% stratified episode-bootstrap intervals. The vertical scale matches Fig.~\ref{fig:historical13}.}
 \label{fig:fresh13}
 \end{figure}
 
-Table~\ref{tab:thirteen} averages the thirteen budgets with equal weight. This descriptive aggregate summarizes the complete replay; it is not a cost-weighted measure or a result on new provider worlds.
+Table~\ref{tab:thirteen} summarizes each policy's mean terminal simple regret across the thirteen budgets.
 
 \begin{table}[t]
 \centering
-\caption{Mean terminal simple regret averaged equally across thirteen budgets (10--80), 240 seeded episodes per policy/budget. Lower is better. The historical archive supplies development evidence; the fresh-reference archive uses independently regenerated, audited white-box trajectories on the same conditions. Joint-action and two-stage policies are separate acquisition rules.}
+\caption{Mean terminal simple regret, averaged equally across thirteen budgets. Lower is better.}
 \label{tab:thirteen}
 \small
 \begin{tabular}{lrr}
