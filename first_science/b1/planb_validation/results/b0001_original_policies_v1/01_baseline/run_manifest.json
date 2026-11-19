@@ -1,0 +1,101 @@
+{
+  "status": "B1_FIXED_BUDGET_DEVELOPMENT_REPLAY_V1",
+  "design": "B1_SEQUENTIAL_VALIDATION_DESIGN_FREEZE_V1",
+  "methods": [
+    "M1",
+    "M2",
+    "M3_FULL343",
+    "ORIGINAL_TOP14_B1400",
+    "ORIGINAL_TOP1_B1400",
+    "FIXED_CV_TOP14",
+    "FIXED_CV_TOP1"
+  ],
+  "cells": [
+    [
+      "P1",
+      "G_PAR"
+    ],
+    [
+      "P1",
+      "G_PARSEQ"
+    ],
+    [
+      "P1",
+      "G_SEQ"
+    ],
+    [
+      "P1",
+      "G_SEQPAR"
+    ],
+    [
+      "P3",
+      "G_PAR"
+    ],
+    [
+      "P3",
+      "G_PARSEQ"
+    ],
+    [
+      "P3",
+      "G_SEQ"
+    ],
+    [
+      "P3",
+      "G_SEQPAR"
+    ],
+    [
+      "P4",
+      "G_PAR"
+    ],
+    [
+      "P4",
+      "G_PARSEQ"
+    ],
+    [
+      "P4",
+      "G_SEQ"
+    ],
+    [
+      "P4",
+      "G_SEQPAR"
+    ]
+  ],
+  "budgets": [
+    10,
+    15,
+    20,
+    30,
+    40
+  ],
+  "policies": [
+    "random",
+    "balanced",
+    "informed",
+    "budgeted_top2"
+  ],
+  "repeats_per_start_cell": 20,
+  "episodes_per_policy_per_budget": 240,
+  "bootstrap_replicates": 2000,
+  "seed": 20261105,
+  "primary_outcome": "simple_regret",
+  "primary_contrast": "budgeted_top2 minus balanced, mean across five frozen budgets",
+  "baseline_recommendation": "posterior mean minimum shared across policies",
+  "budgeted_top2": "ceil((B-7)/2) balanced extra evaluations, then maximize variance reduction of current posterior top-two gap",
+  "note": "Retrospective finite-archive development; NOT independent world-level confirmation",
+  "source_evidence": {
+    "B0001_new_reference": {
+      "metrics_sha256": "0354739d64038da538485b5364b37ad8a69181ca5957dbff92aaec349be2523b",
+      "source": "B0001 frozen 7x12 accuracy, original policies unchanged"
+    }
+  },
+  "inputs_sha256": {
+    "B0001_new_reference": "0354739d64038da538485b5364b37ad8a69181ca5957dbff92aaec349be2523b"
+  },
+  "outputs_sha256": {
+    "budget_summary.csv": "c1b86deefd1da589c915de0bb3c73c52bea3f7ceeceeeb0ec9621e6362c71929",
+    "terminal_episodes.csv": "29d284636dce74cfdec96f61f6056f7d919da76b3746bd3753170973082d357a",
+    "seven_method_matrix.csv": "5c81f50af9fad98596f0eac17ec3e9afc7848661acf476740af48663119606a3",
+    "episode_action_history.csv": "8a89c3495747797fff2b648ce4e0951778fb741c3c462970db1570159b3db55f",
+    "paired_regret_contrasts.csv": "ec68d70ec4613b8288e674ea7aaae7cc2d509c1cbc4ea06bd8e5d5eabef8b386"
+  }
+}

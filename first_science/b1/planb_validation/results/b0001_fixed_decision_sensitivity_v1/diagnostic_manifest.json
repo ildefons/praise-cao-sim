@@ -1,0 +1,27 @@
+{
+  "status": "B0001_FIXED_DECISION_REFERENCE_AND_CELL_INFLUENCE_DIAGNOSTIC_V1_PASS",
+  "not_primary_policy_replay": true,
+  "all_nine_original_policy_recommendations_held_fixed": true,
+  "no_policy_reexecution": true,
+  "no_simulations": true,
+  "no_prediction_or_reference_changes": true,
+  "not_full_reference_aware_policy_bootstrap": true,
+  "original_policy_terminal_episodes_verified": 10800,
+  "bootstrap_existing_trajectory_replicates": 10000,
+  "original_B0001_12_cell_winner": "M1",
+  "original_B0001_M3_minus_M1_mean_MAE": 0.0007158272521691766,
+  "P1_G_PAR_M3_minus_M1_cell_MAE": 0.29626723959838236,
+  "P1_G_PAR_contribution_to_12_cell_M3_minus_M1": 0.02468893663319853,
+  "sources_sha256": {
+    "matrix": "0354739d64038da538485b5364b37ad8a69181ca5957dbff92aaec349be2523b",
+    "reference_bootstrap": "c73404ffb6eda83f48d57812caccb02ae68ecd3a61631a16e5eb6463ddce1418",
+    "baseline": "29d284636dce74cfdec96f61f6056f7d919da76b3746bd3753170973082d357a",
+    "kg": "e0228e0ac3cb51029d97f3d13c45875381ae8924c044f9b30843629f67e04bb4",
+    "controlled": "f45ae653612bc9d69080e3659d3455385514c951c6a47492724346a0698e9af9"
+  },
+  "outputs_sha256": {
+    "fixed_decision_reference_bootstrap_contrasts.csv": "3e4cfff610775eded2a1178d0481927fe42bd2006ffda27e0875e8c378ea0d12",
+    "leave_one_cell_out_fixed_decision_contrasts.csv": "0d8ab758414b69d44884ad1194cba4f9b1cf75e351a92308fd2e46a184b48e6c"
+  },
+  "interpretation": "The reference bootstrap varies full-domain MAE scores only, and the leave-one-cell-out check varies the evaluation target only. Both rescore the same frozen final recommendations. Neither recomputes acquisitions or estimates independent-world generalization."
+}

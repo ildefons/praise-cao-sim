@@ -1,0 +1,33 @@
+{
+  "status": "B1_SUPPLEMENTARY_ONE_STEP_KG_DEVELOPMENT_V1",
+  "protocol": "B1_KG_ONE_STEP_SPECIFICATION_V1",
+  "meaning": "retrospective supplemental comparison on original B1 archive, NOT independent validation",
+  "source_sha256": {
+    "/workspace/scratch/a65c65481323/first_science/b1/planb_validation/b1_kg_one_step_v1.py": "cd79f4b3c87445cdd020d8b8bbd441432f9ccba5960de34ec5bbf4464d68fb94",
+    "/workspace/scratch/a65c65481323/first_science/b1/planb_validation/b1_budget_comparison_v1.py": "11c36f80a6fb0faf2a325a590f29ff48b3f08dc80a34a4ba606e0bc268aac2ac"
+  },
+  "baseline_matrix_sha256": "5c81f50af9fad98596f0eac17ec3e9afc7848661acf476740af48663119606a3",
+  "baseline_terminal_episodes_sha256": "29d284636dce74cfdec96f61f6056f7d919da76b3746bd3753170973082d357a",
+  "policy": "kg_one_step",
+  "policy_id": 4,
+  "budgets": [
+    10,
+    15,
+    20,
+    30,
+    40
+  ],
+  "repeats_per_start": 20,
+  "bootstrap_replicates": 2000,
+  "seed": 20261105,
+  "bootstrap_seed": 20262018,
+  "same_terminal_estimator_as_B1": true,
+  "original_B1_four_policies_mutated": false,
+  "reference_best": "M1",
+  "output_sha256": {
+    "kg_action_history.csv": "e85f52df8d58208ba41a5adb9b476ed422536d5413a2549fcfac135c2b8a7cd7",
+    "kg_budget_summary.csv": "909e741653a84ae7cebf57ca50e1265dbc6762a35c43440231dfcaa532b27608",
+    "kg_terminal_episodes.csv": "e0228e0ac3cb51029d97f3d13c45875381ae8924c044f9b30843629f67e04bb4",
+    "kg_vs_frozen_b1_contrasts.csv": "8ed2d0637137f344551f6add793e6c9bb8b153740aed71d8da71a887af438c5c"
+  }
+}

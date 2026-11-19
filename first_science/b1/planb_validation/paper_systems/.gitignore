@@ -1,0 +1,10 @@
+# PDFs converted from the two frozen plot SVGs and local LaTeX build products.
+/figures/
+/main.pdf
+/main.aux
+/main.log
+/main.out
+/main.toc
+/main.synctex.gz
+/main.fls
+/main.fdb_latexmk

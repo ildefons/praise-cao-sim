@@ -1,0 +1,140 @@
+{
+  "status": "B0001_THIRTEEN_BUDGET_PAIRED_CONTRAST_REAGGREGATION_PASS",
+  "scope": "Episode-bootstrap contrasts conditional on frozen MAEs; no reference resampling",
+  "budgets": [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    55,
+    65,
+    70,
+    75,
+    80
+  ],
+  "old_budgets_reused": [
+    10,
+    15,
+    20,
+    30,
+    40
+  ],
+  "new_budgets_added": [
+    25,
+    35,
+    45,
+    55,
+    65,
+    70,
+    75,
+    80
+  ],
+  "episodes_by_policy_and_budget": 240,
+  "episodes_total": 28080,
+  "bootstrap_draws": 2000,
+  "base_seed": 20261105,
+  "old_five_budget_archive_sha256": "05477c50e2dadfbe0e81711ce48621fec5132bbc781a2aab1723421f070d6f4b",
+  "new_eight_budget_archive_sha256": "8ecf9c881190499f68cf15cd697715e3bb6f743508bc8710dfe27d91e35f8ace",
+  "recomputed_with_original_family_bootstraps": [
+    "b1_budget_comparison_v1.summarize",
+    "extend_b1_original_nine_policy_budgets_v1.kg_statistics",
+    "b1_condition_selection_controlled_v1.statistics"
+  ],
+  "aggregate_contrasts": [
+    {
+      "family": "baseline",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "random minus balanced",
+      "mean_regret_diff": "0.0004884842126364503",
+      "low": "9.1106648414935248e-05",
+      "high": "0.00094216519280079314",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    },
+    {
+      "family": "baseline",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "informed minus balanced",
+      "mean_regret_diff": "-0.00078551548854193713",
+      "low": "-0.0011262889946968711",
+      "high": "-0.00044632452010365963",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    },
+    {
+      "family": "baseline",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "budgeted_top2 minus balanced",
+      "mean_regret_diff": "-0.0011679428745580199",
+      "low": "-0.0014996529105008305",
+      "high": "-0.00079336013090801111",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    },
+    {
+      "family": "kg",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "kg_one_step minus random",
+      "mean_regret_diff": "-0.0018981824831780917",
+      "low": "-0.0022871335187971886",
+      "high": "-0.001532574632340993",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    },
+    {
+      "family": "kg",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "kg_one_step minus balanced",
+      "mean_regret_diff": "-0.0014096982705416414",
+      "low": "-0.0017527404709897331",
+      "high": "-0.0010550073586393042",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    },
+    {
+      "family": "kg",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "kg_one_step minus informed",
+      "mean_regret_diff": "-0.0006241827819997045",
+      "low": "-0.00088347872834797648",
+      "high": "-0.00036051378068234285",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    },
+    {
+      "family": "kg",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "kg_one_step minus budgeted_top2",
+      "mean_regret_diff": "-0.00024175539598362151",
+      "low": "-0.0005453456877127531",
+      "high": "5.6611817391295224e-05",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    },
+    {
+      "family": "controlled",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "kg uniform minus adaptive",
+      "mean_regret_diff": "7.6128877568553801e-06",
+      "low": "-0.00028456709667579801",
+      "high": "0.00026585857392512753",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    },
+    {
+      "family": "controlled",
+      "budget": "MEAN_OVER_13_BUDGETS",
+      "contrast": "top2 uniform minus adaptive",
+      "mean_regret_diff": "8.8606043643003733e-05",
+      "low": "-0.00026531204292684347",
+      "high": "0.00043723733174688055",
+      "bootstrap_draws": 2000,
+      "episodes_per_policy_per_budget": 240
+    }
+  ],
+  "contrast_csv_sha256": "b733b93b9136c0cd4bfd4e5b2213556bf4a364a6790931c98bc39f4e948d090b"
+}
