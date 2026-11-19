@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.73 --- 19 November 2026}
+\date{Working manuscript v0.74 --- 19 November 2026}
 
 \begin{document}
 \maketitle
@@ -434,19 +434,22 @@ A historical Top2 episode with a budget of fifteen evaluations illustrates why s
 \paragraph{Why the composed-system structure matters.}
 The case study instantiates two levels of computing-continuum heterogeneity: constituent-provider behavior and service-composition topology. Their crossing defines twelve validation conditions with recurring factor levels. The per-method additive Gaussian surrogate links losses across those conditions through shared world and graph effects. When a predictor is evaluated under one world--graph combination, the observation updates its posterior estimates for other combinations according to their shared coefficients and posterior covariance. This is the \emph{a priori} rationale for structural sharing: a validation action may provide information beyond the cell it directly reveals.
 
-The same posterior supplies the estimated domain-average loss and the expected change in that estimate needed to score each remaining predictor--condition action by one-step joint-action Knowledge Gradient (KG). In our seven-method, twelve-condition catalogue, this yields an executable KG procedure based on a compact Gaussian model for each predictor and without access to unrevealed losses. The contribution is this explicit connection from continuum condition structure to posterior information transfer and decision-focused acquisition, not a new KG rule. KG can also be implemented with independent-cell models; factor sharing is a modeling choice whose predictive and selection value depends on its adequacy. Because all nine evaluated policies use the same surrogate, their comparison demonstrates the integrated workflow without establishing that additivity is superior or necessary.
+The same posterior supplies the estimated domain-average loss and the expected change in that estimate needed to score each remaining predictor--condition action by one-step joint-action Knowledge Gradient (KG). In our seven-method, twelve-condition catalogue, this provides an executable KG implementation using a compact Gaussian model for each predictor and no access to unrevealed losses. The contribution is the explicit connection from continuum condition structure to posterior information transfer and decision-focused acquisition, rather than a new KG rule. KG can also use independent-cell surrogates; comparing the value of structural sharing is a separate question because all nine evaluated policies use the same model.
 
 \paragraph{Validation is a meaningful allocation decision.}
-The historical and fresh-reference curves both show that decision-focused selection of method--condition evaluations can reduce terminal recommendation error before the full set of 84 outcomes is revealed. This supports budget-aware validation as a decision layer for computing-continuum method selection. The claim concerns effectiveness per revealed validation outcome, not yet measured resource-cost savings or performance of an integrated online service.
+Across both reference archives, the choice of which method--condition outcomes to reveal affects the quality of the final recommendation before all 84 are known. This illustrates budget-aware validation as a decision layer for computing-continuum method selection. The budgets count revealed validation outcomes rather than measured computation time.
 
-\paragraph{What the case study answers.}
-The applied contribution rests on two verifiable results: the continuum's provider and composition dimensions can be represented by an executable, auditable acquisition catalogue, and \emph{where} validation evidence is acquired materially affects the quality of the final predictor recommendation under a fixed evaluation budget. RQ1 receives a positive answer within this prespecified domain: decision-focused selection reduces average terminal regret relative to coverage-oriented and random policies on both reference archives. RQ2 supplies a comparative finding---KG is competitive across the studied budgets, but its head-to-head advantage over original Top2 is not established in the fresh-reference archive. RQ3 identifies an observed early-risk/intermediate-benefit/late-convergence pattern for adaptive KG, but neither an aggregate advantage in that archive nor a reliable switching threshold. The open superiority and threshold questions qualify \emph{which} policy should be preferred and \emph{when}; they do not invalidate the demonstrated feasibility or fixed-domain benefit of budget-aware validation itself. Generalizing that benefit to new provider worlds, different surrogates, and real evaluation costs remains a separate research question.
+\paragraph{What the case study establishes.}
+The case study demonstrates that provider-world and composition-graph dimensions define an executable, auditable catalogue of validation actions, and that how evaluations are allocated materially affects the final recommendation. RQ1 is supported within the studied domain: decision-focused policies outperform random and broad-coverage controls on both references. For RQ2, KG is competitive, with its head-to-head advantage over Top2 unresolved on the fresh-reference archive. For RQ3, adaptive KG shows an intermediate-budget opportunity rather than an established aggregate benefit or switching rule. These distinctions concern policy preference, not the feasibility of structured, budget-aware validation.
 
-\paragraph{The KG family is competitive, not uniformly dominant.}
+\paragraph{KG is competitive across reference archives.}
 Joint-action KG achieves the lowest thirteen-budget average on both archives; two-stage adaptive KG is close behind and outperforms broad-coverage baselines. This cross-reference consistency is more informative than a single best-at-budget claim. Nevertheless, the fresh-reference KG-minus-Top2 uncertainty interval includes zero, and different policies lead at some individual budgets. Near-exhaustive budgets also cause several curves to converge, so very small high-budget differences should not be interpreted as robust dominance.
 
 \paragraph{An intermediate window for adaptive condition choice.}
-The full curves reveal an effect that is obscured by a five-budget summary: early adaptive KG can be worse than its uniform counterpart, intermediate budgets can favor it, and both eventually reach the regret floor. The existing per-method Gaussian model transfers information among world and graph conditions, but each method starts with only one observed design direction; confident cross-condition extrapolation at that stage rests heavily on the prior and additive assumption. With more observations, focused condition choice may become useful, while further acquisitions lose decision value as uncertainty resolves. This is a plausible mechanism, not an identified causal explanation or a proven switching threshold. Linear best-arm identification and misspecification theory offer relevant foundations \cite{soare2014,reda2021}; testing a calibrated reliability or confidence-set trigger requires a separately specified future study.
+Early adaptive KG can be worse than its uniform counterpart, intermediate budgets can favor it, and both eventually reach the regret floor. The per-method Gaussian surrogate transfers information among world and graph conditions, but each method initially has evidence from only one condition; early cross-condition extrapolation therefore depends strongly on the prior and additive assumptions. With more observations, focused condition choice may become useful, while near-exhaustive acquisition offers diminishing decision value. This is a plausible mechanism rather than an identified causal explanation or a proven switching threshold. Linear best-arm identification and misspecification theory provide relevant foundations \cite{soare2014,reda2021}.
+
+\paragraph{Future research.}
+The present findings motivate extending the methodology along four directions. New provider worlds, graph families and predictor portfolios would test transfer beyond the twelve studied conditions. Comparisons with independent-cell and interaction-aware surrogates would quantify the value of factor sharing, while reference-aware sequential analyses would assess uncertainty and sensitivity to condition weighting. Prospective studies could identify reliable criteria for adaptive condition choice using frozen policy and budget specifications to confirm the exploratory budget-dependent patterns. Finally, replacing equal-cost outcome reveals with measured evidence-generation, simulation and scoring costs would enable evaluation of operational benefits and integration into online orchestration.
 
 \section{Related Work and Systems-Level Positioning}
 Prior work addresses distinct decisions. Pozas Garc\'ia et al.\ learn to recommend a \emph{composition optimization algorithm} before identifying services \cite{pozas2023}. Stupar and Huljeni\'c integrate QoS/cost prediction and \emph{deployment configuration} optimization \cite{stupar2023}; Sedlak et al.\ investigate edge-device configuration and offloading through active inference \cite{sedlak2024}. These are important examples of system-level algorithm/model use but do not make the terminal choice considered here identical.
@@ -457,85 +460,10 @@ Best-arm identification with linear structure can adapt acquisitions to uncertai
 
 The methodological contribution is the explicit, auditable connection between composed-service prediction, structured validation conditions, and a budgeted full-domain method recommendation. The case study demonstrates this connection and its fixed-domain selection value with existing acquisition rules. Stronger systems claims require measured evaluation costs and deployment integration; stronger generality claims require new provider worlds and comparisons with alternative surrogate structures. The current evidence supports a specialized applied-methodology contribution, without requiring a claim of a mathematically new acquisition rule.
 
-\section{Limitations and Research Agenda}
-\textbf{World generalization.} Both the historical archive and the fresh-reference archive evaluate
-the same three eligible physical provider worlds and four graphs. The fresh-reference archive
-supplies an independent and audited white-box reference with fresh trajectory
-seeds, \emph{not} new provider-world configurations. Randomized replay
-episodes and their bootstraps do not constitute independent environment
-replicates. Out-of-sample confirmation requires newly sampled provider worlds
-and a frozen eligibility/attrition protocol.
-
-\textbf{Budget semantics and saturation.} Budgets count one archived predictor--condition MAE reveal as one action. They are \emph{not} measured seconds, simulation trajectories, CPU-hours or energy. Original prediction methods may have very different costs. At budget 80, only four of the 84 distinct outcomes remain unobserved, making high-budget convergence less discriminating than intermediate-budget performance. Real-cost validation must distinguish shared provider-evidence acquisition, method construction, graph simulation and reference-scoring costs.
-
-\textbf{Model assumptions.} The independent additive Gaussian acquisition surrogate may fail under world--graph interactions, cross-method correlations and heteroscedastic errors. Constituent-provider and composition levels motivate the crossed condition descriptors but do not imply additive errors; the influential P1/$G_{\rm PAR}$ result makes misspecification particularly relevant. The nine compared selectors share this surrogate, so their relative performance does not isolate the value of the factorwise model against a nonsharing or interaction-aware alternative. Its initial one-condition-per-method evidence weakly constrains extrapolation over the target domain. We do not claim calibrated posterior uncertainty, a justified adaptive switching threshold, or best-arm optimality. Misspecification diagnostics and established strong baselines are planned.
-
-\textbf{Reference and target-domain sensitivity.} The fresh-reference archive's lowest-mean-MAE
-methods M1 and M3 are not decisively separated by the existing
-trajectory-reference bootstrap. The P1/$G_{\rm PAR}$ condition is
-particularly influential: removing it changes the target domain and
-reverses key \emph{fixed-recommendation} diagnostic contrasts from the
-original five-budget study. The post-hoc analysis does not rerun policies under an eleven-cell target or
-propagate white-box uncertainty through their sequential acquisition paths.
-We cannot infer that either policy advantage is independent of the chosen
-set and weighting of operating conditions.
-
-\textbf{Operational integration.} Offline selection of a predictor for an evaluation domain does not automatically improve end-to-end deployment, SLA attainment or online orchestration. The present artifact is a retrospective selection prototype linked by traceable evidence to upstream executed predictor stages, rather than an autonomic production service.
-
-\textbf{Development reuse and exploratory extension.} Several policy variants
-were developed or assessed on the historical fixed archive. The fresh-reference archive reuses
-the frozen methods and protocol on a newly generated white-box reference,
-making it a meaningful independent-reference replication for that
-setting, but its operating conditions are not new. The additional eight
-budgets were chosen after the initial five-budget fresh-reference findings were
-inspected; full-grid results characterize the observed budget dependence
-but are not a second independent confirmation study. The fresh-reference archive does not
-establish an aggregate adaptive-condition advantage, even though
-intermediate-budget adaptive KG often performs better than uniform KG.
-Neither archive alone establishes out-of-domain generalization.
-
 \section{Conclusion}
-We studied the allocation of limited validation evidence when choosing
-among seven composed-service predictors in a hierarchical
-computing-continuum setting. Provider behavior and composition graphs
-define twelve crossed operating conditions. An additive per-method
-Gaussian surrogate lets an observation update predictions for other
-conditions through shared factor effects; its posterior also supplies
-the quantities needed to score joint predictor--condition actions with
-one-step Knowledge Gradient. This is an executable way to connect
-structured validation evidence with KG, without claiming a new
-acquisition rule or that physical hierarchy guarantees additive errors.
-Nine executable allocation policies were compared at
-thirteen budgets on a historical development archive and the independently
-regenerated, mechanically audited fresh-reference archive for the same conditions.
-Three findings emerge. First, budget-aware decision-focused validation
-achieves lower terminal simple regret than broad or random acquisition
-in both archives. Second, Knowledge Gradient policies are particularly
-competitive: joint-action KG has the lowest thirteen-budget average in
-both archives, although its advantage over original Top2 remains
-inconclusive on the fresh-reference archive. Third, adaptive KG condition selection has a
-budget-dependent pattern: it is not uniformly preferable at small
-budgets, improves over its uniform counterpart across intermediate
-budgets in the fresh-reference archive, and eventually converges with it; the aggregate
-adaptive advantage in that archive is statistically unresolved.
+We introduced a budget-aware validation method for selecting among composed-service predictors over provider-world and composition-graph conditions. The per-method additive Gaussian surrogate shares information across conditions: observing one predictor--condition outcome updates other condition estimates and supports one-step Knowledge Gradient scoring of joint acquisition actions. This yields an executable, auditable connection between computing-continuum structure, validation evidence, and full-domain predictor recommendation.
 
-Together, these findings support the applied methodological contribution:
-the composed-service hierarchy can be mapped to auditable validation
-conditions, shared-factor posterior updates can make one acquisition
-inform several condition estimates, and the resulting model supports an
-executable joint-action KG decision procedure. Selective acquisition
-improves the final recommendation within the studied domain under this
-model. Resolving KG's comparative dominance, identifying a reliable
-adaptation threshold, and establishing the independent value of the
-additive surrogate are separate research questions. The present findings
-concern fixed-domain, fixed-archive recommendation quality, not measured
-resource savings or out-of-world transfer. The fresh-reference archive's
-near-tied leading predictors and the influence of P1/$G_{\rm PAR}$
-underscore sensitivity to reference and target-domain choices.
-Further work should examine the value and adequacy of factor sharing
-against alternative surrogates, reliable criteria for initiating
-adaptation, genuine new-world validation, reference-aware policy
-uncertainty, and realistic per-evaluation costs.
+Across seven predictors, twelve conditions, thirteen budgets and two audited reference archives, decision-focused acquisition reduces average terminal simple regret relative to random and broad-coverage validation. Joint-action KG has the lowest thirteen-budget average in both archives; on the fresh-reference archive its advantage over Top2 remains uncertain. Adaptive condition choice offers a promising intermediate-budget pattern, while its aggregate advantage is unresolved. Together, these findings establish the feasibility and fixed-domain value of structured validation under limited evidence. They motivate testing new operating environments, alternative surrogates, calibrated adaptive acquisition and measured validation costs.
 
 \section*{Artifact and Reproducibility Statement}
 The repository provides the seven-method evaluation matrices, selection-policy implementations, complete acquisition traces and terminal episodes, bootstrap summaries, provenance manifests, and figure-generation scripts \cite{praiseB1Report,praiseB13}. It also contains the independently regenerated white-box reference, audit records, and post-hoc reference and condition-sensitivity analyses \cite{praiseB0001}. Those analyses do not propagate reference uncertainty through the sequential selection policies. The supplementary records are research artifacts, not peer-reviewed publications.
