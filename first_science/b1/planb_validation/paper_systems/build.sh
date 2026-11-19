@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Standard-pdfLaTeX build of the PRAISE systems paper.
-# Converts the *frozen thirteen-budget* historical and fresh-reference (B0001) SVG plots, without
-# regenerating any data or rerunning a selection policy.
+# Converts the archived historical SVG and renders a paper-only fresh-reference zoom
+# from frozen summary data. No selection policy, bootstrap, or simulation is rerun.
 set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p figures
@@ -33,9 +33,9 @@ PY
 convert_frozen_svg \
   "../results/b1_nine_policy_13_budget_extension_v1/figures/historical_nine_policy_13_budget_regret.svg" \
   "figures/historical_nine_policy_13_budget_regret.pdf"
-convert_frozen_svg \
-  "../results/b1_nine_policy_13_budget_extension_v1/figures/b0001_nine_policy_13_budget_regret.svg" \
-  "figures/b0001_nine_policy_13_budget_regret.pdf"
+# The paper's fresh-reference panel uses a tighter axis (0--0.012), with every
+# archived 95% interval still visible. The original shared-axis plot is untouched.
+python3 plot_fresh_reference_zoom_v1.py
 pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
 pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
 echo "PRAISE_PAPER_BUILD_PASS $(pwd)/main.pdf"
