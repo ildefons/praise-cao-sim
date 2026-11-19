@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.72 --- 19 November 2026}
+\date{Working manuscript v0.73 --- 19 November 2026}
 
 \begin{document}
 \maketitle
@@ -538,23 +538,7 @@ adaptation, genuine new-world validation, reference-aware policy
 uncertainty, and realistic per-evaluation costs.
 
 \section*{Artifact and Reproducibility Statement}
-The repository contains the frozen seven-method matrix builder, original
-selection-policy implementations, source-linked systems architecture,
-the original five-budget studies, and a verified historical $B=15$
-episode. The thirteen-budget extension is separately archived with
-the unchanged original five-budget curve data, eight new budgets'
-complete action histories and terminal episodes for each archive,
-per-budget bootstrap summaries, and SHA-256 provenance manifests
-\cite{praiseB13}. The two new nine-policy figures were rendered on
-the same $[0,0.025]$ regret scale. The fresh-reference archive's separate reference-generation,
-mechanical audit, original policy replay, and post-hoc fixed-decision
-reference/condition-sensitivity diagnostics are retained
-\cite{praiseB0001}. The latter do not replace a reference-aware
-sequential policy bootstrap. The historical numeric appendix remains
-linked from the B1 technical report \cite{praiseB1Report}. All
-supplementary records are research artifacts, not peer-reviewed
-publications. Extending the budget grid did not require new
-white-box simulations or changes to predictor results.
+The repository provides the seven-method evaluation matrices, selection-policy implementations, complete acquisition traces and terminal episodes, bootstrap summaries, provenance manifests, and figure-generation scripts \cite{praiseB1Report,praiseB13}. It also contains the independently regenerated white-box reference, audit records, and post-hoc reference and condition-sensitivity analyses \cite{praiseB0001}. Those analyses do not propagate reference uncertainty through the sequential selection policies. The supplementary records are research artifacts, not peer-reviewed publications.
 
 \begin{thebibliography}{20}
 \bibitem{bishop2006} C. M. Bishop. 2006. \emph{Pattern Recognition and Machine Learning}, Section 3.3: Bayesian Linear Regression. Springer. \url{https://link.springer.com/book/9780387310732}.
