@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.68 --- 19 November 2026}
+\date{Working manuscript v0.69 --- 19 November 2026}
 
 \begin{document}
 \maketitle
@@ -337,9 +337,7 @@ The complete budget grid is
 \[
 \mathcal B=\{10,15,20,25,30,35,40,45,55,65,70,75,80\}.
 \]
-For each of the nine policies at each budget, twelve different starting conditions and twenty seeded repetitions per start yield 240 terminal recommendations, or 28,080 policy episodes per archive. All runs use the original seed scheme (base seed 20261105), Gaussian model, acquisition objectives, and final recommendation rule. At each budget, nominal 95\% intervals are computed from 2,000 stratified episode-bootstrap draws. They condition on the fixed archive and do not incorporate white-box trajectory uncertainty.
-
-The five previously archived budgets ($10,15,20,30,40$) are reused without rerunning or changing their results. Eight additional budgets ($25,35,45,55,65,70,75,80$) were evaluated later using the same original policy episode functions and generalized budget bookkeeping. One compatibility correction was required at near-exhaustive budgets: Balanced originally sized an internal coverage array by the largest method index \emph{remaining available}, which can omit an already exhausted method and cause an indexing error. The extension retains the original balance scores and tie-breaking but keeps the full seven-row catalogue. Original policy-source hashes and all five-budget summaries remain unchanged. The additional budgets were selected after the first fresh-reference results were inspected, so the full-grid comparisons are an \emph{exploratory extension}, not a newly preregistered confirmation test.
+For each policy and budget, we evaluate 240 episodes, covering twelve initial conditions and twenty repetitions per condition. Terminal simple regret is summarized using nominal 95\% stratified episode-bootstrap intervals based on 2,000 resamples. These intervals are conditional on each fixed archive and do not incorporate white-box trajectory uncertainty.
 
 This experiment instantiates the structured problem of Section~\ref{sec:performance-model}: provider-world and graph labels are known at acquisition time, but the errors associated with their combinations are initially unknown to the policy. The nine selectors share the additive surrogate and terminal rule; their comparison evaluates how to allocate a limited number of revealed cells \emph{using} that structure. Because we do not compare alternative surrogate families here, the experiment does not separately establish that the additive approximation is better than an interaction-aware or nonsharing model.
 
