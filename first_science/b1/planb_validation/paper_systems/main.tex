@@ -23,12 +23,12 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.74 --- 19 November 2026}
+\date{Working manuscript v0.75 --- 19 November 2026}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-Validating competing methods for hierarchical computing-continuum services is costly because their quality must be assessed across combinations of provider behavior and composition structure. These operating conditions have reusable factors rather than being unrelated tests. We study budget-aware acquisition of method--condition errors using a per-method additive Gaussian surrogate that shares evidence across provider worlds and composition graphs, while targeting the best domain-average recommendation. Nine frozen validation policies, including Knowledge Gradient (KG), Top2 and matched adaptive/uniform two-stage variants, are compared at thirteen budgets from 10 to 80 on seven composed-service compliance predictors and twelve crossed conditions. A historical development archive is followed by a \emph{fresh-reference archive}, constructed from independently generated and audited white-box trajectories for the same conditions. On the fresh-reference archive, joint-action KG averages 0.001982 terminal simple regret versus 0.003392 for Balanced (41.6\% less). Joint-action KG has the lowest thirteen-budget mean on both archives, although its advantage over original Top2 is inconclusive in the fresh-reference archive. Adaptive KG condition choice performs better at intermediate budgets in that archive but not the smallest ones; its aggregate advantage over uniform choice is unresolved. The case study establishes that a structured computing-continuum validation catalogue can support executable, decision-focused allocation with lower fixed-domain regret than coverage-oriented validation. It does not establish general adequacy of the additive model or measured computational-cost savings; reference uncertainty and an influential condition further limit generalization.
+Validating competing methods for hierarchical computing-continuum services is costly because their quality must be assessed across combinations of provider behavior and composition structure. These operating conditions contain recurring factors that can inform statistical sharing across conditions. We formulate structure-informed, budget-aware acquisition of method--condition errors and instantiate it with an additive Gaussian surrogate over provider worlds and composition graphs, targeting the best domain-average recommendation. Nine frozen validation policies, including Knowledge Gradient (KG), Top2 and matched adaptive/uniform two-stage variants, are compared at thirteen budgets from 10 to 80 on seven composed-service compliance predictors and twelve crossed conditions. A historical development archive is followed by a \emph{fresh-reference archive}, constructed from independently generated and audited white-box trajectories for the same conditions. On the fresh-reference archive, joint-action KG averages 0.001982 terminal simple regret versus 0.003392 for Balanced (41.6\% less). Joint-action KG has the lowest thirteen-budget mean on both archives, although its advantage over original Top2 is inconclusive in the fresh-reference archive. Adaptive KG condition choice performs better at intermediate budgets in that archive but not the smallest ones; its aggregate advantage over uniform choice is unresolved. The case study demonstrates an executable connection between continuum structure, posterior information sharing and decision-focused validation, with lower fixed-domain regret than coverage-oriented allocation. Testing alternative sharing models and real evaluation costs remains future research.
 \end{abstract}
 
 \noindent\textbf{Keywords:} computing continuum; budget-aware validation; sequential experimental design; Knowledge Gradient; method selection; adaptive testing.
@@ -44,10 +44,10 @@ We instantiate this approach in a composed-service compliance prediction problem
 
 The study addresses three questions. \emph{RQ1:} In the studied computing-continuum domain, does budget-aware acquisition improve terminal method selection over random or coverage-oriented validation? \emph{RQ2:} How do Knowledge Gradient policies compare with other acquisition rules as the budget and reference outcomes change? \emph{RQ3:} How does adaptive condition choice compare with uniform choice across budget ranges? RQ1 tests a fixed-domain selection benefit; RQ2 and RQ3 characterize comparative behavior without presupposing that one policy must dominate. We investigate these questions on a historical development archive and a \emph{fresh-reference archive}: a separately generated and mechanically audited white-box reference for the \emph{same} twelve conditions, with the predictor outputs already frozen. Thirteen acquisition limits from 10 to 80 reveal low-budget behavior and convergence toward near-exhaustive validation.
 
-We contribute a structured budget-aware validation formulation and an audited computing-continuum case study, linking the hierarchy of provider behavior and service composition to a sequential method-selection problem. The contributions are:
+We contribute a structure-informed, budget-aware validation methodology and an audited computing-continuum case study that links operating-condition structure to sequential method selection. The contributions are:
 
 \begin{enumerate}
-\item \textbf{Structured validation problem for composed systems.} We connect the provider-world and composition-graph levels to a crossed-factor condition catalogue and an additive per-method performance surrogate. Its shared coefficients allow acquired evidence to inform unobserved combinations; additivity is an explicit modeling assumption, not a claimed physical law or new statistical estimator.
+\item \textbf{From continuum structure to statistical sharing.} We translate recurring condition factors into a per-method prior covariance over validation losses, so an observation can inform other related conditions. Our evaluated instance uses additive Gaussian effects for provider worlds and composition graphs; the broader construction also accommodates other valid structure-informed covariances.
 \item \textbf{Budget-aware acquisition and demonstrated selection benefit.} We formulate sequential acquisition of method--condition outcomes with a terminal full-domain recommendation. In both evaluated archives, decision-focused allocation reduces regret relative to Random and Balanced over the extended budgets.
 \item \textbf{Comparative characterization of KG and condition adaptation.} We evaluate nine executable policies, distinguishing joint-action KG/Top2 from matched adaptive/uniform two-stage variants. The results locate competitive KG behavior and budget-dependent adaptive tradeoffs without asserting universal policy dominance.
 \item \textbf{Audited fresh-reference case study.} Seven composed-service compliance predictors are evaluated on twelve crossed operating conditions, first using historical evidence and then independently regenerated white-box trajectories. Frozen predictors, replay histories, bootstrap statistics and sensitivity diagnostics delimit what the fixed-domain results establish.
@@ -115,9 +115,31 @@ The diversity dimensions identified in the Introduction become the coordinates o
 
 The same multidimensional structure shapes the budget-aware validation problem introduced in Section~2. An evaluation reveals the loss of a particular method under one chosen condition, while the final recommendation targets that method's \emph{average} loss over the full prespecified domain (Eq.~\eqref{eq:target}). Because an acquisition policy chooses conditions selectively, the observed losses cannot simply be treated as interchangeable samples of one condition-independent method reward. The policy must allocate its limited budget over method--condition pairs and estimate losses for the combinations it has not evaluated. A performance model that shares information across recurring condition factors can make these estimates more useful for the final decision.
 
-We address this class of \emph{crossed-factor validation problems} by representing a condition as $c=(c_1,\ldots,c_J)\in\mathcal C_1\times\cdots\times\mathcal C_J$ and approximating each method's loss by a general performance level plus additive effects associated with the levels of those factors. For each candidate method $a$, the selection policy maintains a separate Bayesian performance surrogate over its entire condition domain. A Gaussian likelihood relates observed condition-level losses to the shared coefficients, while a Gaussian prior regularizes estimates when few evaluations have been acquired. The resulting posterior enables an observation in one condition to update predictions for other combinations. Additivity is a working statistical approximation motivated by the reusable condition structure, rather than a physical law implied by the service hierarchy.
+For a structured condition $c=(c_1,\ldots,c_J)$, let $f_a(c)$ denote the latent performance of method $a$ before observation. We maintain a separate Gaussian belief for each method and specify how its condition-level estimates share information through a prior covariance
+\begin{equation}
+\operatorname{Cov}_0\bigl(f_a(c),f_a(c')\bigr)=\kappa_{\mathcal S}(c,c'),
+\label{eq:structure-map}
+\end{equation}
+where $\mathcal S$ encodes relevant condition relationships and $\kappa_{\mathcal S}$ is a positive-semidefinite covariance function chosen from those descriptors. Shared factor levels, common ancestors or nearby operating values can motivate different forms of statistical similarity (Table~\ref{tab:structure-map}). This mapping is a modeling hypothesis informed by the system structure: physical hierarchy alone does not determine performance correlations. With Gaussian observation errors, the posterior transfers evidence among conditions according to the chosen covariance.
 
-For the case study, the condition $c=(w,g)$ crosses a provider world $w\in\{\mathrm{P1},\mathrm{P3},\mathrm{P4}\}$ with a composition graph $g\in\{\mathrm{PAR},\mathrm{PARSEQ},\mathrm{SEQ},\mathrm{SEQPAR}\}$. The corresponding per-method Gaussian model is:
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{p{0.27\linewidth}p{0.62\linewidth}}
+\toprule
+Condition structure & Example information-sharing assumption\\
+\midrule
+Crossed factors & Shared categorical levels contribute common effects.\\
+Nested hierarchy & Conditions inherit effects from shared region or cluster ancestors.\\
+Continuous factor & Correlation decreases with workload or network-load distance.\\
+Factor interaction & Matching combinations contribute an additional shared effect.\\
+\bottomrule
+\end{tabular}
+\caption{Possible translations from computing-continuum condition structure into a prior covariance. Only the crossed-factor additive instance is evaluated here.}
+\label{tab:structure-map}
+\end{table}
+
+Our evaluated instance uses additive Gaussian effects for crossed categorical factors. In the case study, the condition $c=(w,g)$ crosses a provider world $w\in\{\mathrm{P1},\mathrm{P3},\mathrm{P4}\}$ with a composition graph $g\in\{\mathrm{PAR},\mathrm{PARSEQ},\mathrm{SEQ},\mathrm{SEQPAR}\}$. The corresponding per-method Gaussian model is:
 \begin{equation}
 \begin{aligned}
 Y_{a,(w,g)}
@@ -162,7 +184,7 @@ For seven methods, this produces seven performance models, each predicting twelv
 +\frac{1}{4}\sum_g v_{a,g}.
 \label{eq:additive-average}
 \end{equation}
-This additive sharing is an assumption, not a discovered relationship: the model does not represent world--graph interaction effects or cross-method correlations. Section~\ref{sec:case} describes the concrete predictor portfolio and fixed prior hyperparameters.
+The evaluated additive instance does not represent world--graph interaction effects or cross-method correlations. Section~\ref{sec:case} describes the predictor portfolio and fixed prior hyperparameters.
 
 \subsection{Posterior updating and acquisition statistics}
 Given Eq.~\eqref{eq:gaussianmodel}, the posterior for method $a$ is Gaussian with coefficient mean $b_a$ and covariance $\Sigma_a$. Initially, $b_a=b_0$ and $\Sigma_a=V_0$. Acquired condition-level losses sequentially update this posterior; the working residual variance $\sigma^2$ represents regression discrepancy, not an independently sampled new simulator result on each replay.
@@ -191,16 +213,19 @@ m_a=v^\top b_a.
 The value $m_a$ is the current estimate of method $a$'s domain-average loss, including conditions not yet evaluated. The final recommendation chooses the method with the smallest $m_a$.
 
 \paragraph{3. Recompute the next acquisition scores.}
-Before evaluating an unused pair $(a,c)$, the expected reduction in the posterior variance of its domain-average loss is
+Let $Q_a(c',c)=\operatorname{Cov}(f_a(c'),f_a(c)\mid\mathcal D)$ denote the current posterior covariance between condition losses for method $a$. Before evaluating an unused pair $(a,c)$, the reduction in posterior variance of its model-implied domain-average performance is
 \begin{equation}
-\Delta_{a,c}=
-\frac{(v^\top\Sigma_a x_c)^2}
+\begin{aligned}
+\Delta_{a,c}
+&=\frac{\bigl(C^{-1}\sum_{c'}Q_a(c',c)\bigr)^2}
+{\sigma^2+Q_a(c,c)}\\
+&=\frac{(v^\top\Sigma_a x_c)^2}
 {\sigma^2+x_c^\top\Sigma_a x_c},
-\qquad
-s_{a,c}=\sqrt{\Delta_{a,c}}.
+\qquad s_{a,c}=\sqrt{\Delta_{a,c}}.
+\end{aligned}
 \label{eq:gain}
 \end{equation}
-Here $\Delta_{a,c}$ is a variance reduction, whereas $s_{a,c}$ is the standard deviation of the possible change in the posterior mean $m_a$ after that evaluation. Top2 uses $\Delta_{a,c}$ to prioritize uncertainty reduction; Knowledge Gradient uses $s_{a,c}$ to score expected improvement in the final selection. The policy then selects its next unevaluated method--condition pair, observes its loss, and repeats the updates until the budget is exhausted.
+Under the stated independent Gaussian residual model, the first expression applies to any Gaussian within-method condition covariance; the second is its coefficient-model form in our additive implementation. Here $\Delta_{a,c}$ is a variance reduction and $s_{a,c}$ is the standard deviation of the possible change in the posterior mean $m_a$. Top2 uses $\Delta_{a,c}$ for uncertainty reduction, while Knowledge Gradient uses $s_{a,c}$ to score expected improvement in the final selection. This extension preserves the same acquisition calculation as long as the candidate methods maintain independent beliefs; a model sharing information across methods would require a different KG calculation.
 
 \subsection{Validation allocation strategies}
 We compare strategies that differ in how they use the evaluation history to select the next method--condition pair. All share the initialization and final decision rule described in Section~3.2.
@@ -432,9 +457,9 @@ A historical Top2 episode with a budget of fifteen evaluations illustrates why s
 \FloatBarrier
 \section{Discussion}
 \paragraph{Why the composed-system structure matters.}
-The case study instantiates two levels of computing-continuum heterogeneity: constituent-provider behavior and service-composition topology. Their crossing defines twelve validation conditions with recurring factor levels. The per-method additive Gaussian surrogate links losses across those conditions through shared world and graph effects. When a predictor is evaluated under one world--graph combination, the observation updates its posterior estimates for other combinations according to their shared coefficients and posterior covariance. This is the \emph{a priori} rationale for structural sharing: a validation action may provide information beyond the cell it directly reveals.
+The methodological link begins with recurring computing-continuum condition factors, translates their relationships into a prior covariance, and uses posterior information sharing to guide validation. In the evaluated provider-world--graph catalogue, a predictor's observed loss informs estimates for other conditions through common world and graph effects. This is the \emph{a priori} rationale for letting one validation action affect more than the cell it reveals.
 
-The same posterior supplies the estimated domain-average loss and the expected change in that estimate needed to score each remaining predictor--condition action by one-step joint-action Knowledge Gradient (KG). In our seven-method, twelve-condition catalogue, this provides an executable KG implementation using a compact Gaussian model for each predictor and no access to unrevealed losses. The contribution is the explicit connection from continuum condition structure to posterior information transfer and decision-focused acquisition, rather than a new KG rule. KG can also use independent-cell surrogates; comparing the value of structural sharing is a separate question because all nine evaluated policies use the same model.
+The resulting posterior supplies the estimated domain-average loss and the possible change in that estimate used by one-step joint-action Knowledge Gradient (KG). The case study demonstrates an executable connection from system structure to a statistical belief and then to decision-focused acquisition. The same construction can use other valid within-method covariances (Table~\ref{tab:structure-map}); the reported policy comparisons use the additive instance and do not isolate the empirical gain of factor sharing itself.
 
 \paragraph{Validation is a meaningful allocation decision.}
 Across both reference archives, the choice of which method--condition outcomes to reveal affects the quality of the final recommendation before all 84 are known. This illustrates budget-aware validation as a decision layer for computing-continuum method selection. The budgets count revealed validation outcomes rather than measured computation time.
@@ -452,16 +477,14 @@ Early adaptive KG can be worse than its uniform counterpart, intermediate budget
 The present findings motivate extending the methodology along four directions. New provider worlds, graph families and predictor portfolios would test transfer beyond the twelve studied conditions. Comparisons with independent-cell and interaction-aware surrogates would quantify the value of factor sharing, while reference-aware sequential analyses would assess uncertainty and sensitivity to condition weighting. Prospective studies could identify reliable criteria for adaptive condition choice using frozen policy and budget specifications to confirm the exploratory budget-dependent patterns. Finally, replacing equal-cost outcome reveals with measured evidence-generation, simulation and scoring costs would enable evaluation of operational benefits and integration into online orchestration.
 
 \section{Related Work and Systems-Level Positioning}
-Prior work addresses distinct decisions. Pozas Garc\'ia et al.\ learn to recommend a \emph{composition optimization algorithm} before identifying services \cite{pozas2023}. Stupar and Huljeni\'c integrate QoS/cost prediction and \emph{deployment configuration} optimization \cite{stupar2023}; Sedlak et al.\ investigate edge-device configuration and offloading through active inference \cite{sedlak2024}. These are important examples of system-level algorithm/model use but do not make the terminal choice considered here identical.
+Computing-continuum research has considered recommending composition optimization algorithms \cite{pozas2023}, predicting QoS and selecting deployment configurations \cite{stupar2023}, and adapting edge offloading decisions \cite{sedlak2024}. These applications motivate the need to validate methods across heterogeneous operating conditions, while addressing different terminal decisions.
 
-Predictive portfolios and cloud QoS forecast comparisons are also established \cite{mao2024,guerron2026}. More directly, Hara et al.\ and Kossen et al.\ actively select test evidence to evaluate or choose a predictive model \cite{hara2024,kossen2021}; sequential value-of-information acquisition is longstanding \cite{frazier2008}. Our claim is therefore \emph{not} that predictor selection, additive Gaussian modeling or active evaluation is new. Rather, the investigated engineering decision connects provider-limited compliance prediction in \emph{composed graphs} with a crossed-factor description of costly method--world--graph validation actions. That description permits an explicit, inspectable hypothesis about transfer between conditions and supports an empirical comparison of acquisition decisions made under it.
+Predictive portfolios and cloud QoS forecast comparisons are also established \cite{mao2024,guerron2026}. Hara et al.\ and Kossen et al.\ study active acquisition of evidence for model evaluation or selection \cite{hara2024,kossen2021}. Sequential value-of-information policies, Knowledge Gradient with correlated normal beliefs, and its use with linear additive belief models have established foundations \cite{frazier2008,frazier2009,negoescu2011}. The contribution here is a computing-continuum validation methodology that maps recurring system factors to a statistical sharing model and uses its posterior to allocate method--condition evaluations toward one full-domain recommendation.
 
-Best-arm identification with linear structure can adapt acquisitions to uncertain comparisons \cite{soare2014}. In related misspecified linear identification problems, the possible modeling error affects how safely that structure may be exploited \cite{reda2021}. These results motivate investigating a reliability-dependent condition-choice threshold, but their theoretical guarantees do not directly apply to the present finite, nonrepeated error catalogue and heuristic Gaussian prior.
-
-The methodological contribution is the explicit, auditable connection between composed-service prediction, structured validation conditions, and a budgeted full-domain method recommendation. The case study demonstrates this connection and its fixed-domain selection value with existing acquisition rules. Stronger systems claims require measured evaluation costs and deployment integration; stronger generality claims require new provider worlds and comparisons with alternative surrogate structures. The current evidence supports a specialized applied-methodology contribution, without requiring a claim of a mathematically new acquisition rule.
+Best-arm identification with linear structure can adapt acquisitions to uncertain comparisons \cite{soare2014}, while work on misspecified linear identification clarifies the risks of exploiting an inaccurate model \cite{reda2021}. The present case study makes the structure-to-belief-to-decision workflow executable and auditable, with model adequacy and transfer beyond the tested domain remaining research directions.
 
 \section{Conclusion}
-We introduced a budget-aware validation method for selecting among composed-service predictors over provider-world and composition-graph conditions. The per-method additive Gaussian surrogate shares information across conditions: observing one predictor--condition outcome updates other condition estimates and supports one-step Knowledge Gradient scoring of joint acquisition actions. This yields an executable, auditable connection between computing-continuum structure, validation evidence, and full-domain predictor recommendation.
+We introduced a budget-aware validation methodology that translates computing-continuum condition structure into statistical information sharing and uses the resulting posterior to select informative method--condition evaluations. An additive Gaussian model over provider-world and composition-graph effects provides the evaluated instance: one observation updates estimates at related conditions and supplies the quantities for one-step joint-action Knowledge Gradient. This creates an executable, auditable connection from system structure to full-domain method recommendation.
 
 Across seven predictors, twelve conditions, thirteen budgets and two audited reference archives, decision-focused acquisition reduces average terminal simple regret relative to random and broad-coverage validation. Joint-action KG has the lowest thirteen-budget average in both archives; on the fresh-reference archive its advantage over Top2 remains uncertain. Adaptive condition choice offers a promising intermediate-budget pattern, while its aggregate advantage is unresolved. Together, these findings establish the feasibility and fixed-domain value of structured validation under limited evidence. They motivate testing new operating environments, alternative surrogates, calibrated adaptive acquisition and measured validation costs.
 
@@ -491,6 +514,8 @@ Diagnostic scope:
 \bibitem{toscano2022} S. Toscano-Palmerin and P. I. Frazier. 2022. Bayesian Optimization with Expensive Integrands. \emph{SIAM Journal on Optimization} 32(2):417--444. \url{https://doi.org/10.1137/19M1303125}.
 \bibitem{ding2022} Ding, L., Hong, L. J., Shen, H., and Zhang, X. 2022. Technical note---Knowledge gradient for selection with covariates: Consistency and computation. \emph{Naval Research Logistics} 69(3):496--507. \url{https://doi.org/10.1002/nav.22028}.
 \bibitem{frazier2008} Frazier, Powell, and Dayanik. 2008. A Knowledge-Gradient Policy for Sequential Information Collection. \emph{SIAM Journal on Control and Optimization}. \url{https://doi.org/10.1137/070693424}.
+\bibitem{frazier2009} P. I. Frazier, W. B. Powell, and S. Dayanik. 2009. The Knowledge-Gradient Policy for Correlated Normal Beliefs. \emph{INFORMS Journal on Computing} 21(4):599--613. \url{https://doi.org/10.1287/ijoc.1080.0314}.
+\bibitem{negoescu2011} D. M. Negoescu, P. I. Frazier, and W. B. Powell. 2011. The Knowledge-Gradient Algorithm for Sequencing Experiments in Drug Discovery. \emph{INFORMS Journal on Computing} 23(3):346--363. \url{https://doi.org/10.1287/ijoc.1100.0417}.
 \bibitem{russo2016} Russo. 2016. Simple Bayesian Algorithms for Best Arm Identification. \emph{COLT}. \url{https://proceedings.mlr.press/v49/russo16.html}.
 \bibitem{fiez2019} Fiez, Jain, Jamieson, and Ratliff. 2019. Sequential Experimental Design for Transductive Linear Bandits. \emph{NeurIPS}. \url{https://papers.neurips.cc/}.
 \bibitem{soare2014} M. Soare, A. Lazaric, and R. Munos. 2014. Best-Arm Identification in Linear Bandits. \emph{NeurIPS}. \url{https://proceedings.neurips.cc/paper/2014/hash/f8d84caae48546d0934d637ab54f7086-Abstract.html}.
