@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.67 --- 19 November 2026}
+\date{Working manuscript v0.68 --- 19 November 2026}
 
 \begin{document}
 \maketitle
@@ -438,7 +438,9 @@ The example is included to make the workflow concrete, not to imply that fifteen
 \FloatBarrier
 \section{Discussion}
 \paragraph{Why the composed-system structure matters.}
-The case study instantiates two distinct levels of computing-continuum heterogeneity: the behavior of constituent providers and the topology connecting their services. Their crossing generates twelve meaningful validation conditions rather than arbitrary test identifiers; obtaining each condition-level prediction error requires upstream graph-level prediction and white-box reference evidence. The additive Gaussian surrogate turns these descriptors into shared coefficients: a result for one predictor under one condition can update its estimated quality in other world--graph combinations. The executed prediction-to-reference pipeline and subsequent policy replays show that the proposed \emph{method--condition validation interface} is implementable with independently auditable evidence. All nine policies use the same surrogate, so this experiment demonstrates the combined workflow rather than separately proving the adequacy or benefit of factorwise additivity.
+The case study instantiates two levels of computing-continuum heterogeneity: constituent-provider behavior and service-composition topology. Their crossing defines twelve validation conditions with recurring factor levels. The per-method additive Gaussian surrogate links losses across those conditions through shared world and graph effects. When a predictor is evaluated under one world--graph combination, the observation updates its posterior estimates for other combinations according to their shared coefficients and posterior covariance. This is the \emph{a priori} rationale for structural sharing: a validation action may provide information beyond the cell it directly reveals.
+
+The same posterior supplies the estimated domain-average loss and the expected change in that estimate needed to score each remaining predictor--condition action by one-step joint-action Knowledge Gradient (KG). In our seven-method, twelve-condition catalogue, this yields an executable KG procedure based on a compact Gaussian model for each predictor and without access to unrevealed losses. The contribution is this explicit connection from continuum condition structure to posterior information transfer and decision-focused acquisition, not a new KG rule. KG can also be implemented with independent-cell models; factor sharing is a modeling choice whose predictive and selection value depends on its adequacy. Because all nine evaluated policies use the same surrogate, their comparison demonstrates the integrated workflow without establishing that additivity is superior or necessary.
 
 \paragraph{Validation is a meaningful allocation decision.}
 The historical and fresh-reference curves both show that decision-focused selection of method--condition evaluations can reduce terminal recommendation error before the full set of 84 outcomes is revealed. This supports budget-aware validation as a decision layer for computing-continuum method selection. The claim concerns effectiveness per revealed validation outcome, not yet measured resource-cost savings or performance of an integrated online service.
@@ -502,11 +504,14 @@ Neither archive alone establishes out-of-domain generalization.
 We studied the allocation of limited validation evidence when choosing
 among seven composed-service predictors in a hierarchical
 computing-continuum setting. Provider behavior and composition graphs
-define twelve crossed operating conditions; an additive per-method
-performance surrogate shares evidence across their recurring factors.
-This connects an application-specific system hierarchy to a structured
-validation problem without assuming that the physical hierarchy
-guarantees additive prediction errors. Nine executable allocation policies were compared at
+define twelve crossed operating conditions. An additive per-method
+Gaussian surrogate lets an observation update predictions for other
+conditions through shared factor effects; its posterior also supplies
+the quantities needed to score joint predictor--condition actions with
+one-step Knowledge Gradient. This is an executable way to connect
+structured validation evidence with KG, without claiming a new
+acquisition rule or that physical hierarchy guarantees additive errors.
+Nine executable allocation policies were compared at
 thirteen budgets on a historical development archive and the independently
 regenerated, mechanically audited fresh-reference archive for the same conditions.
 Three findings emerge. First, budget-aware decision-focused validation
@@ -522,13 +527,15 @@ adaptive advantage in that archive is statistically unresolved.
 
 Together, these findings support the applied methodological contribution:
 the composed-service hierarchy can be mapped to auditable validation
-conditions, and selective acquisition improves the final decision within
-the studied domain. Resolving KG's comparative dominance and identifying
-a reliable adaptation threshold are further questions rather than
-prerequisites for this fixed-domain result. The experiment does not
-establish the separate validity or necessity of its additive surrogate.
-They concern fixed-domain, fixed-archive recommendation
-quality, not real-resource savings or out-of-world transfer. The fresh-reference archive's
+conditions, shared-factor posterior updates can make one acquisition
+inform several condition estimates, and the resulting model supports an
+executable joint-action KG decision procedure. Selective acquisition
+improves the final recommendation within the studied domain under this
+model. Resolving KG's comparative dominance, identifying a reliable
+adaptation threshold, and establishing the independent value of the
+additive surrogate are separate research questions. The present findings
+concern fixed-domain, fixed-archive recommendation quality, not measured
+resource savings or out-of-world transfer. The fresh-reference archive's
 near-tied leading predictors and the influence of P1/$G_{\rm PAR}$
 underscore sensitivity to reference and target-domain choices.
 Further work should examine the value and adequacy of factor sharing
