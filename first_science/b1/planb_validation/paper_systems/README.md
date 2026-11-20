@@ -1,49 +1,104 @@
-# PRAISE systems paper — LaTeX working directory
+# PRAISE sequential validation paper — LaTeX v0.77
 
-**Status:** manuscript draft v0.76, 19 November 2026. **Review-first**, not ready for submission.
-**Canonical source:** `main.tex` in this directory. Edits and iterations are committed to the `praise-identifiability-feasibility` branch.  
-**Compilation:** Standard **pdfLaTeX**, no XeLaTeX/LuaLaTeX/fontspec, no shell escape, no bibliography generator. The historical figure is converted from its archived SVG, while the zoomed fresh-reference figure is rendered locally from the frozen summary CSV by build.sh. Citations use a standard in-file bibliography. The architecture is drawn using LaTeX boxes and text so no image conversion is needed.
+**Status:** method-focused working manuscript (20 November 2026), pending
+local compilation and section-by-section review before submission.
+The canonical source is [main.tex](main.tex) on
+`praise-identifiability-feasibility`.
 
-## Pull and compile
+## What changed
 
-The two principal Results figures show the same nine policies and thirteen budgets. Figure 3 retains the historical 0--0.025 regret axis; Figure 4 uses a 0--0.012 vertical range to resolve the smaller fresh-reference regrets. All fresh-reference 95% interval bounds are below 0.012. The independent-reference archive covers the same provider worlds and graphs (repository identifier `B0001`). The original **shared-axis SVGs remain frozen and unchanged**. During `bash build.sh`, the historical SVG is converted to PDF and `plot_fresh_reference_zoom_v1.py` reconstructs only the paper's zoomed Figure 4 from the archived summary CSV. Policy labels, markers, colors, curves and uncertainty values are reused; no outcomes are recomputed. The build requires the existing Python plotting dependencies (`matplotlib`, `numpy`, `pandas`) and an SVG converter (Inkscape, `rsvg-convert`, or Python `cairosvg`) for Figure 3.
+- Primary method: one Gaussian surrogate per candidate predictor, with
+  world and graph factors sharing posterior information between conditions.
+- Algorithmic contribution: two-stage adaptive KG selects a method using
+  average KG over its remaining conditions, then selects an informative
+  condition. A matched uniform-condition KG policy uses the same first stage.
+- Evidence: the six budget-independent policies use nested budget prefixes;
+  the three Top2 policies retain their original budget-specific episodes.
+  Both reference matrices, nine policies and thirteen budgets are represented.
+- Figures 3 and 4 use the verified 234-row `data/combined_nine_policy_budget_summary.csv`.
+  The paper's statistic tables are reconciled to the frozen adaptive-versus-uniform
+  and KG-versus-Top2 aggregate ledgers stored under `data/`.
+- Figure 2 is a within-method condition-sharing schematic. The former detailed
+  case-study workflow diagram is preserved, but not built, in
+  [supplement_case_pipeline.tex](supplement_case_pipeline.tex).
+- Discussion and conclusion now distinguish the statistical sharing mechanism,
+  the adaptive two-stage acquisition rule and the evidence for policy performance.
+
+The manuscript no longer states that joint-action KG has the lowest mean
+regret: in the consistent nested comparison, adaptive two-stage KG does on
+both archives. The adapted KG-versus-uniform advantage is supported by an
+adjusted interval historically but remains uncertain on the fresh reference.
+
+## Pull and compile on the laptop
+
+The paper uses **standard pdfLaTeX** and no `fontspec`, shell escape,
+external SVG converter, BibTeX or XeLaTeX engine. Figure generation requires
+the existing `matplotlib` and `numpy` Python packages.
 
 ```bash
 cd ~/praise/praise-cao-sim
 git pull --ff-only origin praise-identifiability-feasibility
+
 cd first_science/b1/planb_validation/paper_systems
+
+python test_plot_nested_paper_figures_v1.py -v
+python plot_nested_paper_figures_v1.py --preflight-only
+
 bash build.sh
 ```
 
-Output: `main.pdf` in this directory. If no SVG converter is installed, `bash build.sh` explains which lightweight option can be installed (for Ubuntu: `sudo apt-get install librsvg2-bin`). The generated figure PDFs and zoomed SVG in `figures/` are **local build artifacts**; do not commit them.
+Expected markers:
+- `PAPER_FIGURE_PREFLIGHT_PASS no files written`
+- `PAPER_FIGURES_PASS no episodes or statistical resamples executed`
+- `PRAISE_PAPER_BUILD_PASS .../main.pdf`
 
-If figures were already converted and you only wish to recompile the TeX source, two ordinary `pdflatex` invocations are sufficient.
+The output is `main.pdf` in this directory. The generated figure PDFs
+are in `figures/`, and all generated PDFs/LaTeX auxiliary files are
+**local artifacts**. Do not commit them.
 
-The manuscript now includes a formal citation to the GitHub-hosted B1 consolidated technical report and its complete numerical appendix. This is clearly labeled an internal repository technical report, not a peer-reviewed publication. GitHub links are branch-specific and should be replaced with immutable commit links or a DOI when the paper is submission-ready.
+```bash
+xdg-open main.pdf
+```
 
-## Review protocol
+To recompile TeX only, after the paper's figure PDFs exist:
 
-- The manuscript is framed around **budget-aware allocation of validation evidence for decisions among computing-continuum methods**. Composed-service predictor selection is the evaluated case study, not the whole problem definition.
-- The structural methodology is explicit throughout v0.76: the Introduction identifies diversity dimensions as validation-condition coordinates; Section 3.3 formulates a structure-informed prior covariance and presents crossed world--graph additive effects as the evaluated instance; Section 3.4 relates posterior condition covariance to acquisition statistics. These are modeling hypotheses informed by continuum structure, not physically guaranteed loss correlations. The policy replay does not isolate the empirical gain from factor sharing.
-- Current review structure: Section 2 presents the general validation framework; Section 3 specifies the protocol (3.2), the structure-informed prior and its additive case-study implementation (3.3), posterior updating (3.4), and validation allocation strategies (3.5); Section 4 introduces the composed-service case study; Section 5 gives the historical and fresh-reference thirteen-budget validation results with the same y-axis for both plots; Section 6 discusses the positive RQ1 finding, the comparative RQ2/RQ3 results and future research; Section 7 positions the contribution against related work; Section 8 concludes. Joint-action KG remains distinct from the matched two-stage condition-choice experiment.
-- When proposing edits, refer to section numbers or quote a phrase. The v0.76 Discussion and Conclusion distinguish the general structure-to-belief-to-decision methodology from its evaluated additive surrogate and existing KG theory.
-- Manuscript is **venue-neutral** until the actual workshop/conference format is chosen. Page length and references must be adapted to that venue's template once identified.
-- Working author list and affiliations appear in the manuscript; verify the final metadata before submission.
-- No new simulations were run to write this draft; all reported values are reused from the verified evidence documents.
+```bash
+pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
+pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
+```
 
-## Evidence and provenance
+## Frozen paper evidence
 
-- [A1 implementation and seven-method public-I1 source trace](../B1_A1_I_M_SOURCE_TRACE_2026-11-06_V0_2.md).
-- [A1 architecture and real episode](../B1_A1_SYSTEM_ARCHITECTURE_DRAFT_2026-11-06_V0_1.md).
-- [A2 closest-systems audit](../B1_A2_CLOSEST_SYSTEMS_COMPARISON_2026-11-06_V0_2.md).
-- [Original B1 main result](../B1_CONSOLIDATED_SCIENTIFIC_EVIDENCE_V0_1.md) and [complete numerical appendix](../B1_CONSOLIDATED_NUMERIC_APPENDIX_V0_1.md).
-- [Controlled two-stage condition-selection study](../B1_CONTROLLED_CONDITION_SELECTION_RESULTS_2026-11-06.md).
-- [Fresh-reference (B0001) complete exact-original-policy replay and figures](../results/b0001_original_policies_v1/README.md).
-- [Fresh-reference (B0001) read-only fixed-decision reference and condition-sensitivity audit](../results/b0001_fixed_decision_sensitivity_v1/README.md).
-- [Both thirteen-budget curves, original-policy extension data and provenance](../results/b1_nine_policy_13_budget_extension_v1/README.md).
-- [Exact eight-budget extension commands and the shared-axis plotting command](../B1_ORIGINAL_NINE_POLICY_13_BUDGET_REPLAY_RUNBOOK_V1.md).
-- [Complete verified B=15 episode](../results/worked_example_v1/worked_episode.md).
+- `data/combined_nine_policy_budget_summary.csv`: nine policy mean-regret
+  curves and nominal 95% intervals in both archives.
+- `data/nested_six_plus_frozen_top2_plot_manifest.json`: exact source
+  provenance and original summary hashes.
+- `data/kg_condition_adaptivity_aggregate_contrasts.csv` and its manifest:
+  matched adaptive-versus-uniform KG comparisons with independent
+  policy-resampling and preserved across-budget dependence.
+- `data/kg_vs_top2_*_aggregate_contrasts.csv` and matching manifests:
+  cross-design adaptive-KG comparisons with three frozen Top2 variants.
 
-## Proposed version discipline
+The plotting script verifies exact policy/budget coverage, source designs,
+all input hashes, all thirteen-budget contrast means, and unclipped confidence
+intervals before writing figures. It reads only the committed summary files
+and never runs acquisition episodes, bootstrap resampling or simulations.
 
-Use `main.tex` as the evolving manuscript rather than creating one file per edit. Record major scientific/scoping decisions in versioned standalone evidence notes, preserve the original frozen data and scripts, and increment the manuscript's visible version tag in the title/date for substantive revisions. Git history captures every textual iteration.
+### Interpretation boundaries
+
+The evaluation is retrospective on two fixed seven-predictor by twelve-condition
+loss matrices. Bootstrap intervals describe acquisition-randomization
+uncertainty conditional on each matrix; they do not resample the underlying
+white-box reference trajectories. Multiple comparisons against three Top2
+variants are corrected within each archive; KG adaptive-versus-uniform
+contrasts are corrected across the two archives. The analyzed contrasts
+were chosen after examining earlier curves. Alternative surrogate structures,
+new operating environments and measured evaluation costs remain future work.
+
+## Review workflow
+
+Review the PDF section by section. The title, contributions and methodological
+definition are deliberately aligned with the Results, Discussion and Conclusion.
+Avoid reintroducing labels meaningful only to the archive scripts, numerical
+seeds, or internal development chronology into the paper. The project is
+venue-neutral pending target-format selection.
