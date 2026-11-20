@@ -1,0 +1,158 @@
+{
+  "status": "B1_PRIOR_SENSITIVITY_ANALYSIS_V1_COMPLETE",
+  "scenarios": {
+    "base": [
+      0.12,
+      0.07,
+      0.045,
+      0.055,
+      0.17
+    ],
+    "intercept_half": [
+      0.06,
+      0.07,
+      0.045,
+      0.055,
+      0.17
+    ],
+    "intercept_double": [
+      0.24,
+      0.07,
+      0.045,
+      0.055,
+      0.17
+    ],
+    "world_half": [
+      0.12,
+      0.035,
+      0.045,
+      0.055,
+      0.17
+    ],
+    "world_double": [
+      0.12,
+      0.14,
+      0.045,
+      0.055,
+      0.17
+    ],
+    "graph_half": [
+      0.12,
+      0.07,
+      0.0225,
+      0.055,
+      0.17
+    ],
+    "graph_double": [
+      0.12,
+      0.07,
+      0.09,
+      0.055,
+      0.17
+    ],
+    "noise_half": [
+      0.12,
+      0.07,
+      0.045,
+      0.0275,
+      0.17
+    ],
+    "noise_double": [
+      0.12,
+      0.07,
+      0.045,
+      0.11,
+      0.17
+    ],
+    "world_graph_swap": [
+      0.12,
+      0.045,
+      0.07,
+      0.055,
+      0.17
+    ],
+    "all_prior_half": [
+      0.06,
+      0.035,
+      0.0225,
+      0.055,
+      0.17
+    ],
+    "all_prior_double": [
+      0.24,
+      0.14,
+      0.09,
+      0.055,
+      0.17
+    ],
+    "mean_low": [
+      0.12,
+      0.07,
+      0.045,
+      0.055,
+      0.1
+    ],
+    "mean_high": [
+      0.12,
+      0.07,
+      0.045,
+      0.055,
+      0.24
+    ]
+  },
+  "archives": [
+    "historical",
+    "fresh_reference"
+  ],
+  "budgets": [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    55,
+    65,
+    70,
+    75,
+    80
+  ],
+  "policies": [
+    "random",
+    "balanced",
+    "informed",
+    "kg_one_step",
+    "kg_two_stage_adaptive",
+    "kg_two_stage_uniform",
+    "budgeted_top2",
+    "top2_two_stage_adaptive",
+    "top2_two_stage_uniform"
+  ],
+  "repeats_per_start": 20,
+  "bootstrap": 3000,
+  "contrast_intervals": "nominal exploratory 95%; do not claim familywise significance across prior grid",
+  "bootstrap_design": "independent streams by policy; nested budget-prefix dependence retained; Top2 independently resampled by budget",
+  "source_manifests_sha256": {
+    "base": "1a00cc405f9840ca8d2057f1488b2bbde74e2b3e4a68b1d20e286335c6fb2a1b",
+    "intercept_half": "df47ff8e279d034ecce93eb97c7ee68d265a70adfa6a208e7061365b04de35aa",
+    "intercept_double": "348088565b877099233ca7c2a99cc2d26045fdf5158dbf4f0fbe5d954e3c59c7",
+    "world_half": "e03c20b6f8da64a92fa357e748cab16d36c221038165409c5fd9afeef10ab517",
+    "world_double": "6f1b84c332cd1346c2962cf964e0aeb54a53d1d6e601d233545924309d6a8293",
+    "graph_half": "9b30870ffe4ff5acb1f043e1f471795a2b39013f77d31ef571b1b93be65c64fb",
+    "graph_double": "3f130ae91853f609ed71b5240d73da82ab14b9cf88e51eb2ceadd8b7c8f95385",
+    "noise_half": "668919256b9417ee96ebbe39e1dc45c0d6f217b08106fa5e545703a4fcf59bc2",
+    "noise_double": "8ef66fc102364e6b4feb0feddb80616209211562761c2f263dfe7f1894fca53f",
+    "world_graph_swap": "c9bfac68627f056ec0e4ee4c62d8308a826bfebe85302fdf308e89f662767158",
+    "all_prior_half": "0ac1577af51636ad2d76de1da67e6c40984664d5a33fec0cbaea0c3558a3d59b",
+    "all_prior_double": "79fd13b9e6f0ce0b93b6237623dbce00e86a67265d92077e3c98a2ab94b08c2f",
+    "mean_low": "053ed936d2c3ef4ee031898693aec5c517e27998e334ffb22aa9a20c419eb4b2",
+    "mean_high": "81db1345afdc17a527313017e5429bf1ba0b232e386606b0e4e90abd1423786b"
+  },
+  "outputs_sha256": {
+    "all_scenario_aggregate_contrasts.csv": "7e5331111147225f8f85759b89b34051a2c370c09103f39c27a5e856af25b3cc",
+    "prior_sensitivity_decision_table.csv": "33772539b82d54bdc14a742490095978a138d4e0f87531675f045d00ce521b2a"
+  },
+  "interpretation": "finite-grid conditional robustness, not universal prior insensitivity or absence of historical tuning"
+}
