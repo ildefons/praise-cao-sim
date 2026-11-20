@@ -81,6 +81,8 @@ class PlotTop2Tests(unittest.TestCase):
             old = root / "original"
             nested.mkdir()
             old.mkdir()
+            old_tables = old / "tables"
+            old_tables.mkdir()
             all_nested = [fake_row(p, b, a, .001) for a in plot.ARCHIVES
                           for p in plot.NESTED for b in plot.BUDGETS]
             save(nested / "nested_budget_summary.csv", all_nested)
@@ -97,7 +99,7 @@ class PlotTop2Tests(unittest.TestCase):
             old_hashes = {}
             for archive in plot.ARCHIVES:
                 old_name = plot.OLD_ARCHIVE[archive]
-                path = old / f"{old_name}_nine_policy_13_budget_regret.csv"
+                path = old_tables / f"{old_name}_nine_policy_13_budget_regret.csv"
                 save(path, [fake_row(p, b, regret=.009) for p in plot.POLICIES
                             for b in plot.BUDGETS])
                 old_hashes[path.name] = plot.digest(path)
@@ -116,6 +118,11 @@ class PlotTop2Tests(unittest.TestCase):
             self.assertEqual({a: len(rows) for a, rows in series.items()},
                              {a: 117 for a in plot.ARCHIVES})
             self.assertIn("original_plot_manifest.json", source_files)
+            # Accept both the archived root and its tables/ subdirectory.
+            via_tables, _ = plot.load_checked_sources(
+                nested, old_tables, Path(plot.__file__).resolve().parent
+            )
+            self.assertEqual(series, via_tables)
 
 
 if __name__ == "__main__":
