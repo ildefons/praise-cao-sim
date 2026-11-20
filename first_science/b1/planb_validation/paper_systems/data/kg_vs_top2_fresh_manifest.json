@@ -1,0 +1,54 @@
+{
+  "status": "B1_NESTED_ADAPTIVE_KG_VS_FROZEN_TOP2_INFERENCE_V1_PASS",
+  "archives": [
+    "fresh_reference"
+  ],
+  "budgets": [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    55,
+    65,
+    70,
+    75,
+    80
+  ],
+  "primary_comparison": "kg_two_stage_adaptive",
+  "competitors": [
+    "budgeted_top2",
+    "top2_two_stage_adaptive",
+    "top2_two_stage_uniform"
+  ],
+  "primary_aggregate": "MEAN_OVER_13_BUDGETS",
+  "secondary_exploratory_aggregate": "MEAN_OVER_10_TO_40",
+  "comparison_chosen_after_inspecting_previous_summary_curves": true,
+  "sampling": "12 fixed initial conditions, independently resampled 20 repetitions per policy",
+  "kg_budget_resampling": "same bootstrap replicate indices across all nested budget prefixes",
+  "top2_budget_resampling": "independent replicate indices for each separate B-dependent episode",
+  "familywise_intervals": "Bonferroni 95% coverage for three Top2 comparisons within each archive and budget aggregate",
+  "per_budget_intervals": "nominal 95%; exploratory over 13 budgets",
+  "uncertainty_scope": "acquisition randomization conditional on each frozen 7x12 archive",
+  "bootstrap_draws": 10000,
+  "seed": 20261120,
+  "input_sources": {
+    "fresh_reference": {
+      "new_eight_budget_zip": "/home/ildefons/praise/praise-cao-sim/first_science/b1/planb_validation/results/b1_nine_policy_13_budget_extension_v1/b0001_eight_added_budgets_full_replay.zip",
+      "new_sha256": "8ecf9c881190499f68cf15cd697715e3bb6f743508bc8710dfe27d91e35f8ace",
+      "old_five_budget_zip": "/home/ildefons/praise/praise-cao-sim/first_science/b1/planb_validation/results/b0001_original_policies_v1/b0001_original_policy_replay_v1_complete.zip",
+      "old_sha256": "05477c50e2dadfbe0e81711ce48621fec5132bbc781a2aab1723421f070d6f4b"
+    }
+  },
+  "nested_terminal_sha256": "4b14f8efb2b8b8e52f3db521553139998ead5b83569436069844259a91731f25",
+  "output_sha256": {
+    "cross_design_aggregate_contrasts.csv": "56c7f16a23dd0e15891e6528419a5d9fc7deb7968beb8f9c020fa7f9e4df07d8",
+    "cross_design_budget_contrasts.csv": "d092dfc2653de10f4ada9e06716121051d9554480f74501b3ab3ad07615be8da"
+  },
+  "no_simulation": true,
+  "no_policy_replay": true,
+  "no_paper_changes": true
+}
