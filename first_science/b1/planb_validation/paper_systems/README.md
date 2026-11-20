@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.77
+# PRAISE sequential validation paper — LaTeX v0.78
 
 **Status:** method-focused working manuscript (20 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -21,8 +21,14 @@ The canonical source is [main.tex](main.tex) on
 - Figure 2 is a within-method condition-sharing schematic. The former detailed
   case-study workflow diagram is preserved, but not built, in
   [supplement_case_pipeline.tex](supplement_case_pipeline.tex).
-- Discussion and conclusion now distinguish the statistical sharing mechanism,
+- Discussion and conclusion distinguish the statistical sharing mechanism,
   the adaptive two-stage acquisition rule and the evidence for policy performance.
+- Added fixed-grid sensitivity of the additive Gaussian prior: fourteen settings
+  change the intercept/world/graph standard deviations, residual scale or prior mean.
+  Aggregate adaptive-versus-uniform, Random and Balanced comparisons retain their
+  direction in both archives for all fourteen settings. Per-budget effects vary;
+  an independently compilable [prior-sensitivity supplement](supplement_prior_sensitivity.tex)
+  and archived tables document the details.
 
 The manuscript no longer states that joint-action KG has the lowest mean
 regret: in the consistent nested comparison, adaptive two-stage KG does on
@@ -56,6 +62,16 @@ The output is `main.pdf` in this directory. The generated figure PDFs
 are in `figures/`, and all generated PDFs/LaTeX auxiliary files are
 **local artifacts**. Do not commit them.
 
+The optional prior-sensitivity supplement is an independent pdfLaTeX document:
+
+```bash
+pdflatex -interaction=nonstopmode -halt-on-error -file-line-error supplement_prior_sensitivity.tex
+pdflatex -interaction=nonstopmode -halt-on-error -file-line-error supplement_prior_sensitivity.tex
+xdg-open supplement_prior_sensitivity.pdf
+```
+
+It reads no external figures or experiment outputs during compilation.
+
 ```bash
 xdg-open main.pdf
 ```
@@ -78,6 +94,16 @@ pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
   policy-resampling and preserved across-budget dependence.
 - `data/kg_vs_top2_*_aggregate_contrasts.csv` and matching manifests:
   cross-design adaptive-KG comparisons with three frozen Top2 variants.
+- `data/prior_sensitivity_decision_table.csv`: 28 scenario-by-archive
+  thirteen-budget decision comparisons for the fourteen-case prior grid.
+- `data/prior_sensitivity_aggregate_contrasts.csv`: 224 exploratory nominal
+  95% bootstrap contrasts, **not** familywise-adjusted over prior configurations.
+- `data/prior_sensitivity_analysis_manifest.json`: scenario specifications,
+  source-manifest hashes and exact hashes for the two analysis CSVs.
+- `data/prior_sensitivity_budget_diagnostics.csv`: 26 archive-by-budget
+  rows derived from all fourteen scenario-specific policy summaries.
+- `supplement_prior_sensitivity.tex`: independently renderable tables
+  presenting both aggregate and budget-dependent sensitivity results.
 
 The plotting script verifies exact policy/budget coverage, source designs,
 all input hashes, all thirteen-budget contrast means, and unclipped confidence
@@ -92,8 +118,11 @@ uncertainty conditional on each matrix; they do not resample the underlying
 white-box reference trajectories. Multiple comparisons against three Top2
 variants are corrected within each archive; KG adaptive-versus-uniform
 contrasts are corrected across the two archives. The analyzed contrasts
-were chosen after examining earlier curves. Alternative surrogate structures,
-new operating environments and measured evaluation costs remain future work.
+were chosen after examining earlier curves. The prior-sensitivity grid checks numerical parameters **within the additive
+surrogate**; it does not compare distinct covariance structures or establish
+whether the original heuristic numerical choices involved any informal use of
+observed outcomes. Alternative surrogate structures, new operating environments
+and measured evaluation costs remain future work.
 
 ## Review workflow
 
