@@ -1,0 +1,37 @@
+% Optional supplementary case-study workflow diagram, preserved from manuscript v0.76.
+% This fragment is not included in the main four-figure paper. To use it in
+% a separate supplement, input the file after setting up a LaTeX document.
+\section*{Supplementary case-study evidence flow}
+\begin{figure*}[t]
+\centering
+\setlength{\fboxsep}{7pt}
+\fbox{\begin{minipage}{0.92\linewidth}
+\centering
+\textbf{Composition request:} graph $G$, compliance requirement $A$, horizon $H$, threshold $\rho$\\[4pt]
+$\downarrow$\\[3pt]
+\fbox{\begin{minipage}{0.81\linewidth}\centering
+\textbf{Public provider evidence I1}\\
+Rho-conditioned provider cards and admissibility regions
+\end{minipage}}\\[5pt]
+$\downarrow$\\[3pt]
+\fbox{\begin{minipage}{0.81\linewidth}\centering
+\textbf{Prediction portfolio (seven I1-based variants)}\\
+M1 \quad M2 \quad M3-FULL343 \quad Original Top14/Top1 \quad Fixed-CV Top14/Top1\\
+Blind graph-composition compliance predictions
+\end{minipage}}\\[5pt]
+$\downarrow$ \hspace{1.4cm} \textit{Reference WB joined after prediction freeze}\\[3pt]
+\fbox{\begin{minipage}{0.81\linewidth}\centering
+\textbf{Validated method $\times$ provider-world $\times$ graph loss catalogue}\\
+84 possible aggregated error measurements, initially hidden from the selector
+\end{minipage}}\\[5pt]
+$\downarrow$ \hspace{0.3cm} \textit{reveal one unused cell per action}\\[3pt]
+\fbox{\begin{minipage}{0.81\linewidth}\centering
+\textbf{Sequential validation policy and decision model}\\
+Choose next validation cell $\rightarrow$ update posterior $\rightarrow$ recommend one method
+\end{minipage}}\\[5pt]
+$\downarrow$\\[3pt]
+\textbf{Selected predictor for the entire predefined validation domain}
+\end{minipage}}
+\caption{Case-study prediction and validation workflow. All candidate methods use the same public provider information. Their graph-level predictions are compared with independent white-box references only after prediction results are frozen. The validation procedure subsequently reveals one archived method--condition error at a time to evaluate its final recommendation.}
+\label{fig:casepipeline}
+\end{figure*}
