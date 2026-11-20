@@ -63,7 +63,9 @@ def checked_sources() -> dict[str, list[dict]]:
     for archive in plotting.ARCHIVES:
         rows = [r for r in all_rows if r["archive"] == archive]
         validated = plotting.validated_rows(rows, "paper figure", plotting.POLICIES, archive)
-        by_key = {(r["policy"], r["budget"]): r for r in rows}
+        # csv.DictReader keeps numeric keys as strings; validated_rows
+        # normalizes budget to int. Reconcile using the same typed key.
+        by_key = {(r["policy"], int(r["budget"])): r for r in rows}
         for row in validated:
             kind = ("nested_80_step_prefix" if row["policy"] in plotting.NESTED
                     else "budget_specific_frozen")
