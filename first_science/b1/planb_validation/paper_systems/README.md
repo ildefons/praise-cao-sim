@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.78
+# PRAISE sequential validation paper — LaTeX v0.79
 
 **Status:** method-focused working manuscript (20 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -27,8 +27,8 @@ The canonical source is [main.tex](main.tex) on
   change the intercept/world/graph standard deviations, residual scale or prior mean.
   Aggregate adaptive-versus-uniform, Random and Balanced comparisons retain their
   direction in both archives for all fourteen settings. Per-budget effects vary;
-  an independently compilable [prior-sensitivity supplement](supplement_prior_sensitivity.tex)
-  and archived tables document the details.
+  Appendix A after the references in [main.tex](main.tex) and archived tables
+  document the details.
 
 The manuscript no longer states that joint-action KG has the lowest mean
 regret: in the consistent nested comparison, adaptive two-stage KG does on
@@ -62,16 +62,6 @@ The output is `main.pdf` in this directory. The generated figure PDFs
 are in `figures/`, and all generated PDFs/LaTeX auxiliary files are
 **local artifacts**. Do not commit them.
 
-The optional prior-sensitivity supplement is an independent pdfLaTeX document:
-
-```bash
-pdflatex -interaction=nonstopmode -halt-on-error -file-line-error supplement_prior_sensitivity.tex
-pdflatex -interaction=nonstopmode -halt-on-error -file-line-error supplement_prior_sensitivity.tex
-xdg-open supplement_prior_sensitivity.pdf
-```
-
-It reads no external figures or experiment outputs during compilation.
-
 ```bash
 xdg-open main.pdf
 ```
@@ -102,8 +92,8 @@ pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
   source-manifest hashes and exact hashes for the two analysis CSVs.
 - `data/prior_sensitivity_budget_diagnostics.csv`: 26 archive-by-budget
   rows derived from all fourteen scenario-specific policy summaries.
-- `supplement_prior_sensitivity.tex`: independently renderable tables
-  presenting both aggregate and budget-dependent sensitivity results.
+- Appendix A in `main.tex`, placed after the bibliography: parameter grid,
+  aggregate comparison counts, and budget-dependent sensitivity table.
 
 The plotting script verifies exact policy/budget coverage, source designs,
 all input hashes, all thirteen-budget contrast means, and unclipped confidence
@@ -118,8 +108,9 @@ uncertainty conditional on each matrix; they do not resample the underlying
 white-box reference trajectories. Multiple comparisons against three Top2
 variants are corrected within each archive; KG adaptive-versus-uniform
 contrasts are corrected across the two archives. The analyzed contrasts
-were chosen after examining earlier curves. The prior-sensitivity grid checks numerical parameters **within the additive
-surrogate**; it does not compare distinct covariance structures or establish
+were chosen after examining earlier curves. The prior-sensitivity grid checks
+numerical parameters **within the additive surrogate**; it does not compare
+distinct covariance structures or establish
 whether the original heuristic numerical choices involved any informal use of
 observed outcomes. Alternative surrogate structures, new operating environments
 and measured evaluation costs remain future work.
