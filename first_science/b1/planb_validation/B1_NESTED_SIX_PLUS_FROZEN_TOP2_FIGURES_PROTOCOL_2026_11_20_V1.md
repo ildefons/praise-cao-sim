@@ -31,35 +31,24 @@ git pull --ff-only origin praise-identifiability-feasibility
 python first_science/b1/planb_validation/test_plot_b1_nested_with_frozen_top2_v1.py -v
 ```
 
-## 2. Find your EXISTING nine-policy figure-data directory
+## 2. Original Top2 summaries are already tracked
 
-The previous frozen nine-policy plotting script created these two CSVs in the
-same directory as `plot_manifest.json`:
+The existing repository contains the original complete nine-policy CSVs at
+`first_science/b1/planb_validation/results/b1_nine_policy_13_budget_extension_v1/tables/`:
 
 - `historical_nine_policy_13_budget_regret.csv`
 - `b0001_nine_policy_13_budget_regret.csv`
 
-Locate the historical one (no experiment is run):
-
-```bash
-rg --files --hidden ~/praise | rg '/historical_nine_policy_13_budget_regret\.csv$'
-```
-
-The directory containing that file should also contain the fresh-reference
-CSV and `plot_manifest.json`. The following commands use the placeholder
-`/PATH/TO/EXISTING/13_BUDGET_FIGURES`; substitute the actual directory.
-
-If you cannot find these original CSVs, **stop and tell me**. We can use the
-previously saved eight-budget extension outputs to regenerate the old *plots
-and summaries* without rerunning a single policy episode. We should not
-silently synthesize missing Top2 episodes or replace the frozen source.
+The matching `plot_manifest.json` lives one directory higher, at the archive
+root. Its CSV hashes match the tracked table files. The plotting script now
+knows this directory layout automatically. No `rg`, `find`, extra paths,
+copying, or episode reruns are needed.
 
 ## 3. Preflight (no files written)
 
 ```bash
 python first_science/b1/planb_validation/plot_b1_nested_with_frozen_top2_v1.py \
   --nested-dir ~/praise/planb_b1_nested_budget_2026_11_20_v1 \
-  --original-nine-dir /PATH/TO/EXISTING/13_BUDGET_FIGURES \
   --preflight-only
 ```
 
@@ -77,7 +66,6 @@ original B0001 baseline manifest records this exact source-to-export link.
 ```bash
 python first_science/b1/planb_validation/plot_b1_nested_with_frozen_top2_v1.py \
   --nested-dir ~/praise/planb_b1_nested_budget_2026_11_20_v1 \
-  --original-nine-dir /PATH/TO/EXISTING/13_BUDGET_FIGURES \
   --out ~/praise/planb_b1_nested6_plus_top2_figures_2026_11_20_v1
 ```
 
