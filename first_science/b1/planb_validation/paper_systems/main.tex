@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.78 --- 20 November 2026}
+\date{Working manuscript v0.79 --- 20 November 2026}
 
 \begin{document}
 \maketitle
@@ -336,7 +336,7 @@ The public provider-information records were produced before the predictors gene
 Our validation catalogue has $K=7$ predictor variants and $C=12$ conditions: three eligible provider worlds (P1, P3, P4) crossed with four composition graphs ($G_{\rm PAR}$, $G_{\rm SEQ}$, $G_{\rm PARSEQ}$, $G_{\rm SEQPAR}$). Provider world P2 was excluded under the predefined eligibility criterion. Each $Y_{a,c}$ is the mean absolute prediction error of method $a$ against independent white-box reference results, aggregated over the same 555 query--horizon points in condition $c$. The target is the equally weighted average of the twelve condition-level errors. The complete $7\times12$ reference table exists in the archived evidence, while an allocation policy may observe only the entries acquired within its budget.
 
 \subsection{Instantiated prediction and validation pipeline}
-The case study instantiates Fig.~\ref{fig:architecture} as follows. Seven predictors receive common public provider information and produce predictions for composed-service compliance under the specified graph and query. Independent white-box reference outcomes are joined only after those predictions have been frozen, yielding one condition-level mean absolute error for each method--world--graph combination. The sequential validation policy initially knows the methods and condition descriptors; each action reveals one as-yet unobserved entry of the resulting $7\times12$ loss catalogue. A detailed diagram of this upstream evidence flow is retained in the supplementary material.
+The case study instantiates Fig.~\ref{fig:architecture} as follows. Seven predictors receive common public provider information and produce predictions for composed-service compliance under the specified graph and query. Independent white-box reference outcomes are joined only after those predictions have been frozen, yielding one condition-level mean absolute error for each method--world--graph combination. The sequential validation policy initially knows the methods and condition descriptors; each action reveals one as-yet unobserved entry of the resulting $7\times12$ loss catalogue.
 
 \subsection{Implementation and evidence-access boundaries}
 Provider-local public-I1 records, reconstructed predictor models and graph-level compliance predictions are materialized before the retrospective selection experiment. The selector observes only the archived losses it has acquired and their condition descriptors. Unobserved errors, private provider parameters and the identity of the full-domain best predictor are reserved for scoring after the terminal recommendation.
@@ -350,7 +350,7 @@ Each predictor takes the public-I1 provider evidence, composition graph and quer
 \label{sec:surrogate-case}
 We instantiate the per-method additive Gaussian model of Section~\ref{sec:performance-model} for three provider worlds and four graph types. The primary policy comparisons use a common prior: intercept mean $0.17$ and standard deviation $\tau_\alpha=0.12$; zero-mean world effects with $\tau_w=0.07$; zero-mean graph effects with $\tau_g=0.045$; and residual standard deviation $\sigma=0.055$. Coefficients are a priori independent within and across methods. The three prior scales encode method-wide uncertainty and additional covariance for conditions sharing a world or graph (Eq.~\eqref{eq:structured-prior}). Their ordering and magnitudes are heuristic modeling choices, not covariance estimates derived uniquely from the continuum hierarchy or fitted to the complete error matrices. All policies use identical settings within each comparison; the posterior supports the acquisition scores of Section~3 and the terminal rule of Eq.~\eqref{eq:target}.
 
-We assess the influence of these numerical choices with a fixed grid of fourteen hyperparameter configurations: the baseline; halving or doubling each of $\tau_\alpha,\tau_w,\tau_g$ and $\sigma$ separately; swapping the world and graph scales; jointly halving or doubling the three prior scales; and setting the intercept mean to $0.10$ or $0.24$. Each configuration replays posterior updates and acquisition decisions for all nine policies, retaining the same frozen reference matrices, initial conditions and evaluation budgets. The baseline replay reproduces all 234 plotted policy--budget--archive means. The grid evaluates robustness \emph{within} the additive surrogate family; the detailed configuration and results are provided in the supplementary sensitivity analysis \cite{praisePriorSensitivity}.
+We assess the influence of these numerical choices with a fixed grid of fourteen hyperparameter configurations: the baseline; halving or doubling each of $\tau_\alpha,\tau_w,\tau_g$ and $\sigma$ separately; swapping the world and graph scales; jointly halving or doubling the three prior scales; and setting the intercept mean to $0.10$ or $0.24$. Each configuration replays posterior updates and acquisition decisions for all nine policies, retaining the same frozen reference matrices, initial conditions and evaluation budgets. The baseline replay reproduces all 234 plotted policy--budget--archive means. The grid evaluates robustness \emph{within} the additive surrogate family; the configurations and results are reported in Appendix~\ref{app:prior-sensitivity} and the repository evidence \cite{praisePriorSensitivity}.
 
 \section{Evaluation}
 \subsection{Reference archives and validation protocol}
@@ -437,7 +437,7 @@ Across thirteen budgets, adaptive-minus-uniform KG regret is $-0.000792$ on the 
 
 For the exploratory budgets 10--40, the corresponding differences are $-0.001435$ (adjusted interval $[-0.002574,-0.000325]$) historically and $-0.000551$ (interval $[-0.001426,+0.000337]$) on the fresh reference. The smaller-budget pattern is consistent with allocating condition tests more selectively after initial evidence accumulates, but does not establish a universal switching threshold. As the catalogue approaches exhaustion, several methods reach zero regret and their differences diminish.
 
-The prior-sensitivity replay preserves this aggregate direction. Across all fourteen settings in each archive, adaptive two-stage KG has lower thirteen-budget mean regret than uniform two-stage KG, Random and Balanced. It also has lower mean regret than the best Top2 variant in thirteen of fourteen historical settings and all fourteen fresh-reference settings. Budget-specific comparisons are less uniform: adaptive KG beats uniform KG in every historical setting at each budget from 15 to 45, but in eight to fourteen fresh-reference settings at those checkpoints. The spread of adaptive-KG regret across priors is not monotone at intermediate budgets; it approaches zero at high budgets as terminal selection saturates. These are descriptive sensitivity checks, with exploratory intervals reported separately in the supplement \cite{praisePriorSensitivity}.
+The prior-sensitivity replay preserves this aggregate direction. Across all fourteen settings in each archive, adaptive two-stage KG has lower thirteen-budget mean regret than uniform two-stage KG, Random and Balanced. It also has lower mean regret than the best Top2 variant in thirteen of fourteen historical settings and all fourteen fresh-reference settings. Budget-specific comparisons are less uniform: adaptive KG beats uniform KG in every historical setting at each budget from 15 to 45, but in eight to fourteen fresh-reference settings at those checkpoints. The spread of adaptive-KG regret across priors is not monotone at intermediate budgets; it approaches zero at high budgets as terminal selection saturates. These are descriptive sensitivity checks, with exploratory interval counts summarized in Appendix~\ref{app:prior-sensitivity} \cite{praisePriorSensitivity}.
 
 \subsection{Reference sensitivity and scope of the case study}
 The identity of the reference-best predictor changes: the historical matrix favors M3\_FULL343, whereas the fresh-reference matrix favors M1 by 0.000716 mean MAE. A separate white-box trajectory bootstrap indicates uncertainty in this fresh-reference ranking \cite{praiseB0001}. An influential P1/$G_{\rm PAR}$ condition also affects the relative ranking of those predictors; detailed fixed-decision diagnostics are provided in the supplementary evidence. The reported policy intervals condition on the fixed reference matrices and do not propagate white-box trajectory uncertainty through acquisitions.
@@ -484,7 +484,7 @@ Diagnostic scope:
 \url{https://github.com/ildefons/praise-cao-sim/tree/praise-identifiability-feasibility/first_science/b1/planb_validation/results/b0001_fixed_decision_sensitivity_v1}.
 \bibitem{praiseB13} PRAISE research team. 2026. B1: Thirteen-budget, nine-policy historical and fresh-reference validation extension (repository research evidence, 19 November 2026). Reproducible policy extension and read-only figure-generation scripts, frozen summary CSVs, and complete eight-budget supplementary replay archives in \method{first\_science/b1/planb\_validation/results/b1\_nine\_policy\_13\_budget\_extension\_v1}.
 \bibitem{praiseNested} PRAISE research team. 2026. Nested-budget replay and adaptive-KG inference for structured sequential validation (repository evidence, 20 November 2026). Protocol and code: \url{https://github.com/ildefons/praise-cao-sim/blob/praise-identifiability-feasibility/first_science/b1/planb_validation/B1_NESTED_BUDGET_REPLAY_EXECUTION_PROTOCOL_2026_11_20_V1.md}. Paper source tables and contrast manifests: \method{first\_science/b1/planb\_validation/paper\_systems/data/}.
-\bibitem{praisePriorSensitivity} PRAISE research team. 2026. Fixed-grid sensitivity of the structured Gaussian prior in sequential validation (repository research evidence, 20 November 2026). Replay protocol: \url{https://github.com/ildefons/praise-cao-sim/blob/praise-identifiability-feasibility/first_science/b1/planb_validation/B1_PRIOR_SENSITIVITY_REPLAY_PROTOCOL_2026_11_20_V1.md}. Audited summary tables and supplementary LaTeX: \method{first\_science/b1/planb\_validation/paper\_systems/}.
+\bibitem{praisePriorSensitivity} PRAISE research team. 2026. Fixed-grid sensitivity of the structured Gaussian prior in sequential validation (repository research evidence, 20 November 2026). Replay protocol: \url{https://github.com/ildefons/praise-cao-sim/blob/praise-identifiability-feasibility/first_science/b1/planb_validation/B1_PRIOR_SENSITIVITY_REPLAY_PROTOCOL_2026_11_20_V1.md}. Audited summary tables and appendix data: \method{first\_science/b1/planb\_validation/paper\_systems/}.
 \bibitem{pozas2023} Pozas Garc\'ia et al. 2023. Location-aware scalable service composition. \emph{Software: Practice and Experience}. \url{https://doi.org/10.1002/spe.3260}.
 \bibitem{stupar2023} Stupar and Huljeni\'c. 2023. Model-based cloud service deployment optimisation method for minimisation of application service operational cost. \emph{Journal of Cloud Computing}. \url{https://doi.org/10.1186/s13677-023-00389-8}.
 \bibitem{sedlak2024} Sedlak et al. 2024. Equilibrium in the Computing Continuum through Active Inference. \emph{Future Generation Computer Systems}. \url{https://doi.org/10.1016/j.future.2024.05.056}.
@@ -504,4 +504,123 @@ Diagnostic scope:
 \bibitem{soare2014} M. Soare, A. Lazaric, and R. Munos. 2014. Best-Arm Identification in Linear Bandits. \emph{NeurIPS}. \url{https://proceedings.neurips.cc/paper/2014/hash/f8d84caae48546d0934d637ab54f7086-Abstract.html}.
 \bibitem{reda2021} C. R\'eda, A. Tirinzoni, and R. Degenne. 2021. Dealing With Misspecification in Fixed-Confidence Linear Top-m Identification. \emph{NeurIPS}. \url{https://proceedings.neurips.cc/paper/2021/hash/d5fcc35c94879a4afad61cacca56192c-Abstract.html}.
 \end{thebibliography}
+
+\clearpage
+\appendix
+\section{Sensitivity of the structured Gaussian prior}
+\label{app:prior-sensitivity}
+We replayed all nine acquisition policies on both frozen reference archives under
+fourteen fixed hyperparameter configurations (Table~\ref{tab:prior-grid}).
+Each setting changes the posterior and acquisition decisions while retaining the
+same validation conditions, budgets and episode design. The baseline reproduces all
+234 mean regrets reported in the main figures. Parameters are prior standard
+deviations except for the residual standard deviation $\sigma$ and intercept
+mean $E[\alpha_a]$.
+
+\subsection{Tested configurations}
+\begin{table}[htbp]
+\centering
+\small
+\caption{Fourteen fixed hyperparameter configurations. All scale columns
+are standard deviations, not variances. The prior mean applies to the
+per-method intercept; world and graph coefficient means are zero.}
+\label{tab:prior-grid}
+\begin{tabular}{lrrrrr}
+\toprule
+Configuration & $\tau_\alpha$ & $\tau_w$ & $\tau_g$ & $\sigma$ & $E[\alpha_a]$\\
+\midrule
+Baseline & 0.120 & 0.070 & 0.0450 & 0.0550 & 0.17\\
+Intercept half & 0.060 & 0.070 & 0.0450 & 0.0550 & 0.17\\
+Intercept double & 0.240 & 0.070 & 0.0450 & 0.0550 & 0.17\\
+World half & 0.120 & 0.035 & 0.0450 & 0.0550 & 0.17\\
+World double & 0.120 & 0.140 & 0.0450 & 0.0550 & 0.17\\
+Graph half & 0.120 & 0.070 & 0.0225 & 0.0550 & 0.17\\
+Graph double & 0.120 & 0.070 & 0.0900 & 0.0550 & 0.17\\
+Noise half & 0.120 & 0.070 & 0.0450 & 0.0275 & 0.17\\
+Noise double & 0.120 & 0.070 & 0.0450 & 0.1100 & 0.17\\
+World/graph swap & 0.120 & 0.045 & 0.0700 & 0.0550 & 0.17\\
+All prior scales half & 0.060 & 0.035 & 0.0225 & 0.0550 & 0.17\\
+All prior scales double & 0.240 & 0.140 & 0.0900 & 0.0550 & 0.17\\
+Intercept mean low & 0.120 & 0.070 & 0.0450 & 0.0550 & 0.10\\
+Intercept mean high & 0.120 & 0.070 & 0.0450 & 0.0550 & 0.24\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Aggregate comparisons}
+Across the thirteen equally weighted budgets, Table~\ref{tab:prior-aggregate}
+counts configurations in which adaptive two-stage KG has lower mean terminal
+regret than each comparator. The best Top2 variant is determined separately
+for each archive and configuration.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Direction of thirteen-budget average regret comparisons under the
+fourteen hyperparameter settings (counts out of fourteen). Lower is better.}
+\label{tab:prior-aggregate}
+\begin{tabular}{lcc}
+\toprule
+Comparator to adaptive two-stage KG & Historical & Fresh reference\\
+\midrule
+Uniform two-stage KG & 14/14 & 14/14\\
+Random & 14/14 & 14/14\\
+Balanced & 14/14 & 14/14\\
+Best Top2 variant & 13/14 & 14/14\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The only best-Top2 reversal is the historical case with all three prior
+scales doubled: adaptive KG has $0.0000417$ greater mean regret, approximately
+$1.4\%$ of the Top2 comparator. Exploratory nominal 95\% intervals for
+adaptive KG minus uniform KG exclude zero in 12/14 historical settings and
+6/14 fresh-reference settings. These exploratory intervals are not
+familywise-adjusted across the sensitivity grid.
+
+\subsection{Variation with validation budget}
+Table~\ref{tab:prior-budget-diagnostics} reports strict adaptive-KG wins,
+ties and losses relative to uniform two-stage KG at each budget. Prior spread
+is the maximum minus minimum adaptive-KG mean regret across the fourteen
+configurations, in $10^{-3}$ MAE.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Adaptive KG versus uniform KG across fourteen configurations
+at each budget. Each count triple is better/tied/worse; spread is in
+$10^{-3}$ MAE.}
+\label{tab:prior-budget-diagnostics}
+\begin{tabular}{rcccc}
+\toprule
+& \multicolumn{2}{c}{Historical archive}
+& \multicolumn{2}{c}{Fresh-reference archive}\\
+Budget & Better/tied/worse & Prior spread
+& Better/tied/worse & Prior spread\\
+\midrule
+10 & 7/0/7 & 2.952 & 11/0/3 & 1.951 \\
+15 & 14/0/0 & 2.871 & 14/0/0 & 2.267 \\
+20 & 14/0/0 & 0.862 & 8/0/6 & 0.976 \\
+25 & 14/0/0 & 3.104 & 9/0/5 & 1.757 \\
+30 & 14/0/0 & 2.061 & 11/0/3 & 0.748 \\
+35 & 14/0/0 & 1.555 & 13/0/1 & 0.973 \\
+40 & 14/0/0 & 0.335 & 10/0/4 & 1.268 \\
+45 & 14/0/0 & 0.101 & 9/0/5 & 0.850 \\
+55 & 4/10/0 & 0.000 & 11/0/3 & 0.457 \\
+65 & 0/14/0 & 0.000 & 5/6/3 & 0.130 \\
+70 & 0/14/0 & 0.000 & 0/12/2 & 0.098 \\
+75 & 0/14/0 & 0.000 & 0/13/1 & 0.049 \\
+80 & 0/14/0 & 0.000 & 0/14/0 & 0.003 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Adaptive KG has lower regret in every historical configuration at each
+budget from 15 to 45. The fresh-reference direction varies at intermediate
+budgets. At high budgets the remaining regret and between-prior spread become
+very small; a zero win count then often reflects ties rather than
+uniform-KG superiority. The archived scenario decision tables, bootstrap
+contrasts, manifest and budget diagnostics support these checks
+\cite{praisePriorSensitivity}.
+
 \end{document}
