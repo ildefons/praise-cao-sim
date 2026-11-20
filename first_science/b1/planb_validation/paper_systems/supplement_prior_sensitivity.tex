@@ -1,0 +1,170 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage{hyperref}
+\usepackage{microtype}
+\title{\bfseries Supplementary evidence: sensitivity to the structured-surrogate prior}
+\author{Ildefons Magrans de Abril \and Xavier Franch \and Schahram Dustdar}
+\date{20 November 2026}
+\begin{document}
+\maketitle
+
+\section*{Scope and replay protocol}
+Equation~(5) of the accompanying paper defines the within-method additive prior covariance
+\[
+\operatorname{Cov}_0(f_a(w,g),f_a(w',g'))=
+\tau_\alpha^2+\tau_w^2\mathbf{1}[w=w']+
+\tau_g^2\mathbf{1}[g=g'].
+\]
+The original hyperparameter values are heuristic. We retain the same two frozen
+seven-method by twelve-condition reference matrices and thirteen budget limits,
+changing only the posterior's numerical hyperparameters. Every variant replays
+all nine policies using its own updated Gaussian posterior and acquisition
+decisions. The six budget-independent policies preserve their nested budget
+prefixes; the three Top2 policies retain budget-specific schedules. Each
+archive--scenario--policy--budget cell summarizes 240 terminal episodes.
+The baseline replay independently reproduces all 234 paper-figure mean regrets.
+
+The fixed grid covers independent half/double perturbations of the three prior
+standard deviations and the residual standard deviation, the world/graph scale
+swap, joint half/double scaling of the three prior standard deviations, and two
+intercept prior means. Table~\ref{tab:grid} identifies the exact settings.
+Each scenario is a complete nine-policy comparison under a shared prior;
+the sensitivity analysis does not fit its hyperparameters to a reference
+matrix or select a favorable setting for the primary paper.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Fourteen fixed hyperparameter configurations. All scale columns
+are standard deviations, not variances. The prior mean applies to the
+per-method intercept; world and graph coefficient means are zero.}
+\label{tab:grid}
+\begin{tabular}{lrrrrr}
+\toprule
+Configuration & $\tau_\alpha$ & $\tau_w$ & $\tau_g$ & $\sigma$ & $E[\alpha_a]$\\
+\midrule
+Baseline & 0.120 & 0.070 & 0.0450 & 0.0550 & 0.17\\
+Intercept half & 0.060 & 0.070 & 0.0450 & 0.0550 & 0.17\\
+Intercept double & 0.240 & 0.070 & 0.0450 & 0.0550 & 0.17\\
+World half & 0.120 & 0.035 & 0.0450 & 0.0550 & 0.17\\
+World double & 0.120 & 0.140 & 0.0450 & 0.0550 & 0.17\\
+Graph half & 0.120 & 0.070 & 0.0225 & 0.0550 & 0.17\\
+Graph double & 0.120 & 0.070 & 0.0900 & 0.0550 & 0.17\\
+Noise half & 0.120 & 0.070 & 0.0450 & 0.0275 & 0.17\\
+Noise double & 0.120 & 0.070 & 0.0450 & 0.1100 & 0.17\\
+World/graph swap & 0.120 & 0.045 & 0.0700 & 0.0550 & 0.17\\
+All prior scales half & 0.060 & 0.035 & 0.0225 & 0.0550 & 0.17\\
+All prior scales double & 0.240 & 0.140 & 0.0900 & 0.0550 & 0.17\\
+Intercept mean low & 0.120 & 0.070 & 0.0450 & 0.0550 & 0.10\\
+Intercept mean high & 0.120 & 0.070 & 0.0450 & 0.0550 & 0.24\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Aggregate regret comparisons}
+The primary paper averages terminal simple regret equally across the thirteen
+budget checkpoints. Under that estimand, Table~\ref{tab:aggregate}
+summarizes the number of prior configurations in which adaptive two-stage KG
+has strictly lower mean regret than a comparator. The \emph{best Top2}
+denotes the lowest thirteen-budget mean among the three Top2 variants
+within each archive and prior configuration; it is not a fixed
+universal comparator.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Direction of thirteen-budget average regret comparisons under the
+fourteen hyperparameter settings (counts out of fourteen). Lower is better.}
+\label{tab:aggregate}
+\begin{tabular}{lcc}
+\toprule
+Comparator to adaptive two-stage KG & Historical & Fresh reference\\
+\midrule
+Uniform two-stage KG & 14/14 & 14/14\\
+Random & 14/14 & 14/14\\
+Balanced & 14/14 & 14/14\\
+Best Top2 variant & 13/14 & 14/14\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The sole configuration where the best Top2 variant has lower average
+regret is the historical archive with all three prior scales doubled:
+the adaptive-KG excess is $0.0000417$ MAE, about $1.4\%$ of that Top2
+regret. The exploratory nominal 95\% bootstrap intervals for
+adaptive-minus-uniform exclude zero in 12/14 historical configurations
+and 6/14 fresh-reference configurations. These intervals are
+\emph{not} corrected across the fourteen-case grid. The primary
+manuscript's familywise-adjusted inference applies to the baseline
+configuration only.
+
+\section*{Sensitivity by validation budget}
+Table~\ref{tab:prior-budget-diagnostics} retains the budget dependence
+hidden by the thirteen-budget average. The directional counts in each
+archive are ordered as adaptive KG strictly better than, tied with, or
+strictly worse than uniform two-stage KG. Prior spread is the
+maximum minus the minimum adaptive-KG mean regret across fourteen
+configurations, expressed in $10^{-3}$ MAE. The table is descriptive
+rather than an additional set of budgetwise significance tests.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Adaptive KG versus uniform KG across fourteen configurations
+at each budget. Each count triple is better/tied/worse; spread is in
+$10^{-3}$ MAE.}
+\label{tab:prior-budget-diagnostics}
+\begin{tabular}{rcccc}
+\toprule
+& \multicolumn{2}{c}{Historical archive}
+& \multicolumn{2}{c}{Fresh-reference archive}\\
+Budget & Better/tied/worse & Prior spread
+& Better/tied/worse & Prior spread\\
+\midrule
+10 & 7/0/7 & 2.952 & 11/0/3 & 1.951 \\
+15 & 14/0/0 & 2.871 & 14/0/0 & 2.267 \\
+20 & 14/0/0 & 0.862 & 8/0/6 & 0.976 \\
+25 & 14/0/0 & 3.104 & 9/0/5 & 1.757 \\
+30 & 14/0/0 & 2.061 & 11/0/3 & 0.748 \\
+35 & 14/0/0 & 1.555 & 13/0/1 & 0.973 \\
+40 & 14/0/0 & 0.335 & 10/0/4 & 1.268 \\
+45 & 14/0/0 & 0.101 & 9/0/5 & 0.850 \\
+55 & 4/10/0 & 0.000 & 11/0/3 & 0.457 \\
+65 & 0/14/0 & 0.000 & 5/6/3 & 0.130 \\
+70 & 0/14/0 & 0.000 & 0/12/2 & 0.098 \\
+75 & 0/14/0 & 0.000 & 0/13/1 & 0.049 \\
+80 & 0/14/0 & 0.000 & 0/14/0 & 0.003 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On the historical archive, adaptive KG is better than uniform KG in
+all fourteen configurations at every checkpoint from $B=15$ to
+$B=45$. At $B=55$, adaptive KG has reached zero regret in every
+configuration, and from $B=65$ both KG variants tie at zero.
+On the fresh-reference archive, the budgetwise direction varies
+between configurations at most intermediate checkpoints, and both
+KG variants tie at $B=80$. The absolute spread across prior
+settings is not monotonic at early and intermediate budgets, but
+diminishes to zero or nearly zero as the finite method-selection
+task saturates. The acquisition paths need not become identical
+when terminal regret does.
+
+\section*{Reproducibility and interpretation}
+The accompanying repository contains the scenario-specific
+thirteen-budget decision table, exploratory aggregate contrast
+table, analysis manifest with source checksums, and the derived
+per-budget directional and spread table. The original replay
+protocol and executable audit are available at
+\url{https://github.com/ildefons/praise-cao-sim/tree/praise-identifiability-feasibility/first_science/b1/planb_validation}.
+The analysis establishes sensitivity over this \emph{finite grid},
+conditional on two fixed reference matrices. It does not estimate
+the optimum covariance hyperparameters, establish absence of
+historical human tuning, or compare the additive information-sharing
+structure against a distinct surrogate family.
+
+\end{document}
