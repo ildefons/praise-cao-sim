@@ -1,0 +1,73 @@
+{
+  "status": "B1_NESTED6_PLUS_FROZEN_TOP2_FIGURES_V1_PASS",
+  "budgets": [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    55,
+    65,
+    70,
+    75,
+    80
+  ],
+  "policies": [
+    "random",
+    "balanced",
+    "informed",
+    "kg_one_step",
+    "kg_two_stage_adaptive",
+    "kg_two_stage_uniform",
+    "budgeted_top2",
+    "top2_two_stage_adaptive",
+    "top2_two_stage_uniform"
+  ],
+  "archives": [
+    "historical",
+    "fresh_reference"
+  ],
+  "nested_policies": [
+    "random",
+    "balanced",
+    "informed",
+    "kg_one_step",
+    "kg_two_stage_adaptive",
+    "kg_two_stage_uniform"
+  ],
+  "budget_specific_frozen_policies": [
+    "budgeted_top2",
+    "top2_two_stage_adaptive",
+    "top2_two_stage_uniform"
+  ],
+  "mean_regret_and_95pct_intervals_from_original_summaries": true,
+  "no_policy_replay": true,
+  "no_bootstrap_rerun": true,
+  "no_simulation": true,
+  "no_paper_changes": true,
+  "y_axis_limits": {
+    "historical": 0.025,
+    "fresh_reference": 0.012
+  },
+  "source_sha256": {
+    "nested_budget_summary.csv": "5297e6d2067aeee1489c6f9d29b814e42e6b936751d3799a0feb4921450e04fc",
+    "historical_nine_policy_13_budget_regret.csv": "4532547b27a7a9ddd21090caad2a228e6fa91651a5a069df10fcdb2f0be944c4",
+    "b0001_nine_policy_13_budget_regret.csv": "01f5baf2c3cbb6e15ac9dd652b5905efb75584b84acfc6e1037b6a1458af76cd",
+    "nested_manifest.json": "40ee57d65f9faefe12aadb152462bcc3d42ddbd217a49ec98108ae229724eff2",
+    "original_plot_manifest.json": "225d70226666b3e45b7870e9179493bc92770949b51b4cc26da3c36586f33801",
+    "b0001_baseline_run_manifest.json": "b7c0004de8c9aeae6721780287354e05b7bf7a3a9786263005a5b87279cbc523"
+  },
+  "output_sha256": {
+    "combined_nine_policy_budget_summary.csv": "f7c2905f13cc67b85a276b7067d8ca2e05ce4ce02733a76c510e06a7ca2f2b4a",
+    "fresh_reference_nested6_plus_top2_13_budgets.pdf": "a450e891c4c21fa3226b6059cb6520417de6349320b90d0e80f6949f0a8f77b9",
+    "fresh_reference_nested6_plus_top2_13_budgets.png": "6c53fbfd9dbbf1b7b56e1dd3b02cfed9a3355af3706450871b90323217b99257",
+    "fresh_reference_nested6_plus_top2_13_budgets.svg": "7e65131e5fe32c1d7b1dd260575880e0398f88d087beba9008999fdebe0c8499",
+    "historical_nested6_plus_top2_13_budgets.pdf": "ea3d73a4680f27c8ae49fcdc43a216947c8bb256a1a9b063847a5ab023dccf27",
+    "historical_nested6_plus_top2_13_budgets.png": "c5dfda849d9870ea3b3605ef34d85d69eb994e2cb992343708b16ff79dcdb3b5",
+    "historical_nested6_plus_top2_13_budgets.svg": "2a4c24a97f70c8a126d3154a1ca22bd58024545b23015eb5253c44e99ad40d74"
+  },
+  "interpretation": "Six curves use B-independent nested histories. Three Top2 curves reuse original B-dependent episodes. Error bars are archive-conditional 95% bootstrap intervals; cross-design pairs have not been tested for significance here."
+}
