@@ -114,6 +114,9 @@ def combine(nested_rows: list[dict], old_rows: list[dict], archive: str) -> list
 
 def load_checked_sources(nested_dir: Path, original_dir: Path, repo: Path):
     nested_manifest_path = nested_dir / "nested_manifest.json"
+    if not (original_dir / "plot_manifest.json").is_file() and (original_dir.parent / "plot_manifest.json").is_file():
+        # Also accept the tables/ subdirectory as the user-supplied location.
+        original_dir = original_dir.parent
     original_manifest_path = original_dir / "plot_manifest.json"
     nm = json.loads(nested_manifest_path.read_text())
     om = json.loads(original_manifest_path.read_text())
@@ -146,7 +149,13 @@ def load_checked_sources(nested_dir: Path, original_dir: Path, repo: Path):
         if nm.get("archive_sources", {}).get(archive, {}).get("sha256") != EXPECTED_MATRIX_SHA[archive]:
             raise ValueError(f"{archive}: nested matrix is not the frozen matrix")
         npath = nested_dir / "nested_budget_summary.csv"
-        opath = original_dir / f"{old_label}_nine_policy_13_budget_regret.csv"
+        filename = f"{old_label}_nine_policy_13_budget_regret.csv"
+        opath = original_dir / filename
+        if not opath.is_file():
+            # The tracked archive stores plot data in tables/ while retaining
+            # plot_manifest.json at the archive root. Original hashes remain
+            # valid because the CSV contents were not modified during archiving.
+            opath = original_dir / "tables" / filename
         if digest(npath) != nm["outputs_sha256"][npath.name]:
             raise ValueError("Nested budget summary checksum mismatch")
         if digest(opath) != om["output_sha256"][opath.name]:
@@ -222,8 +231,10 @@ def plot_all(series: dict, out: Path, ymax: dict) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--nested-dir", required=True, type=Path)
-    parser.add_argument("--original-nine-dir", required=True, type=Path,
-                        help="Existing output from plot_b1_nine_policies_shared_axis_13budgets_v1.py")
+    parser.add_argument("--original-nine-dir", type=Path,
+                        default=Path(__file__).resolve().parent
+                        / "results/b1_nine_policy_13_budget_extension_v1",
+                        help="Original nine-policy archive; defaults to the tracked results directory")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument("--historical-ymax", type=float, default=.025)
