@@ -1,0 +1,50 @@
+{
+  "status": "B1_NESTED_KG_CONDITION_ADAPTIVITY_INFERENCE_V1_PASS",
+  "objective": "two-stage adaptive KG minus two-stage uniform KG; negative favors adaptive",
+  "archives": [
+    "fresh_reference",
+    "historical"
+  ],
+  "primary_budget_set": "MEAN_OVER_13_BUDGETS",
+  "exploratory_budget_set": "MEAN_OVER_10_TO_40",
+  "budgets": [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    55,
+    65,
+    70,
+    75,
+    80
+  ],
+  "source_policies": [
+    "kg_two_stage_adaptive",
+    "kg_two_stage_uniform"
+  ],
+  "policy_difference": "maximum-KG versus uniform remaining-condition choice after identical first-stage method-selection rule",
+  "policy_streams": "different fixed policy IDs; independently resampled; matched initial-condition strata",
+  "within_policy_dependence": "one bootstrap index array reused across all 13 budget prefixes of each policy",
+  "familywise_intervals": "Bonferroni 95% simultaneous coverage across the two archive-specific contrasts within each budget set",
+  "per_budget_intervals": "nominal 95%, exploratory across 13 budgets",
+  "inference_scope": "acquisition randomness conditional on two fixed 7x12 reference matrices",
+  "analysis_chosen_after_inspecting_previous_policy_curves": true,
+  "bootstrap_draws": 10000,
+  "seed": 20261120,
+  "source_nested_manifest_status": "B1_NESTED_BUDGET_REPLAY_V1_COMPLETE",
+  "source_nested_terminal_sha256": "4b14f8efb2b8b8e52f3db521553139998ead5b83569436069844259a91731f25",
+  "source_nested_summary_sha256": "5297e6d2067aeee1489c6f9d29b814e42e6b936751d3799a0feb4921450e04fc",
+  "source_nested_manifest_sha256": "40ee57d65f9faefe12aadb152462bcc3d42ddbd217a49ec98108ae229724eff2",
+  "output_sha256": {
+    "kg_condition_adaptivity_aggregate_contrasts.csv": "6ecd5be567d46cad338d98a06ac32d4c11bbe42106472f0b5e4636fb2f594fd4",
+    "kg_condition_adaptivity_budget_contrasts.csv": "ad61984aad499bbebad0ece3fcb120d227286fb70fc14b677dc18faa51cade88"
+  },
+  "no_policy_execution": true,
+  "no_simulation": true,
+  "no_whitebox_access": true,
+  "no_paper_changes": true
+}
