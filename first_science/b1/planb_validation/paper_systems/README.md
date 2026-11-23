@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.82
+# PRAISE sequential validation paper — LaTeX v0.83
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,11 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Refined all three Introduction contribution statements to distinguish the novel
+  continuum-structure-to-sharing methodology, the method-then-condition KG rule,
+  and evidence from the controlled budget comparisons. Claims now explicitly
+  preserve uncertainty and note that unstructured-surrogate comparisons remain open.
 
 - Review pass: reformulated RQ1–RQ3 around budget-efficient selection,
   sharing across structured conditions, and acquisition organization.
