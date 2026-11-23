@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.83
+# PRAISE sequential validation paper — LaTeX v0.84
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,10 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Rewrote the opening of Section 3.2 (Validation protocol) to explain the
+  shared statistical model, per-method posterior estimates, evidence acquired
+  by each policy, and resulting divergence across allocation strategies.
 
 - Refined all three Introduction contribution statements to distinguish the novel
   continuum-structure-to-sharing methodology, the method-then-condition KG rule,
