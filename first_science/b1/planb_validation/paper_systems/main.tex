@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.87 --- 23 November 2026}
+\date{Working manuscript v0.88 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -120,7 +120,11 @@ For a structured condition $c=(c_1,\ldots,c_J)$, let $f_a(c)$ denote the latent 
 \end{equation}
 where $\mathcal S$ describes the relationships among operating conditions and $\kappa_{\mathcal S}$ is a positive-semidefinite covariance function chosen to represent them. To construct this covariance, we first identify characteristics that two conditions may share. We then specify how each shared characteristic contributes to the assumed similarity of their performance. For example, if two conditions involve the same provider world, a world-specific random effect can link their predicted losses: its prior variance contributes to the covariance between those conditions. A shared composition graph can contribute in the same way. These relationships are hypotheses about performance informed by the system structure, not correlations guaranteed by that structure. Under Gaussian observation errors, the resulting posterior uses the assumed covariance to share information between conditions.
 
-Our evaluated instance uses additive Gaussian effects for crossed categorical factors. In the case study, the condition $c=(w,g)$ crosses a provider world $w\in\{\mathrm{P1},\mathrm{P3},\mathrm{P4}\}$ with a composition graph $g\in\{\mathrm{PAR},\mathrm{PARSEQ},\mathrm{SEQ},\mathrm{SEQPAR}\}$. The corresponding per-method Gaussian model is:
+We now illustrate how the general structure-informed approach is implemented in our case study. Each operating condition combines two characteristics: a provider world, representing a particular configuration of provider behavior, and a composition graph, describing how the services are connected. We use these two characteristics to construct a statistical model of each candidate predictor's validation error.
+
+The model assumes that a predictor's error can be represented by three contributions: an overall component shared by all conditions, an adjustment associated with the provider world, and an adjustment associated with the composition graph. The contributions are additive, so conditions sharing a world or graph also share part of their statistical representation. We assign Gaussian prior distributions to these components and assume Gaussian residual errors, allowing the resulting model to be updated analytically as validation evidence is acquired.
+
+This is a deliberately simple implementation of our general methodology. It allows information sharing across conditions without introducing a separate parameter for every combination, although it does not explicitly represent interactions between provider worlds and composition graphs. In our experiments, the provider worlds are $w\in\{\mathrm{P1},\mathrm{P3},\mathrm{P4}\}$, and the composition graphs are $g\in\{\mathrm{PAR},\mathrm{PARSEQ},\mathrm{SEQ},\mathrm{SEQPAR}\}$. Each condition is $c=(w,g)$. The resulting per-method Gaussian model is:
 \begin{equation}
 \begin{aligned}
 Y_{a,(w,g)}
