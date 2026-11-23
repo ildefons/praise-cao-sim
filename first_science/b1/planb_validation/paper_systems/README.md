@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.96
+# PRAISE sequential validation paper — LaTeX v0.97
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,10 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Clarified the fixed residual variance $\sigma^2$ used in the acquisition-value
+  denominator (formerly Eq. 9), distinguishing surrogate discrepancy from the
+  dynamically updated posterior coefficient covariance $\Sigma_a$.
 
 - Made both independent intercept/factor-effect redundancies explicit and
   explained why six independently identifiable combinations determine the
