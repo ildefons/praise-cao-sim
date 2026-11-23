@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.88
+# PRAISE sequential validation paper — LaTeX v0.89
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,12 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Reorganized Section 3.3 to present the additive Gaussian performance model
+  first, derive its prior covariance from the shared coefficient priors, and
+  then generalize the structure-to-covariance mapping. Clarified the
+  latent-loss versus independent-residual distinction and preserved stable
+  equation labels and references. No results or simulations changed.
 
 - Expanded the opening of the Section 3.3 additive Gaussian instance to explain
   the choice of provider worlds and graph factors, additive components, Gaussian
