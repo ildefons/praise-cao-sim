@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.90
+# PRAISE sequential validation paper — LaTeX v0.91
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,11 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Explained the coefficient prior $b_0,V_0$ in Section 3.3, including the
+  explicit diagonal covariance blocks and their induced sharing kernel.
+  Section 4 now distinguishes the baseline numerical prior settings from the
+  structural assumptions and explains the heuristic scales and sensitivity.
 
 - Clarified in Section 3.3 that the Gaussian model coefficients are reused
   across operating conditions within each candidate method, not across methods.
