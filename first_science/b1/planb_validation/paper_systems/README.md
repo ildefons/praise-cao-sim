@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.81
+# PRAISE sequential validation paper — LaTeX v0.82
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,12 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Review pass: reformulated RQ1–RQ3 around budget-efficient selection,
+  sharing across structured conditions, and acquisition organization.
+  Aligned contributions, evaluation interpretations, discussion, and conclusion;
+  explicitly distinguish a demonstrated sharing mechanism from the untested
+  incremental benefit of sharing over an independent-cell surrogate.
 
 - Introduction now grounds general continuum heterogeneity in the reviewed 2024
   and 2025 computing-continuum surveys, with case-specific provider information
