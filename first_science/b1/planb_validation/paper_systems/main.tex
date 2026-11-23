@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.86 --- 23 November 2026}
+\date{Working manuscript v0.87 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -118,24 +118,7 @@ For a structured condition $c=(c_1,\ldots,c_J)$, let $f_a(c)$ denote the latent 
 \operatorname{Cov}_0\bigl(f_a(c),f_a(c')\bigr)=\kappa_{\mathcal S}(c,c'),
 \label{eq:structure-map}
 \end{equation}
-where $\mathcal S$ encodes relevant condition relationships and $\kappa_{\mathcal S}$ is a positive-semidefinite covariance function chosen from those descriptors. Shared factor levels, common ancestors or nearby operating values can motivate different forms of statistical similarity (Table~\ref{tab:structure-map}). This mapping is a modeling hypothesis informed by the system structure: physical hierarchy alone does not determine performance correlations. With Gaussian observation errors, the posterior transfers evidence among conditions according to the chosen covariance.
-
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{p{0.27\linewidth}p{0.62\linewidth}}
-\toprule
-Condition structure & Example information-sharing assumption\\
-\midrule
-Crossed factors & Shared categorical levels contribute common effects.\\
-Nested hierarchy & Conditions inherit effects from shared region or cluster ancestors.\\
-Continuous factor & Correlation decreases with workload or network-load distance.\\
-Factor interaction & Matching combinations contribute an additional shared effect.\\
-\bottomrule
-\end{tabular}
-\caption{Possible translations from computing-continuum condition structure into a prior covariance. Only the crossed-factor additive instance is evaluated here.}
-\label{tab:structure-map}
-\end{table}
+where $\mathcal S$ describes the relationships among operating conditions and $\kappa_{\mathcal S}$ is a positive-semidefinite covariance function chosen to represent them. To construct this covariance, we first identify characteristics that two conditions may share. We then specify how each shared characteristic contributes to the assumed similarity of their performance. For example, if two conditions involve the same provider world, a world-specific random effect can link their predicted losses: its prior variance contributes to the covariance between those conditions. A shared composition graph can contribute in the same way. These relationships are hypotheses about performance informed by the system structure, not correlations guaranteed by that structure. Under Gaussian observation errors, the resulting posterior uses the assumed covariance to share information between conditions.
 
 Our evaluated instance uses additive Gaussian effects for crossed categorical factors. In the case study, the condition $c=(w,g)$ crosses a provider world $w\in\{\mathrm{P1},\mathrm{P3},\mathrm{P4}\}$ with a composition graph $g\in\{\mathrm{PAR},\mathrm{PARSEQ},\mathrm{SEQ},\mathrm{SEQPAR}\}$. The corresponding per-method Gaussian model is:
 \begin{equation}
@@ -160,14 +143,44 @@ v_{a,\mathrm{SEQ}},v_{a,\mathrm{SEQPAR}}\bigr)^\top,
 the condition $(\mathrm{P1},\mathrm{PAR})$ has
 $x_{(\mathrm{P1},\mathrm{PAR})}=(1,1,0,0,1,0,0,0)^\top$.
 
-These coefficients are \emph{reused} across conditions. The losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; the losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$. If the intercept, world and graph coefficients have independent prior variances $\tau_\alpha^2$, $\tau_w^2$ and $\tau_g^2$, respectively, their induced prior covariance is
+These coefficients are \emph{reused} across conditions. The losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; the losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$. In this crossed-factor model, every pair of conditions shares the method-specific intercept. Conditions involving the same provider world or composition graph also share the corresponding effect. If the intercept, world and graph effects have independent Gaussian priors with variances $\tau_\alpha^2$, $\tau_w^2$ and $\tau_g^2$, these shared effects yield the following prior covariance:
 \begin{equation}
 \operatorname{Cov}_0\bigl(f_a(w,g),f_a(w',g')\bigr)
 =\tau_\alpha^2+\tau_w^2\mathbf{1}[w=w']
  +\tau_g^2\mathbf{1}[g=g'].
 \label{eq:structured-prior}
 \end{equation}
-Thus, sharing a world or graph adds a specified amount of prior similarity, while the common intercept links even conditions sharing neither level. These quantities represent a \emph{modeling assumption}, not empirically measured physical correlations. Consequently, observing one cell changes posterior predictions for other cells \emph{of the same method}. After acquiring data, this transfer is represented by the posterior covariance between their latent predicted losses,
+Thus, sharing a world or graph adds a specified amount of prior similarity, while the common intercept links even conditions sharing neither level. Equation~\eqref{eq:structured-prior} is the crossed-factor covariance in Table~\ref{tab:structure-map}; its other rows illustrate alternative translations of continuum condition structure. All are modeling assumptions, not empirically measured physical correlations.
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{0.24\linewidth}p{0.66\linewidth}}
+\toprule
+Condition structure & Example covariance construction \\
+\midrule
+Crossed factors (evaluated) &
+$\displaystyle\begin{aligned}[t]
+\kappa(c,c')={}&\tau_\alpha^2+\tau_w^2\mathbf{1}[w=w']\\
+&+\tau_g^2\mathbf{1}[g=g']
+\end{aligned}$ \\[4pt]
+Nested region/cluster hierarchy &
+$\displaystyle\begin{aligned}[t]
+\kappa(c,c')={}&\tau_0^2+\tau_r^2\mathbf{1}[r=r']\\
+&+\tau_k^2\mathbf{1}[k=k']
+\end{aligned}$ \\[4pt]
+Continuous load $l$ &
+$\kappa(c,c')=\tau_0^2+\tau_l^2\exp(-|l-l'|/\ell)$ \\[4pt]
+World--graph interaction &
+Add $\tau_{wg}^2\mathbf{1}[(w,g)=(w',g')]$ to the crossed model. \\
+\bottomrule
+\end{tabular}
+\caption{Illustrative mappings from computing-continuum condition structure to prior covariance. The first row is Eq.~\eqref{eq:structured-prior} and is the only construction evaluated here. Indicators equal one when their condition holds and zero otherwise; variance components are nonnegative. In the nested example, $r$ denotes a region and $k$ a cluster uniquely associated with its region. For continuous load, $\ell>0$ controls the distance scale. The interaction term adds covariance only for the same world--graph combination, rather than sharing information between distinct combinations.}
+\label{tab:structure-map}
+\end{table}
+
+Consequently, observing one cell changes posterior predictions for other cells \emph{of the same method}. After acquiring data, this transfer is represented by the posterior covariance between their latent predicted losses,
 \begin{equation}
 \operatorname{Cov}\!\bigl(f_a(c),f_a(c')\mid\mathcal{D}\bigr)
 =x_c^\top\Sigma_a x_{c'},
