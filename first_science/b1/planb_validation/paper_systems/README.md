@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.89
+# PRAISE sequential validation paper — LaTeX v0.90
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,9 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Clarified in Section 3.3 that the Gaussian model coefficients are reused
+  across operating conditions within each candidate method, not across methods.
 
 - Reorganized Section 3.3 to present the additive Gaussian performance model
   first, derive its prior covariance from the shared coefficient priors, and
