@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.95
+# PRAISE sequential validation paper — LaTeX v0.96
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,12 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Made both independent intercept/factor-effect redundancies explicit and
+  explained why six independently identifiable combinations determine the
+  condition predictions. Clarified that the strictly positive Gaussian prior
+  variances yield a well-defined posterior but do not identify individual
+  coefficients from data alone.
 
 - Clarified why each eight-coefficient additive method surrogate has only six
   independently identifiable prediction combinations, with a concrete
