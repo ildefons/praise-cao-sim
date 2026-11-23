@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.88 --- 23 November 2026}
+\date{Working manuscript v0.89 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -113,23 +113,16 @@ The diversity dimensions identified in the Introduction become the coordinates o
 
 These shared condition characteristics are useful because validation observes only a subset of the method--condition combinations, while the final decision depends on each method's average performance across all conditions (Eq.~\eqref{eq:target}). The conditions selected for evaluation may not represent the entire domain, so averaging only their observed losses can lead to misleading comparisons. We therefore need to estimate performance under conditions that have not yet been evaluated. Our approach exploits the possibility that conditions sharing relevant characteristics may also exhibit related performance. We represent these relationships in the statistical model introduced next.
 
-For a structured condition $c=(c_1,\ldots,c_J)$, let $f_a(c)$ denote the latent performance of method $a$ before observation. We maintain a separate Gaussian belief for each method and specify how its condition-level estimates share information through a prior covariance
-\begin{equation}
-\operatorname{Cov}_0\bigl(f_a(c),f_a(c')\bigr)=\kappa_{\mathcal S}(c,c'),
-\label{eq:structure-map}
-\end{equation}
-where $\mathcal S$ describes the relationships among operating conditions and $\kappa_{\mathcal S}$ is a positive-semidefinite covariance function chosen to represent them. To construct this covariance, we first identify characteristics that two conditions may share. We then specify how each shared characteristic contributes to the assumed similarity of their performance. For example, if two conditions involve the same provider world, a world-specific random effect can link their predicted losses: its prior variance contributes to the covariance between those conditions. A shared composition graph can contribute in the same way. These relationships are hypotheses about performance informed by the system structure, not correlations guaranteed by that structure. Under Gaussian observation errors, the resulting posterior uses the assumed covariance to share information between conditions.
-
 We now illustrate how the general structure-informed approach is implemented in our case study. Each operating condition combines two characteristics: a provider world, representing a particular configuration of provider behavior, and a composition graph, describing how the services are connected. We use these two characteristics to construct a statistical model of each candidate predictor's validation error.
 
 The model assumes that a predictor's error can be represented by three contributions: an overall component shared by all conditions, an adjustment associated with the provider world, and an adjustment associated with the composition graph. The contributions are additive, so conditions sharing a world or graph also share part of their statistical representation. We assign Gaussian prior distributions to these components and assume Gaussian residual errors, allowing the resulting model to be updated analytically as validation evidence is acquired.
 
-This is a deliberately simple implementation of our general methodology. It allows information sharing across conditions without introducing a separate parameter for every combination, although it does not explicitly represent interactions between provider worlds and composition graphs. In our experiments, the provider worlds are $w\in\{\mathrm{P1},\mathrm{P3},\mathrm{P4}\}$, and the composition graphs are $g\in\{\mathrm{PAR},\mathrm{PARSEQ},\mathrm{SEQ},\mathrm{SEQPAR}\}$. Each condition is $c=(w,g)$. The resulting per-method Gaussian model is:
+This is a deliberately simple implementation of our general methodology. It allows information sharing across conditions without introducing a separate parameter for every combination, although it does not explicitly represent interactions between provider worlds and composition graphs. In our experiments, the provider worlds are $w\in\{\mathrm{P1},\mathrm{P3},\mathrm{P4}\}$, and the composition graphs are $g\in\{\mathrm{PAR},\mathrm{PARSEQ},\mathrm{SEQ},\mathrm{SEQPAR}\}$. Each condition is $c=(w,g)$. Let $f_a(w,g)$ denote the model's latent condition-specific loss. The observed validation loss $Y_{a,(w,g)}$ is represented as this latent performance plus a residual discrepancy. The resulting per-method Gaussian model is:
 \begin{equation}
 \begin{aligned}
-Y_{a,(w,g)}
-  &=\alpha_a+u_{a,w}+v_{a,g}+\varepsilon_{a,(w,g)}
-   =x_{(w,g)}^\top\beta_a+\varepsilon_{a,(w,g)},\\
+Y_{a,(w,g)}&=f_a(w,g)+\varepsilon_{a,(w,g)},\\
+f_a(w,g)&=\alpha_a+u_{a,w}+v_{a,g}
+ =x_{(w,g)}^\top\beta_a,\\
 \beta_a&\sim\mathcal{N}(b_0,V_0),\qquad
 \varepsilon_{a,(w,g)}\sim\mathcal{N}(0,\sigma^2).
 \end{aligned}
@@ -154,7 +147,14 @@ These coefficients are \emph{reused} across conditions. The losses for $(\mathrm
  +\tau_g^2\mathbf{1}[g=g'].
 \label{eq:structured-prior}
 \end{equation}
-Thus, sharing a world or graph adds a specified amount of prior similarity, while the common intercept links even conditions sharing neither level. Equation~\eqref{eq:structured-prior} is the crossed-factor covariance in Table~\ref{tab:structure-map}; its other rows illustrate alternative translations of continuum condition structure. All are modeling assumptions, not empirically measured physical correlations.
+Thus, sharing a world or graph adds a specified amount of prior similarity, while the common intercept links even conditions sharing neither level. This covariance follows from the shared Gaussian coefficients and their prior variances in Eq.~\eqref{eq:gaussianmodel}; it is not an independently specified second model. The residual error is modeled independently across conditions and therefore does not produce information sharing between distinct conditions.
+
+The same principle extends beyond this additive implementation. For a general structured condition $c=(c_1,\ldots,c_J)$, we can encode relevant condition relationships $\mathcal S$ through a prior covariance function:
+\begin{equation}
+\operatorname{Cov}_0\bigl(f_a(c),f_a(c')\bigr)=\kappa_{\mathcal S}(c,c'),
+\label{eq:structure-map}
+\end{equation}
+where $\kappa_{\mathcal S}$ must be positive semidefinite. In our evaluated model, Eq.~\eqref{eq:structured-prior} provides this function. Other ways of organizing computing-continuum conditions can motivate different covariance choices, as illustrated in Table~\ref{tab:structure-map}. Each choice is a statistical hypothesis informed by the system structure, not a performance correlation guaranteed by the physical hierarchy.
 
 \begin{table}[htbp]
 \centering
@@ -184,7 +184,7 @@ Add $\tau_{wg}^2\mathbf{1}[(w,g)=(w',g')]$ to the crossed model. \\
 \label{tab:structure-map}
 \end{table}
 
-Consequently, observing one cell changes posterior predictions for other cells \emph{of the same method}. After acquiring data, this transfer is represented by the posterior covariance between their latent predicted losses,
+With Gaussian observation errors, an acquired loss updates estimates for related unobserved conditions according to the assumed sharing structure. For the additive model used here, this transfer is expressed by the posterior covariance between latent losses at two conditions,
 \begin{equation}
 \operatorname{Cov}\!\bigl(f_a(c),f_a(c')\mid\mathcal{D}\bigr)
 =x_c^\top\Sigma_a x_{c'},
