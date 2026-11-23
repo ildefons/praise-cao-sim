@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.84
+# PRAISE sequential validation paper — LaTeX v0.85
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,10 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Clarified Section 3.2's retrospective validation procedure: archived errors are
+  revealed only for selected method--condition evaluations, and the full
+  catalogue is used only after recommendation to measure selection quality.
 
 - Rewrote the opening of Section 3.2 (Validation protocol) to explain the
   shared statistical model, per-method posterior estimates, evidence acquired
