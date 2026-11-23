@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.95 --- 23 November 2026}
+\date{Working manuscript v0.96 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -191,7 +191,7 @@ Add $\tau_{wg}^2\mathbf{1}[(w,g)=(w',g')]$ to the crossed model. \\
 \label{tab:structure-map}
 \end{table}
 
-For seven candidate methods, we use seven separate statistical models, each predicting losses across twelve conditions, rather than 84 independent statistical models. Each method's model has eight coefficients: one intercept, three provider-world effects and four composition-graph effects. However, these coefficients cannot all be uniquely determined from the observations. For example, increasing the intercept while decreasing every world effect by the same amount leaves all predicted losses unchanged; a similar adjustment is possible using the graph effects. Consequently, the twelve predictions depend on only $1+(3-1)+(4-1)=6$ independent coefficient combinations. The proper Gaussian prior ensures that the posterior remains well-defined, although individual coefficients should not be interpreted as uniquely determined physical effects. In particular, the intercept $\alpha_a$ is not the domain-average loss $\mu_a$ in Eq.~\eqref{eq:target}. The model-implied average over the balanced $3\times4$ domain is
+For seven candidate methods, we use seven separate statistical models, each predicting losses across twelve conditions, rather than 84 independent statistical models. Each method's model has eight coefficients: one intercept, three provider-world effects and four composition-graph effects. However, these coefficients are not all independently identifiable from observations. Increasing the intercept while decreasing every world effect by the same amount leaves every predicted loss unchanged. Independently, the intercept can also be increased while all graph effects are decreased by the same amount, again without changing any prediction. These two redundant directions leave $1+(3-1)+(4-1)=6$ independent quantities determining the predictions: one overall level, two provider-world differences and three composition-graph differences. Because the specified Gaussian prior assigns strictly positive variances to all coefficients, the posterior remains well-defined despite this redundancy. Individual coefficient estimates therefore depend partly on the prior, even though the model can estimate losses across operating conditions. In particular, the intercept $\alpha_a$ is not the domain-average loss $\mu_a$ in Eq.~\eqref{eq:target}. The model-implied average over the balanced $3\times4$ domain is
 \begin{equation}
 \overline{f}_a
 =\alpha_a+\frac{1}{3}\sum_w u_{a,w}
