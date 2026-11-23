@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.96 --- 23 November 2026}
+\date{Working manuscript v0.97 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -263,7 +263,7 @@ m_a=v^\top b_a.
 The value $m_a$ is the current estimate of method $a$'s domain-average loss, including conditions not yet evaluated. The final recommendation chooses the method with the smallest $m_a$.
 
 \paragraph{3. Recompute the next acquisition scores.}
-Let $Q_a(c',c)=\operatorname{Cov}(f_a(c'),f_a(c)\mid\mathcal D)$ denote the current posterior covariance between condition losses for method $a$. Before evaluating an unused pair $(a,c)$, the reduction in posterior variance of its model-implied domain-average performance is
+Let $Q_a(c',c)=\operatorname{Cov}(f_a(c'),f_a(c)\mid\mathcal D)$ denote the current posterior covariance between condition losses for method $a$. Here $\sigma^2$ is the residual variance introduced in Eq.~\eqref{eq:gaussianmodel}, representing discrepancies between observed losses and those predicted by the additive model. Unlike the posterior coefficient covariance $\Sigma_a$, which changes as evidence is acquired, $\sigma^2$ is held fixed throughout each validation experiment. Before evaluating an unused pair $(a,c)$, the reduction in posterior variance of its model-implied domain-average performance is
 \begin{equation}
 \begin{aligned}
 \Delta_{a,c}
