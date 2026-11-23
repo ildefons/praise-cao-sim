@@ -1,11 +1,16 @@
-# PRAISE sequential validation paper — LaTeX v0.79
+# PRAISE sequential validation paper — LaTeX v0.80
 
-**Status:** method-focused working manuscript (20 November 2026), pending
+**Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
 The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Introduction now grounds general continuum heterogeneity in the reviewed 2024
+  and 2025 computing-continuum surveys, with case-specific provider information
+  and composition topology clearly separated. Removed the unsupported application
+  trio as methodological foundations; their papers remain in Related Work.
 
 - Primary method: one Gaussian surrogate per candidate predictor, with
   world and graph factors sharing posterior information between conditions.
