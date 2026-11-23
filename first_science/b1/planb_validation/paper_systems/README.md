@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.92
+# PRAISE sequential validation paper — LaTeX v0.93
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,12 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Consolidated the interpretation of the additive prior covariance and its
+  generalization into a single explanation after the derived covariance.
+  Removed the redundant general covariance equation (formerly Eq. 5), kept
+  the Table 1 examples and prior-sensitivity qualification, and verified
+  remaining LaTeX references.
 
 - In Section 3.3, qualify prior-scale robustness using the fourteen-setting
   sensitivity analysis: aggregate regret directions are stable for adaptive KG
