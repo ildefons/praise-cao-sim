@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.89 --- 23 November 2026}
+\date{Working manuscript v0.90 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -140,7 +140,7 @@ v_{a,\mathrm{SEQ}},v_{a,\mathrm{SEQPAR}}\bigr)^\top,
 the condition $(\mathrm{P1},\mathrm{PAR})$ has
 $x_{(\mathrm{P1},\mathrm{PAR})}=(1,1,0,0,1,0,0,0)^\top$.
 
-These coefficients are \emph{reused} across conditions. The losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; the losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$. In this crossed-factor model, every pair of conditions shares the method-specific intercept. Conditions involving the same provider world or composition graph also share the corresponding effect. If the intercept, world and graph effects have independent Gaussian priors with variances $\tau_\alpha^2$, $\tau_w^2$ and $\tau_g^2$, these shared effects yield the following prior covariance:
+These coefficients are \emph{reused} across operating conditions for each candidate method. The losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; the losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$. In this crossed-factor model, every pair of conditions shares the method-specific intercept. Conditions involving the same provider world or composition graph also share the corresponding effect. If the intercept, world and graph effects have independent Gaussian priors with variances $\tau_\alpha^2$, $\tau_w^2$ and $\tau_g^2$, these shared effects yield the following prior covariance:
 \begin{equation}
 \operatorname{Cov}_0\bigl(f_a(w,g),f_a(w',g')\bigr)
 =\tau_\alpha^2+\tau_w^2\mathbf{1}[w=w']
