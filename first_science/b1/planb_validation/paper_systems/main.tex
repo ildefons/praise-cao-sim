@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.93 --- 23 November 2026}
+\date{Working manuscript v0.94 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -191,17 +191,42 @@ Add $\tau_{wg}^2\mathbf{1}[(w,g)=(w',g')]$ to the crossed model. \\
 \label{tab:structure-map}
 \end{table}
 
-With Gaussian observation errors, an acquired loss updates estimates for related unobserved conditions according to the assumed sharing structure. For the additive model used here, this transfer is expressed by the posterior covariance between latent losses at two conditions,
+For seven methods, this produces seven performance models, each predicting twelve condition losses, rather than 84 independent statistical models. Each model stores eight coefficients, but the one-hot encoding with an intercept is redundant: only $1+(3-1)+(4-1)=6$ coefficient directions are identified by the likelihood. The proper Gaussian prior makes the posterior well-defined; individual intercept and effect coefficients should not be interpreted as uniquely identified physical quantities. In particular, the intercept $\alpha_a$ is not the domain-average loss $\mu_a$ in Eq.~\eqref{eq:target}. The model-implied average over the balanced $3\times4$ domain is
+\begin{equation}
+\overline{f}_a
+=\alpha_a+\frac{1}{3}\sum_w u_{a,w}
++\frac{1}{4}\sum_g v_{a,g}.
+\label{eq:additive-average}
+\end{equation}
+The evaluated additive instance does not represent world--graph interaction effects or cross-method correlations. Section~\ref{sec:case} describes the predictor portfolio, fixed prior hyperparameters and numerical sensitivity checks.
+
+\subsection{Posterior updating and acquisition statistics}
+Given Eq.~\eqref{eq:gaussianmodel}, the posterior for method $a$ is Gaussian with coefficient mean $b_a$ and covariance $\Sigma_a$. Initially, $b_a=b_0$ and $\Sigma_a=V_0$. Acquired condition-level losses sequentially update this posterior; the working residual variance $\sigma^2$ represents regression discrepancy, not an independently sampled new simulator result on each replay.
+
+\paragraph{1. Acquire evidence and update the model.}
+Suppose the policy evaluates method $a$ at condition $c$ and observes loss $y=Y_{a,c}$. Define the update weight
+$k_{a,c}=\Sigma_a x_c/(\sigma^2+x_c^\top\Sigma_a x_c)$.
+The current coefficient estimate and covariance are then updated by
+\begin{equation}
+\begin{aligned}
+b_a^{\mathrm{new}}&=b_a+k_{a,c}(y-x_c^\top b_a),\\
+\Sigma_a^{\mathrm{new}}&=\Sigma_a-k_{a,c}x_c^\top\Sigma_a.
+\end{aligned}
+\label{eq:covupdate}
+\end{equation}
+The difference $y-x_c^\top b_a$ is the observed loss minus its predicted value. It adjusts the coefficient estimates; the covariance update reduces their uncertainty. After the update, $b_a$ and $\Sigma_a$ denote the current posterior values.
+
+The updated coefficients also affect predictions for conditions that have not been evaluated. Because the same coefficients contribute to several conditions, an observation at $c$ can change the predicted losses of other conditions $c'$. In the additive model, this information sharing is governed by the posterior covariance between their latent losses:
 \begin{equation}
 \operatorname{Cov}\!\bigl(f_a(c),f_a(c')\mid\mathcal{D}\bigr)
 =x_c^\top\Sigma_a x_{c'},
 \label{eq:condition-covariance}
 \end{equation}
-where $f_a(c)=x_c^\top\beta_a$, $\mathcal{D}$ denotes acquired evaluations, and $\Sigma_a$ is the current posterior coefficient covariance. The seven method-specific parameter vectors have independent priors and posteriors: evaluating method $a$ does not directly update the coefficients of another method.
+where $\mathcal{D}$ denotes the acquired evaluations and $\Sigma_a$ is the updated coefficient covariance. The prior structure determines which coefficients are shared; the posterior incorporates the evidence collected so far. This transfer occurs only within a candidate method: evaluating method $a$ does not directly update the coefficients of any other method.
 
-Figure~\ref{fig:sharing} illustrates the transfer within one method's twelve-condition belief. An evaluation at P1/PAR informs the common intercept, P1 effect and PAR effect; the resulting posterior change propagates to predictions at related conditions according to Eq.~\eqref{eq:condition-covariance}. The pattern conveys the assumed sharing structure, not a claim that all posterior updates have equal magnitude.
+Figure~\ref{fig:sharing} illustrates these relationships within one method's twelve-condition model. An evaluation at P1/PAR updates its shared intercept, P1 and PAR coefficient estimates, which also contribute to predictions at other conditions. The figure depicts sharing pathways, not equal magnitudes of posterior updates.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \footnotesize
 \setlength{\tabcolsep}{2.3pt}
@@ -226,31 +251,6 @@ P4 &
 \caption{Information sharing within one candidate method's structured surrogate. An observed loss at P1/PAR updates the method's posterior; shared world, shared graph and common-intercept effects connect that observation to other condition estimates. The colors show prior sharing pathways rather than measured correlation strengths. Other candidate methods have separate surrogates.}
 \label{fig:sharing}
 \end{figure}
-
-For seven methods, this produces seven performance models, each predicting twelve condition losses, rather than 84 independent statistical models. Each model stores eight coefficients, but the one-hot encoding with an intercept is redundant: only $1+(3-1)+(4-1)=6$ coefficient directions are identified by the likelihood. The proper Gaussian prior makes the posterior well-defined; individual intercept and effect coefficients should not be interpreted as uniquely identified physical quantities. In particular, the intercept $\alpha_a$ is not the domain-average loss $\mu_a$ in Eq.~\eqref{eq:target}. The model-implied average over the balanced $3\times4$ domain is
-\begin{equation}
-\overline{f}_a
-=\alpha_a+\frac{1}{3}\sum_w u_{a,w}
-+\frac{1}{4}\sum_g v_{a,g}.
-\label{eq:additive-average}
-\end{equation}
-The evaluated additive instance does not represent world--graph interaction effects or cross-method correlations. Section~\ref{sec:case} describes the predictor portfolio, fixed prior hyperparameters and numerical sensitivity checks.
-
-\subsection{Posterior updating and acquisition statistics}
-Given Eq.~\eqref{eq:gaussianmodel}, the posterior for method $a$ is Gaussian with coefficient mean $b_a$ and covariance $\Sigma_a$. Initially, $b_a=b_0$ and $\Sigma_a=V_0$. Acquired condition-level losses sequentially update this posterior; the working residual variance $\sigma^2$ represents regression discrepancy, not an independently sampled new simulator result on each replay.
-
-\paragraph{1. Acquire evidence and update the model.}
-Suppose the policy evaluates method $a$ at condition $c$ and observes loss $y=Y_{a,c}$. Define the update weight
-$k_{a,c}=\Sigma_a x_c/(\sigma^2+x_c^\top\Sigma_a x_c)$.
-The current coefficient estimate and covariance are then updated by
-\begin{equation}
-\begin{aligned}
-b_a^{\mathrm{new}}&=b_a+k_{a,c}(y-x_c^\top b_a),\\
-\Sigma_a^{\mathrm{new}}&=\Sigma_a-k_{a,c}x_c^\top\Sigma_a.
-\end{aligned}
-\label{eq:covupdate}
-\end{equation}
-The difference $y-x_c^\top b_a$ is the observed loss minus its predicted value. It adjusts the coefficient estimates; the covariance update reduces their uncertainty. Only the model for the evaluated method changes at this step.
 
 \paragraph{2. Update predicted performance.}
 Let $v$ be the average feature vector of all $C$ target conditions. Using the updated coefficient estimate $b_a$, we calculate the predicted loss at any condition $c'$ and the predicted domain-average loss as
