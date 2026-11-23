@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.86
+# PRAISE sequential validation paper — LaTeX v0.87
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,11 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Clarified Section 3.3's structure-to-covariance translation and moved Table 1
+  after the derived crossed-factor covariance. Table 1 now states explicit
+  illustrative covariance formulas (crossed, nested, continuous, interaction)
+  and identifies only the crossed-factor case as evaluated.
 
 - Replaced the bridging paragraph in Section 3.3 to connect shared
   operating-condition characteristics with the need to estimate unobserved
