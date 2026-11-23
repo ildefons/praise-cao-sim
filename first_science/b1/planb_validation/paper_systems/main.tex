@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.92 --- 23 November 2026}
+\date{Working manuscript v0.93 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -157,14 +157,11 @@ Under this prior, the latent losses of two conditions are correlated when they d
  +\tau_g^2\mathbf{1}[g=g'].
 \label{eq:structured-prior}
 \end{equation}
-Thus, conditions sharing a world or graph have an additional prior covariance, while the intercept contributes to the covariance of every condition pair. The kernel in Eq.~\eqref{eq:structured-prior} is induced by the prior $V_0$ in Eq.~\eqref{eq:gaussianmodel}, rather than being an independent assumption. The residual errors are independent across conditions and do not create additional cross-condition covariance. The relative sizes of the three prior variances control the assumed strength of sharing through each component. The sensitivity analysis (Section~\ref{sec:adaptive-condition-choice} and Appendix~\ref{app:prior-sensitivity}) shows that adaptive two-stage KG retains lower thirteen-budget mean regret than uniform two-stage KG, Random and Balanced under all fourteen tested prior configurations in both reference archives. Absolute regret and budget-specific comparisons nevertheless vary, so this robustness concerns the aggregate direction of those comparisons rather than independence from the prior choices.
+Equation~\eqref{eq:structured-prior} makes the information-sharing structure explicit: the intercept contributes to the prior covariance of every pair of conditions, while a shared provider world or composition graph contributes an additional term. This covariance follows from the coefficient prior $V_0$ in Eq.~\eqref{eq:gaussianmodel}; independent residual errors do not contribute to information sharing between different conditions.
 
-The same principle extends beyond this additive implementation. For a general structured condition $c=(c_1,\ldots,c_J)$, we can encode relevant condition relationships $\mathcal S$ through a prior covariance function:
-\begin{equation}
-\operatorname{Cov}_0\bigl(f_a(c),f_a(c')\bigr)=\kappa_{\mathcal S}(c,c'),
-\label{eq:structure-map}
-\end{equation}
-where $\kappa_{\mathcal S}$ must be positive semidefinite. In our evaluated model, Eq.~\eqref{eq:structured-prior} provides this function. Other ways of organizing computing-continuum conditions can motivate different covariance choices, as illustrated in Table~\ref{tab:structure-map}. Each choice is a statistical hypothesis informed by the system structure, not a performance correlation guaranteed by the physical hierarchy.
+More generally, relationships among operating conditions $c=(c_1,\ldots,c_J)$ can be represented by a structure-informed covariance function $\kappa_{\mathcal S}(c,c')$, where $\mathcal S$ describes the relevant condition structure and the function must be positive semidefinite. Our crossed-factor model is one such construction. Table~\ref{tab:structure-map} illustrates alternatives based on hierarchical relationships, continuous operating variables and factor interactions. Each construction expresses a statistical hypothesis about performance similarity, rather than a correlation guaranteed by the system's physical structure.
+
+The relative prior variances determine the assumed strength of information sharing. The sensitivity analysis (Section~\ref{sec:adaptive-condition-choice} and Appendix~\ref{app:prior-sensitivity}) shows that the aggregate advantage of adaptive two-stage KG over uniform two-stage KG, Random and Balanced persists across all fourteen tested prior configurations in both reference archives, although absolute regret and budget-specific comparisons vary.
 
 \begin{table}[htbp]
 \centering
