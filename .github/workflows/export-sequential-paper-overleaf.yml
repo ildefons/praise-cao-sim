@@ -1,0 +1,92 @@
+name: Export sequential validation paper for Overleaf
+
+on:
+  push:
+    branches: [praise-identifiability-feasibility]
+    paths:
+      - .github/workflows/export-sequential-paper-overleaf.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout reproducible manuscript and figure data
+        uses: actions/checkout@v4
+
+      - name: Prepare Python for frozen paper figures
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate the original paper figures
+        run: |
+          python -m pip install --quiet matplotlib
+          cd first_science/b1/planb_validation/paper_systems
+          python plot_nested_paper_figures_v1.py
+          test -s figures/historical_nested6_plus_top2_13_budgets.pdf
+          test -s figures/fresh_reference_nested6_plus_top2_13_budgets.pdf
+
+      - name: Compile manuscript with standard pdfLaTeX
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+            texlive-fonts-recommended lmodern
+          cd first_science/b1/planb_validation/paper_systems
+          pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
+          pdflatex -interaction=nonstopmode -halt-on-error -file-line-error main.tex
+          test -s main.pdf
+
+      - name: Package only Overleaf-ready inputs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          base = Path("first_science/b1/planb_validation/paper_systems")
+          outdir = base / "exports"
+          outdir.mkdir(exist_ok=True)
+          target = outdir / "PRAISE_Sequential_Validation_Overleaf_v0.98.zip"
+          readme = (
+              "# PRAISE sequential validation manuscript — Overleaf import\n\n"
+              "Version: v0.98, 23 November 2026.\n"
+              "Primary LaTeX file: main.tex.\n"
+              "Compiler: pdfLaTeX (standard Overleaf default).\n"
+              "Bibliography: embedded in main.tex; no BibTeX run required.\n"
+              "The two figure PDFs are bundled under figures/.\n"
+              "The package is self-contained; Overleaf does not need Python.\n"
+              "Generated from the GitHub praise-identifiability-feasibility branch.\n"
+          )
+          with ZipFile(target, "w", ZIP_DEFLATED, compresslevel=9) as z:
+              z.write(base / "main.tex", "main.tex")
+              for name in (
+                  "historical_nested6_plus_top2_13_budgets.pdf",
+                  "fresh_reference_nested6_plus_top2_13_budgets.pdf",
+              ):
+                  z.write(base / "figures" / name, "figures/" + name)
+              z.writestr("README_OVERLEAF.md", readme)
+          print(f"OVERLEAF_ZIP_READY {target} ({target.stat().st_size} bytes)")
+          PY
+
+      - name: Preserve export as GitHub Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PRAISE-Sequential-Validation-Overleaf-v0.98
+          path: first_science/b1/planb_validation/paper_systems/exports/PRAISE_Sequential_Validation_Overleaf_v0.98.zip
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Publish downloadable ZIP to the manuscript branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f first_science/b1/planb_validation/paper_systems/exports/PRAISE_Sequential_Validation_Overleaf_v0.98.zip
+          if ! git diff --cached --quiet; then
+            git commit -m "Export manuscript v0.98 as Overleaf-ready ZIP"
+            git push origin HEAD:praise-identifiability-feasibility
+          fi
