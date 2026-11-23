@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.97 --- 23 November 2026}
+\date{Working manuscript v0.98 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -128,7 +128,7 @@ f_a(w,g)&=\alpha_a+u_{a,w}+v_{a,g}
 \end{aligned}
 \label{eq:gaussianmodel}
 \end{equation}
-Here $\alpha_a$ is a condition-independent intercept; $u_{a,w}$ and $v_{a,g}$ are, respectively, the world-specific and graph-specific adjustments \emph{within method $a$}. The feature vector $x_{(w,g)}$ has an intercept and one-hot indicators for the three worlds and four graph types. For example, with the coefficient ordering
+Here $\alpha_a$ is a condition-independent intercept; $u_{a,w}$ and $v_{a,g}$ are, respectively, the world-specific and graph-specific adjustments \emph{within method $a$}. The residual $\varepsilon_{a,(w,g)}$ represents the discrepancy between an observed validation loss and the performance predicted by these additive components. We model residuals as independent zero-mean Gaussian terms with fixed variance $\sigma^2$. This variance represents surrogate-model discrepancy, not a new random simulator outcome whenever an archived loss is retrieved. The feature vector $x_{(w,g)}$ has an intercept and one-hot indicators for the three worlds and four graph types. For example, with the coefficient ordering
 \[
 \begin{aligned}
 \beta_a=\bigl(&\alpha_a,u_{a,\mathrm{P1}},u_{a,\mathrm{P3}},
@@ -263,7 +263,7 @@ m_a=v^\top b_a.
 The value $m_a$ is the current estimate of method $a$'s domain-average loss, including conditions not yet evaluated. The final recommendation chooses the method with the smallest $m_a$.
 
 \paragraph{3. Recompute the next acquisition scores.}
-Let $Q_a(c',c)=\operatorname{Cov}(f_a(c'),f_a(c)\mid\mathcal D)$ denote the current posterior covariance between condition losses for method $a$. Here $\sigma^2$ is the residual variance introduced in Eq.~\eqref{eq:gaussianmodel}, representing discrepancies between observed losses and those predicted by the additive model. Unlike the posterior coefficient covariance $\Sigma_a$, which changes as evidence is acquired, $\sigma^2$ is held fixed throughout each validation experiment. Before evaluating an unused pair $(a,c)$, the reduction in posterior variance of its model-implied domain-average performance is
+Let $Q_a(c',c)=\operatorname{Cov}(f_a(c'),f_a(c)\mid\mathcal D)$ denote the current posterior covariance between condition losses for method $a$. The uncertainty of a prospective observed loss combines uncertainty in its latent performance with the fixed residual variance $\sigma^2$ defined in Eq.~\eqref{eq:gaussianmodel}. Before evaluating an unused pair $(a,c)$, the reduction in posterior variance of its model-implied domain-average performance is
 \begin{equation}
 \begin{aligned}
 \Delta_{a,c}
