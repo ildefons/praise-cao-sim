@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.90 --- 23 November 2026}
+\date{Working manuscript v0.91 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -140,14 +140,24 @@ v_{a,\mathrm{SEQ}},v_{a,\mathrm{SEQPAR}}\bigr)^\top,
 the condition $(\mathrm{P1},\mathrm{PAR})$ has
 $x_{(\mathrm{P1},\mathrm{PAR})}=(1,1,0,0,1,0,0,0)^\top$.
 
-These coefficients are \emph{reused} across operating conditions for each candidate method. The losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; the losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$. In this crossed-factor model, every pair of conditions shares the method-specific intercept. Conditions involving the same provider world or composition graph also share the corresponding effect. If the intercept, world and graph effects have independent Gaussian priors with variances $\tau_\alpha^2$, $\tau_w^2$ and $\tau_g^2$, these shared effects yield the following prior covariance:
+These coefficients are \emph{reused} across operating conditions for each candidate method. The latent losses for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P1},\mathrm{SEQ})$ depend on the same $\alpha_a$ and $u_{a,\mathrm{P1}}$; those for $(\mathrm{P1},\mathrm{PAR})$ and $(\mathrm{P3},\mathrm{PAR})$ depend on the same $\alpha_a$ and $v_{a,\mathrm{PAR}}$.
+
+The Gaussian prior $\beta_a\sim\mathcal{N}(b_0,V_0)$ in Eq.~\eqref{eq:gaussianmodel} specifies our initial beliefs about these eight coefficients. The vector $b_0$ contains their prior means, while $V_0$ specifies their variances and covariances. We make a deliberately simple choice: the intercept, world effects and graph effects have mutually independent priors, and effects of the same type have a common variance. With the coefficient ordering above, this gives
+\[
+V_0=\operatorname{diag}\!\left(
+\tau_\alpha^2,\;\tau_w^2 I_3,\;\tau_g^2 I_4
+\right).
+\]
+Here $\tau_\alpha^2$ represents uncertainty in the overall component of a method's performance, $\tau_w^2$ in its world-specific adjustments, and $\tau_g^2$ in its graph-specific adjustments. These three scales are modeling choices: the condition structure tells us which coefficients are shared, but does not determine their numerical variances. We specify the values used in our experiments and assess their sensitivity in Section~\ref{sec:surrogate-case}.
+
+Under this prior, the latent losses of two conditions are correlated when they depend on some of the same coefficients. In particular, $\operatorname{Cov}_0(f_a(w,g),f_a(w',g'))=x_{(w,g)}^\top V_0 x_{(w',g')}$. Substituting the corresponding feature vectors gives
 \begin{equation}
 \operatorname{Cov}_0\bigl(f_a(w,g),f_a(w',g')\bigr)
 =\tau_\alpha^2+\tau_w^2\mathbf{1}[w=w']
  +\tau_g^2\mathbf{1}[g=g'].
 \label{eq:structured-prior}
 \end{equation}
-Thus, sharing a world or graph adds a specified amount of prior similarity, while the common intercept links even conditions sharing neither level. This covariance follows from the shared Gaussian coefficients and their prior variances in Eq.~\eqref{eq:gaussianmodel}; it is not an independently specified second model. The residual error is modeled independently across conditions and therefore does not produce information sharing between distinct conditions.
+Thus, conditions sharing a world or graph have an additional prior covariance, while the intercept contributes to the covariance of every condition pair. The kernel in Eq.~\eqref{eq:structured-prior} is induced by the prior $V_0$ in Eq.~\eqref{eq:gaussianmodel}, rather than being an independent assumption. The residual errors are independent across conditions and do not create additional cross-condition covariance. The relative sizes of the three prior variances control the assumed strength of sharing through each component.
 
 The same principle extends beyond this additive implementation. For a general structured condition $c=(c_1,\ldots,c_J)$, we can encode relevant condition relationships $\mathcal S$ through a prior covariance function:
 \begin{equation}
@@ -365,7 +375,9 @@ Each predictor takes the public-I1 provider evidence, composition graph and quer
 
 \subsection{Statistical surrogate used for allocation}
 \label{sec:surrogate-case}
-We instantiate the per-method additive Gaussian model of Section~\ref{sec:performance-model} for three provider worlds and four graph types. The primary policy comparisons use a common prior: intercept mean $0.17$ and standard deviation $\tau_\alpha=0.12$; zero-mean world effects with $\tau_w=0.07$; zero-mean graph effects with $\tau_g=0.045$; and residual standard deviation $\sigma=0.055$. Coefficients are a priori independent within and across methods. The three prior scales encode method-wide uncertainty and additional covariance for conditions sharing a world or graph (Eq.~\eqref{eq:structured-prior}). Their ordering and magnitudes are heuristic modeling choices, not covariance estimates derived uniquely from the continuum hierarchy or fitted to the complete error matrices. All policies use identical settings within each comparison; the posterior supports the acquisition scores of Section~3 and the terminal rule of Eq.~\eqref{eq:target}.
+We instantiate the per-method additive Gaussian model of Section~ef{sec:performance-model} for three provider worlds and four graph types. The primary policy comparisons use the same prior for every candidate method: the intercept has mean $0.17$ and standard deviation $	au_alpha=0.12$; each world effect has mean zero and $	au_w=0.07$; and each graph effect has mean zero and $	au_g=0.045$. The residual standard deviation is $sigma=0.055$. Thus $b_0$ contains the intercept mean followed by zero means for all factor effects, and $V_0$ has the diagonal structure specified in Section~ef{sec:performance-model}. Priors are independent across candidate methods as well as across coefficients within each method.
+
+These numbers are heuristic prior settings, not estimates uniquely determined by the computing-continuum hierarchy or fitted to the complete error matrices. The larger intercept scale expresses broader uncertainty about the method-wide component; the world and graph scales express smaller additional uncertainties for conditions sharing those factors. Their relative values determine how strongly an observation can inform other conditions through the induced covariance of Eq.~eqref{eq:structured-prior}. We use the same settings for all acquisition policies in each comparison, so policy differences do not arise from different prior assumptions. The posterior supports the acquisition scores of Section~3 and the terminal rule of Eq.~eqref{eq:target}. We examine the consequences of alternative prior scales and means below rather than treating the baseline values as established properties of the system.
 
 We assess the influence of these numerical choices with a fixed grid of fourteen hyperparameter configurations: the baseline; halving or doubling each of $\tau_\alpha,\tau_w,\tau_g$ and $\sigma$ separately; swapping the world and graph scales; jointly halving or doubling the three prior scales; and setting the intercept mean to $0.10$ or $0.24$. Each configuration replays posterior updates and acquisition decisions for all nine policies, retaining the same frozen reference matrices, initial conditions and evaluation budgets. The baseline replay reproduces all 234 plotted policy--budget--archive means. The grid evaluates robustness \emph{within} the additive surrogate family; the configurations and results are reported in Appendix~\ref{app:prior-sensitivity} and the repository evidence \cite{praisePriorSensitivity}.
 
