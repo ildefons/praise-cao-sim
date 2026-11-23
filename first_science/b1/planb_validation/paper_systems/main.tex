@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.85 --- 23 November 2026}
+\date{Working manuscript v0.86 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -111,7 +111,7 @@ Each episode begins by evaluating every candidate method under one common initia
 \label{sec:performance-model}
 The diversity dimensions identified in the Introduction become the coordinates of the validation conditions. Provider behavior, composition topology, workload and deployment configuration can each distinguish scenarios in a broader computing-continuum study. Our experiment instantiates the first two dimensions, crossing provider worlds with composition graphs while keeping the public-information interface and query--horizon set common. This crossed catalogue expresses the system hierarchy as reusable \emph{condition descriptors}: two evaluations may concern different combinations yet share a provider world or a graph structure. Their validation losses remain specific to the method and the complete condition.
 
-The same multidimensional structure shapes the budget-constrained validation problem introduced in Section~2. An evaluation reveals the loss of a particular method under one chosen condition, while the final recommendation targets that method's \emph{average} loss over the full prespecified domain (Eq.~\eqref{eq:target}). Because an acquisition policy chooses conditions selectively, the observed losses cannot simply be treated as interchangeable samples of one condition-independent method reward. The policy must allocate its limited budget over method--condition pairs and estimate losses for the combinations it has not evaluated. A performance model that shares information across recurring condition factors can make these estimates more useful for the final decision.
+These shared condition characteristics are useful because validation observes only a subset of the method--condition combinations, while the final decision depends on each method's average performance across all conditions (Eq.~\eqref{eq:target}). The conditions selected for evaluation may not represent the entire domain, so averaging only their observed losses can lead to misleading comparisons. We therefore need to estimate performance under conditions that have not yet been evaluated. Our approach exploits the possibility that conditions sharing relevant characteristics may also exhibit related performance. We represent these relationships in the statistical model introduced next.
 
 For a structured condition $c=(c_1,\ldots,c_J)$, let $f_a(c)$ denote the latent performance of method $a$ before observation. We maintain a separate Gaussian belief for each method and specify how its condition-level estimates share information through a prior covariance
 \begin{equation}
