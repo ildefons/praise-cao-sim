@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.97
+# PRAISE sequential validation paper — LaTeX v0.98
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,12 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Defined the residual $\sigma^2$ at its first occurrence after the
+  additive Gaussian model (Eq. 3), distinguishing fixed surrogate-model
+  discrepancy from newly generated simulator outcomes. Replaced the longer
+  later explanation before the acquisition-variance equation with a concise
+  reminder of residual and latent-performance uncertainty.
 
 - Clarified the fixed residual variance $\sigma^2$ used in the acquisition-value
   denominator (formerly Eq. 9), distinguishing surrogate discrepancy from the
