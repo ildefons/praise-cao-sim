@@ -23,7 +23,7 @@
 \author{Ildefons Magrans de Abril$^{1}$ \and Xavier Franch$^{1}$ \and Schahram Dustdar$^{2}$\\[6pt]
 \small $^{1}$Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain\\
 \small $^{2}$TU Wien, Vienna, Austria}
-\date{Working manuscript v0.83 --- 23 November 2026}
+\date{Working manuscript v0.84 --- 23 November 2026}
 
 \begin{document}
 \maketitle
@@ -103,7 +103,7 @@ r_B=\mu_{\widehat{a}_B}-\mu_{a^\star}\geq0.
 The objective is to recommend one method that performs well across the entire target domain. Note that, unlike cumulative-reward bandit objectives, which evaluate the rewards obtained during successive actions, terminal simple regret evaluates only the quality of the final recommendation.
 
 \subsection{Validation protocol}
-Every allocation policy uses the same statistical model specification and the same terminal decision rule, but maintains a separate posterior for each candidate method. Its observations consist only of the validation outcomes it has acquired; unobserved method--condition losses are inferred rather than consulted.
+All allocation policies use the same statistical model and the same rule for recommending a method at the end of validation. For each candidate method, the model maintains separate estimates of its performance across operating conditions. When a policy evaluates a method under a particular condition, the observed loss updates these estimates, including those for related conditions through the model's information-sharing structure. The policy cannot access the outcomes of evaluations it has not selected, so it must estimate those losses from the evidence collected so far. Because different policies may select different evaluations, their estimates can evolve differently even though they use the same statistical model.
 
 Each episode begins by evaluating every candidate method under one common initial condition, charging these $K$ evaluations against the total budget. The policy then chooses $B-K$ previously unobserved pairs. In the retrospective implementation, the replay harness reveals a selected loss from the archive and reserves the complete table for post-recommendation scoring. The terminal budget limits the number of acquisitions; it is an explicit input to the acquisition schedule only for the Top2 family. KG and the other budget-independent rules can be stopped at any permitted budget without changing their earlier choices.
 
