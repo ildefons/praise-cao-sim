@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.93
+# PRAISE sequential validation paper — LaTeX v0.94
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,11 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Moved the posterior latent-loss covariance formula and the P1/PAR sharing
+  figure from Section 3.3 into Step 1 of Section 3.4, following the Gaussian
+  coefficient update. Adjusted explanations to make the flow from acquisition
+  to posterior sharing to predicted performance explicit; no numerical results changed.
 
 - Consolidated the interpretation of the additive prior covariance and its
   generalization into a single explanation after the derived covariance.
