@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.91
+# PRAISE sequential validation paper — LaTeX v0.92
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,13 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- In Section 3.3, qualify prior-scale robustness using the fourteen-setting
+  sensitivity analysis: aggregate regret directions are stable for adaptive KG
+  against uniform KG, Random and Balanced in both archives; absolute regrets
+  and individual-budget comparisons remain sensitive.
+- Add a stable reference to the relevant Evaluation subsection and correct
+  escaped LaTeX notation/reference typos in the surrogate case-study paragraph.
 
 - Explained the coefficient prior $b_0,V_0$ in Section 3.3, including the
   explicit diagonal covariance blocks and their induced sharing kernel.
