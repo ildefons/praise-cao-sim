@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.94
+# PRAISE sequential validation paper — LaTeX v0.95
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,10 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Clarified why each eight-coefficient additive method surrogate has only six
+  independently identifiable prediction combinations, with a concrete
+  intercept/world-effect example and the role of the Gaussian prior.
 
 - Moved the posterior latent-loss covariance formula and the P1/PAR sharing
   figure from Section 3.3 into Step 1 of Section 3.4, following the Gaussian
