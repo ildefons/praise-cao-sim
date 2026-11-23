@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.85
+# PRAISE sequential validation paper — LaTeX v0.86
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,10 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Replaced the bridging paragraph in Section 3.3 to connect shared
+  operating-condition characteristics with the need to estimate unobserved
+  method performance and the following covariance model. No results changed.
 
 - Clarified Section 3.2's retrospective validation procedure: archived errors are
   revealed only for selected method--condition evaluations, and the full
