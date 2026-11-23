@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.80
+# PRAISE sequential validation paper — LaTeX v0.81
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
