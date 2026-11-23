@@ -1,4 +1,4 @@
-# PRAISE sequential validation paper — LaTeX v0.87
+# PRAISE sequential validation paper — LaTeX v0.88
 
 **Status:** method-focused working manuscript (23 November 2026), pending
 local compilation and section-by-section review before submission.
@@ -6,6 +6,11 @@ The canonical source is [main.tex](main.tex) on
 `praise-identifiability-feasibility`.
 
 ## What changed
+
+- Expanded the opening of the Section 3.3 additive Gaussian instance to explain
+  the choice of provider worlds and graph factors, additive components, Gaussian
+  priors and residual assumptions, and the scope of this deliberately simple
+  implementation before presenting the model equation.
 
 - Clarified Section 3.3's structure-to-covariance translation and moved Table 1
   after the derived crossed-factor covariance. Table 1 now states explicit
