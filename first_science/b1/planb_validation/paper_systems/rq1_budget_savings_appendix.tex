@@ -1,0 +1,52 @@
+% Provisional budget-efficiency analysis, 24 November 2026.
+\section{Exploratory evaluation-budget savings at comparable decision quality}
+\label{app:budget-savings}
+For each policy and archive, we define a sustained tested-grid budget as the smallest evaluated budget satisfying a decision-quality target at that budget and every subsequent tested checkpoint through 80. Specifically, for an upper regret target $t$ and the ordered tested budget set $\mathcal B$,
+\[
+ B_t=\min\{b\in\mathcal B:\ \widehat R(b')\le t\ \text{for every } b'\in\mathcal B,\ b'\ge b\},
+\]
+where $\widehat R$ is mean terminal simple regret. The correct-selection-rate criterion replaces the upper bound with a lower bound. A target not attained on the tested grid is right-censored ($>80$). We do not interpolate, infer an online stopping rule, or guarantee quality at untested budgets. All 234 original curve points are reproduced from the terminal ledgers. The six exploratory targets were fixed before the new threshold analysis, but the source results were previously known.
+\begin{table}[htbp]
+\centering\small
+\caption{Historical archive: sustained budget at each illustrative target. Lower is better. $>80$ denotes nonattainment within the tested grid.}
+\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{3}{c}{Mean regret $\le$} & \multicolumn{3}{c}{Correct-selection rate $\ge$}\\
+Policy & .001 & .002 & .004 & .80 & .90 & .95\\
+\midrule
+Random & 65 & 65 & 55 & 55 & 65 & 70\\
+Balanced & 55 & 55 & 40 & 45 & 55 & 65\\
+Informed & 55 & 55 & 40 & 45 & 55 & 65\\
+Joint KG & 35 & 35 & 30 & 30 & 35 & 40\\
+Adaptive two-stage KG & 40 & 35 & 25 & 30 & 35 & 40\\
+Uniform two-stage KG & 40 & 35 & 30 & 35 & 40 & 45\\
+Budgeted Top2 & 40 & 35 & 30 & 30 & 35 & 45\\
+Adaptive two-stage Top2 & 40 & 35 & 30 & 30 & 35 & 40\\
+Uniform two-stage Top2 & 55 & 40 & 35 & 40 & 45 & 55\\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{table}[htbp]
+\centering\small
+\caption{Fresh-reference archive: sustained budget at each illustrative target. Lower is better. $>80$ denotes nonattainment within the tested grid.}
+\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{3}{c}{Mean regret $\le$} & \multicolumn{3}{c}{Correct-selection rate $\ge$}\\
+Policy & .001 & .002 & .004 & .80 & .90 & .95\\
+\midrule
+Random & 80 & 75 & 55 & $>80$ & $>80$ & $>80$\\
+Balanced & 80 & 70 & 35 & $>80$ & $>80$ & $>80$\\
+Informed & 65 & 65 & 30 & 70 & 75 & 75\\
+Joint KG & 45 & 40 & 15 & 55 & 55 & 65\\
+Adaptive two-stage KG & 55 & 40 & 15 & 55 & 55 & 65\\
+Uniform two-stage KG & 55 & 45 & 20 & 55 & 55 & 65\\
+Budgeted Top2 & 55 & 40 & 20 & 65 & 75 & 80\\
+Adaptive two-stage Top2 & 55 & 40 & 25 & 65 & 80 & 80\\
+Uniform two-stage Top2 & 55 & 45 & 25 & 65 & 75 & 80\\
+\bottomrule
+\end{tabular}
+\end{table}
+\paragraph{Evaluation savings.}
+At mean regret at most .002, adaptive two-stage KG requires 35 evaluations in the historical archive and 40 in the fresh reference, compared with 65 and 75 for Random and 55 and 70 for Balanced. The savings relative to Random are 30 (nominal 95\% bootstrap range 20--35) and 35 (30--40) evaluations, respectively; relative to Balanced they are 20 (10--25) and 30 (20--35). This corresponds to approximately 36--47\% fewer evaluations across these four comparisons. Joint KG and some Top2 policies reach the same target with the same budgets. At the stricter .001 target, joint KG requires five and ten fewer evaluations than adaptive two-stage KG in the historical and fresh-reference archives, respectively. In the fresh reference, both KG policies reach a 90\% correct-selection rate at 55 evaluations, versus 75 for Budgeted Top2 and 80 for adaptive two-stage Top2; Random and Balanced do not reach this sustained target through 80.
+
+Ten thousand bootstrap draws independently resample policies within starting-condition strata, retaining dependence across budgets for nested trajectories and resampling budget-specific Top2 episodes separately by budget. Ranges for savings account conservatively for censored thresholds. They are nominal exploratory percentile ranges, not simultaneous confidence intervals. The targets are illustrative, not application-specific service requirements; the correct-selection rates are conditional on the fixed reference-best method. These results quantify savings in validation observations, not measured elapsed time, energy or monetary cost.

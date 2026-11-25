@@ -1,0 +1,64 @@
+% Provisional structural robustness analysis, 24 November 2026.
+\section{Exploratory robustness of cross-condition information sharing}
+\label{app:rq2-e1a}
+\paragraph{Controlled covariance models.}
+For each method, let $K_B$ denote the additive condition covariance of Eq.~\eqref{eq:structured-prior}, $d=0.021325$ its common diagonal entry, and $r=0.01610454545$ its mean off-diagonal entry. We compare the following four models:
+\begin{align*}
+ K_A&=dI, & K_B&=K_{\mathrm{additive}},\\
+ K_C&=0.75K_B+0.25K_A, & K_D&=(d-r)I+r\mathbf{1}\mathbf{1}^{\top}.
+\end{align*}
+A treats conditions independently; B uses world and graph identities; C allows additional independent cell-specific latent variation; D pools exchangeably without using factor identities. All four retain marginal variance $d$, prior mean 0.17 and working residual standard deviation 0.055. D additionally matches B's mean cross-condition covariance and initial variance of the uniform domain-average latent loss (0.01653958). It is a controlled, moment-matched baseline, not an optimized exchangeable model.
+
+\subsection{Fixed-observation surrogate comparison}
+For each archive, we enumerate all $2^{12}-2=4094$ nonempty proper subsets of conditions. At each mask size $n$, all seven methods reveal their losses on the same $n$ conditions, using $7n$ evaluations. The posterior predicts the held-out losses and recommends the method with the smallest estimated domain-average loss. The full reference matrix is used only for scoring. Table~\ref{tab:rq2-fixed-consolidated} averages the mask-specific results first within each size, then equally across the eleven sizes.
+\begin{table}[htbp]
+\centering\small
+\caption{Held-out prediction MAE, averaged equally across eleven observed-condition counts. Lower is better. A: independent; B: additive; C: interaction-aware; D: exchangeable.}
+\label{tab:rq2-fixed-consolidated}
+\begin{tabular}{lrrrr}
+\toprule
+Archive & A & B & C & D\\
+\midrule
+Historical & .051594 & .045525 & .045166 & .052267\\
+Fresh reference & .079342 & .077811 & .074267 & .082417\\
+\bottomrule
+\end{tabular}
+\end{table}
+B has lower held-out MAE than D at all eleven mask sizes in both archives. However, predictive accuracy does not guarantee better method selection. With eleven observed conditions per method in the fresh-reference archive, correct-selection frequencies are 91.7\% for A and D, 50.0\% for B and 75.0\% for C. Under common masks, A and D rank methods identically: at fixed mask size their posterior domain means are increasing affine functions of the sum of observed losses. B can instead weight observed conditions differently. These exhaustive mask averages are descriptive, conditional on the same archived matrices, not independent-world replications.
+
+\subsection{Surrogate effects under adaptive KG acquisition}
+\label{app:rq2-e1b}
+We fix the acquisition rule (joint-action KG or adaptive two-stage KG) while allowing each covariance model to generate its own trajectory. Each validation run begins with all seven losses at one common condition. For each model, archive and policy, twelve starting conditions and twenty seeded repetitions yield 240 validation runs, with common random streams across models. Each run reveals up to 80 distinct matrix entries and is scored at thirteen budgets. Only revealed losses inform acquisition. The covariance-space B implementation reproduces all 960 original additive KG histories and 12,480 checkpoint recommendations. All 960 new D trajectories pass the catalogue and nonrepetition checks.
+\begin{table}[htbp]
+\centering\small
+\caption{Mean terminal simple regret averaged equally over thirteen budgets. Lower is better.}
+\label{tab:rq2-e1b}
+\begin{tabular}{llrrrr}
+\toprule
+Archive & KG policy & A & B & C & D\\
+\midrule
+Historical & Joint & .003446 & .002847 & .002540 & .004038\\
+Historical & Adaptive two-stage & .003513 & .002664 & .002572 & .004324\\
+Fresh reference & Joint & .002275 & .002212 & .002166 & .002369\\
+Fresh reference & Adaptive two-stage & .002116 & .001930 & .001982 & .002252\\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{table}[htbp]
+\centering\small
+\caption{Paired contrasts in thirteen-budget average regret. Differences and approximate 95\% confidence intervals are in units of $10^{-3}$ MAE. Negative differences favor B. We first average the regret difference over budgets for each matched validation run, then estimate its standard error across seeded repetitions within each starting condition, as in Section~\ref{sec:validation-protocol}. Intervals use Student's $t$ critical values and are not adjusted for multiple comparisons.}
+\label{tab:rq2-contrasts}
+\begin{tabular}{llrr}
+\toprule
+Archive & KG policy & B minus A [interval] & B minus D [interval]\\
+\midrule
+Historical & Joint & $-0.599\;[-1.243,+0.045]$ & $-1.191\;[-1.743,-0.639]$\\
+Historical & Adaptive two-stage & $-0.848\;[-1.474,-0.223]$ & $-1.659\;[-2.271,-1.047]$\\
+Fresh reference & Joint & $-0.063\;[-0.606,+0.480]$ & $-0.158\;[-0.601,+0.286]$\\
+Fresh reference & Adaptive two-stage & $-0.186\;[-0.695,+0.324]$ & $-0.322\;[-0.749,+0.105]$\\
+\bottomrule
+\end{tabular}
+\end{table}
+The additive model has lower average regret than both A and D for both policies in both archives. Against D, the historical intervals exclude zero for both policies, while the fresh-reference intervals span zero. B beats D at eight and ties at five of the thirteen historical checkpoints for each policy; in the fresh reference it wins six, ties four and loses three. C does not consistently outperform B. In particular, under adaptive KG on the fresh reference, average correct-selection rates are .638 for B, .673 for A and .616 for D: reduced regret need not imply more frequent identification of the reference-best method.
+
+These results provide exploratory evidence for the value of factor-informed sharing beyond independent conditions and this matched exchangeable alternative. The two reference matrices were previously examined during development and use the same physical conditions. The paired confidence intervals describe acquisition-randomization uncertainty within those fixed matrices, not uncertainty over new worlds, graphs or predictor portfolios. Neither optimality of the additive covariance nor a universal benefit of structural sharing follows from the experiment.
