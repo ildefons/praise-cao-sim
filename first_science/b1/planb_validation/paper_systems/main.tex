@@ -19,6 +19,9 @@
 \newcommand{\revdel}[1]{\ifrevisionmarked\sout{#1}\space\fi}
 % For new material containing LaTeX commands (e.g. bibliography entries).
 \newcommand{\revnewref}[1]{\revadd{#1}}
+% WP2: highlight new mathematical expressions without passing them through soul.
+\newcommand{\revaddmath}[1]{\ifrevisionmarked\colorbox{yellow}{$#1$}\else#1\fi}
+\newcommand{\revdelmath}[1]{\ifrevisionmarked\mbox{\sout{\ensuremath{#1}}}\fi}
 \usepackage{hyperref}
 \usepackage{microtype}
 \usepackage{placeins}
@@ -40,15 +43,15 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-\revdel{Selecting a method for computing-continuum services requires evaluating alternatives across heterogeneous operating conditions, often under limited validation budgets.}\revadd{The computing continuum integrates heterogeneous computing infrastructures to support distributed applications under diverse and dynamic conditions. Infrastructure configurations, service dependencies, workloads, and operational requirements give rise to a complex, structured space of operating conditions. Comparing competing methods across this space can require prohibitively expensive validation campaigns.} We formulate sequential method validation using a structured Gaussian surrogate that exploits recurring condition factors to share information between evaluations. Its posterior supports decision-focused acquisition through Knowledge Gradient (KG). We further introduce an adaptive two-stage KG policy that selects a candidate method and then an informative operating condition. We evaluate nine allocation policies over seven prediction methods, twelve conditions, and thirteen budgets on a historical and a separately regenerated white-box reference archive. Adaptive two-stage KG achieves the lowest observed average terminal simple regret in both archives. Adjusted confidence intervals support advantages over selected Top2 baselines, while the aggregate advantage over adaptive Top2 remains less conclusive. A direct comparison against uniform two-stage KG supports the value of adaptive condition choice in the historical archive and shows a smaller, uncertain advantage in the fresh-reference archive. A fourteen-setting prior-sensitivity replay preserves the aggregate direction of the adaptive-KG advantage over uniform KG, Random and Balanced, while individual-budget effects vary. Exploratory covariance ablations support factor-informed sharing over independent and exchangeable alternatives, with stronger evidence in the historical archive. At an illustrative mean-regret target of 0.002, adaptive two-stage KG requires 36--47\% fewer evaluations than Random or Balanced across the two archives.
+The computing continuum integrates heterogeneous computing infrastructures to support distributed applications under diverse and dynamic conditions. Infrastructure configurations, service dependencies, workloads, and operational requirements give rise to a complex, structured space of operating conditions. Comparing competing methods across this space can require prohibitively expensive validation campaigns. We formulate sequential method validation using a structured Gaussian surrogate that exploits recurring condition factors to share information between evaluations. Its posterior supports decision-focused acquisition through Knowledge Gradient (KG). We further introduce an adaptive two-stage KG policy that selects a candidate method and then an informative operating condition. We evaluate nine allocation policies over seven prediction methods, twelve conditions, and thirteen budgets on a historical and a separately regenerated white-box reference archive. Adaptive two-stage KG achieves the lowest observed average terminal simple regret in both archives. Adjusted confidence intervals support advantages over selected Top2 baselines, while the aggregate advantage over adaptive Top2 remains less conclusive. A direct comparison against uniform two-stage KG supports the value of adaptive condition choice in the historical archive and shows a smaller, uncertain advantage in the fresh-reference archive. A fourteen-setting prior-sensitivity replay preserves the aggregate direction of the adaptive-KG advantage over uniform KG, Random and Balanced, while individual-budget effects vary. Exploratory covariance ablations support factor-informed sharing over independent and exchangeable alternatives, with stronger evidence in the historical archive. At an illustrative mean-regret target of 0.002, adaptive two-stage KG requires 36--47\% fewer evaluations than Random or Balanced across the two archives.
 \end{abstract}
 
 \noindent\textbf{Keywords:} computing continuum; structured sequential validation; sequential experimental design; Knowledge Gradient; method selection; adaptive testing.
 
 \section{Introduction}
-\revdel{Selecting a method for deployment or operational use often requires comparing alternatives across conditions that affect their performance. This is especially demanding in computing-continuum systems, which combine heterogeneous endpoint, edge, and cloud resources and networking technologies to serve applications with different workload, quality-of-service, and deployment requirements}\revadd{Computing-continuum systems combine heterogeneous endpoint, edge, and cloud resources and networking technologies to serve distributed applications with different workload, quality-of-service, and deployment requirements} \cite{alDulaimy2024,bittencourt2025}. \revadd{The interplay between infrastructure heterogeneity, dynamic resource availability, and application dependencies creates structural challenges for service orchestration and its comparative evaluation.} \cite{sedlak2026} In composed-service settings, further variation arises from provider behavior, available provider information, and composition topology. A \emph{validation condition} specifies a combination of levels along the relevant dimensions. A predictive or management method may perform differently under each combination, and establishing its quality may require end-to-end measurement, execution or simulation. \revadd{The relative performance of competing methods can also change across conditions, as demonstrated in comparative scheduling experiments across heterogeneous edge-cluster configurations and load regimes.} \cite{wang2026} As the dimensions are crossed, the catalogue of method--condition evaluations grows, making validation itself a resource-allocation challenge.
+Computing-continuum systems combine heterogeneous endpoint, edge, and cloud resources and networking technologies to serve distributed applications with different workload, quality-of-service, and deployment requirements \cite{alDulaimy2024,bittencourt2025}. The interplay between infrastructure heterogeneity, dynamic resource availability, and application dependencies creates structural challenges for service orchestration and its comparative evaluation. \cite{sedlak2026} In composed-service settings, further variation arises from provider behavior, available provider information, and composition topology. A \emph{validation condition} specifies a combination of levels along the relevant dimensions. A predictive or management method may perform differently under each combination, and establishing its quality may require end-to-end measurement, execution or simulation. The relative performance of competing methods can also change across conditions, as demonstrated in comparative scheduling experiments across heterogeneous edge-cluster configurations and load regimes. \cite{wang2026} As the dimensions are crossed, the catalogue of method--condition evaluations grows, making validation itself a resource-allocation challenge.
 
-With a fixed experimental budget, which method should be tested next, and under which operating condition? The objective is to gather evidence that supports a good final decision about relative method performance over a defined target domain. This introduces two decisions: \emph{where to spend the remaining validation budget} and \emph{which method to recommend after the budget is exhausted}. \revdel{The multidimensional catalogue also offers a possible economy:}\revadd{The same structural complexity that makes comprehensive validation expensive also offers a potential opportunity for information sharing:} two conditions may share a provider scenario, composition structure or other factor level. If these shared dimensions explain part of a method's quality, a structured performance model can use one observed outcome to inform estimates under other combinations. Sequential validation can then allocate scarce tests according to their expected value for the domain-wide recommendation, rather than treating each condition as an unrelated test.
+With a fixed experimental budget, which method should be tested next, and under which operating condition? The objective is to gather evidence that supports a good final decision about relative method performance over a defined target domain. This introduces two decisions: \emph{where to spend the remaining validation budget} and \emph{which method to recommend after the budget is exhausted}. The same structural complexity that makes comprehensive validation expensive also offers a potential opportunity for information sharing: two conditions may share a provider scenario, composition structure or other factor level. If these shared dimensions explain part of a method's quality, a structured performance model can use one observed outcome to inform estimates under other combinations. Sequential validation can then allocate scarce tests according to their expected value for the domain-wide recommendation, rather than treating each condition as an unrelated test.
 
 Sequential experimental design, active model testing, and best-arm identification provide established foundations for allocating evaluation effort \cite{hara2024,kossen2021,frazier2008}. Motivated by the validation challenge described above, we investigate a structure-informed sequential validation layer for comparing competing methods under heterogeneous computing-continuum conditions. At each step, the validation procedure chooses both which method to evaluate and the operating condition in which to test it. After the budget is exhausted, it recommends the method estimated to perform best across the full set of target conditions.
 
@@ -272,7 +275,53 @@ v=\frac{1}{C}\sum_{c'=1}^{C}x_{c'},\qquad
 m_a=v^\top b_a.
 \label{eq:posteriorpred}
 \end{equation}
-The value $m_a$ is the current estimate of method $a$'s domain-average loss, including conditions not yet evaluated. The final recommendation chooses the method with the smallest $m_a$.
+\revdel{The value} $\revdelmath{m_a}$ \revdel{is the current estimate of method} $\revdelmath{a}$\revdel{'s domain-average loss, including conditions not yet evaluated. The final recommendation chooses the method with the smallest} $\revdelmath{m_a}$\revdel{.}
+
+\revadd{The value} $\revaddmath{m_a}$ \revadd{is the posterior mean of the latent domain-average loss. To estimate the finite-catalogue target in Eq.}~\eqref{eq:target}, \revadd{let} $\revaddmath{\mathcal O_a}$ \revadd{denote the conditions already evaluated for method} $\revaddmath{a}$. \revadd{Under the independent residual model, its posterior mean retains observed losses and predicts only the remaining ones:}
+\begin{equation}
+\revaddmath{\displaystyle \widetilde m_a=
+\frac{1}{C}\left[
+\sum_{c\in\mathcal O_a}Y_{a,c}+
+\sum_{c\notin\mathcal O_a}x_c^\top b_a
+\right].}
+\label{eq:finite-posterior-mean}
+\end{equation}
+\revadd{Although these two estimates need not coincide, the structure of the prior can make them equivalent for method selection.}
+
+\noindent\revadd{Proposition 1 (Recommendation equivalence).}
+\revadd{Suppose that the latent condition losses have the same constant prior mean} $\revaddmath{m_0}$ \revadd{and the same prior covariance matrix} $\revaddmath{K_0}$ \revadd{for all methods, with independent Gaussian residuals of common variance} $\revaddmath{\sigma^2}$. \revadd{Assume uniform target weights and a constant positive covariance row sum,}
+$\revaddmath{K_0\mathbf 1=\kappa\mathbf 1}$ \revadd{with} $\revaddmath{\kappa>0}$. \revadd{For any acquisition history,}
+\begin{equation}
+\revaddmath{\displaystyle \widetilde m_a=m_0+
+\left(1+\frac{\sigma^2}{\kappa}\right)(m_a-m_0).}
+\label{eq:finite-affine-equivalence}
+\end{equation}
+\revadd{Consequently, both estimators induce identical method rankings and the same set of optimal recommendations.}
+
+\noindent\revadd{Proof.}
+\revadd{For a given method, let} $\revaddmath{O=\mathcal O_a}$ \revadd{and let} $\revaddmath{y_O}$ \revadd{be its vector of observed losses. Write}
+\[
+\revaddmath{\displaystyle u=(K_{0,OO}+\sigma^2 I)^{-1}
+(y_O-m_0\mathbf 1).}
+\]
+\revadd{The posterior latent predictions across the catalogue are}
+$\revaddmath{p=m_0\mathbf 1+K_{0,:,O}u}$.
+\revadd{Since the symmetric prior covariance has constant row and column sums,}
+\[
+\revaddmath{\displaystyle m_a-m_0=\frac{\kappa}{C}\mathbf 1^\top u,
+\qquad y_O-p_O=\sigma^2 u.}
+\]
+\revadd{Replacing latent predictions by known losses at observed conditions therefore gives}
+\[
+\revaddmath{\displaystyle \widetilde m_a-m_a
+=\frac{\sigma^2}{C}\mathbf 1^\top u
+=\frac{\sigma^2}{\kappa}(m_a-m_0).}
+\]
+\revadd{The case of no observations follows directly from the common prior mean. This proves Eq.}~\eqref{eq:finite-affine-equivalence}; \revadd{its positive common slope preserves all rankings.} \hfill$\square$
+
+\revadd{Our complete three-world by four-graph factorial catalogue satisfies this condition under Eq.}~\eqref{eq:structured-prior}, \revadd{with}
+$\revaddmath{\kappa=C\tau_\alpha^2+4\tau_w^2+3\tau_g^2}$.
+\revadd{We therefore retain the implemented recommendation based on the smallest latent posterior mean, which is decision-equivalent to minimizing the finite-catalogue posterior mean in this setting.}
 
 \paragraph{3. Recompute the next acquisition scores.}
 Let $Q_a(c',c)=\operatorname{Cov}(f_a(c'),f_a(c)\mid\mathcal D)$ denote the current posterior covariance between condition losses for method $a$. The uncertainty of a prospective observed loss combines uncertainty in its latent performance with the fixed residual variance $\sigma^2$ defined in Eq.~\eqref{eq:gaussianmodel}. Before evaluating an unused pair $(a,c)$, the reduction in posterior variance of its model-implied domain-average performance is
@@ -336,6 +385,13 @@ The independently evaluated \emph{one-step joint-action KG} benchmark uses the s
  \end{cases}
  \label{eq:kg}
 \end{equation}
+\revadd{Proposition 1 also establishes acquisition equivalence. Let} $\revaddmath{\lambda=1+\sigma^2/\kappa}$. \revadd{Under the same predictive observation law, the affine relationship holds both before and after any prospective observation. The expected reduction in the minimum finite-catalogue posterior mean is thus}
+\[
+\revaddmath{\displaystyle \operatorname{KG}_{\widetilde m}(a,c)
+=\lambda\,\operatorname{KG}_{m}(a,c).}
+\]
+\revadd{Since the multiplier is positive and common to all actions, the acquisition rankings are identical in exact arithmetic. Maximizing or averaging these scores across remaining conditions also preserves their rankings, so the equivalence extends to the two-stage KG policies below. We retain the existing unscaled implementation.}
+
 The score estimates the expected benefit of one more evaluation for selecting the best method. The quantity $s_{a,c}$ measures how much evaluating method $a$ under condition $c$ could change its estimated average loss. The gap $d_a$ measures the difference between the current estimated loss of method $a$ and that of its closest competitor. Their ratio $d_a/s_{a,c}$ compares the gap with the scale of a possible change. The factor $\Phi(-d_a/s_{a,c})$ describes how likely a change is to cross that gap under the Gaussian model. The term $s_{a,c}\phi(d_a/s_{a,c})$ captures the potential gain from such changes, while $d_a\Phi(-d_a/s_{a,c})$ subtracts the gap that must be overcome. Together they yield the expected one-step improvement in the predicted best average loss. When $s_{a,c}=0$, the evaluation cannot change the estimated ranking and its KG score is zero.
 
 At each step, the policy selects the unused method--condition pair $(a,c)$ with the highest KG score, observes its loss, and updates the model. This is an exact one-step calculation under the assumed Gaussian model, not a guarantee of optimality over the entire budget.
@@ -502,6 +558,8 @@ and 20 seeded repetitions per condition). All nine policies use
 the same statistical surrogate, condition catalogue
 and final recommendation rule.
 
+\revadd{As a retrospective check of Proposition 1, we reconstructed both terminal estimators at all thirteen budget checkpoints for the six budget-independent policies on both reference archives (37,440 terminal decisions). Both estimators recommended the same method in every episode, yielding identical terminal simple regret and correct-selection outcomes. The diagnostic reused the recorded action histories and did not generate new simulator outcomes. The Top2 action histories were not included in this numerical check.}
+
 We estimate approximate 95\% confidence intervals directly from the variability across seeded repetitions, conditional on each fixed reference loss matrix. For a given policy, archive and budget, the estimated standard error of mean regret is
 \[
 \widehat{\mathrm{SE}}(\widehat R)=
@@ -602,6 +660,8 @@ Provider worlds and composition graphs supply reusable condition descriptors rat
 \paragraph{RQ3: Joint and two-stage acquisition choices.}
 The two-stage policy first selects a method according to average acquisition value and then evaluates its most informative remaining condition. Joint-action KG instead chooses a method--condition pair directly. The two-stage adaptive policy has lower observed thirteen-budget mean regret than joint-action KG in both archives, but that descriptive difference alone does not establish superiority. Its matched uniform-condition counterpart isolates the condition-choice rule while keeping the posterior model and method-selection criterion fixed. The historical archive supports an aggregate adaptive advantage; the fresh-reference result has the same direction but remains uncertain. Prior-sensitivity checks preserve the direction of the thirteen-budget average, while differences shrink as validation approaches exhaustion.
 
+\revadd{The finite-catalogue equivalence relies on the shared prior, uniform target weights, independent homoskedastic discrepancies and constant prior covariance row sums. It should not be assumed for irregular catalogues, arbitrary covariance structures or method-specific prior parameters. The finite-catalogue posterior mean remains the relevant decision target in such extensions, but its equivalence to the latent mean and the corresponding acquisition scores must be established separately.}
+
 \paragraph{Future research.}
 These results motivate validating the method on additional provider worlds, graph structures and predictor portfolios; extending the exploratory covariance comparisons to new environments and alternative covariance specifications; and incorporating uncertainty in the white-box reference into sequential decisions. Prospective confirmation of adaptive condition selection and experiments with measured, potentially unequal validation costs would also clarify deployment value. The current evaluation isolates acquisition behavior on fixed archived error matrices, not online runtime savings.
 
@@ -636,8 +696,8 @@ Diagnostic scope:
 \bibitem{bittencourt2025} L. F. Bittencourt et al. 2025. The computing continuum: Past, present, and future. \emph{Computer Science Review} 58:100782. \url{https://doi.org/10.1016/j.cosrev.2025.100782}.
 \bibitem{pozas2023} Pozas Garc\'ia et al. 2023. Location-aware scalable service composition. \emph{Software: Practice and Experience}. \url{https://doi.org/10.1002/spe.3260}.
 \bibitem{stupar2023} Stupar and Huljeni\'c. 2023. Model-based cloud service deployment optimisation method for minimisation of application service operational cost. \emph{Journal of Cloud Computing}. \url{https://doi.org/10.1186/s13677-023-00389-8}.
-\bibitem{sedlak2026} \revnewref{B. Sedlak, V. Casamayor Pujol, I. Magrans de Abril, P. K. Donta, A. N. Toosi, and S. Dustdar. 2026. Service Orchestration in the Computing Continuum: Structural Challenges and Vision. arXiv:2602.15794.} \url{https://arxiv.org/abs/2602.15794}.
-\bibitem{wang2026} \revnewref{Z. Wang, B. Sedlak, J. L. Herrera, and S. Dustdar. 2026. Fair Comparison of Scheduling Algorithms on Heterogeneous Edge Clusters: A Continuous Adaptive Benchmark. arXiv:2606.12343.} \url{https://arxiv.org/abs/2606.12343}.
+\bibitem{sedlak2026} B. Sedlak, V. Casamayor Pujol, I. Magrans de Abril, P. K. Donta, A. N. Toosi, and S. Dustdar. 2026. Service Orchestration in the Computing Continuum: Structural Challenges and Vision. arXiv:2602.15794. \url{https://arxiv.org/abs/2602.15794}.
+\bibitem{wang2026} Z. Wang, B. Sedlak, J. L. Herrera, and S. Dustdar. 2026. Fair Comparison of Scheduling Algorithms on Heterogeneous Edge Clusters: A Continuous Adaptive Benchmark. arXiv:2606.12343. \url{https://arxiv.org/abs/2606.12343}.
 \bibitem{sedlak2024} Sedlak et al. 2024. Equilibrium in the Computing Continuum through Active Inference. \emph{Future Generation Computer Systems}. \url{https://doi.org/10.1016/j.future.2024.05.056}.
 \bibitem{mao2024} Mao et al. 2024. QoS prediction of cloud services by selective ensemble learning on prefilling-based matrix factorizations. \emph{Concurrency and Computation: Practice and Experience}. \url{https://doi.org/10.1002/cpe.8282}.
 \bibitem{guerron2026} Guerron et al. 2026. Building and validating deep learning models for forecasting the quality of cloud services. \emph{Automated Software Engineering}. \url{https://doi.org/10.1007/s10515-026-00630-z}.
