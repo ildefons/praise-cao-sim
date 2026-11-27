@@ -250,3 +250,38 @@ def analyse(root,hashes,prov):
         "outputs_sha256":{f:sha(tmp/f) for f in tables}})
     tmp.rename(dest)
     print("WP3A_ANALYSIS_COMPLETE",dest,flush=True)
+
+
+def review_base(root,hashes,prov):
+    """Produce baseline-only tables without changing the frozen design or
+    inspecting any sensitivity configuration. Full analysis remains separate."""
+    root=Path(root); dest=root/"base_review"
+    verify_case(root,"base",hashes["primary.csv"],prov)
+    manifest_sha=sha(root/"base/manifest.json")
+    if dest.exists():
+        m=json.loads((dest/"manifest.json").read_text())
+        require(m["case_manifest_sha256"]==manifest_sha and
+                m["provenance"]["code_and_protocol_sha256"]==prov["code_and_protocol_sha256"],
+                "Existing baseline review mismatch")
+        for f,h in m["outputs_sha256"].items():
+            require(sha(dest/f)==h,"Baseline review hash mismatch")
+        print("WP3A_BASE_REVIEW_ALREADY_VERIFIED",dest)
+        return
+    a=arrays(pd.read_csv(root/"base/terminals.csv",float_precision="round_trip"),POLICIES)
+    aggregate=pd.DataFrame([dict(policy=p,
+        mean_regret=float(a[p,"simple_regret"].mean()),
+        mean_pcs=float(a[p,"correct"].mean())) for p in POLICIES])
+    tables={"policy_budget_summary.csv":pd.DataFrame(summarize("base",a,POLICIES)),
+            "aggregate_summary.csv":aggregate,
+            "aggregate_contrasts.csv":pd.DataFrame(contrasts("base",a)),
+            "budget_contrasts.csv":pd.DataFrame(budget_contrasts("base",a))}
+    tmp=Path(tempfile.mkdtemp(prefix=".base_review_incomplete_",dir=root))
+    for f,table in tables.items():
+        table.to_csv(tmp/f,index=False)
+    dump(tmp/"manifest.json",{"status":"WP3A_BASE_REVIEW_COMPLETE",
+        "case_manifest_sha256":manifest_sha,"provenance":prov,
+        "scope":"conditional replay, baseline only; no sensitivity selection",
+        "outputs_sha256":{f:sha(tmp/f) for f in tables}})
+    tmp.rename(dest)
+    print(aggregate.to_string(index=False),flush=True)
+    print("WP3A_BASE_REVIEW_COMPLETE",dest,flush=True)
