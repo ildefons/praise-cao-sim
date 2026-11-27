@@ -9,6 +9,7 @@ import hashlib
 import io
 import json
 import platform
+import os
 import subprocess
 import tempfile
 import zipfile
@@ -80,7 +81,8 @@ def provenance():
     return {"code_and_protocol_sha256":{n:sha(HERE/n) for n in CODE_FILES+LEGACY_FILES},
             "source_commit":subprocess.check_output(["git","-C",str(REPO),"rev-parse","HEAD"],text=True).strip(),
             "versions":{"python":platform.python_version(),"numpy":np.__version__,
-                        "pandas":pd.__version__,"scipy":scipy.__version__}}
+                        "pandas":pd.__version__,"scipy":scipy.__version__},
+            "thread_environment":{k:os.environ.get(k) for k in ("OPENBLAS_NUM_THREADS","OMP_NUM_THREADS","MKL_NUM_THREADS")}}
 
 
 def load_source(path):
@@ -191,7 +193,8 @@ def verify_case(root,name,reference_hash,prov):
             and tuple(m["budgets"])==BUDGETS and m["repeats"]==REPEATS and m["seed"]==SEED
             and tuple(m["counts"])==expected,"Case manifest conflicts with frozen design")
     require(m["provenance"]["code_and_protocol_sha256"]==prov["code_and_protocol_sha256"]
-            and m["provenance"]["versions"]==prov["versions"],"Code/environment changed; use a new versioned output root")
+            and m["provenance"]["versions"]==prov["versions"]
+            and m["provenance"]["thread_environment"]==prov["thread_environment"],"Code/environment changed; use a new versioned output root")
     require(set(m["outputs_sha256"])=={"terminals.csv","paths.npz"},"Missing case outputs")
     for f,d in m["outputs_sha256"].items():
         require(sha(dest/f)==d,"Case output hash mismatch: "+f)
@@ -345,7 +348,7 @@ def main():
     p.add_argument("--source",type=Path,required=True)
     p.add_argument("--out",type=Path)
     p.add_argument("--preflight-only",action="store_true")
-    p.add_argument("--stage",choices=("base","priors","balanced","structure","all","analyse"))
+    p.add_argument("--stage",choices=("base","review-base","priors","balanced","structure","all","analyse"))
     p.add_argument("--prior",choices=tuple(SCENARIOS)[1:],help="One frozen nonbase prior; requires --stage priors")
     a=p.parse_args()
     require(a.preflight_only != bool(a.stage),"Choose either preflight-only or stage")
@@ -369,6 +372,9 @@ def main():
         run_case(root,"base",matrices,hashes,prov)
     else:
         verify_case(root,"base",hashes["primary.csv"],prov)
+    if a.stage=="review-base":
+        from wp3a_cmms_analysis import review_base
+        review_base(root,hashes,prov)
     if a.stage in ("priors","all"):
         for name in ([a.prior] if a.prior else tuple(SCENARIOS)[1:]):
             run_case(root,name,matrices,hashes,prov)
